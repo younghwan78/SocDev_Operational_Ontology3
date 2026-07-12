@@ -1,0 +1,18 @@
+DecisionCaseStatus:
+  DRAFT: 초안
+  CONTEXT_BUILDING: 상황 정리 중
+  OPTIONS_READY: 선택지 준비
+  DECISION_REQUIRED: 결정 필요
+  DECIDED: 판단 완료
+  ACTIONING: 실행 중
+  VERIFIED: 검증 완료
+  CLOSED: 종료
+DecisionType:
+  APPROVE: 진행 승인
+  APPROVE_WITH_GUARDRAILS: 조건부 진행
+  RUN_REVERSIBLE_TRIAL: 가역적 시험
+  COLLECT_MINIMUM_EVIDENCE: 최소 근거 확보
+  DEFER_UNTIL_TRIGGER: 조건 충족까지 연기
+  REJECT: 진행하지 않음
+  ESCALATE: 상위 검토 필요
+

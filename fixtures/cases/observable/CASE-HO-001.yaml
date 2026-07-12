@@ -1,0 +1,10 @@
+extends: CASE-VR-001
+case_id: CASE-HO-001
+title_ko: 일정 workaround와 기술 부채 검토
+current_step: 14
+decision_question: 일정 확보를 위해 workaround를 expiry 조건과 함께 수용할 것인가?
+uncertainties:
+  - workaround 제거 effort가 아직 범위로만 알려졌다.
+  - 다음 project로 기술 부채가 이월될 가능성이 있다.
+allowed_decision_types: [APPROVE_WITH_GUARDRAILS, RUN_REVERSIBLE_TRIAL, REJECT]
+

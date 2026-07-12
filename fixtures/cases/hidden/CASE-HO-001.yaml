@@ -1,0 +1,4 @@
+extends: CASE-VR-001
+case_id: CASE-HO-001
+hidden_root_causes: [workaround가 다음 milestone에서 integration rework를 만든다.]
+

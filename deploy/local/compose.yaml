@@ -1,0 +1,22 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: soc_ot
+      POSTGRES_USER: soc_ot_admin
+      POSTGRES_PASSWORD: admin_local
+    ports:
+      - "127.0.0.1:15432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U soc_ot_admin -d soc_ot"]
+      interval: 2s
+      timeout: 3s
+      retries: 20
+    volumes:
+      - soc_ot_postgres:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/001-init.sql:ro
+
+volumes:
+  soc_ot_postgres:
+    name: soc_ot_postgres
+

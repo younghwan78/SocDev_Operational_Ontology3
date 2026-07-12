@@ -1,0 +1,4 @@
+extends: CASE-VR-001
+case_id: CASE-HO-001
+acceptable_decision_types: [APPROVE_WITH_GUARDRAILS, RUN_REVERSIBLE_TRIAL]
+

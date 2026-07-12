@@ -1,0 +1,10 @@
+extends: CASE-VR-001
+case_id: CASE-VR-004
+title_ko: Heavy recording thermal evidence 충돌 검토
+current_step: 13
+decision_question: 상충하는 thermal evidence를 구분할 최소 실험을 먼저 수행할 것인가?
+uncertainties:
+  - 과거 lab data와 현재 model prediction이 반대 방향이다.
+  - 두 source의 workload 조건이 정확히 일치하지 않는다.
+allowed_decision_types: [RUN_REVERSIBLE_TRIAL, COLLECT_MINIMUM_EVIDENCE, DEFER_UNTIL_TRIGGER]
+

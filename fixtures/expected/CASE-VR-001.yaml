@@ -1,0 +1,9 @@
+schema_version: expected-result.v1
+fixture_version: 1
+case_id: CASE-VR-001
+acceptable_decision_types: [APPROVE_WITH_GUARDRAILS, RUN_REVERSIBLE_TRIAL]
+unacceptable_decision_types: [APPROVE]
+mandatory_claim_ids: [CLM-SW-REVERSIBLE, CLM-BW-RISK]
+mandatory_dependency_ids: [WORK-ARCH-OPTION]
+mandatory_guardrail_metric_ids: [DDR_BANDWIDTH]
+

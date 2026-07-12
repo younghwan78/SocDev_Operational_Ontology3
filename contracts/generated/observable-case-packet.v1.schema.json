@@ -1,0 +1,703 @@
+{
+  "$defs": {
+    "Alternative": {
+      "additionalProperties": false,
+      "properties": {
+        "option_id": {
+          "title": "Option Id",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "description": {
+          "title": "Description",
+          "type": "string"
+        },
+        "reversible": {
+          "title": "Reversible",
+          "type": "boolean"
+        },
+        "switching_cost": {
+          "$ref": "#/$defs/Quantity"
+        },
+        "claim_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Claim Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "option_id",
+        "title",
+        "description",
+        "reversible",
+        "switching_cost"
+      ],
+      "title": "Alternative",
+      "type": "object"
+    },
+    "Claim": {
+      "additionalProperties": false,
+      "properties": {
+        "claim_id": {
+          "title": "Claim Id",
+          "type": "string"
+        },
+        "statement": {
+          "title": "Statement",
+          "type": "string"
+        },
+        "epistemic_status": {
+          "$ref": "#/$defs/EpistemicStatus"
+        },
+        "source_refs": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Source Refs",
+          "type": "array"
+        },
+        "inference_basis": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Inference Basis",
+          "type": "array"
+        },
+        "confidence_level": {
+          "$ref": "#/$defs/ConfidenceLevel",
+          "default": "medium"
+        },
+        "owner": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Owner"
+        },
+        "expires_at_step": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expires At Step"
+        }
+      },
+      "required": [
+        "claim_id",
+        "statement",
+        "epistemic_status"
+      ],
+      "title": "Claim",
+      "type": "object"
+    },
+    "ConfidenceLevel": {
+      "enum": [
+        "low",
+        "medium",
+        "high"
+      ],
+      "title": "ConfidenceLevel",
+      "type": "string"
+    },
+    "DecisionType": {
+      "enum": [
+        "APPROVE",
+        "APPROVE_WITH_GUARDRAILS",
+        "RUN_REVERSIBLE_TRIAL",
+        "COLLECT_MINIMUM_EVIDENCE",
+        "DEFER_UNTIL_TRIGGER",
+        "REJECT",
+        "ESCALATE"
+      ],
+      "title": "DecisionType",
+      "type": "string"
+    },
+    "EpistemicStatus": {
+      "enum": [
+        "fact",
+        "inference",
+        "assumption",
+        "unknown"
+      ],
+      "title": "EpistemicStatus",
+      "type": "string"
+    },
+    "Evidence": {
+      "additionalProperties": false,
+      "properties": {
+        "evidence_id": {
+          "title": "Evidence Id",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "evidence_type": {
+          "title": "Evidence Type",
+          "type": "string"
+        },
+        "source_ref": {
+          "title": "Source Ref",
+          "type": "string"
+        },
+        "available_at_step": {
+          "minimum": 0,
+          "title": "Available At Step",
+          "type": "integer"
+        },
+        "quantity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Quantity"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "limitations": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Limitations",
+          "type": "array"
+        }
+      },
+      "required": [
+        "evidence_id",
+        "title",
+        "evidence_type",
+        "source_ref",
+        "available_at_step"
+      ],
+      "title": "Evidence",
+      "type": "object"
+    },
+    "EvidenceAvailability": {
+      "additionalProperties": false,
+      "properties": {
+        "evidence_id": {
+          "title": "Evidence Id",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "available_at_step": {
+          "title": "Available At Step",
+          "type": "integer"
+        },
+        "eligible_now": {
+          "title": "Eligible Now",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "evidence_id",
+        "title",
+        "available_at_step",
+        "eligible_now"
+      ],
+      "title": "EvidenceAvailability",
+      "type": "object"
+    },
+    "Milestone": {
+      "additionalProperties": false,
+      "properties": {
+        "milestone_id": {
+          "title": "Milestone Id",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "planned_at_step": {
+          "minimum": 0,
+          "title": "Planned At Step",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "milestone_id",
+        "title",
+        "planned_at_step"
+      ],
+      "title": "Milestone",
+      "type": "object"
+    },
+    "OptionOperability": {
+      "additionalProperties": false,
+      "properties": {
+        "option_id": {
+          "title": "Option Id",
+          "type": "string"
+        },
+        "reversible": {
+          "title": "Reversible",
+          "type": "boolean"
+        },
+        "detectability": {
+          "enum": [
+            "observable_now",
+            "observable_later",
+            "unknown"
+          ],
+          "title": "Detectability",
+          "type": "string"
+        },
+        "recoverability": {
+          "enum": [
+            "high",
+            "medium",
+            "low"
+          ],
+          "title": "Recoverability",
+          "type": "string"
+        },
+        "constraint_claim_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Constraint Claim Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "option_id",
+        "reversible",
+        "detectability",
+        "recoverability",
+        "constraint_claim_ids"
+      ],
+      "title": "OptionOperability",
+      "type": "object"
+    },
+    "Quantity": {
+      "additionalProperties": false,
+      "properties": {
+        "mode": {
+          "$ref": "#/$defs/QuantityMode"
+        },
+        "unit": {
+          "enum": [
+            "mW",
+            "mJ",
+            "GB/s",
+            "Mbps",
+            "ms",
+            "fps",
+            "degC",
+            "mm2",
+            "ratio",
+            "count",
+            "person_day",
+            "step"
+          ],
+          "title": "Unit",
+          "type": "string"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Value"
+        },
+        "lower_bound": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Lower Bound"
+        },
+        "upper_bound": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Upper Bound"
+        },
+        "qualitative": {
+          "anyOf": [
+            {
+              "enum": [
+                "low",
+                "medium",
+                "high",
+                "critical"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Qualitative"
+        }
+      },
+      "required": [
+        "mode",
+        "unit"
+      ],
+      "title": "Quantity",
+      "type": "object"
+    },
+    "QuantityMode": {
+      "enum": [
+        "exact",
+        "range",
+        "qualitative",
+        "unknown"
+      ],
+      "title": "QuantityMode",
+      "type": "string"
+    },
+    "WorkImpact": {
+      "additionalProperties": false,
+      "properties": {
+        "source_work_item_id": {
+          "title": "Source Work Item Id",
+          "type": "string"
+        },
+        "downstream_work_item_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Downstream Work Item Ids",
+          "type": "array"
+        },
+        "impacted_track_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Impacted Track Ids",
+          "type": "array"
+        },
+        "reaches_decision_deadline": {
+          "title": "Reaches Decision Deadline",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "source_work_item_id",
+        "downstream_work_item_ids",
+        "impacted_track_ids",
+        "reaches_decision_deadline"
+      ],
+      "title": "WorkImpact",
+      "type": "object"
+    },
+    "WorkItem": {
+      "additionalProperties": false,
+      "properties": {
+        "work_item_id": {
+          "title": "Work Item Id",
+          "type": "string"
+        },
+        "track_id": {
+          "title": "Track Id",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/WorkItemStatus"
+        },
+        "owner": {
+          "title": "Owner",
+          "type": "string"
+        },
+        "dependency_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Dependency Ids",
+          "type": "array"
+        },
+        "blocker": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Blocker"
+        },
+        "planned_at_step": {
+          "minimum": 0,
+          "title": "Planned At Step",
+          "type": "integer"
+        },
+        "effective_at_step": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Effective At Step"
+        }
+      },
+      "required": [
+        "work_item_id",
+        "track_id",
+        "title",
+        "status",
+        "owner",
+        "planned_at_step"
+      ],
+      "title": "WorkItem",
+      "type": "object"
+    },
+    "WorkItemStatus": {
+      "enum": [
+        "PLANNED",
+        "READY",
+        "IN_PROGRESS",
+        "BLOCKED",
+        "DONE",
+        "VERIFIED",
+        "REWORK",
+        "CANCELLED"
+      ],
+      "title": "WorkItemStatus",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "default": "observable-case-packet.v1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "case_id": {
+      "title": "Case Id",
+      "type": "string"
+    },
+    "fixture_version": {
+      "title": "Fixture Version",
+      "type": "integer"
+    },
+    "current_step": {
+      "title": "Current Step",
+      "type": "integer"
+    },
+    "decision_question": {
+      "title": "Decision Question",
+      "type": "string"
+    },
+    "deadline_milestone_id": {
+      "title": "Deadline Milestone Id",
+      "type": "string"
+    },
+    "deadline_milestone": {
+      "$ref": "#/$defs/Milestone"
+    },
+    "allowed_decision_types": {
+      "items": {
+        "$ref": "#/$defs/DecisionType"
+      },
+      "title": "Allowed Decision Types",
+      "type": "array"
+    },
+    "work_items": {
+      "items": {
+        "$ref": "#/$defs/WorkItem"
+      },
+      "title": "Work Items",
+      "type": "array"
+    },
+    "blocker_work_item_ids": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Blocker Work Item Ids",
+      "type": "array"
+    },
+    "dependency_edges": {
+      "items": {
+        "maxItems": 2,
+        "minItems": 2,
+        "prefixItems": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "string"
+          }
+        ],
+        "type": "array"
+      },
+      "title": "Dependency Edges",
+      "type": "array"
+    },
+    "eligible_evidence": {
+      "items": {
+        "$ref": "#/$defs/Evidence"
+      },
+      "title": "Eligible Evidence",
+      "type": "array"
+    },
+    "evidence_availability": {
+      "items": {
+        "$ref": "#/$defs/EvidenceAvailability"
+      },
+      "title": "Evidence Availability",
+      "type": "array"
+    },
+    "claims": {
+      "items": {
+        "$ref": "#/$defs/Claim"
+      },
+      "title": "Claims",
+      "type": "array"
+    },
+    "assumptions": {
+      "items": {
+        "$ref": "#/$defs/Claim"
+      },
+      "title": "Assumptions",
+      "type": "array"
+    },
+    "unknowns": {
+      "items": {
+        "$ref": "#/$defs/Claim"
+      },
+      "title": "Unknowns",
+      "type": "array"
+    },
+    "uncertainties": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Uncertainties",
+      "type": "array"
+    },
+    "alternatives": {
+      "items": {
+        "$ref": "#/$defs/Alternative"
+      },
+      "title": "Alternatives",
+      "type": "array"
+    },
+    "option_operability": {
+      "items": {
+        "$ref": "#/$defs/OptionOperability"
+      },
+      "title": "Option Operability",
+      "type": "array"
+    },
+    "work_impacts": {
+      "items": {
+        "$ref": "#/$defs/WorkImpact"
+      },
+      "title": "Work Impacts",
+      "type": "array"
+    },
+    "selected_role_ids": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Selected Role Ids",
+      "type": "array"
+    },
+    "allowed_source_ids": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Allowed Source Ids",
+      "type": "array"
+    },
+    "contract_version": {
+      "default": "observable-case-packet.v1",
+      "title": "Contract Version",
+      "type": "string"
+    },
+    "policy_version": {
+      "default": "decision-policy.v1",
+      "title": "Policy Version",
+      "type": "string"
+    },
+    "hidden_denylist_checked": {
+      "default": true,
+      "title": "Hidden Denylist Checked",
+      "type": "boolean"
+    },
+    "packet_hash": {
+      "title": "Packet Hash",
+      "type": "string"
+    }
+  },
+  "required": [
+    "case_id",
+    "fixture_version",
+    "current_step",
+    "decision_question",
+    "deadline_milestone_id",
+    "deadline_milestone",
+    "allowed_decision_types",
+    "work_items",
+    "blocker_work_item_ids",
+    "dependency_edges",
+    "eligible_evidence",
+    "evidence_availability",
+    "claims",
+    "assumptions",
+    "unknowns",
+    "uncertainties",
+    "alternatives",
+    "option_operability",
+    "work_impacts",
+    "selected_role_ids",
+    "allowed_source_ids",
+    "packet_hash"
+  ],
+  "title": "ObservableCasePacket",
+  "type": "object"
+}

@@ -1,0 +1,261 @@
+{
+  "$defs": {
+    "DecisionType": {
+      "enum": [
+        "APPROVE",
+        "APPROVE_WITH_GUARDRAILS",
+        "RUN_REVERSIBLE_TRIAL",
+        "COLLECT_MINIMUM_EVIDENCE",
+        "DEFER_UNTIL_TRIGGER",
+        "REJECT",
+        "ESCALATE"
+      ],
+      "title": "DecisionType",
+      "type": "string"
+    },
+    "Quantity": {
+      "additionalProperties": false,
+      "properties": {
+        "mode": {
+          "$ref": "#/$defs/QuantityMode"
+        },
+        "unit": {
+          "enum": [
+            "mW",
+            "mJ",
+            "GB/s",
+            "Mbps",
+            "ms",
+            "fps",
+            "degC",
+            "mm2",
+            "ratio",
+            "count",
+            "person_day",
+            "step"
+          ],
+          "title": "Unit",
+          "type": "string"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Value"
+        },
+        "lower_bound": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Lower Bound"
+        },
+        "upper_bound": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Upper Bound"
+        },
+        "qualitative": {
+          "anyOf": [
+            {
+              "enum": [
+                "low",
+                "medium",
+                "high",
+                "critical"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Qualitative"
+        }
+      },
+      "required": [
+        "mode",
+        "unit"
+      ],
+      "title": "Quantity",
+      "type": "object"
+    },
+    "QuantityMode": {
+      "enum": [
+        "exact",
+        "range",
+        "qualitative",
+        "unknown"
+      ],
+      "title": "QuantityMode",
+      "type": "string"
+    },
+    "Safeguard": {
+      "additionalProperties": false,
+      "properties": {
+        "safeguard_id": {
+          "title": "Safeguard Id",
+          "type": "string"
+        },
+        "metric_id": {
+          "title": "Metric Id",
+          "type": "string"
+        },
+        "operator": {
+          "enum": [
+            "lt",
+            "lte",
+            "gt",
+            "gte",
+            "eq"
+          ],
+          "title": "Operator",
+          "type": "string"
+        },
+        "threshold": {
+          "$ref": "#/$defs/Quantity"
+        },
+        "check_at_step": {
+          "minimum": 0,
+          "title": "Check At Step",
+          "type": "integer"
+        },
+        "expires_at_step": {
+          "minimum": 0,
+          "title": "Expires At Step",
+          "type": "integer"
+        },
+        "violation_action": {
+          "enum": [
+            "rollback",
+            "pause",
+            "escalate",
+            "re_review"
+          ],
+          "title": "Violation Action",
+          "type": "string"
+        },
+        "condition": {
+          "title": "Condition",
+          "type": "string"
+        },
+        "rollback_trigger": {
+          "title": "Rollback Trigger",
+          "type": "string"
+        },
+        "owner": {
+          "title": "Owner",
+          "type": "string"
+        },
+        "verification": {
+          "title": "Verification",
+          "type": "string"
+        }
+      },
+      "required": [
+        "safeguard_id",
+        "metric_id",
+        "operator",
+        "threshold",
+        "check_at_step",
+        "expires_at_step",
+        "violation_action",
+        "condition",
+        "rollback_trigger",
+        "owner",
+        "verification"
+      ],
+      "title": "Safeguard",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "simulated-decision.v1",
+      "default": "simulated-decision.v1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "case_id": {
+      "title": "Case Id",
+      "type": "string"
+    },
+    "decision_type": {
+      "$ref": "#/$defs/DecisionType"
+    },
+    "selected_option_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Selected Option Id"
+    },
+    "rationale": {
+      "title": "Rationale",
+      "type": "string"
+    },
+    "safeguards": {
+      "items": {
+        "$ref": "#/$defs/Safeguard"
+      },
+      "title": "Safeguards",
+      "type": "array"
+    },
+    "dissent_acknowledged": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Dissent Acknowledged",
+      "type": "array"
+    },
+    "decision_source": {
+      "default": "simulated_chair",
+      "enum": [
+        "deterministic_core",
+        "simulated_chair"
+      ],
+      "title": "Decision Source",
+      "type": "string"
+    },
+    "simulated": {
+      "const": true,
+      "default": true,
+      "title": "Simulated",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "case_id",
+    "decision_type",
+    "rationale",
+    "safeguards",
+    "dissent_acknowledged"
+  ],
+  "title": "SimulatedDecision",
+  "type": "object"
+}

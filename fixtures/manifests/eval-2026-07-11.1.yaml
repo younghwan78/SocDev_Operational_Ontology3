@@ -1,0 +1,46 @@
+evaluation_release: eval-2026-07-11.1
+schema_version: evaluation-manifest.v1
+policy_version: decision-policy.v1
+prompt_bundle_version: prompts.v1
+prompt_bundle_hash: c210f7ddbb43c08b7e28fd08263570040985ca6c4886ade02c114e5153c129ed
+cases:
+- case_id: CASE-VR-001
+  partition: development
+  observable_sha256: 395e92ccf7b2b4a001cca706428cf14b603c58c71601575f339f0ab2da9938e1
+  hidden_sha256: 0bc0de5f241ef50304c70f59829c951add48a96d2ab56f043231e9eff2c01a76
+  expected_sha256: 5d424921364b660ac0583425613a7c5a3896d4d0e304b32e3af1010f72c80dee
+- case_id: CASE-VR-002
+  partition: development
+  observable_sha256: 4279c14cba9293b584a2e4b8821e3870cf631643cf3255662e62a4f88897a5a2
+  hidden_sha256: 6a4d57cd008510addc61a2db4de8f538dc659918fcc8dc03c8c73de60046ff36
+  expected_sha256: 0369555965196e4a1ccdcd0889da705be2a186b4c0648d71fe124cf83d1b023b
+- case_id: CASE-VR-003
+  partition: development
+  observable_sha256: 379474207b30f7f9da2f574b9a83a329e6ac1ccaaac07499562e98301b6fc88b
+  hidden_sha256: c061d09fd4241b98ee6168396fb1f9f8ae8cbb57f39e7a3a038e4b90f21bd83a
+  expected_sha256: f2a2e298a2fbc8aeb2c5cb8d0bc66b41cea325f23d49695698c405c618594469
+- case_id: CASE-VR-004
+  partition: validation
+  observable_sha256: 05bee177f7856793bc90a83b330226b88d9c993c70a30e7ff15dff78a3cabd92
+  hidden_sha256: ab8564f812e28f31e69b1cf630b3142b5e34566108815a1e91f2a3204ac4699e
+  expected_sha256: 1d3c6e005fab95dd6dfbc28bd35235b50e270003b653b944dd7e08b994e8a242
+- case_id: CASE-VR-005
+  partition: validation
+  observable_sha256: b587376dac9ec6bd626f18c62719d13fe9b0913912f7f8fcb34242053e52d115
+  hidden_sha256: 345ae795d62ed35a5500ad7c1736f22e24b2bbe13433f79987484bd22e964de6
+  expected_sha256: 232cb96f31a9e89d7242332725552894261e98b5aaef717c0717378713e0c464
+- case_id: CASE-HO-001
+  partition: sealed-unseen
+  observable_sha256: 208468023ec4d7ce0bda04915ad541d9bd4f2688634c5f79cdd46f4eebe170a0
+  hidden_sha256: 73f14a3e44aa793b97e8809905a00326237b8a4760ed2365459ad21f456992f3
+  expected_sha256: 5843480032783ea8ef2079de7ea6b29d810e6398d81f1c9039d7170105573033
+- case_id: CASE-HO-002
+  partition: sealed-unseen
+  observable_sha256: cb67178f6fe82bc09b219e63fb09505e2a27e43ad1dae0ba5808ca292072879a
+  hidden_sha256: 1e8d43dda01fc4b24a677d27d9d171600dcf06ef8e1be0943c95384145ee88bf
+  expected_sha256: 7292ea60fa753ec38792cf128b0db860038793cf47d15980f80213a403fdc839
+- case_id: CASE-HO-003
+  partition: sealed-unseen
+  observable_sha256: 1a2f6db64446ab7c1bf1d1a95783183be8f1d90979d68fa21a4324762d0efb28
+  hidden_sha256: 68564ed6cea6ff37ad299a03c7676e3f4a02577e8ecbe0aede240100c1e9afb3
+  expected_sha256: 22e4b2d3bf572d49f1a7662f9f3ca041f89d74b33eca5c4d7c3fc98cb4ddd460

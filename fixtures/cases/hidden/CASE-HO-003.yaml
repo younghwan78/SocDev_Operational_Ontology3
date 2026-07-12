@@ -1,0 +1,4 @@
+extends: CASE-VR-001
+case_id: CASE-HO-003
+hidden_root_causes: [공유 장비 충돌로 우선순위가 낮은 과제가 architecture freeze를 놓친다.]
+

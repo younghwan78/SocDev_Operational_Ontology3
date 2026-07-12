@@ -1,0 +1,382 @@
+import argparse
+import json
+from collections.abc import Sequence
+from pathlib import Path
+from uuid import uuid4
+
+from sqlalchemy.orm import Session
+
+from soc_ot import __version__
+from soc_ot.agents.providers import OpenAIResponsesProvider
+from soc_ot.application.contracts import export_contracts
+from soc_ot.application.evaluation import run_evaluation
+from soc_ot.application.evaluation_artifacts import write_evaluation_artifacts
+from soc_ot.application.evaluation_manifest import (
+    freeze_evaluation_manifest,
+    validate_evaluation_manifest,
+)
+from soc_ot.application.live_evaluation import (
+    estimate_ablation_batch,
+    estimate_stability_batch,
+    run_live_ablation,
+    run_live_stability,
+)
+from soc_ot.application.repositories import PostgresCaseRepository
+from soc_ot.config import get_settings
+from soc_ot.infrastructure.database import get_outcome_engine, get_runtime_engine
+from soc_ot.infrastructure.fixtures import FixtureRepository
+from soc_ot.infrastructure.hidden_repository import PostgresHiddenCaseRepository
+from soc_ot.infrastructure.tables import HiddenAuthoringAuditRow
+
+ROOT_DIR = Path(__file__).resolve().parents[4]
+
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(prog="soc-ot")
+    parser.add_argument("--version", action="version", version=__version__)
+    subparsers = parser.add_subparsers(dest="command")
+    subparsers.add_parser("status", help="Show the implemented stage")
+
+    contracts = subparsers.add_parser("contracts")
+    contracts_sub = contracts.add_subparsers(dest="contracts_command")
+    export = contracts_sub.add_parser("export")
+    export.add_argument("--check", action="store_true")
+    openapi_export = contracts_sub.add_parser("export-openapi")
+    openapi_export.add_argument(
+        "--output", type=Path, default=ROOT_DIR / "contracts/generated/openapi.json"
+    )
+    openapi_export.add_argument("--check", action="store_true")
+
+    fixtures = subparsers.add_parser("fixtures")
+    fixtures_sub = fixtures.add_subparsers(dest="fixtures_command")
+    validate = fixtures_sub.add_parser("validate")
+    validate.add_argument("--root", type=Path, default=ROOT_DIR / "fixtures")
+    validate.add_argument("--case-id")
+    validate.add_argument("--include-hidden", action="store_true")
+    fixture_import = fixtures_sub.add_parser("import")
+    fixture_import.add_argument("--root", type=Path, default=ROOT_DIR / "fixtures")
+    fixture_import.add_argument("--case-id", required=True)
+    fixture_import.add_argument("--replace-current", action="store_true")
+    hidden_import = fixtures_sub.add_parser("import-hidden")
+    hidden_import.add_argument("--root", type=Path, default=ROOT_DIR / "fixtures")
+    hidden_import.add_argument("--case-id")
+
+    dev = subparsers.add_parser("dev")
+    dev_sub = dev.add_subparsers(dest="dev_command")
+    inspect_hidden = dev_sub.add_parser("inspect-hidden")
+    inspect_hidden.add_argument("--root", type=Path, default=ROOT_DIR / "fixtures")
+    inspect_hidden.add_argument("--case-id", required=True)
+
+    evaluation = subparsers.add_parser("evaluation")
+    evaluation_sub = evaluation.add_subparsers(dest="evaluation_command")
+    freeze = evaluation_sub.add_parser("freeze")
+    freeze.add_argument("--root", type=Path, default=ROOT_DIR / "fixtures")
+    freeze.add_argument(
+        "--manifest", type=Path, default=ROOT_DIR / "fixtures/manifests/eval-2026-07-11.1.yaml"
+    )
+    validate_release = evaluation_sub.add_parser("validate-release")
+    validate_release.add_argument("--root", type=Path, default=ROOT_DIR / "fixtures")
+    validate_release.add_argument(
+        "--manifest", type=Path, default=ROOT_DIR / "fixtures/manifests/eval-2026-07-11.1.yaml"
+    )
+    run = evaluation_sub.add_parser("run")
+    run.add_argument("--root", type=Path, default=ROOT_DIR / "fixtures")
+    run.add_argument(
+        "--manifest",
+        type=Path,
+        default=ROOT_DIR / "fixtures/manifests/eval-2026-07-11.1.yaml",
+    )
+    run.add_argument("--provider", choices=["replay"], default="replay")
+    run.add_argument("--topology", choices=["B0", "B1", "B2", "B3"], default="B3")
+    run.add_argument("--output-root", type=Path, default=ROOT_DIR / "output/evaluations")
+    run.add_argument("--output", type=Path, help="Optional legacy summary JSON path")
+    ablate = evaluation_sub.add_parser("ablate")
+    ablate.add_argument("--root", type=Path, default=ROOT_DIR / "fixtures")
+    ablate.add_argument(
+        "--manifest",
+        type=Path,
+        default=ROOT_DIR / "fixtures/manifests/eval-2026-07-11.1.yaml",
+    )
+    ablate.add_argument("--provider", choices=["openai"], default="openai")
+    ablate.add_argument("--partitions", default="validation,sealed-unseen")
+    ablate.add_argument("--output-root", type=Path, default=ROOT_DIR / "output/evaluations")
+    ablate.add_argument("--output", type=Path, help="Optional legacy summary JSON path")
+    ablate.add_argument("--acknowledge-cost", action="store_true")
+    stability = evaluation_sub.add_parser("stability")
+    stability.add_argument("--root", type=Path, default=ROOT_DIR / "fixtures")
+    stability.add_argument(
+        "--manifest",
+        type=Path,
+        default=ROOT_DIR / "fixtures/manifests/eval-2026-07-11.1.yaml",
+    )
+    stability.add_argument("--provider", choices=["openai"], default="openai")
+    stability.add_argument(
+        "--partition", choices=["validation", "sealed-unseen"], required=True
+    )
+    stability.add_argument("--repeat", type=int, required=True)
+    stability.add_argument("--output-root", type=Path, default=ROOT_DIR / "output/evaluations")
+    stability.add_argument("--output", type=Path, help="Optional legacy summary JSON path")
+    stability.add_argument("--acknowledge-cost", action="store_true")
+
+    agent = subparsers.add_parser("agent")
+    agent_sub = agent.add_subparsers(dest="agent_command")
+    agent_sub.add_parser("preflight")
+    return parser
+
+
+def main(argv: Sequence[str] | None = None) -> int:
+    parser = build_parser()
+    args = parser.parse_args(argv)
+    if args.command == "status":
+        print("I7 hardening; live provider gate pending")
+        return 0
+    if args.command == "contracts" and args.contracts_command == "export":
+        export_contracts(ROOT_DIR / "contracts/generated", check=args.check)
+        print("Contracts are current." if args.check else "Contracts exported.")
+        return 0
+    if args.command == "contracts" and args.contracts_command == "export-openapi":
+        from soc_ot.api.main import create_app
+        from soc_ot.application.repositories import InMemoryCaseRepository
+        from soc_ot.application.review_runs import InMemoryReviewRunRepository
+
+        rendered = json.dumps(
+            create_app(InMemoryCaseRepository(), InMemoryReviewRunRepository()).openapi(),
+            ensure_ascii=False,
+            indent=2,
+            sort_keys=True,
+        ) + "\n"
+        if args.check:
+            if not args.output.exists() or args.output.read_text(encoding="utf-8") != rendered:
+                raise ValueError("generated OpenAPI contract is stale")
+        else:
+            args.output.parent.mkdir(parents=True, exist_ok=True)
+            args.output.write_text(rendered, encoding="utf-8")
+        print("OpenAPI contract is current." if args.check else "OpenAPI contract exported.")
+        return 0
+    if args.command == "fixtures" and args.fixtures_command == "validate":
+        fixture_repository = FixtureRepository(args.root)
+        case_ids = [args.case_id] if args.case_id else fixture_repository.case_ids()
+        for case_id in case_ids:
+            fixture_repository.validate_case(case_id, include_hidden=args.include_hidden)
+        print(f"Validated {len(case_ids)} fixture case(s).")
+        return 0
+    if args.command == "fixtures" and args.fixtures_command == "import":
+        fixture_repository = FixtureRepository(args.root)
+        case = fixture_repository.validate_case(args.case_id)
+        case_repository = PostgresCaseRepository(get_runtime_engine())
+        current = case_repository.get(case.case_id)
+        if (
+            current
+            and current.case.fixture_version == case.fixture_version
+            and not args.replace_current
+        ):
+            print(f"Fixture {case.case_id} version {case.fixture_version} already imported.")
+            return 0
+        expected_version = current.aggregate_version if current else None
+        stored = case_repository.save(
+            case,
+            event_type="fixture_reimported" if current else "fixture_imported",
+            expected_aggregate_version=expected_version,
+        )
+        print(f"Imported {case.case_id} at aggregate version {stored.aggregate_version}.")
+        return 0
+    if args.command == "fixtures" and args.fixtures_command == "import-hidden":
+        settings = get_settings()
+        if not settings.authoring_mode:
+            print("Hidden import requires SOC_OT_AUTHORING_MODE=1.")
+            return 2
+        fixtures = FixtureRepository(args.root)
+        case_ids = [args.case_id] if args.case_id else fixtures.case_ids()
+        repository = PostgresHiddenCaseRepository(get_outcome_engine())
+        print("=== AUTHORING/HIDDEN: hidden fixture import is being audited ===")
+        for case_id in case_ids:
+            repository.upsert(fixtures.load_hidden(case_id))
+            _audit_hidden_access("import-hidden", case_id)
+        print(f"Imported {len(case_ids)} hidden case(s) through the outcome-only port.")
+        return 0
+    if args.command == "dev" and args.dev_command == "inspect-hidden":
+        settings = get_settings()
+        if not settings.authoring_mode:
+            print("Hidden inspection requires SOC_OT_AUTHORING_MODE=1.")
+            return 2
+        hidden = FixtureRepository(args.root).load_hidden(args.case_id)
+        print("=== AUTHORING/HIDDEN: hidden fixture inspection is being audited ===")
+        _audit_hidden_access("inspect-hidden", args.case_id)
+        print(json.dumps(hidden.model_dump(mode="json"), ensure_ascii=False, indent=2))
+        return 0
+    if args.command == "evaluation" and args.evaluation_command == "freeze":
+        manifest = freeze_evaluation_manifest(args.root, args.manifest)
+        cases = manifest["cases"]
+        if not isinstance(cases, list):
+            raise ValueError("evaluation manifest cases must be a list")
+        print(f"Frozen {len(cases)} evaluation cases.")
+        return 0
+    if args.command == "evaluation" and args.evaluation_command == "validate-release":
+        validate_evaluation_manifest(args.root, args.manifest)
+        print("Evaluation release is current.")
+        return 0
+    if args.command == "evaluation" and args.evaluation_command == "run":
+        validate_evaluation_manifest(args.root, args.manifest)
+        replay_summary = run_evaluation(FixtureRepository(args.root), topology=args.topology)
+        artifact_dir = write_evaluation_artifacts(
+            replay_summary,
+            manifest_path=args.manifest,
+            output_root=args.output_root,
+            provider="replay",
+            model_identifier="deterministic-replay",
+            runtime_settings=_redacted_runtime_settings(),
+        )
+        if args.output is not None:
+            _write_legacy_summary(args.output, replay_summary.model_dump(mode="json"))
+        print(
+            f"Evaluation passed {replay_summary.passed}/{replay_summary.total}; "
+            f"artifacts={artifact_dir}"
+        )
+        return 0 if replay_summary.passed == replay_summary.total else 1
+    if args.command == "agent" and args.agent_command == "preflight":
+        settings = get_settings()
+        problems = []
+        if not settings.openai_api_key:
+            problems.append("OPENAI_API_KEY is missing")
+        if not settings.role_model:
+            problems.append("SOC_OT_ROLE_MODEL is missing")
+        if settings.max_case_cost_usd <= 0 or settings.max_evaluation_cost_usd <= 0:
+            problems.append("cost budgets must be positive")
+        if (
+            settings.role_input_cost_per_million_usd <= 0
+            or settings.role_output_cost_per_million_usd <= 0
+        ):
+            problems.append("live token price settings must be positive")
+        if problems:
+            print("Live preflight failed: " + "; ".join(problems))
+            return 2
+        print("Live preflight passed without exposing credentials.")
+        return 0
+    if args.command == "evaluation" and args.evaluation_command in {"ablate", "stability"}:
+        if not args.acknowledge_cost:
+            print("Use --acknowledge-cost after reviewing the evaluation budget.")
+            return 2
+        settings = get_settings()
+        validate_evaluation_manifest(args.root, args.manifest)
+        if args.evaluation_command == "ablate":
+            if args.partitions != "validation,sealed-unseen":
+                print("Ablation requires exactly validation,sealed-unseen partitions.")
+                return 2
+            estimate = estimate_ablation_batch(
+                max_case_cost_usd=settings.max_case_cost_usd,
+                max_evaluation_cost_usd=settings.max_evaluation_cost_usd,
+                case_timeout_seconds=settings.max_case_runtime_seconds,
+            )
+        else:
+            estimate = estimate_stability_batch(
+                args.partition,
+                args.repeat,
+                max_case_cost_usd=settings.max_case_cost_usd,
+                max_evaluation_cost_usd=settings.max_evaluation_cost_usd,
+                case_timeout_seconds=settings.max_case_runtime_seconds,
+            )
+        print(
+            f"Live batch estimate: runs={estimate.run_count}, "
+            f"semantic_calls={estimate.semantic_call_count}, "
+            f"timeout_seconds={estimate.timeout_envelope_seconds}, "
+            f"maximum_cost=${estimate.maximum_cost_usd:.2f}"
+        )
+        if not estimate.within_budget:
+            print("Batch estimate exceeds SOC_OT_MAX_EVALUATION_COST_USD; aborting before call.")
+            return 2
+        if not settings.openai_api_key:
+            print("OPENAI_API_KEY is required for live evaluation.")
+            return 2
+        provider = OpenAIResponsesProvider(
+            api_key=settings.openai_api_key,
+            model=settings.role_model,
+            challenger_model=settings.challenger_model,
+            chair_model=settings.chair_model,
+            input_cost_per_million_usd=settings.role_input_cost_per_million_usd,
+            output_cost_per_million_usd=settings.role_output_cost_per_million_usd,
+        )
+        if args.evaluation_command == "ablate":
+            ablation_summary = run_live_ablation(
+                FixtureRepository(args.root),
+                provider,
+                max_cost_usd=settings.max_evaluation_cost_usd,
+            )
+            success = True
+            result_line = (
+                f"Live ablation marginal cases={ablation_summary.marginal_value_cases}/5; "
+                f"stop_rule={ablation_summary.stop_rule}"
+            )
+            summary_payload = ablation_summary.model_dump(mode="json")
+            actual_cost = ablation_summary.estimated_cost_usd
+        else:
+            stability_summary = run_live_stability(
+                FixtureRepository(args.root),
+                provider,
+                partition=args.partition,
+                repeats=args.repeat,
+                max_cost_usd=settings.max_evaluation_cost_usd,
+            )
+            success = stability_summary.stability_gate_passed
+            result_line = (
+                f"Live stability acceptable={stability_summary.acceptable_runs}/"
+                f"{stability_summary.total_runs}; "
+                f"policy={stability_summary.policy_compliant_runs}/"
+                f"{stability_summary.total_runs}"
+            )
+            summary_payload = stability_summary.model_dump(mode="json")
+            actual_cost = stability_summary.estimated_cost_usd
+        artifact_dir = write_evaluation_artifacts(
+            ablation_summary if args.evaluation_command == "ablate" else stability_summary,
+            manifest_path=args.manifest,
+            output_root=args.output_root,
+            provider=provider.name,
+            model_identifier=settings.role_model,
+            runtime_settings=_redacted_runtime_settings(),
+            batch_estimate=estimate,
+        )
+        if args.output is not None:
+            _write_legacy_summary(args.output, summary_payload)
+        print(
+            f"{result_line}; estimated cost=${actual_cost:.4f}; artifacts={artifact_dir}"
+        )
+        return 0 if success else 1
+    parser.print_help()
+    return 0
+
+
+def _redacted_runtime_settings() -> dict[str, object]:
+    settings = get_settings()
+    return {
+        "environment": settings.env,
+        "llm_mode": settings.llm_mode,
+        "max_case_runtime_seconds": settings.max_case_runtime_seconds,
+        "role_timeout_seconds": settings.role_timeout_seconds,
+        "max_case_cost_usd": settings.max_case_cost_usd,
+        "max_evaluation_cost_usd": settings.max_evaluation_cost_usd,
+        "raw_provider_retention_days": settings.raw_provider_retention_days,
+    }
+
+
+def _write_legacy_summary(path: Path, payload: object) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+
+
+def _audit_hidden_access(action: str, case_id: str) -> None:
+    settings = get_settings()
+    with Session(get_outcome_engine()) as session, session.begin():
+        session.add(
+            HiddenAuthoringAuditRow(
+                audit_id=str(uuid4()),
+                actor_id=settings.local_actor_id,
+                action=action,
+                case_id=case_id,
+            )
+        )
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

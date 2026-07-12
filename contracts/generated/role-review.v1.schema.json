@@ -1,0 +1,148 @@
+{
+  "$defs": {
+    "DecisionType": {
+      "enum": [
+        "APPROVE",
+        "APPROVE_WITH_GUARDRAILS",
+        "RUN_REVERSIBLE_TRIAL",
+        "COLLECT_MINIMUM_EVIDENCE",
+        "DEFER_UNTIL_TRIGGER",
+        "REJECT",
+        "ESCALATE"
+      ],
+      "title": "DecisionType",
+      "type": "string"
+    },
+    "RiskAssessment": {
+      "additionalProperties": false,
+      "properties": {
+        "risk_id": {
+          "title": "Risk Id",
+          "type": "string"
+        },
+        "statement": {
+          "title": "Statement",
+          "type": "string"
+        },
+        "severity": {
+          "enum": [
+            "low",
+            "medium",
+            "high",
+            "critical"
+          ],
+          "title": "Severity",
+          "type": "string"
+        },
+        "claim_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Claim Ids",
+          "type": "array"
+        },
+        "mitigation": {
+          "title": "Mitigation",
+          "type": "string"
+        }
+      },
+      "required": [
+        "risk_id",
+        "statement",
+        "severity",
+        "mitigation"
+      ],
+      "title": "RiskAssessment",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "role-review.v1",
+      "default": "role-review.v1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "role_id": {
+      "title": "Role Id",
+      "type": "string"
+    },
+    "recommendation": {
+      "$ref": "#/$defs/DecisionType"
+    },
+    "recommended_option_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Recommended Option Id"
+    },
+    "rationale": {
+      "title": "Rationale",
+      "type": "string"
+    },
+    "rationale_claim_ids": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Rationale Claim Ids",
+      "type": "array"
+    },
+    "risks": {
+      "items": {
+        "$ref": "#/$defs/RiskAssessment"
+      },
+      "title": "Risks",
+      "type": "array"
+    },
+    "information_gaps": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Information Gaps",
+      "type": "array"
+    },
+    "unique_concern": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Unique Concern"
+    },
+    "no_unique_concern": {
+      "default": false,
+      "title": "No Unique Concern",
+      "type": "boolean"
+    },
+    "confidence": {
+      "enum": [
+        "low",
+        "medium",
+        "high"
+      ],
+      "title": "Confidence",
+      "type": "string"
+    }
+  },
+  "required": [
+    "role_id",
+    "recommendation",
+    "rationale",
+    "risks",
+    "information_gaps",
+    "confidence"
+  ],
+  "title": "RoleReview",
+  "type": "object"
+}

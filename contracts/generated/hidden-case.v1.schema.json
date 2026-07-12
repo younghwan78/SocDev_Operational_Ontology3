@@ -1,0 +1,84 @@
+{
+  "$defs": {
+    "OutcomePath": {
+      "additionalProperties": false,
+      "properties": {
+        "option_id": {
+          "title": "Option Id",
+          "type": "string"
+        },
+        "rule_id": {
+          "title": "Rule Id",
+          "type": "string"
+        },
+        "parameters": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "boolean"
+              }
+            ]
+          },
+          "title": "Parameters",
+          "type": "object"
+        }
+      },
+      "required": [
+        "option_id",
+        "rule_id",
+        "parameters"
+      ],
+      "title": "OutcomePath",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "hidden-case.v1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "fixture_version": {
+      "minimum": 1,
+      "title": "Fixture Version",
+      "type": "integer"
+    },
+    "case_id": {
+      "title": "Case Id",
+      "type": "string"
+    },
+    "hidden_root_causes": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Hidden Root Causes",
+      "type": "array"
+    },
+    "outcome_paths": {
+      "items": {
+        "$ref": "#/$defs/OutcomePath"
+      },
+      "title": "Outcome Paths",
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema_version",
+    "fixture_version",
+    "case_id",
+    "hidden_root_causes",
+    "outcome_paths"
+  ],
+  "title": "HiddenCase",
+  "type": "object"
+}

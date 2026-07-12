@@ -1,0 +1,4 @@
+extends: CASE-VR-001
+case_id: CASE-VR-003
+hidden_root_causes: [새 HW interface의 alignment 변경이 기존 SW buffer contract와 충돌한다.]
+

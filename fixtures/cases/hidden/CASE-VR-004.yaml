@@ -1,0 +1,4 @@
+extends: CASE-VR-001
+case_id: CASE-VR-004
+hidden_root_causes: [과거 lab data는 다른 ambient 조건에서 측정되어 현재 case에 직접 적용할 수 없다.]
+

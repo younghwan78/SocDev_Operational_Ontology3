@@ -1,0 +1,338 @@
+{
+  "$defs": {
+    "AgreementGroup": {
+      "additionalProperties": false,
+      "properties": {
+        "recommendation": {
+          "$ref": "#/$defs/DecisionType"
+        },
+        "role_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Role Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "recommendation",
+        "role_ids"
+      ],
+      "title": "AgreementGroup",
+      "type": "object"
+    },
+    "ChallengerObjection": {
+      "additionalProperties": false,
+      "properties": {
+        "objection_id": {
+          "title": "Objection Id",
+          "type": "string"
+        },
+        "target_role_id": {
+          "title": "Target Role Id",
+          "type": "string"
+        },
+        "statement": {
+          "title": "Statement",
+          "type": "string"
+        },
+        "claim_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Claim Ids",
+          "type": "array"
+        },
+        "requested_revision": {
+          "title": "Requested Revision",
+          "type": "string"
+        }
+      },
+      "required": [
+        "objection_id",
+        "target_role_id",
+        "statement",
+        "requested_revision"
+      ],
+      "title": "ChallengerObjection",
+      "type": "object"
+    },
+    "ChallengerReview": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "challenger-review.v1",
+          "default": "challenger-review.v1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "objections": {
+          "items": {
+            "$ref": "#/$defs/ChallengerObjection"
+          },
+          "title": "Objections",
+          "type": "array"
+        },
+        "no_objection_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "No Objection Reason"
+        }
+      },
+      "required": [
+        "objections"
+      ],
+      "title": "ChallengerReview",
+      "type": "object"
+    },
+    "DecisionType": {
+      "enum": [
+        "APPROVE",
+        "APPROVE_WITH_GUARDRAILS",
+        "RUN_REVERSIBLE_TRIAL",
+        "COLLECT_MINIMUM_EVIDENCE",
+        "DEFER_UNTIL_TRIGGER",
+        "REJECT",
+        "ESCALATE"
+      ],
+      "title": "DecisionType",
+      "type": "string"
+    },
+    "DissentItem": {
+      "additionalProperties": false,
+      "properties": {
+        "role_id": {
+          "title": "Role Id",
+          "type": "string"
+        },
+        "recommendation": {
+          "$ref": "#/$defs/DecisionType"
+        },
+        "rationale": {
+          "title": "Rationale",
+          "type": "string"
+        }
+      },
+      "required": [
+        "role_id",
+        "recommendation",
+        "rationale"
+      ],
+      "title": "DissentItem",
+      "type": "object"
+    },
+    "RiskAssessment": {
+      "additionalProperties": false,
+      "properties": {
+        "risk_id": {
+          "title": "Risk Id",
+          "type": "string"
+        },
+        "statement": {
+          "title": "Statement",
+          "type": "string"
+        },
+        "severity": {
+          "enum": [
+            "low",
+            "medium",
+            "high",
+            "critical"
+          ],
+          "title": "Severity",
+          "type": "string"
+        },
+        "claim_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Claim Ids",
+          "type": "array"
+        },
+        "mitigation": {
+          "title": "Mitigation",
+          "type": "string"
+        }
+      },
+      "required": [
+        "risk_id",
+        "statement",
+        "severity",
+        "mitigation"
+      ],
+      "title": "RiskAssessment",
+      "type": "object"
+    },
+    "RoleReview": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "role-review.v1",
+          "default": "role-review.v1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "role_id": {
+          "title": "Role Id",
+          "type": "string"
+        },
+        "recommendation": {
+          "$ref": "#/$defs/DecisionType"
+        },
+        "recommended_option_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Recommended Option Id"
+        },
+        "rationale": {
+          "title": "Rationale",
+          "type": "string"
+        },
+        "rationale_claim_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Rationale Claim Ids",
+          "type": "array"
+        },
+        "risks": {
+          "items": {
+            "$ref": "#/$defs/RiskAssessment"
+          },
+          "title": "Risks",
+          "type": "array"
+        },
+        "information_gaps": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Information Gaps",
+          "type": "array"
+        },
+        "unique_concern": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Unique Concern"
+        },
+        "no_unique_concern": {
+          "default": false,
+          "title": "No Unique Concern",
+          "type": "boolean"
+        },
+        "confidence": {
+          "enum": [
+            "low",
+            "medium",
+            "high"
+          ],
+          "title": "Confidence",
+          "type": "string"
+        }
+      },
+      "required": [
+        "role_id",
+        "recommendation",
+        "rationale",
+        "risks",
+        "information_gaps",
+        "confidence"
+      ],
+      "title": "RoleReview",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "decision-dossier.v1",
+      "default": "decision-dossier.v1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "case_id": {
+      "title": "Case Id",
+      "type": "string"
+    },
+    "packet_hash": {
+      "title": "Packet Hash",
+      "type": "string"
+    },
+    "original_reviews": {
+      "items": {
+        "$ref": "#/$defs/RoleReview"
+      },
+      "title": "Original Reviews",
+      "type": "array"
+    },
+    "challenger": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ChallengerReview"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "revised_reviews": {
+      "items": {
+        "$ref": "#/$defs/RoleReview"
+      },
+      "title": "Revised Reviews",
+      "type": "array"
+    },
+    "agreement_groups": {
+      "items": {
+        "$ref": "#/$defs/AgreementGroup"
+      },
+      "title": "Agreement Groups",
+      "type": "array"
+    },
+    "dissent": {
+      "items": {
+        "$ref": "#/$defs/DissentItem"
+      },
+      "title": "Dissent",
+      "type": "array"
+    },
+    "unresolved_uncertainties": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Unresolved Uncertainties",
+      "type": "array"
+    }
+  },
+  "required": [
+    "case_id",
+    "packet_hash",
+    "original_reviews",
+    "agreement_groups",
+    "dissent",
+    "unresolved_uncertainties"
+  ],
+  "title": "DecisionDossier",
+  "type": "object"
+}

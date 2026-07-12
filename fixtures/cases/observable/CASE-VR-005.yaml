@@ -1,0 +1,10 @@
+extends: CASE-VR-001
+case_id: CASE-VR-005
+title_ko: AI camera 고객 요구 불확실성 검토
+current_step: 9
+decision_question: 고객 요구가 확정되기 전에 NPU/ISP option을 어느 수준까지 보존할 것인가?
+uncertainties:
+  - 고객 feature 우선순위가 확정되지 않았다.
+  - option 보존에 필요한 area와 interface cost가 범위로만 알려졌다.
+allowed_decision_types: [RUN_REVERSIBLE_TRIAL, DEFER_UNTIL_TRIGGER, ESCALATE]
+

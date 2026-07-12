@@ -1,0 +1,4 @@
+extends: CASE-VR-001
+case_id: CASE-VR-002
+hidden_root_causes: [8K30 HDR sustained load가 thermal guardrail을 초과한다.]
+

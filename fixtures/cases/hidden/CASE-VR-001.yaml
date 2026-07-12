@@ -1,0 +1,18 @@
+schema_version: hidden-case.v1
+fixture_version: 1
+case_id: CASE-VR-001
+hidden_root_causes:
+  - EIS motion path가 burst 구간에서 예상보다 높은 DDR traffic을 만든다.
+outcome_paths:
+  - option_id: OPT-SW-GUARDED
+    rule_id: guarded_sw_eis_path.v1
+    parameters:
+      reveal_measurement_at_step: 15
+      bandwidth_gb_s: 20.6
+      thermal_deg_c: 81
+  - option_id: OPT-DEFER-EIS
+    rule_id: deferred_eis_path.v1
+    parameters:
+      reveal_measurement_at_step: 15
+      milestone_delay_steps: 2
+

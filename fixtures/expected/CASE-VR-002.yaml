@@ -1,0 +1,4 @@
+extends: CASE-VR-001
+case_id: CASE-VR-002
+acceptable_decision_types: [COLLECT_MINIMUM_EVIDENCE, DEFER_UNTIL_TRIGGER, ESCALATE]
+

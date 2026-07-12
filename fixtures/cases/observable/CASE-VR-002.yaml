@@ -1,0 +1,10 @@
+extends: CASE-VR-001
+case_id: CASE-VR-002
+title_ko: 8K30 HDR 추가 요청 검토
+current_step: 11
+decision_question: Architecture freeze 전에 8K30 HDR option을 보존할 것인가?
+uncertainties:
+  - sustained thermal data가 아직 없다.
+  - 고객 가치가 최종 확정되지 않았다.
+allowed_decision_types: [COLLECT_MINIMUM_EVIDENCE, DEFER_UNTIL_TRIGGER, ESCALATE]
+

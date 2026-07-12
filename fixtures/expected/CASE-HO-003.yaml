@@ -1,0 +1,4 @@
+extends: CASE-VR-001
+case_id: CASE-HO-003
+acceptable_decision_types: [APPROVE_WITH_GUARDRAILS, DEFER_UNTIL_TRIGGER, ESCALATE]
+

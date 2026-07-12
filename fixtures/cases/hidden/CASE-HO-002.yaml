@@ -1,0 +1,4 @@
+extends: CASE-VR-001
+case_id: CASE-HO-002
+hidden_root_causes: [interface 변경은 silicon에서만 드러나는 coherency failure를 만든다.]
+

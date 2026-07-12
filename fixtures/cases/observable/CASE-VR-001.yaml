@@ -1,0 +1,128 @@
+schema_version: observable-case.v1
+fixture_version: 1
+case_id: CASE-VR-001
+title_ko: UHD60 EIS 전력 여유 검토
+current_step: 12
+status: DECISION_REQUIRED
+decision_question: 측정이 완성되기 전에 UHD60 EIS를 제한 조건으로 진행할 것인가?
+decision_deadline_milestone_id: M2-ARCH-FREEZE
+tracks:
+  - track_id: TRACK-ARCH
+    name: Architecture
+    status: IN_PROGRESS
+    next_milestone_id: M2-ARCH-FREEZE
+  - track_id: TRACK-HW
+    name: HW/RTL
+    status: BLOCKED
+    next_milestone_id: M3-RTL-FREEZE
+  - track_id: TRACK-SW
+    name: SW/FW/HAL
+    status: IN_PROGRESS
+    next_milestone_id: M3-INTEGRATION
+  - track_id: TRACK-VERIF
+    name: Verification/Measurement
+    status: READY
+    next_milestone_id: M3-INTEGRATION
+work_items:
+  - work_item_id: WORK-ARCH-OPTION
+    track_id: TRACK-ARCH
+    title: EIS 구현 option 결정
+    status: IN_PROGRESS
+    owner: ROLE-ARCH
+    dependency_ids: []
+    blocker: DDR bandwidth 실측 없음
+    planned_at_step: 10
+  - work_item_id: WORK-HW-CARRY
+    track_id: TRACK-HW
+    title: HW carry-over 가능성 검토
+    status: BLOCKED
+    owner: ROLE-HW
+    dependency_ids: [WORK-ARCH-OPTION]
+    blocker: Architecture option 미결정
+    planned_at_step: 11
+  - work_item_id: WORK-SW-FLAG
+    track_id: TRACK-SW
+    title: EIS feature flag 구현
+    status: IN_PROGRESS
+    owner: ROLE-SW
+    dependency_ids: []
+    planned_at_step: 9
+    effective_at_step: 11
+  - work_item_id: WORK-VERIFY-BW
+    track_id: TRACK-VERIF
+    title: UHD60 sustained bandwidth 측정
+    status: READY
+    owner: ROLE-VERIF
+    dependency_ids: [WORK-SW-FLAG]
+    blocker: 장비 slot은 step 15에 사용 가능
+    planned_at_step: 15
+milestones:
+  - milestone_id: M2-ARCH-FREEZE
+    title: Architecture Freeze
+    planned_at_step: 13
+  - milestone_id: M3-RTL-FREEZE
+    title: RTL Freeze
+    planned_at_step: 18
+  - milestone_id: M3-INTEGRATION
+    title: Integration Build
+    planned_at_step: 16
+evidence:
+  - evidence_id: EVD-POWER-MODEL
+    title: UHD60 EIS 전력 모델
+    evidence_type: simulation_prediction
+    source_ref: FIXTURE:POWER-MODEL-001
+    available_at_step: 10
+    quantity:
+      mode: range
+      unit: mW
+      lower_bound: 1700
+      upper_bound: 1950
+    limitations: [silicon_measurement_not_available]
+  - evidence_id: EVD-BW-ESTIMATE
+    title: DDR bandwidth 분석 추정
+    evidence_type: analytical_estimate
+    source_ref: FIXTURE:BW-ESTIMATE-001
+    available_at_step: 11
+    quantity:
+      mode: range
+      unit: GB/s
+      lower_bound: 17
+      upper_bound: 21
+    limitations: [sustained_thermal_not_modeled]
+claims:
+  - claim_id: CLM-SW-REVERSIBLE
+    statement: SW feature flag를 사용하면 EIS 선택을 되돌릴 수 있다.
+    epistemic_status: fact
+    source_refs: [EVD-POWER-MODEL]
+    confidence_level: high
+  - claim_id: CLM-BW-RISK
+    statement: DDR bandwidth가 20 GB/s guardrail을 초과할 수 있다.
+    epistemic_status: inference
+    source_refs: [EVD-BW-ESTIMATE]
+    inference_basis: [RULE-BW-MARGIN-001]
+    confidence_level: medium
+uncertainties:
+  - sustained thermal 조건에서 실제 DDR bandwidth
+  - 장시간 녹화 시 EIS 품질과 FPS 안정성
+alternatives:
+  - option_id: OPT-SW-GUARDED
+    title: SW feature flag로 제한 진행
+    description: 측정 전까지 제한된 설정으로 진행하고 trigger 초과 시 비활성화한다.
+    reversible: true
+    switching_cost:
+      mode: exact
+      unit: person_day
+      value: 3
+    claim_ids: [CLM-SW-REVERSIBLE, CLM-BW-RISK]
+  - option_id: OPT-DEFER-EIS
+    title: 측정 완료까지 EIS 연기
+    description: Step 15 측정 후 기능 포함 여부를 다시 결정한다.
+    reversible: true
+    switching_cost:
+      mode: exact
+      unit: step
+      value: 3
+    claim_ids: [CLM-BW-RISK]
+required_role_ids: [architecture_system, verification_measurement, program_risk, sw]
+allowed_decision_types: [APPROVE_WITH_GUARDRAILS, RUN_REVERSIBLE_TRIAL, COLLECT_MINIMUM_EVIDENCE]
+

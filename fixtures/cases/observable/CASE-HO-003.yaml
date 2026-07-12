@@ -1,0 +1,10 @@
+extends: CASE-VR-001
+case_id: CASE-HO-003
+title_ko: 동시 과제 공유 자원 충돌 검토
+current_step: 12
+decision_question: 두 feature program이 공유하는 verification resource의 우선순위를 조정할 것인가?
+uncertainties:
+  - 장비 slot 추가 확보 가능 시점이 확정되지 않았다.
+  - 한 과제 지연이 다른 과제 milestone에 미치는 영향이 비대칭이다.
+allowed_decision_types: [APPROVE_WITH_GUARDRAILS, DEFER_UNTIL_TRIGGER, ESCALATE]
+

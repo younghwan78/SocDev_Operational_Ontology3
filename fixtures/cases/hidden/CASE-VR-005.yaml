@@ -1,0 +1,4 @@
+extends: CASE-VR-001
+case_id: CASE-VR-005
+hidden_root_causes: [고객은 차기 release에서만 AI camera 기능을 필수로 요구한다.]
+

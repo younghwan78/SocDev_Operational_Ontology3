@@ -1,0 +1,4 @@
+extends: CASE-VR-001
+case_id: CASE-VR-005
+acceptable_decision_types: [RUN_REVERSIBLE_TRIAL, DEFER_UNTIL_TRIGGER]
+

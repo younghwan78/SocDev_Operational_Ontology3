@@ -1,0 +1,81 @@
+{
+  "$defs": {
+    "DecisionType": {
+      "enum": [
+        "APPROVE",
+        "APPROVE_WITH_GUARDRAILS",
+        "RUN_REVERSIBLE_TRIAL",
+        "COLLECT_MINIMUM_EVIDENCE",
+        "DEFER_UNTIL_TRIGGER",
+        "REJECT",
+        "ESCALATE"
+      ],
+      "title": "DecisionType",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "expected-result.v1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "fixture_version": {
+      "minimum": 1,
+      "title": "Fixture Version",
+      "type": "integer"
+    },
+    "case_id": {
+      "title": "Case Id",
+      "type": "string"
+    },
+    "acceptable_decision_types": {
+      "items": {
+        "$ref": "#/$defs/DecisionType"
+      },
+      "title": "Acceptable Decision Types",
+      "type": "array"
+    },
+    "unacceptable_decision_types": {
+      "items": {
+        "$ref": "#/$defs/DecisionType"
+      },
+      "title": "Unacceptable Decision Types",
+      "type": "array"
+    },
+    "mandatory_claim_ids": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Mandatory Claim Ids",
+      "type": "array"
+    },
+    "mandatory_dependency_ids": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Mandatory Dependency Ids",
+      "type": "array"
+    },
+    "mandatory_guardrail_metric_ids": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Mandatory Guardrail Metric Ids",
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema_version",
+    "fixture_version",
+    "case_id",
+    "acceptable_decision_types",
+    "unacceptable_decision_types",
+    "mandatory_claim_ids",
+    "mandatory_dependency_ids",
+    "mandatory_guardrail_metric_ids"
+  ],
+  "title": "ExpectedResult",
+  "type": "object"
+}

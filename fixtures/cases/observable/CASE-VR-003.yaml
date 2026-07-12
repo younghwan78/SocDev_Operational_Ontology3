@@ -1,0 +1,9 @@
+extends: CASE-VR-001
+case_id: CASE-VR-003
+title_ko: ISP path 변경과 HW/SW mismatch 검토
+decision_question: 변경된 HW interface에 맞춰 SW 통합 일정을 재계획할 것인가?
+uncertainties:
+  - 새 interface의 integration effort가 확인되지 않았다.
+  - 이전 SW contract와 호환 가능한 범위가 불명확하다.
+allowed_decision_types: [APPROVE_WITH_GUARDRAILS, COLLECT_MINIMUM_EVIDENCE, ESCALATE]
+

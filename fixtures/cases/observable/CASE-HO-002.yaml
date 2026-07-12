@@ -1,0 +1,10 @@
+extends: CASE-VR-001
+case_id: CASE-HO-002
+title_ko: Silicon 이후 측정 가능한 비가역 변경 검토
+current_step: 10
+decision_question: Silicon 이전에 검증하기 어려운 비가역 interface 변경을 연기할 것인가?
+uncertainties:
+  - 실제 실패는 silicon bring-up 이후에만 관측 가능하다.
+  - interface 변경의 blast radius가 여러 IP에 걸친다.
+allowed_decision_types: [COLLECT_MINIMUM_EVIDENCE, DEFER_UNTIL_TRIGGER, ESCALATE]
+
