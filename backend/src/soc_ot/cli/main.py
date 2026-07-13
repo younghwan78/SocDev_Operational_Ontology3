@@ -7,7 +7,8 @@ from uuid import uuid4
 from sqlalchemy.orm import Session
 
 from soc_ot import __version__
-from soc_ot.agents.providers import OpenAIResponsesProvider
+from soc_ot.agents.codex_cli_provider import CodexCliProvider
+from soc_ot.agents.providers import OpenAIResponsesProvider, ReviewProvider
 from soc_ot.application.contracts import export_contracts
 from soc_ot.application.evaluation import run_evaluation
 from soc_ot.application.evaluation_artifacts import write_evaluation_artifacts
@@ -97,11 +98,14 @@ def build_parser() -> argparse.ArgumentParser:
         type=Path,
         default=ROOT_DIR / "fixtures/manifests/eval-2026-07-11.1.yaml",
     )
-    ablate.add_argument("--provider", choices=["openai"], default="openai")
+    ablate.add_argument(
+        "--provider", choices=["openai", "codex-cli"], default="openai"
+    )
     ablate.add_argument("--partitions", default="validation,sealed-unseen")
     ablate.add_argument("--output-root", type=Path, default=ROOT_DIR / "output/evaluations")
     ablate.add_argument("--output", type=Path, help="Optional legacy summary JSON path")
     ablate.add_argument("--acknowledge-cost", action="store_true")
+    ablate.add_argument("--acknowledge-usage", action="store_true")
     stability = evaluation_sub.add_parser("stability")
     stability.add_argument("--root", type=Path, default=ROOT_DIR / "fixtures")
     stability.add_argument(
@@ -109,7 +113,9 @@ def build_parser() -> argparse.ArgumentParser:
         type=Path,
         default=ROOT_DIR / "fixtures/manifests/eval-2026-07-11.1.yaml",
     )
-    stability.add_argument("--provider", choices=["openai"], default="openai")
+    stability.add_argument(
+        "--provider", choices=["openai", "codex-cli"], default="openai"
+    )
     stability.add_argument(
         "--partition", choices=["validation", "sealed-unseen"], required=True
     )
@@ -117,10 +123,14 @@ def build_parser() -> argparse.ArgumentParser:
     stability.add_argument("--output-root", type=Path, default=ROOT_DIR / "output/evaluations")
     stability.add_argument("--output", type=Path, help="Optional legacy summary JSON path")
     stability.add_argument("--acknowledge-cost", action="store_true")
+    stability.add_argument("--acknowledge-usage", action="store_true")
 
     agent = subparsers.add_parser("agent")
     agent_sub = agent.add_subparsers(dest="agent_command")
-    agent_sub.add_parser("preflight")
+    preflight = agent_sub.add_parser("preflight")
+    preflight.add_argument(
+        "--provider", choices=["openai", "codex-cli"], default="openai"
+    )
     return parser
 
 
@@ -235,6 +245,23 @@ def main(argv: Sequence[str] | None = None) -> int:
         return 0 if replay_summary.passed == replay_summary.total else 1
     if args.command == "agent" and args.agent_command == "preflight":
         settings = get_settings()
+        if args.provider == "codex-cli":
+            try:
+                cli_provider = CodexCliProvider(
+                    model=settings.codex_cli_model,
+                    reasoning_effort=settings.codex_cli_reasoning_effort,
+                    timeout_seconds=settings.codex_cli_timeout_seconds,
+                )
+                cli_provider.preflight()
+            except ValueError as error:
+                print(f"Codex CLI preflight failed: {error}")
+                return 2
+            print(
+                "Codex CLI preflight passed: "
+                f"model={cli_provider.model}, effort={cli_provider.reasoning_effort}, "
+                "billing=ChatGPT subscription."
+            )
+            return 0
         problems = []
         if not settings.openai_api_key:
             problems.append("OPENAI_API_KEY is missing")
@@ -253,53 +280,82 @@ def main(argv: Sequence[str] | None = None) -> int:
         print("Live preflight passed without exposing credentials.")
         return 0
     if args.command == "evaluation" and args.evaluation_command in {"ablate", "stability"}:
-        if not args.acknowledge_cost:
+        settings = get_settings()
+        is_codex_cli = args.provider == "codex-cli"
+        if is_codex_cli and not args.acknowledge_usage:
+            print(
+                "Use --acknowledge-usage after reviewing the ChatGPT subscription "
+                "call/token envelope."
+            )
+            return 2
+        if not is_codex_cli and not args.acknowledge_cost:
             print("Use --acknowledge-cost after reviewing the evaluation budget.")
             return 2
-        settings = get_settings()
         validate_evaluation_manifest(args.root, args.manifest)
+        estimate_case_cost = 0.0 if is_codex_cli else settings.max_case_cost_usd
+        estimate_batch_cost = 0.0 if is_codex_cli else settings.max_evaluation_cost_usd
         if args.evaluation_command == "ablate":
             if args.partitions != "validation,sealed-unseen":
                 print("Ablation requires exactly validation,sealed-unseen partitions.")
                 return 2
             estimate = estimate_ablation_batch(
-                max_case_cost_usd=settings.max_case_cost_usd,
-                max_evaluation_cost_usd=settings.max_evaluation_cost_usd,
+                max_case_cost_usd=estimate_case_cost,
+                max_evaluation_cost_usd=estimate_batch_cost,
                 case_timeout_seconds=settings.max_case_runtime_seconds,
             )
         else:
             estimate = estimate_stability_batch(
                 args.partition,
                 args.repeat,
-                max_case_cost_usd=settings.max_case_cost_usd,
-                max_evaluation_cost_usd=settings.max_evaluation_cost_usd,
+                max_case_cost_usd=estimate_case_cost,
+                max_evaluation_cost_usd=estimate_batch_cost,
                 case_timeout_seconds=settings.max_case_runtime_seconds,
             )
+        cost_text = (
+            "billing=ChatGPT subscription; USD cost=N/A"
+            if is_codex_cli
+            else f"maximum_cost=${estimate.maximum_cost_usd:.2f}"
+        )
         print(
             f"Live batch estimate: runs={estimate.run_count}, "
             f"semantic_calls={estimate.semantic_call_count}, "
-            f"timeout_seconds={estimate.timeout_envelope_seconds}, "
-            f"maximum_cost=${estimate.maximum_cost_usd:.2f}"
+            f"timeout_seconds={estimate.timeout_envelope_seconds}, {cost_text}"
         )
         if not estimate.within_budget:
             print("Batch estimate exceeds SOC_OT_MAX_EVALUATION_COST_USD; aborting before call.")
             return 2
-        if not settings.openai_api_key:
-            print("OPENAI_API_KEY is required for live evaluation.")
-            return 2
-        provider = OpenAIResponsesProvider(
-            api_key=settings.openai_api_key,
-            model=settings.role_model,
-            challenger_model=settings.challenger_model,
-            chair_model=settings.chair_model,
-            input_cost_per_million_usd=settings.role_input_cost_per_million_usd,
-            output_cost_per_million_usd=settings.role_output_cost_per_million_usd,
-        )
+        evaluation_provider: ReviewProvider
+        if is_codex_cli:
+            evaluation_provider = CodexCliProvider(
+                model=settings.codex_cli_model,
+                reasoning_effort=settings.codex_cli_reasoning_effort,
+                timeout_seconds=settings.codex_cli_timeout_seconds,
+            )
+            evaluation_provider.preflight()
+            max_cost_usd = 0.0
+            max_workers = settings.codex_cli_parallelism
+            model_identifier = settings.codex_cli_model
+        else:
+            if not settings.openai_api_key:
+                print("OPENAI_API_KEY is required for live evaluation.")
+                return 2
+            evaluation_provider = OpenAIResponsesProvider(
+                api_key=settings.openai_api_key,
+                model=settings.role_model,
+                challenger_model=settings.challenger_model,
+                chair_model=settings.chair_model,
+                input_cost_per_million_usd=settings.role_input_cost_per_million_usd,
+                output_cost_per_million_usd=settings.role_output_cost_per_million_usd,
+            )
+            max_cost_usd = settings.max_evaluation_cost_usd
+            max_workers = 1
+            model_identifier = settings.role_model
         if args.evaluation_command == "ablate":
             ablation_summary = run_live_ablation(
                 FixtureRepository(args.root),
-                provider,
-                max_cost_usd=settings.max_evaluation_cost_usd,
+                evaluation_provider,
+                max_cost_usd=max_cost_usd,
+                max_workers=max_workers,
             )
             success = True
             result_line = (
@@ -311,10 +367,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         else:
             stability_summary = run_live_stability(
                 FixtureRepository(args.root),
-                provider,
+                evaluation_provider,
                 partition=args.partition,
                 repeats=args.repeat,
-                max_cost_usd=settings.max_evaluation_cost_usd,
+                max_cost_usd=max_cost_usd,
+                max_workers=max_workers,
             )
             success = stability_summary.stability_gate_passed
             result_line = (
@@ -325,20 +382,52 @@ def main(argv: Sequence[str] | None = None) -> int:
             )
             summary_payload = stability_summary.model_dump(mode="json")
             actual_cost = stability_summary.estimated_cost_usd
+        evaluation_result = (
+            ablation_summary if args.evaluation_command == "ablate" else stability_summary
+        )
+        runtime_settings = _redacted_runtime_settings()
+        runtime_settings.update(
+            {
+                "llm_mode": "codex-cli" if is_codex_cli else "openai",
+                "evaluation_surface": "codex-cli" if is_codex_cli else "responses-api",
+                "model_identifier": model_identifier,
+                "adapter_prompt_contract_version": (
+                    "codex-cli-i7c.v1" if is_codex_cli else None
+                ),
+                "reasoning_effort": (
+                    settings.codex_cli_reasoning_effort if is_codex_cli else None
+                ),
+                "billing_basis": (
+                    "chatgpt-subscription" if is_codex_cli else "api-token-rates"
+                ),
+                "parallelism": max_workers,
+            }
+        )
         artifact_dir = write_evaluation_artifacts(
-            ablation_summary if args.evaluation_command == "ablate" else stability_summary,
+            evaluation_result,
             manifest_path=args.manifest,
             output_root=args.output_root,
-            provider=provider.name,
-            model_identifier=settings.role_model,
-            runtime_settings=_redacted_runtime_settings(),
+            provider=evaluation_provider.name,
+            model_identifier=model_identifier,
+            runtime_settings=runtime_settings,
             batch_estimate=estimate,
         )
         if args.output is not None:
             _write_legacy_summary(args.output, summary_payload)
-        print(
-            f"{result_line}; estimated cost=${actual_cost:.4f}; artifacts={artifact_dir}"
-        )
+        if is_codex_cli:
+            input_tokens = sum(
+                item.ablation.input_tokens for item in evaluation_result.results
+            )
+            output_tokens = sum(
+                item.ablation.output_tokens for item in evaluation_result.results
+            )
+            usage_text = (
+                f"ChatGPT subscription tokens input={input_tokens}, "
+                f"output={output_tokens}"
+            )
+        else:
+            usage_text = f"estimated cost=${actual_cost:.4f}"
+        print(f"{result_line}; {usage_text}; artifacts={artifact_dir}")
         return 0 if success else 1
     parser.print_help()
     return 0

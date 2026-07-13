@@ -155,6 +155,8 @@ def run_dossier_round(
             attempts_used = result.usage.provider_attempts
         except ReviewExecutionError as error:
             provider_attempts += error.provider_attempts
+            if error.code == "PROVIDER_USAGE_LIMIT":
+                raise RuntimeError("PROVIDER_USAGE_LIMIT") from error
             if error.code.startswith("AGENT_BUDGET_EXCEEDED"):
                 raise ValueError(error.code) from error
             failures.append(
@@ -185,7 +187,10 @@ def run_dossier_round(
             budget=budget,
         )
     if not provider_results:
-        raise RuntimeError("ALL_MANDATORY_ROLES_FAILED")
+        details = ",".join(
+            f"{failure.role_id}={failure.error_code}" for failure in failures
+        )
+        raise RuntimeError(f"ALL_MANDATORY_ROLES_FAILED:{details}")
     reviews = [result.review for result in provider_results]
     challenger_result = initial_challenger_result
     if topology == "B3" and challenger_result is None:
@@ -249,6 +254,8 @@ def run_dossier_round(
                 )
             except ReviewExecutionError as error:
                 provider_attempts += error.provider_attempts
+                if error.code == "PROVIDER_USAGE_LIMIT":
+                    raise RuntimeError("PROVIDER_USAGE_LIMIT") from error
                 if error.code.startswith("AGENT_BUDGET_EXCEEDED"):
                     raise ValueError(error.code) from error
                 revision_failures.append(

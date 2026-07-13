@@ -157,6 +157,40 @@ uv run python -m soc_ot.worker
 
 Replace the placeholder only in the worker terminal. Stop the Replay worker first, then run `preflight` and the live worker in that same terminal so it receives the key. The API does not call the provider directly. `preflight` checks key presence, model configuration, budget, and provider reachability without exposing the key. Do not paste the key into fixtures, commands committed to docs, or screenshots.
 
+### 8.1 Codex CLI I7-C quality evaluation
+
+Codex CLI is a separate ChatGPT-subscription evaluation surface. It does not replace the
+Responses API cost/latency gate and is not used by the normal API worker.
+
+```powershell
+uv run soc-ot agent preflight --provider codex-cli
+
+$env:SOC_OT_CODEX_CLI_MODEL = "gpt-5.6-luna"
+$env:SOC_OT_CODEX_CLI_REASONING_EFFORT = "high"
+$env:SOC_OT_CODEX_CLI_PARALLELISM = "2"
+
+uv run soc-ot evaluation ablate `
+  --provider codex-cli `
+  --partitions validation,sealed-unseen `
+  --acknowledge-usage
+
+uv run soc-ot evaluation stability `
+  --provider codex-cli `
+  --partition validation `
+  --repeat 5 `
+  --acknowledge-usage
+
+uv run soc-ot evaluation stability `
+  --provider codex-cli `
+  --partition sealed-unseen `
+  --repeat 3 `
+  --acknowledge-usage
+```
+
+The command records ChatGPT subscription tokens but reports USD as not applicable. A quota
+failure is terminal and appears in `runtime_failures.json` as `PROVIDER_USAGE_LIMIT`; it must
+not be interpreted as a model-quality result or repaired with repeated schema calls.
+
 ## 9. Authoring hidden fixtures
 
 Hidden inspection is CLI-only and off by default.

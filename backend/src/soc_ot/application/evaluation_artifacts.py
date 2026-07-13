@@ -40,6 +40,9 @@ def write_evaluation_artifacts(
     results = payload.get("results", [])
     if not isinstance(results, list):
         raise ValueError("evaluation summary results must be a list")
+    failures = payload.get("failures", [])
+    if not isinstance(failures, list):
+        raise ValueError("evaluation summary failures must be a list")
 
     (target / "manifest.snapshot.yaml").write_bytes(manifest_bytes)
     environment = {
@@ -61,6 +64,7 @@ def write_evaluation_artifacts(
         ),
         "actual": {
             "result_count": len(results),
+            "failure_count": len(failures),
             "estimated_cost_usd": float(payload.get("estimated_cost_usd", 0.0)),
         },
     }
@@ -75,6 +79,8 @@ def write_evaluation_artifacts(
     _write_json(target / "process_scores.json", process_scores)
     _write_json(target / "outcome_scores.json", outcome_scores)
     _write_json(target / "policy_violations.json", violations)
+    if failures:
+        _write_json(target / "runtime_failures.json", failures)
     (target / "report.md").write_text(
         _render_report(
             release_id=release_id,
@@ -82,6 +88,7 @@ def write_evaluation_artifacts(
             provider=provider,
             model_identifier=model_identifier,
             results=results,
+            failures=failures,
             violations=violations,
             payload=payload,
         ),
@@ -149,13 +156,15 @@ def _render_report(
     provider: str,
     model_identifier: str,
     results: list[object],
+    failures: list[object],
     violations: list[dict[str, object]],
     payload: dict[str, Any],
 ) -> str:
     passed = sum(
         bool(item.get("passed")) for item in results if isinstance(item, dict)
     )
-    gate = passed == len(results) and not violations
+    total_runs = int(payload.get("total_runs", len(results)))
+    gate = passed == total_runs and not violations and not failures
     return (
         "# Evaluation report\n\n"
         f"> Release: `{release_id}`  \n"
@@ -163,7 +172,8 @@ def _render_report(
         f"> Provider/model: `{provider}` / `{model_identifier}`\n\n"
         "## Result\n\n"
         f"- Gate: **{'PASS' if gate else 'FAIL'}**\n"
-        f"- Case runs passed: {passed}/{len(results)}\n"
+        f"- Case runs passed: {passed}/{total_runs}\n"
+        f"- Runtime failures: {len(failures)}\n"
         f"- Policy violations: {len(violations)}\n"
         f"- Estimated provider cost: ${float(payload.get('estimated_cost_usd', 0.0)):.4f}\n\n"
         "Process and outcome scores are intentionally reported separately. A sound process can "

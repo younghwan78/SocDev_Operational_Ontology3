@@ -20,7 +20,11 @@ from soc_ot.agents.multi_role import (
     ChallengerReview,
     DecisionDossier,
 )
-from soc_ot.agents.providers import ReviewProvider, StructuredReviewError
+from soc_ot.agents.providers import (
+    ProviderUsageLimitError,
+    ReviewProvider,
+    StructuredReviewError,
+)
 from soc_ot.application.packets import ObservableCasePacket
 from soc_ot.domain.models import DecisionType
 
@@ -83,6 +87,18 @@ def execute_chair_review(
                 feedback,
                 timeout_seconds,
             )
+        except ProviderUsageLimitError as error:
+            _emit_chair_attempt(
+                attempt_sink,
+                attempt_id=attempt_id,
+                provider=provider,
+                started_at=started_at,
+                started=started,
+                retry_reason=retry_reason,
+                validation_result="PROVIDER_USAGE_LIMIT",
+                final_status="failed",
+            )
+            raise ReviewExecutionError("PROVIDER_USAGE_LIMIT", attempts) from error
         except (ConnectionError, APIConnectionError, RateLimitError, InternalServerError) as error:
             retry = transport_retries < 1 and attempts < max_provider_attempts
             _emit_chair_attempt(
@@ -221,6 +237,18 @@ def execute_challenger_review(
             result = _challenge_with_timeout(
                 provider, packet, reviews, feedback, timeout_seconds
             )
+        except ProviderUsageLimitError as error:
+            _emit_challenger_attempt(
+                attempt_sink,
+                attempt_id=attempt_id,
+                provider=provider,
+                started_at=started_at,
+                started=started,
+                retry_reason=retry_reason,
+                validation_result="PROVIDER_USAGE_LIMIT",
+                final_status="failed",
+            )
+            raise ReviewExecutionError("PROVIDER_USAGE_LIMIT", attempts) from error
         except (ConnectionError, APIConnectionError, RateLimitError, InternalServerError) as error:
             retry = transport_retries < 1 and attempts < max_provider_attempts
             _emit_challenger_attempt(
@@ -363,6 +391,20 @@ def execute_grounded_review(
             result = _review_with_timeout(
                 provider, packet, role_id, feedback, timeout_seconds
             )
+        except ProviderUsageLimitError as error:
+            _emit_attempt(
+                attempt_sink,
+                attempt_id=attempt_id,
+                provider=provider,
+                role_id=role_id,
+                review_round=review_round,
+                started_at=started_at,
+                started=started,
+                retry_reason=retry_reason,
+                validation_result="PROVIDER_USAGE_LIMIT",
+                final_status="failed",
+            )
+            raise ReviewExecutionError("PROVIDER_USAGE_LIMIT", attempts) from error
         except ProviderCallTimeout as error:
             _emit_attempt(
                 attempt_sink,

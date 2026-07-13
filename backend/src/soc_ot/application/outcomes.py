@@ -3,9 +3,15 @@ import json
 from typing import Literal, Protocol
 
 from soc_ot.agents.multi_role import Safeguard, SimulatedDecision
-from soc_ot.domain.models import HiddenCase, ObservableCase, OutcomePath, StrictModel
+from soc_ot.domain.models import (
+    GUARDRAIL_METRIC_UNITS,
+    HiddenCase,
+    ObservableCase,
+    OutcomePath,
+    StrictModel,
+)
 
-METRIC_UNITS = {"DDR_BANDWIDTH": "GB/s", "THERMAL": "degC"}
+METRIC_UNITS = GUARDRAIL_METRIC_UNITS
 
 
 class OutcomeSnapshot(StrictModel):

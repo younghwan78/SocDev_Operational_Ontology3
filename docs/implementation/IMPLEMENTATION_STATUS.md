@@ -1,6 +1,6 @@
 # Implementation status
 
-> Updated: 2026-07-11  
+> Updated: 2026-07-12
 > Current stage: I7 live gate pending
 
 ## Stage evidence
@@ -15,4 +15,5 @@
 |I5|Passed (Replay)|True B0–B3 boundary, independent roles, provider Challenger, at most two provider revisions, dissent-preserving Dossier, policy-validated provider Chair, durable idempotent decision, executable safeguards|
 |I6|Passed|Closed-world outcome rules, persisted idempotent step advance and evaluation, latest evaluation query, pre-reveal API denial, hidden access port, 8/8 Process/Outcome evaluation|
 |I7 Replay|Passed|65 Backend tests, 3 Frontend unit tests, 2 Playwright E2E, axe/console checks, smoke, two migration paths, scans, immutable evaluation artifacts, 8/8 usability|
+|I7-C Codex CLI|Implemented; quality gate not passed|`gpt-5.6-luna/high` isolated provider and failure artifacts implemented. Preliminary ablation found marginal value 5/5. Validation policy passed 10/10 but acceptable decisions were 7/10, so stability failed. Sealed x3 is pending after `PROVIDER_USAGE_LIMIT`. See `../../internal_docs/26.07.12 Codex CLI I7-C 구현 및 평가 보고서.md`.|
 |I7 Live|Blocked by external input|Implementation and pre-call budget abort exist. No `OPENAI_API_KEY` or operator-confirmed current input/output rates, so ablation/stability/cost/model-quality gates are not claimed.|

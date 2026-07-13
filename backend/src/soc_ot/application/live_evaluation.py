@@ -1,3 +1,4 @@
+from concurrent.futures import ThreadPoolExecutor
 from typing import Literal
 
 from pydantic import Field
@@ -28,11 +29,18 @@ class AblationEvaluation(StrictModel):
     estimated_cost_usd: float = Field(ge=0)
 
 
+class LiveEvaluationFailure(StrictModel):
+    case_id: str
+    topology: Topology
+    error_code: str
+
+
 class StabilityEvaluation(StrictModel):
     provider: str
     partition: Literal["validation", "sealed-unseen"]
     repeats: int
     results: list[CaseEvaluation]
+    failures: list[LiveEvaluationFailure] = Field(default_factory=list)
     total_runs: int
     acceptable_runs: int
     policy_compliant_runs: int
@@ -80,21 +88,19 @@ def run_live_ablation(
     provider: ReviewProvider,
     *,
     max_cost_usd: float,
+    max_workers: int = 1,
 ) -> AblationEvaluation:
     if provider.name == "replay":
         raise ValueError("LIVE_PROVIDER_REQUIRED")
-    results: list[CaseEvaluation] = []
     case_ids = PARTITIONS["validation"] + PARTITIONS["sealed-unseen"]
-    for case_id in case_ids:
-        for topology in ("B0", "B1", "B2", "B3"):
-            result = evaluate_case(
-                fixtures,
-                case_id,
-                topology=topology,
-                provider=provider,
-            )
-            results.append(result)
-            _enforce_actual_cost(results, max_cost_usd)
+    topologies: tuple[Topology, ...] = ("B0", "B1", "B2", "B3")
+    jobs: list[tuple[str, Topology]] = [
+        (case_id, topology)
+        for case_id in case_ids
+        for topology in topologies
+    ]
+    results = _run_jobs(fixtures, provider, jobs, max_workers)
+    _enforce_actual_cost(results, max_cost_usd)
     marginal_cases = sum(_has_marginal_value(results, case_id) for case_id in case_ids)
     b1_value_cases = sum(_b1_adds_value(results, case_id) for case_id in case_ids)
     stop_rule: Literal["keep_b3", "release_b1", "release_b0"]
@@ -122,20 +128,19 @@ def run_live_stability(
     partition: Literal["validation", "sealed-unseen"],
     repeats: int,
     max_cost_usd: float,
+    max_workers: int = 1,
 ) -> StabilityEvaluation:
     if provider.name == "replay":
         raise ValueError("LIVE_PROVIDER_REQUIRED")
-    results: list[CaseEvaluation] = []
-    for _ in range(repeats):
-        for case_id in PARTITIONS[partition]:
-            result = evaluate_case(
-                fixtures,
-                case_id,
-                topology="B3",
-                provider=provider,
-            )
-            results.append(result)
-            _enforce_actual_cost(results, max_cost_usd)
+    jobs: list[tuple[str, Topology]] = [
+        (case_id, "B3")
+        for _ in range(repeats)
+        for case_id in PARTITIONS[partition]
+    ]
+    results, failures = _run_jobs_capturing_failures(
+        fixtures, provider, jobs, max_workers
+    )
+    _enforce_actual_cost(results, max_cost_usd)
     acceptable = sum(item.process_evaluation.decision_acceptable for item in results)
     policy_compliant = sum(_policy_compliant(item) for item in results)
     required_acceptable = 4 if partition == "validation" else 2
@@ -148,14 +153,15 @@ def run_live_stability(
         >= required_acceptable
         for case_id in PARTITIONS[partition]
     )
-    gate_passed = per_case_stable and policy_compliant == len(results)
+    gate_passed = not failures and per_case_stable and policy_compliant == len(results)
     actual_cost = _actual_cost(results)
     return StabilityEvaluation(
         provider=provider.name,
         partition=partition,
         repeats=repeats,
         results=results,
-        total_runs=len(results),
+        failures=failures,
+        total_runs=len(jobs),
         acceptable_runs=acceptable,
         policy_compliant_runs=policy_compliant,
         stability_gate_passed=gate_passed,
@@ -228,3 +234,65 @@ def _actual_cost(results: list[CaseEvaluation]) -> float:
 def _enforce_actual_cost(results: list[CaseEvaluation], max_cost_usd: float) -> None:
     if _actual_cost(results) > max_cost_usd:
         raise RuntimeError("LIVE_EVALUATION_COST_ENVELOPE_EXCEEDED")
+
+
+def _run_jobs(
+    fixtures: FixtureRepository,
+    provider: ReviewProvider,
+    jobs: list[tuple[str, Topology]],
+    max_workers: int,
+) -> list[CaseEvaluation]:
+    def execute(job: tuple[str, Topology]) -> CaseEvaluation:
+        case_id, topology = job
+        try:
+            return evaluate_case(
+                fixtures,
+                case_id,
+                topology=topology,
+                provider=provider,
+            )
+        except Exception as error:
+            raise RuntimeError(
+                f"LIVE_EVALUATION_JOB_FAILED:{case_id}:{topology}:{error}"
+            ) from error
+
+    if max_workers <= 1:
+        return [execute(job) for job in jobs]
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        return list(executor.map(execute, jobs))
+
+
+def _run_jobs_capturing_failures(
+    fixtures: FixtureRepository,
+    provider: ReviewProvider,
+    jobs: list[tuple[str, Topology]],
+    max_workers: int,
+) -> tuple[list[CaseEvaluation], list[LiveEvaluationFailure]]:
+    def execute(
+        job: tuple[str, Topology],
+    ) -> CaseEvaluation | LiveEvaluationFailure:
+        case_id, topology = job
+        try:
+            return evaluate_case(
+                fixtures,
+                case_id,
+                topology=topology,
+                provider=provider,
+            )
+        except Exception as error:
+            code = str(getattr(error, "code", "") or error or type(error).__name__)
+            return LiveEvaluationFailure(
+                case_id=case_id,
+                topology=topology,
+                error_code=code[:200],
+            )
+
+    if max_workers <= 1:
+        items = [execute(job) for job in jobs]
+    else:
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            items = list(executor.map(execute, jobs))
+    return (
+        [item for item in items if isinstance(item, CaseEvaluation)],
+        [item for item in items if isinstance(item, LiveEvaluationFailure)],
+    )

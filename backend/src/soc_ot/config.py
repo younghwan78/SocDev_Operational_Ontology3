@@ -1,5 +1,6 @@
 from functools import lru_cache
 from pathlib import Path
+from typing import Literal
 
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -34,6 +35,12 @@ class Settings(BaseSettings):
     role_model: str = "gpt-5.4-mini"
     challenger_model: str = "gpt-5.5"
     chair_model: str = "gpt-5.5"
+    codex_cli_model: str = "gpt-5.6-luna"
+    codex_cli_reasoning_effort: Literal["low", "medium", "high", "xhigh", "max"] = (
+        "high"
+    )
+    codex_cli_timeout_seconds: int = Field(default=180, ge=30, le=900)
+    codex_cli_parallelism: int = Field(default=2, ge=1, le=8)
     max_case_runtime_seconds: int = 900
     role_timeout_seconds: int = 120
     max_case_cost_usd: float = 2.0

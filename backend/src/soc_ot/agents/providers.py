@@ -34,6 +34,10 @@ class StructuredReviewError(ValueError):
         self.code = code
 
 
+class ProviderUsageLimitError(RuntimeError):
+    """Terminal provider quota exhaustion that must not enter repair retries."""
+
+
 class ReplayProvider:
     """Deterministic provider for CI, local development, and evaluation baselines."""
 

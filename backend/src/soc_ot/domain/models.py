@@ -3,6 +3,8 @@ from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+GUARDRAIL_METRIC_UNITS = {"DDR_BANDWIDTH": "GB/s", "THERMAL": "degC"}
+
 
 class StrictModel(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
@@ -313,4 +315,3 @@ ALLOWED_WORK_TRANSITIONS: dict[WorkItemStatus, set[WorkItemStatus]] = {
 def validate_work_transition(before: WorkItemStatus, after: WorkItemStatus) -> None:
     if after not in ALLOWED_WORK_TRANSITIONS[before]:
         raise ValueError(f"invalid work transition: {before} -> {after}")
-

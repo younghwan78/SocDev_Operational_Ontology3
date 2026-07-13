@@ -169,6 +169,39 @@ def test_policy_rejects_incomplete_safeguard() -> None:
         validate_decision_policy(decision, [DecisionType.RUN_REVERSIBLE_TRIAL])
 
 
+def test_policy_rejects_non_executable_guardrail_threshold() -> None:
+    decision = SimulatedDecision(
+        case_id="CASE-X",
+        decision_type=DecisionType.RUN_REVERSIBLE_TRIAL,
+        selected_option_id="OPTION-X",
+        rationale="test",
+        safeguards=[
+            Safeguard(
+                safeguard_id="SG-X",
+                metric_id="DDR_BANDWIDTH",
+                operator="lte",
+                threshold=Quantity(
+                    mode=QuantityMode.RANGE,
+                    unit="GB/s",
+                    lower_bound=18,
+                    upper_bound=20,
+                ),
+                check_at_step=15,
+                expires_at_step=16,
+                violation_action="rollback",
+                condition="limited",
+                rollback_trigger="threshold exceeded",
+                owner="owner",
+                verification="next step",
+            )
+        ],
+        dissent_acknowledged=[],
+    )
+
+    with pytest.raises(ValueError, match="GUARDRAIL_THRESHOLD_NOT_EXACT"):
+        validate_decision_policy(decision, [DecisionType.RUN_REVERSIBLE_TRIAL])
+
+
 def test_chair_output_has_no_hidden_world_fields() -> None:
     case, packet = case_and_packet()
     result = run_ablation(

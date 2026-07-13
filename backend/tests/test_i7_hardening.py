@@ -95,6 +95,29 @@ def test_stability_runner_uses_only_b3_and_applies_per_case_threshold() -> None:
     assert result.stability_gate_passed is True
 
 
+def test_stability_runner_records_provider_failure_instead_of_aborting() -> None:
+    class FailingLiveProvider(ReplayProvider):
+        name = "failing-live"
+
+        def review(self, packet, role_id):
+            if packet.case_id == "CASE-VR-005":
+                raise ConnectionError("synthetic unavailable")
+            return super().review(packet, role_id)
+
+    result = run_live_stability(
+        FixtureRepository(ROOT / "fixtures"),
+        FailingLiveProvider(),
+        partition="validation",
+        repeats=1,
+        max_cost_usd=25,
+    )
+
+    assert result.total_runs == 2
+    assert len(result.results) == 1
+    assert [failure.case_id for failure in result.failures] == ["CASE-VR-005"]
+    assert result.stability_gate_passed is False
+
+
 def test_evaluation_artifact_bundle_is_complete_and_immutable(tmp_path: Path) -> None:
     summary = run_evaluation(FixtureRepository(ROOT / "fixtures"))
     arguments = {

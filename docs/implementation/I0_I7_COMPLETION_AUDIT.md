@@ -11,6 +11,7 @@
 |---|---|---|
 |I0–I6|PASS|Every Deliver and Gate has implementation plus direct test, scan, migration, smoke, browser, or evaluation evidence.|
 |I7 Replay engineering scope|PASS|Accessibility, E2E, telemetry, recovery, scans, runbook, usability, and immutable Replay evaluation pass.|
+|I7-C Codex CLI|IMPLEMENTED, GATE NOT PASSED|Luna/high validation preserved runtime policy in 10/10 runs but acceptable decisions were 7/10. Sealed robustness is unmeasured because the subscription quota produced 9 `PROVIDER_USAGE_LIMIT` failures.|
 |I7 Live|NOT COMPLETE|The runner and pre-call guards exist, but no authorized OpenAI call was made. Live stability, robustness, marginal value, and topology selection are therefore unproven.|
 |Full I0–I7 objective|NOT COMPLETE|I7 Gate explicitly requires live results and an ablation-based keep/simplify/remove decision.|
 
@@ -113,6 +114,7 @@ that multiple live LLM roles improve advice quality or decision speed.
 |Sealed-unseen live robustness x3|IMPLEMENTED, NOT EXECUTED|Estimate is 9 runs / 72 calls / $18 maximum; missing key/rates stop execution.|
 |Live policy, stability, robustness, cost gates|NOT PROVEN|No live outputs exist.|
 |Keep/simplify/remove topology decision|NOT DECIDED|The decision must follow live marginal-value results; Replay cannot substitute.|
+|Codex CLI quality diagnostic|VALIDATION FAIL, SEALED BLOCKED|Preliminary ablation reported marginal value in 5/5 cases. The current validation artifact has 10/10 runtime policy and 7/10 acceptable decisions. The latest sealed artifact records 9 terminal quota failures. See `../../internal_docs/26.07.12 Codex CLI I7-C 구현 및 평가 보고서.md`.|
 
 ## 10. Cross-cutting invariant audit
 
@@ -129,12 +131,15 @@ that multiple live LLM roles improve advice quality or decision speed.
 
 ```text
 Backend pytest                  65 passed
+Backend non-PostgreSQL pytest  63 passed after I7-C changes
 Frontend unit                  3 passed
 Playwright E2E                 2 passed
 Replay evaluation              8/8 passed, 0 policy violations
 Migration paths                empty -> 0016, 0001 -> 0016 passed
 PostgreSQL smoke               COMPLETED, 8 provider attempts, rollback, evaluation pass
 Repository scans              plan, architecture, hidden, secret, links, generated contracts passed
+Codex CLI validation          policy 10/10, acceptable 7/10, stability FAIL
+Codex CLI sealed              9/9 PROVIDER_USAGE_LIMIT, quality not measured
 ```
 
 Latest immutable Replay report:

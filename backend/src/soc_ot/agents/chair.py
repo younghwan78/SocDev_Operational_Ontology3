@@ -1,6 +1,11 @@
 from soc_ot.agents.multi_role import DecisionDossier, Safeguard, SimulatedDecision
 from soc_ot.application.packets import ObservableCasePacket
-from soc_ot.domain.models import DecisionType, Quantity, QuantityMode
+from soc_ot.domain.models import (
+    GUARDRAIL_METRIC_UNITS,
+    DecisionType,
+    Quantity,
+    QuantityMode,
+)
 
 
 def simulated_chair_decision(
@@ -134,3 +139,10 @@ def validate_decision_policy(
             ]
         ):
             raise ValueError("INCOMPLETE_SAFEGUARD")
+        expected_unit = GUARDRAIL_METRIC_UNITS.get(safeguard.metric_id)
+        if expected_unit is None:
+            raise ValueError("UNSUPPORTED_GUARDRAIL_METRIC")
+        if safeguard.threshold.unit != expected_unit:
+            raise ValueError("GUARDRAIL_UNIT_MISMATCH")
+        if safeguard.threshold.mode is not QuantityMode.EXACT:
+            raise ValueError("GUARDRAIL_THRESHOLD_NOT_EXACT")
