@@ -1,0 +1,101 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "decision-action-plan.v1",
+      "default": "decision-action-plan.v1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "action_type": {
+      "enum": [
+        "execute",
+        "collect_evidence",
+        "defer",
+        "escalate",
+        "reject"
+      ],
+      "title": "Action Type",
+      "type": "string"
+    },
+    "owner": {
+      "minLength": 1,
+      "title": "Owner",
+      "type": "string"
+    },
+    "action": {
+      "minLength": 1,
+      "title": "Action",
+      "type": "string"
+    },
+    "due_at_step": {
+      "minimum": 0,
+      "title": "Due At Step",
+      "type": "integer"
+    },
+    "trigger": {
+      "minLength": 1,
+      "title": "Trigger",
+      "type": "string"
+    },
+    "verification": {
+      "minLength": 1,
+      "title": "Verification",
+      "type": "string"
+    },
+    "fallback_action": {
+      "minLength": 1,
+      "title": "Fallback Action",
+      "type": "string"
+    },
+    "evidence_required": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Evidence Required",
+      "type": "array"
+    },
+    "escalation_target": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Escalation Target"
+    },
+    "questions_to_resolve": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Questions To Resolve",
+      "type": "array"
+    },
+    "reopen_condition": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Reopen Condition"
+    }
+  },
+  "required": [
+    "action_type",
+    "owner",
+    "action",
+    "due_at_step",
+    "trigger",
+    "verification",
+    "fallback_action"
+  ],
+  "title": "DecisionActionPlan",
+  "type": "object"
+}

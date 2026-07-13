@@ -33,10 +33,10 @@ A validation failure may inform the next candidate, but the same case then serve
 Every evaluation release has a committed manifest.
 
 ```yaml
-evaluation_release: eval-2026-07-11.1
+evaluation_release: eval-2026-07-14.1
 schema_version: evaluation-manifest.v1
 policy_version: decision-policy.v1
-prompt_bundle_version: prompts.v1
+prompt_bundle_version: prompts.v2
 cases:
   - case_id: CASE-VR-004
     partition: validation
@@ -46,6 +46,9 @@ cases:
 ```
 
 Changing any frozen file creates a new evaluation release. Results from different releases are not merged as if they were comparable.
+
+`eval-2026-07-11.1` with `prompts.v1` remains an immutable historical release.
+The current executable-action contract uses `eval-2026-07-14.1` with `prompts.v2`.
 
 ## 4. Expected-result contract
 
@@ -155,11 +158,11 @@ freeze release manifest
 Commands to be implemented:
 
 ```powershell
-uv run python -m soc_ot.cli evaluation validate-release --manifest fixtures/manifests/eval-2026-07-11.1.yaml
-uv run python -m soc_ot.cli evaluation run --manifest fixtures/manifests/eval-2026-07-11.1.yaml --provider replay
-uv run python -m soc_ot.cli evaluation ablate --manifest fixtures/manifests/eval-2026-07-11.1.yaml --provider openai --partitions validation,sealed-unseen
-uv run python -m soc_ot.cli evaluation stability --manifest fixtures/manifests/eval-2026-07-11.1.yaml --provider openai --partition validation --repeat 5
-uv run python -m soc_ot.cli evaluation stability --manifest fixtures/manifests/eval-2026-07-11.1.yaml --provider openai --partition sealed-unseen --repeat 3
+uv run python -m soc_ot.cli evaluation validate-release --manifest fixtures/manifests/eval-2026-07-14.1.yaml
+uv run python -m soc_ot.cli evaluation run --manifest fixtures/manifests/eval-2026-07-14.1.yaml --provider replay
+uv run python -m soc_ot.cli evaluation ablate --manifest fixtures/manifests/eval-2026-07-14.1.yaml --provider openai --partitions validation,sealed-unseen
+uv run python -m soc_ot.cli evaluation stability --manifest fixtures/manifests/eval-2026-07-14.1.yaml --provider openai --partition validation --repeat 5
+uv run python -m soc_ot.cli evaluation stability --manifest fixtures/manifests/eval-2026-07-14.1.yaml --provider openai --partition sealed-unseen --repeat 3
 ```
 
 Before live execution, print the maximum run count, semantic-call count, timeout envelope, and `runs × SOC_OT_MAX_CASE_COST_USD`. Abort before the first call when the estimate exceeds `SOC_OT_MAX_EVALUATION_COST_USD`; raising the batch cap is an explicit user decision. Store estimated and actual values in the report.

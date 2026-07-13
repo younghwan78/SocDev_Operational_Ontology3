@@ -121,7 +121,7 @@ def test_stability_runner_records_provider_failure_instead_of_aborting() -> None
 def test_evaluation_artifact_bundle_is_complete_and_immutable(tmp_path: Path) -> None:
     summary = run_evaluation(FixtureRepository(ROOT / "fixtures"))
     arguments = {
-        "manifest_path": ROOT / "fixtures/manifests/eval-2026-07-11.1.yaml",
+        "manifest_path": ROOT / "fixtures/manifests/eval-2026-07-14.1.yaml",
         "output_root": tmp_path,
         "provider": "replay",
         "model_identifier": "deterministic-replay",

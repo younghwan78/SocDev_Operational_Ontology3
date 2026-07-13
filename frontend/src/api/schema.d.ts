@@ -497,6 +497,40 @@ export interface components {
             /** Statement */
             statement: string;
         };
+        /** DecisionActionPlan */
+        DecisionActionPlan: {
+            /** Action */
+            action: string;
+            /**
+             * Action Type
+             * @enum {string}
+             */
+            action_type: "execute" | "collect_evidence" | "defer" | "escalate" | "reject";
+            /** Due At Step */
+            due_at_step: number;
+            /** Escalation Target */
+            escalation_target?: string | null;
+            /** Evidence Required */
+            evidence_required?: string[];
+            /** Fallback Action */
+            fallback_action: string;
+            /** Owner */
+            owner: string;
+            /** Questions To Resolve */
+            questions_to_resolve?: string[];
+            /** Reopen Condition */
+            reopen_condition?: string | null;
+            /**
+             * Schema Version
+             * @default decision-action-plan.v1
+             * @constant
+             */
+            schema_version: "decision-action-plan.v1";
+            /** Trigger */
+            trigger: string;
+            /** Verification */
+            verification: string;
+        };
         /** DecisionDossier */
         DecisionDossier: {
             /** Agreement Groups */
@@ -741,6 +775,8 @@ export interface components {
             conditional_control_complete: boolean;
             /** Decision Acceptable */
             decision_acceptable: boolean;
+            /** Decision Action Complete */
+            decision_action_complete: boolean;
             /** Mandatory Claims Covered */
             mandatory_claims_covered: boolean;
             /** Mandatory Dependencies Covered */
@@ -1005,6 +1041,7 @@ export interface components {
         };
         /** SimulatedDecision */
         SimulatedDecision: {
+            action_plan: components["schemas"]["DecisionActionPlan"];
             /** Case Id */
             case_id: string;
             /**
@@ -1022,10 +1059,10 @@ export interface components {
             safeguards: components["schemas"]["Safeguard"][];
             /**
              * Schema Version
-             * @default simulated-decision.v1
+             * @default simulated-decision.v2
              * @constant
              */
-            schema_version: "simulated-decision.v1";
+            schema_version: "simulated-decision.v2";
             /** Selected Option Id */
             selected_option_id?: string | null;
             /**

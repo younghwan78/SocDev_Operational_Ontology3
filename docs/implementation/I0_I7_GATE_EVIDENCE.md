@@ -18,7 +18,7 @@ inferred from Replay results.
 |---|---|---|
 |I0|Pass|Locked Python/Node setup, Ruff, mypy, pytest, TypeScript, ESLint, Vitest, build, PostgreSQL health; Replay needs no key|
 |I1|Pass|Strict case/claim/quantity/time contracts; transition, unit, reference, and hidden-leak negative tests; step reconstruction|
-|I2|Pass|Memory/PostgreSQL parity; case row and append-only event transaction; restart persistence; empty DB and `0001_case_store` upgrades both reach `0016_agent_run_budget_plan`|
+|I2|Pass|Memory/PostgreSQL parity; case row and append-only event transaction; restart persistence; empty DB, `0001_case_store`, and v1 decision data upgrades reach `0017_decision_action_plan_v2`|
 |I3|Pass|Deterministic packet hash, impact/deadline traversal, evidence availability and epistemic projection, hidden denylist, eight frozen cases, generated OpenAPI client, Korean UI|
 |I4 Replay|Pass|Durable role/dossier runs, `SKIP LOCKED` lease, start/final attempt audit, role/revision/Challenger/Chair checkpoint resume, timeout, bounded transport/schema/policy retry, cancel-late discard, budget plan, SSE/polling, stale/partial/retry UI|
 |I5 Replay|Pass|True B0–B3 interface, independent roles, provider Challenger, two provider revisions, explicit unique concern/no-concern, dissent-preserving Dossier, audited provider Chair with deterministic policy validation, executable safeguards, durable decision|

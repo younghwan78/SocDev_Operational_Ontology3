@@ -77,16 +77,83 @@ class Safeguard(StrictModel):
     verification: str
 
 
+class DecisionActionPlan(StrictModel):
+    schema_version: Literal["decision-action-plan.v1"] = "decision-action-plan.v1"
+    action_type: Literal["execute", "collect_evidence", "defer", "escalate", "reject"]
+    owner: str = Field(min_length=1)
+    action: str = Field(min_length=1)
+    due_at_step: int = Field(ge=0)
+    trigger: str = Field(min_length=1)
+    verification: str = Field(min_length=1)
+    fallback_action: str = Field(min_length=1)
+    evidence_required: list[str] = Field(default_factory=list)
+    escalation_target: str | None = None
+    questions_to_resolve: list[str] = Field(default_factory=list)
+    reopen_condition: str | None = None
+
+    @model_validator(mode="after")
+    def reject_blank_action_details(self) -> "DecisionActionPlan":
+        required_values = (
+            self.owner,
+            self.action,
+            self.trigger,
+            self.verification,
+            self.fallback_action,
+        )
+        optional_values = (self.escalation_target, self.reopen_condition)
+        if not all(value.strip() for value in required_values):
+            raise ValueError("ACTION_PLAN_DETAIL_BLANK")
+        if any(value is not None and not value.strip() for value in optional_values):
+            raise ValueError("ACTION_PLAN_DETAIL_BLANK")
+        if any(
+            not value.strip()
+            for value in self.evidence_required + self.questions_to_resolve
+        ):
+            raise ValueError("ACTION_PLAN_DETAIL_BLANK")
+        return self
+
+
 class SimulatedDecision(StrictModel):
-    schema_version: Literal["simulated-decision.v1"] = "simulated-decision.v1"
+    schema_version: Literal["simulated-decision.v2"] = "simulated-decision.v2"
     case_id: str
     decision_type: DecisionType
     selected_option_id: str | None = None
     rationale: str
     safeguards: list[Safeguard]
+    action_plan: DecisionActionPlan
     dissent_acknowledged: list[str]
     decision_source: Literal["deterministic_core", "simulated_chair"] = "simulated_chair"
     simulated: Literal[True] = True
+
+    @model_validator(mode="after")
+    def require_action_for_decision_type(self) -> "SimulatedDecision":
+        expected_action_type = {
+            DecisionType.APPROVE: "execute",
+            DecisionType.APPROVE_WITH_GUARDRAILS: "execute",
+            DecisionType.RUN_REVERSIBLE_TRIAL: "execute",
+            DecisionType.COLLECT_MINIMUM_EVIDENCE: "collect_evidence",
+            DecisionType.DEFER_UNTIL_TRIGGER: "defer",
+            DecisionType.ESCALATE: "escalate",
+            DecisionType.REJECT: "reject",
+        }[self.decision_type]
+        if self.action_plan.action_type != expected_action_type:
+            raise ValueError("ACTION_TYPE_MISMATCH")
+        if (
+            self.decision_type is DecisionType.COLLECT_MINIMUM_EVIDENCE
+            and not self.action_plan.evidence_required
+        ):
+            raise ValueError("COLLECT_REQUIRES_EVIDENCE_LIST")
+        if self.decision_type is DecisionType.ESCALATE and not (
+            self.action_plan.escalation_target
+            and self.action_plan.questions_to_resolve
+        ):
+            raise ValueError("ESCALATE_REQUIRES_TARGET_AND_QUESTIONS")
+        if (
+            self.decision_type is DecisionType.REJECT
+            and not self.action_plan.reopen_condition
+        ):
+            raise ValueError("REJECT_REQUIRES_REOPEN_CONDITION")
+        return self
 
 
 class AblationResult(StrictModel):

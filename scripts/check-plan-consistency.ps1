@@ -82,7 +82,7 @@ $versions = @(
 }
 
 $manifestCases = Select-String -Path (
-    Join-Path $root "fixtures/manifests/eval-2026-07-11.1.yaml"
+    Join-Path $root "fixtures/manifests/eval-2026-07-14.1.yaml"
 ) -Pattern '^- case_id: '
 if ($manifestCases.Count -ne 8) {
     throw "Evaluation manifest must contain exactly 8 cases; found $($manifestCases.Count)."

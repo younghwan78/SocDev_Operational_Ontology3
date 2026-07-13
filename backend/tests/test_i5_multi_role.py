@@ -4,7 +4,12 @@ import pytest
 from fastapi.testclient import TestClient
 
 from soc_ot.agents.contracts import ProviderReviewResult, ProviderUsage
-from soc_ot.agents.multi_role import DossierExecution, Safeguard, SimulatedDecision
+from soc_ot.agents.multi_role import (
+    DecisionActionPlan,
+    DossierExecution,
+    Safeguard,
+    SimulatedDecision,
+)
 from soc_ot.agents.providers import ReplayProvider
 from soc_ot.api.main import create_app
 from soc_ot.application.multi_role import (
@@ -145,6 +150,99 @@ def test_conditional_decision_has_complete_safeguard() -> None:
     assert safeguard.verification
 
 
+@pytest.mark.parametrize(
+    ("decision_type", "action_type"),
+    [
+        (DecisionType.APPROVE, "execute"),
+        (DecisionType.APPROVE_WITH_GUARDRAILS, "execute"),
+        (DecisionType.RUN_REVERSIBLE_TRIAL, "execute"),
+        (DecisionType.COLLECT_MINIMUM_EVIDENCE, "collect_evidence"),
+        (DecisionType.DEFER_UNTIL_TRIGGER, "defer"),
+        (DecisionType.ESCALATE, "escalate"),
+        (DecisionType.REJECT, "reject"),
+    ],
+)
+def test_every_decision_type_has_an_executable_action_plan(
+    decision_type: DecisionType, action_type: str
+) -> None:
+    case, packet = case_and_packet()
+    dossier = run_ablation(
+        packet, ReplayProvider(), "B2", allowed_decision_types=case.allowed_decision_types
+    ).dossier
+
+    decision = simulated_chair_decision(packet, dossier, [decision_type])
+
+    assert decision.schema_version == "simulated-decision.v2"
+    assert decision.action_plan.action_type == action_type
+    assert decision.action_plan.owner
+    assert decision.action_plan.action
+    assert decision.action_plan.due_at_step >= packet.current_step
+    assert decision.action_plan.trigger
+    assert decision.action_plan.verification
+    assert decision.action_plan.fallback_action
+
+
+def test_collect_decision_requires_named_evidence() -> None:
+    with pytest.raises(ValueError, match="COLLECT_REQUIRES_EVIDENCE_LIST"):
+        SimulatedDecision(
+            case_id="CASE-X",
+            decision_type=DecisionType.COLLECT_MINIMUM_EVIDENCE,
+            rationale="test",
+            safeguards=[],
+            action_plan=DecisionActionPlan(
+                action_type="collect_evidence",
+                owner="evidence_owner",
+                action="collect",
+                due_at_step=15,
+                trigger="available",
+                verification="packet updated",
+                fallback_action="defer",
+            ),
+            dissent_acknowledged=[],
+        )
+
+
+def test_escalation_requires_target_and_questions() -> None:
+    with pytest.raises(ValueError, match="ESCALATE_REQUIRES_TARGET_AND_QUESTIONS"):
+        SimulatedDecision(
+            case_id="CASE-X",
+            decision_type=DecisionType.ESCALATE,
+            rationale="test",
+            safeguards=[],
+            action_plan=DecisionActionPlan(
+                action_type="escalate",
+                owner="decision_chair",
+                action="escalate",
+                due_at_step=15,
+                trigger="authority boundary",
+                verification="response recorded",
+                fallback_action="defer",
+            ),
+            dissent_acknowledged=[],
+        )
+
+
+def test_policy_rejects_action_plan_due_in_the_past() -> None:
+    case, packet = case_and_packet()
+    result = run_ablation(
+        packet, ReplayProvider(), "B3", allowed_decision_types=case.allowed_decision_types
+    )
+    decision = result.decision.model_copy(
+        update={
+            "action_plan": result.decision.action_plan.model_copy(
+                update={"due_at_step": packet.current_step - 1}
+            )
+        }
+    )
+
+    with pytest.raises(ValueError, match="ACTION_PLAN_DUE_STEP_IN_PAST"):
+        validate_decision_policy(
+            decision,
+            case.allowed_decision_types,
+            current_step=packet.current_step,
+        )
+
+
 def test_policy_rejects_incomplete_safeguard() -> None:
     decision = SimulatedDecision(
         case_id="CASE-X",
@@ -163,6 +261,15 @@ def test_policy_rejects_incomplete_safeguard() -> None:
                 owner="owner", verification="next step",
             )
         ],
+        action_plan=DecisionActionPlan(
+            action_type="execute",
+            owner="owner",
+            action="run option",
+            due_at_step=15,
+            trigger="decision recorded",
+            verification="next step",
+            fallback_action="rollback",
+        ),
         dissent_acknowledged=[],
     )
     with pytest.raises(ValueError, match="INCOMPLETE_SAFEGUARD"):
@@ -195,6 +302,15 @@ def test_policy_rejects_non_executable_guardrail_threshold() -> None:
                 verification="next step",
             )
         ],
+        action_plan=DecisionActionPlan(
+            action_type="execute",
+            owner="owner",
+            action="run option",
+            due_at_step=15,
+            trigger="decision recorded",
+            verification="next step",
+            fallback_action="rollback",
+        ),
         dissent_acknowledged=[],
     )
 

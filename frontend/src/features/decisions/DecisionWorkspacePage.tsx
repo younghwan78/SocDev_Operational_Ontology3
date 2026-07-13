@@ -222,6 +222,19 @@ export function DecisionWorkspacePage() {
             <p className="status-chip">모의 결정 · {decisionMutation.data.topology}</p>
             <h3>{decisionMutation.data.decision.decision_type}</h3>
             <p>{decisionMutation.data.decision.rationale}</p>
+            <h3>다음 행동</h3>
+            <article className="safeguard-card">
+              <p><strong>담당:</strong> {decisionMutation.data.decision.action_plan.owner}</p>
+              <p><strong>할 일:</strong> {decisionMutation.data.decision.action_plan.action}</p>
+              <p><strong>기한:</strong> Step {decisionMutation.data.decision.action_plan.due_at_step}</p>
+              <p><strong>시작 조건:</strong> {decisionMutation.data.decision.action_plan.trigger}</p>
+              <p><strong>확인 방법:</strong> {decisionMutation.data.decision.action_plan.verification}</p>
+              <p><strong>실패 시:</strong> {decisionMutation.data.decision.action_plan.fallback_action}</p>
+              {(decisionMutation.data.decision.action_plan.evidence_required?.length ?? 0) > 0 && <p><strong>필요 근거:</strong> {decisionMutation.data.decision.action_plan.evidence_required?.join(", ")}</p>}
+              {decisionMutation.data.decision.action_plan.escalation_target && <p><strong>상신 대상:</strong> {decisionMutation.data.decision.action_plan.escalation_target}</p>}
+              {(decisionMutation.data.decision.action_plan.questions_to_resolve?.length ?? 0) > 0 && <p><strong>해결할 질문:</strong> {decisionMutation.data.decision.action_plan.questions_to_resolve?.join(", ")}</p>}
+              {decisionMutation.data.decision.action_plan.reopen_condition && <p><strong>재검토 조건:</strong> {decisionMutation.data.decision.action_plan.reopen_condition}</p>}
+            </article>
             <h3>합의</h3>
             <ul>{decisionMutation.data.dossier.agreement_groups.map((group) => <li key={group.recommendation}>{group.recommendation}: {group.role_ids.join(", ")}</li>)}</ul>
             <h3>반대 의견</h3>

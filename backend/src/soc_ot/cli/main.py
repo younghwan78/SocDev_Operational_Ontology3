@@ -73,19 +73,19 @@ def build_parser() -> argparse.ArgumentParser:
     freeze = evaluation_sub.add_parser("freeze")
     freeze.add_argument("--root", type=Path, default=ROOT_DIR / "fixtures")
     freeze.add_argument(
-        "--manifest", type=Path, default=ROOT_DIR / "fixtures/manifests/eval-2026-07-11.1.yaml"
+        "--manifest", type=Path, default=ROOT_DIR / "fixtures/manifests/eval-2026-07-14.1.yaml"
     )
     validate_release = evaluation_sub.add_parser("validate-release")
     validate_release.add_argument("--root", type=Path, default=ROOT_DIR / "fixtures")
     validate_release.add_argument(
-        "--manifest", type=Path, default=ROOT_DIR / "fixtures/manifests/eval-2026-07-11.1.yaml"
+        "--manifest", type=Path, default=ROOT_DIR / "fixtures/manifests/eval-2026-07-14.1.yaml"
     )
     run = evaluation_sub.add_parser("run")
     run.add_argument("--root", type=Path, default=ROOT_DIR / "fixtures")
     run.add_argument(
         "--manifest",
         type=Path,
-        default=ROOT_DIR / "fixtures/manifests/eval-2026-07-11.1.yaml",
+        default=ROOT_DIR / "fixtures/manifests/eval-2026-07-14.1.yaml",
     )
     run.add_argument("--provider", choices=["replay"], default="replay")
     run.add_argument("--topology", choices=["B0", "B1", "B2", "B3"], default="B3")
@@ -96,7 +96,7 @@ def build_parser() -> argparse.ArgumentParser:
     ablate.add_argument(
         "--manifest",
         type=Path,
-        default=ROOT_DIR / "fixtures/manifests/eval-2026-07-11.1.yaml",
+        default=ROOT_DIR / "fixtures/manifests/eval-2026-07-14.1.yaml",
     )
     ablate.add_argument(
         "--provider", choices=["openai", "codex-cli"], default="openai"
@@ -111,7 +111,7 @@ def build_parser() -> argparse.ArgumentParser:
     stability.add_argument(
         "--manifest",
         type=Path,
-        default=ROOT_DIR / "fixtures/manifests/eval-2026-07-11.1.yaml",
+        default=ROOT_DIR / "fixtures/manifests/eval-2026-07-14.1.yaml",
     )
     stability.add_argument(
         "--provider", choices=["openai", "codex-cli"], default="openai"

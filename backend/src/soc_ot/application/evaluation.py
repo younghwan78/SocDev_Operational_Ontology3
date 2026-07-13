@@ -19,6 +19,7 @@ class ProcessEvaluation(StrictModel):
     role_differentiation: bool
     unresolved_uncertainty_visible: bool
     conditional_control_complete: bool
+    decision_action_complete: bool
     passed: bool
 
 
@@ -170,6 +171,14 @@ def _evaluate_process(
                 and safeguard.verification
             )
             for safeguard in ablation.decision.safeguards
+        ),
+        "decision_action_complete": bool(
+            ablation.decision.action_plan.owner
+            and ablation.decision.action_plan.action
+            and ablation.decision.action_plan.due_at_step >= case.current_step
+            and ablation.decision.action_plan.trigger
+            and ablation.decision.action_plan.verification
+            and ablation.decision.action_plan.fallback_action
         ),
     }
     return ProcessEvaluation(**checks, passed=all(checks.values()))

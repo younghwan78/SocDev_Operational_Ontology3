@@ -49,6 +49,19 @@ ESCALATE
 
 Fixture, Agent output, evaluation, API, database, and Frontend use these exact uppercase codes. Do not introduce synonyms such as `conditional_approve`, `bounded_trial`, or `unconditional_approve`.
 
+### 1.2.1 DecisionActionPlan
+
+`simulated-decision.v2` requires one `decision-action-plan.v1`. It uses the
+canonical fields `action_type`, `owner`, `action`, `due_at_step`, `trigger`,
+`verification`, and `fallback_action`. `COLLECT_MINIMUM_EVIDENCE` additionally
+requires `evidence_required`; `ESCALATE` requires `escalation_target` and
+`questions_to_resolve`; `REJECT` requires `reopen_condition`.
+
+`ESCALATE` is reserved for an authority boundary or irreversible risk outside the
+current role's control. Missing data alone selects a risk-limiting decision such as
+minimum evidence collection, deferral to a named trigger, or a guarded reversible
+trial. The local Chair remains simulated and cannot grant real execution authority.
+
 ### 1.3 AgentRunStatus
 
 ```text
@@ -138,6 +151,10 @@ Local domain APIs use `at_step`, not ambiguous `as_of` timestamps. Future enterp
 |`prompt_bundle_version`|committed prompt bundle and hashes|
 |`policy_version`|routing/decision/runtime policy|
 |`outcome_rule_version`|OutcomeRule registry version|
+
+Current executable decision contract versions are `simulated-decision.v2` and
+`decision-action-plan.v1`. `simulated-decision.v1` remains a historical read/migration
+format and is not emitted by current commands.
 
 Do not use the generic name `case_version` for more than one meaning.
 

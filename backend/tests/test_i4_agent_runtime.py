@@ -68,7 +68,7 @@ def test_idempotent_enqueue_claim_and_duplicate_completion() -> None:
     assert first.run_id == second.run_id
     assert completed.status.value == "COMPLETED"
     assert completed.returned_model == "replay-v1"
-    assert completed.prompt_bundle_version == "prompts.v1"
+    assert completed.prompt_bundle_version == "prompts.v2"
     assert len(completed.prompt_bundle_hash) == 64
     with pytest.raises(RunConflictError, match="RUN_LEASE_NOT_OWNED"):
         runs.complete(claimed.run_id, "worker-1", result)

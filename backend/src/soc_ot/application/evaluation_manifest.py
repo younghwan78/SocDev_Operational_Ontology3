@@ -38,7 +38,7 @@ def freeze_evaluation_manifest(fixtures_root: Path, output_path: Path) -> dict[s
                 }
             )
     manifest: dict[str, object] = {
-        "evaluation_release": "eval-2026-07-11.1",
+        "evaluation_release": "eval-2026-07-14.1",
         "schema_version": "evaluation-manifest.v1",
         "policy_version": "decision-policy.v1",
         "prompt_bundle_version": PROMPT_BUNDLE_VERSION,

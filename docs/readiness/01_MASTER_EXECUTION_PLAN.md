@@ -1,6 +1,6 @@
 # Master execution plan
 
-> Status: IMPLEMENTED THROUGH I7 REPLAY; I7 LIVE GATE PENDING EXTERNAL INPUT  
+> Status: IMPLEMENTED THROUGH I7 REPLAY + EXECUTABLE DECISION STEP 1; I7 LIVE GATE PENDING EXTERNAL INPUT
 > Date: 2026-07-11  
 > Scope: local fixture-only PoC
 
@@ -261,6 +261,7 @@ Deliver:
 - live B0–B3 ablation
 - validation x5 and sealed-unseen x3 live stability evaluation
 - local runbook verification
+- `simulated-decision.v2` executable next-action contract and Korean UI projection
 
 Gate:
 
@@ -270,6 +271,7 @@ Gate:
 - secret/hidden scans and worker recovery E2E pass
 - the local runbook succeeds from a clean checkout without an API key in Replay mode
 - known limitations are recorded
+- every DecisionType emits a type-correct action plan with owner, due step, trigger, verification, and fallback
 
 ## 7. Crosswalk to supporting plans
 

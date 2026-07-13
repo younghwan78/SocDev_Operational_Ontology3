@@ -3,7 +3,7 @@ from pathlib import Path
 
 import yaml
 
-PROMPT_BUNDLE_VERSION = "prompts.v1"
+PROMPT_BUNDLE_VERSION = "prompts.v2"
 _BUNDLE_DIR = Path(__file__).parent / PROMPT_BUNDLE_VERSION
 _MANIFEST_PATH = _BUNDLE_DIR / "manifest.yaml"
 

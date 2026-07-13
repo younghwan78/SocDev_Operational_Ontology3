@@ -657,7 +657,9 @@ def _validate_chair(
     dissent_roles = {item.role_id for item in dossier.dissent}
     if not dissent_roles <= set(decision.dissent_acknowledged):
         raise ValueError("CHAIR_DISSENT_NOT_ACKNOWLEDGED")
-    validate_decision_policy(decision, allowed_decision_types)
+    validate_decision_policy(
+        decision, allowed_decision_types, current_step=packet.current_step
+    )
 
 
 def _emit_chair_attempt(

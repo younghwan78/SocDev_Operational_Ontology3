@@ -56,7 +56,7 @@ from soc_ot.infrastructure.hidden_repository import (
     PostgresHiddenCaseRepository,
 )
 
-EXPECTED_DB_REVISION = "0016_agent_run_budget_plan"
+EXPECTED_DB_REVISION = "0017_decision_action_plan_v2"
 
 
 def _default_repository() -> CaseRepository:

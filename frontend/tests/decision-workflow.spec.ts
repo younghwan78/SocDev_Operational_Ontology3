@@ -55,6 +55,11 @@ test("CASE-VR-001 complete Replay decision workflow is accessible", async ({ pag
   }
   await expect(page.getByText(/다중 역할 진행:/).locator("..")).toContainText("완료");
   await page.getByRole("button", { name: "모의 Chair 결정" }).click();
+  await expect(page.getByRole("heading", { name: "다음 행동" })).toBeVisible();
+  await expect(page.locator("p").filter({ hasText: "할 일:" })).toContainText(
+    "OPT-SW-GUARDED",
+  );
+  await expect(page.locator("p").filter({ hasText: "실패 시:" })).toContainText("rollback");
   await expect(page.getByRole("heading", { name: "반대 의견" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "안전장치" })).toBeVisible();
   await expect(page.locator(".safeguard-card p").filter({ hasText: "측정 기준:" })).toContainText(

@@ -211,8 +211,8 @@ configured local actor, action, and case ID to `audit.hidden_authoring_audits`.
 uv run ruff check backend/src backend/tests
 uv run mypy backend/src
 uv run pytest -p no:cacheprovider
-uv run soc-ot evaluation validate-release --manifest fixtures/manifests/eval-2026-07-11.1.yaml
-uv run soc-ot evaluation run --manifest fixtures/manifests/eval-2026-07-11.1.yaml --provider replay --topology B3
+uv run soc-ot evaluation validate-release --manifest fixtures/manifests/eval-2026-07-14.1.yaml
+uv run soc-ot evaluation run --manifest fixtures/manifests/eval-2026-07-14.1.yaml --provider replay --topology B3
 powershell -File scripts/check-architecture-boundary.ps1
 
 Set-Location frontend
@@ -225,7 +225,7 @@ Set-Location ..
 ```
 
 Replay evaluation writes an immutable directory under
-`output/evaluations/eval-2026-07-11.1/<run-id>/` with manifest, environment,
+`output/evaluations/eval-2026-07-14.1/<run-id>/` with manifest, environment,
 normalized results, separate Process/Outcome scores, policy violations, and `report.md`.
 
 ## 11. Stop and preserve data
