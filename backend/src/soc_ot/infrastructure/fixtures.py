@@ -29,7 +29,13 @@ class FixtureRepository:
         return model_type.model_validate(_load_yaml(self.root / relative_path))
 
     def load_observable(self, case_id: str) -> ObservableCase:
-        return self._load(f"cases/observable/{case_id}.yaml", ObservableCase)
+        evaluation_path = self.root / f"cases/observable/{case_id}.yaml"
+        relative_path = (
+            f"cases/observable/{case_id}.yaml"
+            if evaluation_path.exists()
+            else f"cases/development/{case_id}.yaml"
+        )
+        return self._load(relative_path, ObservableCase)
 
     def load_hidden(self, case_id: str) -> HiddenCase:
         return self._load(f"cases/hidden/{case_id}.yaml", HiddenCase)
@@ -39,6 +45,10 @@ class FixtureRepository:
 
     def validate_case(self, case_id: str, *, include_hidden: bool = False) -> ObservableCase:
         observable = self.load_observable(case_id)
+        if case_id in self.development_case_ids():
+            if include_hidden:
+                raise ValueError("development case has no hidden outcome")
+            return observable
         expected = self.load_expected(case_id)
         if expected.fixture_version != observable.fixture_version:
             raise ValueError("expected and observable fixture versions differ")
@@ -54,3 +64,6 @@ class FixtureRepository:
 
     def case_ids(self) -> list[str]:
         return sorted(path.stem for path in (self.root / "cases/observable").glob("*.yaml"))
+
+    def development_case_ids(self) -> list[str]:
+        return sorted(path.stem for path in (self.root / "cases/development").glob("*.yaml"))

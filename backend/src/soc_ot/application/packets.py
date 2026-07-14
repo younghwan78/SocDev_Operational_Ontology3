@@ -4,10 +4,13 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict
 
+from soc_ot.application.development_twin import reconstruct_case_at_step
 from soc_ot.domain.models import (
     Alternative,
     Claim,
     DecisionType,
+    DevelopmentAction,
+    DevelopmentEvent,
     EpistemicStatus,
     Evidence,
     Milestone,
@@ -71,6 +74,8 @@ class ObservableCasePacket(BaseModel):
     alternatives: list[Alternative]
     option_operability: list[OptionOperability]
     work_impacts: list[WorkImpact]
+    development_actions: list[DevelopmentAction]
+    development_events: list[DevelopmentEvent]
     selected_role_ids: list[str]
     allowed_source_ids: list[str]
     contract_version: str = "observable-case-packet.v1"
@@ -79,7 +84,11 @@ class ObservableCasePacket(BaseModel):
     packet_hash: str
 
 
-def build_observable_case_packet(case: ObservableCase) -> ObservableCasePacket:
+def build_observable_case_packet(
+    case: ObservableCase, *, at_step: int | None = None
+) -> ObservableCasePacket:
+    if at_step is not None:
+        case = reconstruct_case_at_step(case, at_step)
     eligible_evidence = [
         evidence for evidence in case.evidence if evidence.available_at_step <= case.current_step
     ]
@@ -154,6 +163,14 @@ def build_observable_case_packet(case: ObservableCase) -> ObservableCasePacket:
             for item in case.alternatives
         ],
         "work_impacts": [item.model_dump(mode="json") for item in impacts],
+        "development_actions": [
+            item.model_dump(mode="json") for item in case.development_actions
+        ],
+        "development_events": [
+            item.model_dump(mode="json")
+            for item in case.development_events
+            if item.observed_at_step <= case.current_step
+        ],
         "selected_role_ids": case.required_role_ids[:5],
         "allowed_source_ids": sorted(eligible_ids),
         "contract_version": "observable-case-packet.v1",

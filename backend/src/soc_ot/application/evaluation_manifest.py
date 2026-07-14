@@ -5,6 +5,7 @@ from pathlib import Path
 import yaml
 
 from soc_ot.agents.prompts import PROMPT_BUNDLE_HASH, PROMPT_BUNDLE_VERSION
+from soc_ot.domain.models import ObservableCase
 from soc_ot.infrastructure.fixtures import FixtureRepository
 
 PARTITIONS = {
@@ -17,6 +18,16 @@ PARTITIONS = {
 def _model_hash(payload: object) -> str:
     encoded = json.dumps(payload, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
     return hashlib.sha256(encoded.encode()).hexdigest()
+
+
+def _observable_manifest_payload(observable: ObservableCase) -> object:
+    """Keep the frozen v1 corpus hash stable for newly added empty collections."""
+    payload = observable.model_dump(mode="json")
+    if not payload["development_actions"]:
+        payload.pop("development_actions")
+    if not payload["development_events"]:
+        payload.pop("development_events")
+    return payload
 
 
 def freeze_evaluation_manifest(fixtures_root: Path, output_path: Path) -> dict[str, object]:
@@ -32,7 +43,9 @@ def freeze_evaluation_manifest(fixtures_root: Path, output_path: Path) -> dict[s
                 {
                     "case_id": case_id,
                     "partition": partition,
-                    "observable_sha256": _model_hash(observable.model_dump(mode="json")),
+                    "observable_sha256": _model_hash(
+                        _observable_manifest_payload(observable)
+                    ),
                     "hidden_sha256": _model_hash(hidden.model_dump(mode="json")),
                     "expected_sha256": _model_hash(expected.model_dump(mode="json")),
                 }

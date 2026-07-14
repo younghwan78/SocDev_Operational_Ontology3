@@ -1,7 +1,7 @@
 # Master execution plan
 
-> Status: IMPLEMENTED THROUGH I7 REPLAY + EXECUTABLE DECISION STEP 1; I7 LIVE GATE PENDING EXTERNAL INPUT
-> Date: 2026-07-11  
+> Status: IMPLEMENTED THROUGH I7 REPLAY + POST-I7 STEP 2 DEVELOPMENT TWIN; I7 LIVE GATE PENDING EXTERNAL INPUT
+> Date: 2026-07-14
 > Scope: local fixture-only PoC
 
 ## 1. Purpose
@@ -95,6 +95,7 @@ Company approval:
 ├─ fixtures/
 │  ├─ world/
 │  ├─ cases/observable/
+│  ├─ cases/development/
 │  ├─ cases/hidden/
 │  ├─ expected/
 │  ├─ manifests/
@@ -262,6 +263,9 @@ Deliver:
 - validation x5 and sealed-unseen x3 live stability evaluation
 - local runbook verification
 - `simulated-decision.v2` executable next-action contract and Korean UI projection
+- typed `development-event.v1` history, historical state reconstruction, and blocker propagation
+- independent development fixtures for interface rework, measurement delay, technical debt, and shared-resource conflict
+- Korean development timeline projection without raw ontology exposure
 
 Gate:
 
@@ -272,6 +276,8 @@ Gate:
 - the local runbook succeeds from a clean checkout without an API key in Replay mode
 - known limitations are recorded
 - every DecisionType emits a type-correct action plan with owner, due step, trigger, verification, and fallback
+- one event history reconstructs at least three consistent steps and historical Agent packets exclude future observations
+- each active blocker reports downstream work and milestone impact deterministically
 
 ## 7. Crosswalk to supporting plans
 

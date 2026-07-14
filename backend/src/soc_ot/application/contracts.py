@@ -5,12 +5,15 @@ from pydantic import BaseModel
 
 from soc_ot.agents.contracts import RoleReview
 from soc_ot.agents.multi_role import DecisionActionPlan, DecisionDossier, SimulatedDecision
+from soc_ot.application.development_twin import DevelopmentTimelineProjection
 from soc_ot.application.outcomes import OutcomeSnapshot
 from soc_ot.application.packets import ObservableCasePacket
-from soc_ot.domain.models import ExpectedResult, HiddenCase, ObservableCase
+from soc_ot.domain.models import DevelopmentEvent, ExpectedResult, HiddenCase, ObservableCase
 
 CONTRACT_MODELS: dict[str, type[BaseModel]] = {
     "observable-case.v1": ObservableCase,
+    "development-event.v1": DevelopmentEvent,
+    "development-timeline.v1": DevelopmentTimelineProjection,
     "hidden-case.v1": HiddenCase,
     "expected-result.v1": ExpectedResult,
     "observable-case-packet.v1": ObservableCasePacket,

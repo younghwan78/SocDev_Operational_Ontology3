@@ -1,0 +1,156 @@
+schema_version: observable-case.v1
+fixture_version: 1
+case_id: CASE-DT-004
+title_ko: 복수 과제의 공유 측정 자원 충돌
+current_step: 10
+status: DECISION_REQUIRED
+decision_question: 하나의 측정 slot을 두 과제에 어떻게 배분할 것인가?
+decision_deadline_milestone_id: M-DT4-RESOURCE-LOCK
+tracks:
+  - track_id: TRACK-DT4-CAMERA
+    name: Camera Project
+    status: BLOCKED
+    next_milestone_id: M-DT4-CAMERA-FREEZE
+  - track_id: TRACK-DT4-NPU
+    name: NPU Project
+    status: BLOCKED
+    next_milestone_id: M-DT4-NPU-FREEZE
+  - track_id: TRACK-DT4-PROGRAM
+    name: Shared Program
+    status: BLOCKED
+    next_milestone_id: M-DT4-RESOURCE-LOCK
+work_items:
+  - work_item_id: WORK-DT4-CAMERA
+    track_id: TRACK-DT4-CAMERA
+    title: Camera thermal 측정
+    status: BLOCKED
+    owner: ROLE-CAMERA-VERIF
+    blocker: shared chamber slot 충돌
+    planned_at_step: 12
+  - work_item_id: WORK-DT4-NPU
+    track_id: TRACK-DT4-NPU
+    title: NPU sustained 측정
+    status: BLOCKED
+    owner: ROLE-NPU-VERIF
+    blocker: shared chamber slot 충돌
+    planned_at_step: 13
+  - work_item_id: WORK-DT4-RELEASE
+    track_id: TRACK-DT4-PROGRAM
+    title: 두 과제의 freeze 순서 확정
+    status: BLOCKED
+    owner: ROLE-PROGRAM
+    dependency_ids: [WORK-DT4-CAMERA, WORK-DT4-NPU]
+    blocker: 측정 우선순위 미결정
+    planned_at_step: 11
+milestones:
+  - milestone_id: M-DT4-RESOURCE-LOCK
+    title: Shared Resource Lock
+    planned_at_step: 11
+  - milestone_id: M-DT4-CAMERA-FREEZE
+    title: Camera Freeze
+    planned_at_step: 13
+  - milestone_id: M-DT4-NPU-FREEZE
+    title: NPU Freeze
+    planned_at_step: 15
+evidence:
+  - evidence_id: EVD-DT4-BOOKING
+    title: Chamber booking 충돌 기록
+    evidence_type: resource_schedule
+    source_ref: FIXTURE:DT4-BOOKING
+    available_at_step: 8
+    limitations: [priority_value_not_included]
+  - evidence_id: EVD-DT4-IMPACT
+    title: 과제별 일정 영향 분석
+    evidence_type: schedule_analysis
+    source_ref: FIXTURE:DT4-IMPACT
+    available_at_step: 12
+    limitations: [future_evidence]
+claims:
+  - claim_id: CLM-DT4-CONFLICT
+    statement: Camera와 NPU 측정이 동일 chamber slot을 요구한다.
+    epistemic_status: fact
+    source_refs: [EVD-DT4-BOOKING]
+    confidence_level: high
+  - claim_id: CLM-DT4-CASCADE
+    statement: 우선순위 결정 지연은 두 과제의 freeze에 함께 전파된다.
+    epistemic_status: inference
+    source_refs: [EVD-DT4-BOOKING]
+    inference_basis: [RULE-SHARED-RESOURCE]
+    confidence_level: medium
+uncertainties:
+  - 과제별 한 step 지연의 실제 business impact
+  - chamber time-slicing이 측정 신뢰도에 미치는 영향
+alternatives:
+  - option_id: OPT-DT4-CAMERA-FIRST
+    title: Camera 측정을 우선 배정
+    description: Camera Freeze를 보호하고 NPU 측정을 다음 slot으로 이동한다.
+    reversible: false
+    switching_cost: {mode: exact, unit: step, value: 2}
+    claim_ids: [CLM-DT4-CONFLICT, CLM-DT4-CASCADE]
+  - option_id: OPT-DT4-TIME-SLICE
+    title: 두 과제에 제한된 slot 분할
+    description: 최소 측정만 병행하고 full run을 후속 slot에 수행한다.
+    reversible: true
+    switching_cost: {mode: exact, unit: person_day, value: 3}
+    claim_ids: [CLM-DT4-CONFLICT]
+required_role_ids: [verification_measurement, program_risk, architecture_system]
+allowed_decision_types: [RUN_REVERSIBLE_TRIAL, ESCALATE, DEFER_UNTIL_TRIGGER]
+development_actions:
+  - action_id: ACT-DT4-ARBITRATE
+    title: 공유 chamber 우선순위 조정
+    owner: program_risk
+    status: IN_PROGRESS
+    due_at_step: 11
+    dependency_work_item_ids: [WORK-DT4-CAMERA, WORK-DT4-NPU]
+development_events:
+  - event_id: DT4-007-MEASURE-START
+    event_type: WORK_PROGRESS
+    effective_at_step: 7
+    observed_at_step: 7
+    summary: 두 과제의 sustained 측정 준비를 시작했다.
+    cause: 각 과제의 pre-silicon 결과가 준비되었다.
+    work_item_changes:
+      - work_item_id: WORK-DT4-CAMERA
+        before: {status: READY, planned_at_step: 10, dependency_ids: []}
+        after: {status: IN_PROGRESS, planned_at_step: 10, dependency_ids: []}
+      - work_item_id: WORK-DT4-NPU
+        before: {status: READY, planned_at_step: 11, dependency_ids: []}
+        after: {status: IN_PROGRESS, planned_at_step: 11, dependency_ids: []}
+  - event_id: DT4-008-RESOURCE-CONFLICT
+    event_type: RESOURCE_CONFLICT
+    effective_at_step: 8
+    observed_at_step: 8
+    summary: 동일 chamber slot 요청으로 두 측정과 release 순서가 막혔다.
+    cause: 독립 계획에서 공유 자원 dependency를 반영하지 않았다.
+    work_item_changes:
+      - work_item_id: WORK-DT4-CAMERA
+        before: {status: IN_PROGRESS, planned_at_step: 10, dependency_ids: []}
+        after: {status: BLOCKED, blocker: shared chamber slot 충돌, planned_at_step: 12, dependency_ids: []}
+      - work_item_id: WORK-DT4-NPU
+        before: {status: IN_PROGRESS, planned_at_step: 11, dependency_ids: []}
+        after: {status: BLOCKED, blocker: shared chamber slot 충돌, planned_at_step: 13, dependency_ids: []}
+      - work_item_id: WORK-DT4-RELEASE
+        before: {status: READY, planned_at_step: 11, dependency_ids: [WORK-DT4-CAMERA, WORK-DT4-NPU]}
+        after: {status: BLOCKED, blocker: 측정 우선순위 미결정, planned_at_step: 11, dependency_ids: [WORK-DT4-CAMERA, WORK-DT4-NPU]}
+    impacted_milestone_ids: [M-DT4-RESOURCE-LOCK, M-DT4-CAMERA-FREEZE, M-DT4-NPU-FREEZE]
+  - event_id: DT4-009-NPU-FREEZE-DELAY
+    event_type: PLAN_CHANGE
+    effective_at_step: 9
+    observed_at_step: 9
+    summary: NPU Freeze를 한 step 늦춰 resource 조정 여유를 만들었다.
+    cause: Camera 고객 milestone의 우선순위가 더 높게 확인되었다.
+    milestone_changes:
+      - milestone_id: M-DT4-NPU-FREEZE
+        before: {planned_at_step: 14}
+        after: {planned_at_step: 15}
+    impacted_milestone_ids: [M-DT4-NPU-FREEZE]
+  - event_id: DT4-010-ARBITRATION-START
+    event_type: DECISION_ACTION_PROGRESS
+    effective_at_step: 10
+    observed_at_step: 10
+    summary: 공유 자원 우선순위 조정을 시작했다.
+    cause: 두 과제 owner의 일정 영향 입력이 필요하다.
+    action_changes:
+      - action_id: ACT-DT4-ARBITRATE
+        before: {status: PLANNED, due_at_step: 11}
+        after: {status: IN_PROGRESS, due_at_step: 11}

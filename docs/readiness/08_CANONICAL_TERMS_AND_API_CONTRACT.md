@@ -138,6 +138,33 @@ Validation rules:
 
 Local domain APIs use `at_step`, not ambiguous `as_of` timestamps. Future enterprise bitemporal fields require a separate contract.
 
+### 3.1 DevelopmentEvent history
+
+`development-event.v1` records a typed change with its cause and before/after state.
+`effective_at_step` is when the change became true; `observed_at_step` is when it may
+enter an Agent packet or user projection. The canonical event types are:
+
+```text
+WORK_PROGRESS
+BLOCKER_CHANGE
+PLAN_CHANGE
+DEPENDENCY_CHANGE
+EVIDENCE_CHANGE
+REWORK
+INTERFACE_CHANGE
+RESOURCE_CONFLICT
+PRIORITY_CHANGE
+DECISION_ACTION_PROGRESS
+```
+
+Histories are append-only and ordered by `(observed_at_step, event_id)`. Each entity's
+change chain is continuous, and its latest `after` state equals the current case
+snapshot. Historical reconstruction reverses changes not yet observed at `at_step`.
+The resulting packet and projection must not expose a later event or future evidence.
+
+Post-decision development actions use `PLANNED`, `IN_PROGRESS`, `BLOCKED`, `COMPLETED`,
+or `CANCELLED`. These are action states, not `DecisionCaseStatus` values.
+
 ## 4. Version vocabulary
 
 |Field|Meaning|
@@ -181,6 +208,11 @@ GET /api/v1/decision-cases/{case_id}/timeline
 GET /api/v1/decision-cases/{case_id}/evidence
 GET /api/v1/decision-cases/{case_id}/evaluation
 ```
+
+The timeline resource returns `development-timeline.v1`. Optional query parameter
+`at_step` reconstructs the case at that logical step and returns only events with
+`observed_at_step <= at_step`. An out-of-range step returns
+`DEVELOPMENT_STEP_OUT_OF_RANGE`.
 
 ### 6.2 Command API
 

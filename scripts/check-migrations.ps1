@@ -39,6 +39,12 @@ ALTER DEFAULT PRIVILEGES FOR ROLE soc_ot_admin IN SCHEMA audit GRANT SELECT, INS
     if ($StartRevision) { Invoke-Checked uv @("run", "alembic", "upgrade", $StartRevision) }
     if ($SeedLegacyDecision) {
       $legacyDecision = @'
+INSERT INTO observable.decision_cases (
+  case_id, fixture_version, aggregate_version, current_step, status, title_ko, payload
+) VALUES (
+  'CASE-MIGRATION', 1, 1, 12, 'DECISION_REQUIRED', 'migration test',
+  jsonb_build_object('schema_version', 'observable-case.v1', 'case_id', 'CASE-MIGRATION')
+);
 INSERT INTO observable.simulation_states (case_id, current_step, aggregate_version)
 VALUES ('CASE-MIGRATION', 12, 1);
 INSERT INTO observable.simulated_decisions (
@@ -71,6 +77,16 @@ INSERT INTO observable.simulated_decisions (
 DO $migration$
 BEGIN
   IF NOT EXISTS (
+    SELECT 1 FROM observable.decision_cases
+    WHERE case_id = 'CASE-MIGRATION'
+      AND jsonb_typeof(payload -> 'development_actions') = 'array'
+      AND jsonb_array_length(payload -> 'development_actions') = 0
+      AND jsonb_typeof(payload -> 'development_events') = 'array'
+      AND jsonb_array_length(payload -> 'development_events') = 0
+  ) THEN
+    RAISE EXCEPTION 'development event history upgrade assertion failed';
+  END IF;
+  IF NOT EXISTS (
     SELECT 1 FROM observable.simulated_decisions
     WHERE command_id = 'CMD-MIGRATION'
       AND payload #>> '{decision,schema_version}' = 'simulated-decision.v2'
@@ -91,6 +107,14 @@ $migration$;
       $downgradeAssertion = @'
 DO $migration$
 BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM observable.decision_cases
+    WHERE case_id = 'CASE-MIGRATION'
+      AND NOT (payload ? 'development_actions')
+      AND NOT (payload ? 'development_events')
+  ) THEN
+    RAISE EXCEPTION 'development event history downgrade assertion failed';
+  END IF;
   IF NOT EXISTS (
     SELECT 1 FROM observable.simulated_decisions
     WHERE command_id = 'CMD-MIGRATION'
@@ -123,7 +147,7 @@ try {
   Test-MigrationPath "soc_ot_mig_$PID`_a" ""
   Test-MigrationPath "soc_ot_mig_$PID`_b" "0001_case_store"
   Test-MigrationPath "soc_ot_mig_$PID`_a" "0016_agent_run_budget_plan" $true
-  Write-Output "Empty, oldest-supported, and v1 decision data migration paths passed."
+  Write-Output "Empty, oldest-supported, v1 decision, and development history migration paths passed."
 } finally {
   if ($null -eq $priorUrl) {
     Remove-Item Env:SOC_OT_MIGRATION_DATABASE_URL -ErrorAction SilentlyContinue

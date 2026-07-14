@@ -1,0 +1,129 @@
+schema_version: observable-case.v1
+fixture_version: 1
+case_id: CASE-DT-002
+title_ko: 측정 지연과 Architecture Freeze 충돌
+current_step: 12
+status: DECISION_REQUIRED
+decision_question: 실측이 늦어진 상태에서 제한 조건으로 Architecture를 고정할 것인가?
+decision_deadline_milestone_id: M-DT2-ARCH-FREEZE
+tracks:
+  - track_id: TRACK-DT2-ARCH
+    name: Architecture
+    status: IN_PROGRESS
+    next_milestone_id: M-DT2-ARCH-FREEZE
+  - track_id: TRACK-DT2-MEASURE
+    name: Measurement
+    status: BLOCKED
+    next_milestone_id: M-DT2-SIGNOFF
+work_items:
+  - work_item_id: WORK-DT2-MEASURE
+    track_id: TRACK-DT2-MEASURE
+    title: Thermal sustained 성능 측정
+    status: BLOCKED
+    owner: ROLE-VERIF
+    blocker: thermal chamber 예약 지연
+    planned_at_step: 15
+  - work_item_id: WORK-DT2-ARCH
+    track_id: TRACK-DT2-ARCH
+    title: DVFS margin Architecture 결정
+    status: IN_PROGRESS
+    owner: ROLE-ARCH
+    dependency_ids: [WORK-DT2-MEASURE]
+    blocker: sustained 실측 부재
+    planned_at_step: 13
+milestones:
+  - milestone_id: M-DT2-ARCH-FREEZE
+    title: Architecture Freeze
+    planned_at_step: 13
+  - milestone_id: M-DT2-SIGNOFF
+    title: Performance Sign-off
+    planned_at_step: 17
+evidence:
+  - evidence_id: EVD-DT2-MODEL
+    title: Thermal analytical model
+    evidence_type: analytical_estimate
+    source_ref: FIXTURE:DT2-MODEL
+    available_at_step: 9
+    quantity: {mode: range, unit: degC, lower_bound: 78, upper_bound: 88}
+    limitations: [chamber_measurement_missing]
+  - evidence_id: EVD-DT2-MEASURE
+    title: Thermal chamber sustained 결과
+    evidence_type: silicon_measurement
+    source_ref: FIXTURE:DT2-MEASURE
+    available_at_step: 15
+    limitations: [future_evidence]
+claims:
+  - claim_id: CLM-DT2-MARGIN
+    statement: analytical model의 상단 온도는 목표 margin을 넘을 수 있다.
+    epistemic_status: inference
+    source_refs: [EVD-DT2-MODEL]
+    inference_basis: [RULE-THERMAL-MARGIN]
+    confidence_level: medium
+uncertainties:
+  - sustained workload에서 실제 thermal ceiling
+  - chamber 측정이 freeze 이후 도착할 때의 rework 비용
+alternatives:
+  - option_id: OPT-DT2-GUARDED
+    title: 보수적 DVFS margin으로 고정
+    description: 측정 전 보수적 margin을 적용하고 결과에 따라 재검토한다.
+    reversible: true
+    switching_cost: {mode: exact, unit: person_day, value: 2}
+    claim_ids: [CLM-DT2-MARGIN]
+  - option_id: OPT-DT2-DEFER
+    title: 실측까지 Architecture 결정 연기
+    description: Step 15 측정까지 freeze 예외를 요청한다.
+    reversible: true
+    switching_cost: {mode: exact, unit: step, value: 2}
+    claim_ids: [CLM-DT2-MARGIN]
+required_role_ids: [architecture_system, verification_measurement, program_risk]
+allowed_decision_types: [APPROVE_WITH_GUARDRAILS, COLLECT_MINIMUM_EVIDENCE, DEFER_UNTIL_TRIGGER]
+development_events:
+  - event_id: DT2-009-MEASURE-START
+    event_type: WORK_PROGRESS
+    effective_at_step: 9
+    observed_at_step: 9
+    summary: sustained thermal 측정 준비를 시작했다.
+    cause: 초기 analytical model이 완료되었다.
+    work_item_changes:
+      - work_item_id: WORK-DT2-MEASURE
+        before: {status: READY, planned_at_step: 12, dependency_ids: []}
+        after: {status: IN_PROGRESS, planned_at_step: 12, dependency_ids: []}
+  - event_id: DT2-010-ARCH-START
+    event_type: WORK_PROGRESS
+    effective_at_step: 10
+    observed_at_step: 10
+    summary: DVFS margin Architecture 검토를 시작했다.
+    cause: freeze 후보 configuration이 준비되었다.
+    work_item_changes:
+      - work_item_id: WORK-DT2-ARCH
+        before: {status: READY, planned_at_step: 13, dependency_ids: [WORK-DT2-MEASURE]}
+        after: {status: IN_PROGRESS, planned_at_step: 13, dependency_ids: [WORK-DT2-MEASURE]}
+  - event_id: DT2-011-CHAMBER-DELAY
+    event_type: EVIDENCE_CHANGE
+    effective_at_step: 11
+    observed_at_step: 11
+    summary: chamber 예약 지연으로 측정과 근거 공개가 늦어졌다.
+    cause: 선행 과제의 chamber 사용이 연장되었다.
+    work_item_changes:
+      - work_item_id: WORK-DT2-MEASURE
+        before: {status: IN_PROGRESS, planned_at_step: 12, dependency_ids: []}
+        after: {status: BLOCKED, blocker: thermal chamber 예약 지연, planned_at_step: 15, dependency_ids: []}
+      - work_item_id: WORK-DT2-ARCH
+        before: {status: IN_PROGRESS, planned_at_step: 13, dependency_ids: [WORK-DT2-MEASURE]}
+        after: {status: IN_PROGRESS, blocker: sustained 실측 부재, planned_at_step: 13, dependency_ids: [WORK-DT2-MEASURE]}
+    evidence_changes:
+      - evidence_id: EVD-DT2-MEASURE
+        before: {available_at_step: 12}
+        after: {available_at_step: 15}
+    impacted_milestone_ids: [M-DT2-ARCH-FREEZE, M-DT2-SIGNOFF]
+  - event_id: DT2-012-FREEZE-ADVANCED
+    event_type: PLAN_CHANGE
+    effective_at_step: 12
+    observed_at_step: 12
+    summary: 상위 일정 때문에 Architecture Freeze가 앞당겨졌다.
+    cause: 통합 build 기준일이 변경되었다.
+    milestone_changes:
+      - milestone_id: M-DT2-ARCH-FREEZE
+        before: {planned_at_step: 14}
+        after: {planned_at_step: 13}
+    impacted_milestone_ids: [M-DT2-ARCH-FREEZE]

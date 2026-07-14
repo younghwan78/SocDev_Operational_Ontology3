@@ -31,6 +31,7 @@ $requiredLayout = @(
     "contracts/snapshots",
     "fixtures/world",
     "fixtures/cases/observable",
+    "fixtures/cases/development",
     "fixtures/cases/hidden",
     "fixtures/expected",
     "fixtures/manifests",
@@ -87,6 +88,12 @@ $manifestCases = Select-String -Path (
 if ($manifestCases.Count -ne 8) {
     throw "Evaluation manifest must contain exactly 8 cases; found $($manifestCases.Count)."
 }
+$developmentCases = @(Get-ChildItem -LiteralPath (
+    Join-Path $root "fixtures/cases/development"
+) -Filter "CASE-DT-*.yaml" -File)
+if ($developmentCases.Count -ne 4) {
+    throw "Step 2 development corpus must contain exactly 4 cases; found $($developmentCases.Count)."
+}
 
 $requiredPaths = @(
     "/api/v1/decision-cases",
@@ -111,4 +118,4 @@ if ($actualPaths | Where-Object { $_ -match "hidden" }) {
     throw "OpenAPI exposes a forbidden hidden resource."
 }
 
-Write-Output "Plan consistency check passed: I0-I7, 8 cases, terms, and canonical API agree."
+Write-Output "Plan consistency check passed: I0-I7, 8 evaluation cases, 4 development cases, terms, and canonical API agree."

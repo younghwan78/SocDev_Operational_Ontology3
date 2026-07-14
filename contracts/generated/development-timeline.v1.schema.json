@@ -1,0 +1,349 @@
+{
+  "$defs": {
+    "BlockerPropagation": {
+      "properties": {
+        "source_work_item_id": {
+          "title": "Source Work Item Id",
+          "type": "string"
+        },
+        "source_work_item_title": {
+          "title": "Source Work Item Title",
+          "type": "string"
+        },
+        "downstream_work_item_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Downstream Work Item Ids",
+          "type": "array"
+        },
+        "downstream_work_item_titles": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Downstream Work Item Titles",
+          "type": "array"
+        },
+        "impacted_track_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Impacted Track Ids",
+          "type": "array"
+        },
+        "impacted_milestone_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Impacted Milestone Ids",
+          "type": "array"
+        },
+        "impacted_milestone_titles": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Impacted Milestone Titles",
+          "type": "array"
+        },
+        "reaches_decision_deadline": {
+          "title": "Reaches Decision Deadline",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "source_work_item_id",
+        "source_work_item_title",
+        "downstream_work_item_ids",
+        "downstream_work_item_titles",
+        "impacted_track_ids",
+        "impacted_milestone_ids",
+        "impacted_milestone_titles",
+        "reaches_decision_deadline"
+      ],
+      "title": "BlockerPropagation",
+      "type": "object"
+    },
+    "TimelineAction": {
+      "properties": {
+        "action_id": {
+          "title": "Action Id",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "owner": {
+          "title": "Owner",
+          "type": "string"
+        },
+        "status": {
+          "title": "Status",
+          "type": "string"
+        },
+        "due_at_step": {
+          "title": "Due At Step",
+          "type": "integer"
+        },
+        "blocker": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Blocker"
+        }
+      },
+      "required": [
+        "action_id",
+        "title",
+        "owner",
+        "status",
+        "due_at_step",
+        "blocker"
+      ],
+      "title": "TimelineAction",
+      "type": "object"
+    },
+    "TimelineEvent": {
+      "properties": {
+        "event_id": {
+          "title": "Event Id",
+          "type": "string"
+        },
+        "event_type": {
+          "title": "Event Type",
+          "type": "string"
+        },
+        "effective_at_step": {
+          "title": "Effective At Step",
+          "type": "integer"
+        },
+        "observed_at_step": {
+          "title": "Observed At Step",
+          "type": "integer"
+        },
+        "summary": {
+          "title": "Summary",
+          "type": "string"
+        },
+        "cause": {
+          "title": "Cause",
+          "type": "string"
+        },
+        "affected_entity_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Affected Entity Ids",
+          "type": "array"
+        },
+        "impacted_milestone_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Impacted Milestone Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "event_id",
+        "event_type",
+        "effective_at_step",
+        "observed_at_step",
+        "summary",
+        "cause",
+        "affected_entity_ids",
+        "impacted_milestone_ids"
+      ],
+      "title": "TimelineEvent",
+      "type": "object"
+    },
+    "TimelineEvidence": {
+      "properties": {
+        "evidence_id": {
+          "title": "Evidence Id",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "available_at_step": {
+          "title": "Available At Step",
+          "type": "integer"
+        },
+        "eligible_at_step": {
+          "title": "Eligible At Step",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "evidence_id",
+        "title",
+        "available_at_step",
+        "eligible_at_step"
+      ],
+      "title": "TimelineEvidence",
+      "type": "object"
+    },
+    "TimelineMilestone": {
+      "properties": {
+        "milestone_id": {
+          "title": "Milestone Id",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "planned_at_step": {
+          "title": "Planned At Step",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "milestone_id",
+        "title",
+        "planned_at_step"
+      ],
+      "title": "TimelineMilestone",
+      "type": "object"
+    },
+    "TimelineWorkItem": {
+      "properties": {
+        "work_item_id": {
+          "title": "Work Item Id",
+          "type": "string"
+        },
+        "track_id": {
+          "title": "Track Id",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "status": {
+          "title": "Status",
+          "type": "string"
+        },
+        "blocker": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Blocker"
+        },
+        "planned_at_step": {
+          "title": "Planned At Step",
+          "type": "integer"
+        },
+        "dependency_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Dependency Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "work_item_id",
+        "track_id",
+        "title",
+        "status",
+        "blocker",
+        "planned_at_step",
+        "dependency_ids"
+      ],
+      "title": "TimelineWorkItem",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "projection_schema_version": {
+      "default": "development-timeline.v1",
+      "title": "Projection Schema Version",
+      "type": "string"
+    },
+    "case_id": {
+      "title": "Case Id",
+      "type": "string"
+    },
+    "aggregate_version": {
+      "title": "Aggregate Version",
+      "type": "integer"
+    },
+    "current_step": {
+      "title": "Current Step",
+      "type": "integer"
+    },
+    "reconstructed_at_step": {
+      "title": "Reconstructed At Step",
+      "type": "integer"
+    },
+    "work_items": {
+      "items": {
+        "$ref": "#/$defs/TimelineWorkItem"
+      },
+      "title": "Work Items",
+      "type": "array"
+    },
+    "milestones": {
+      "items": {
+        "$ref": "#/$defs/TimelineMilestone"
+      },
+      "title": "Milestones",
+      "type": "array"
+    },
+    "evidence": {
+      "items": {
+        "$ref": "#/$defs/TimelineEvidence"
+      },
+      "title": "Evidence",
+      "type": "array"
+    },
+    "actions": {
+      "items": {
+        "$ref": "#/$defs/TimelineAction"
+      },
+      "title": "Actions",
+      "type": "array"
+    },
+    "events": {
+      "items": {
+        "$ref": "#/$defs/TimelineEvent"
+      },
+      "title": "Events",
+      "type": "array"
+    },
+    "blocker_propagations": {
+      "items": {
+        "$ref": "#/$defs/BlockerPropagation"
+      },
+      "title": "Blocker Propagations",
+      "type": "array"
+    }
+  },
+  "required": [
+    "case_id",
+    "aggregate_version",
+    "current_step",
+    "reconstructed_at_step",
+    "work_items",
+    "milestones",
+    "evidence",
+    "actions",
+    "events",
+    "blocker_propagations"
+  ],
+  "title": "DevelopmentTimelineProjection",
+  "type": "object"
+}

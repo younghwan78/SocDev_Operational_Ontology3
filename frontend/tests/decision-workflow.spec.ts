@@ -28,6 +28,8 @@ test("CASE-VR-001 complete Replay decision workflow is accessible", async ({ pag
   await expect(page.getByRole("cell", { name: "BLOCKED" })).toBeVisible();
   await expect(page.getByText("SW feature flag로 제한 진행")).toBeVisible();
   await expect(page.getByText("현재 사용 가능").first()).toBeVisible();
+  await expect(page.getByRole("heading", { name: "개발 진행 타임라인" })).toBeVisible();
+  await expect(page.getByText("기록된 개발 변경 없음")).toBeVisible();
 
   await page.getByRole("button", { name: "역할 검토 시작", exact: true }).click();
   for (let attempt = 0; attempt < 20; attempt += 1) {

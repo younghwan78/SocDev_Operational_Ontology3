@@ -30,6 +30,26 @@ const caseItem = {
   uncertainties: ["실측 bandwidth"],
 };
 
+const timelineItem = {
+  projection_schema_version: "development-timeline.v1",
+  case_id: "CASE-VR-001",
+  aggregate_version: 1,
+  current_step: 12,
+  reconstructed_at_step: 12,
+  work_items: [],
+  milestones: [],
+  evidence: [],
+  actions: [],
+  events: [],
+  blocker_propagations: [],
+};
+
+function workspaceResponse(input: RequestInfo | URL) {
+  const url = String(input);
+  const payload = url.includes("/timeline") ? timelineItem : caseItem;
+  return Promise.resolve(new Response(JSON.stringify(payload), { status: 200 }));
+}
+
 function renderApp(path = "/decisions") {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
@@ -54,11 +74,11 @@ describe("App", () => {
   });
 
   it("shows a decision workspace without raw ontology", async () => {
-    vi.spyOn(globalThis, "fetch").mockResolvedValue(
-      new Response(JSON.stringify(caseItem), { status: 200 }),
-    );
+    vi.spyOn(globalThis, "fetch").mockImplementation(workspaceResponse);
     renderApp("/decisions/CASE-VR-001");
     expect(await screen.findByRole("heading", { name: "현재 개발 상황" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "개발 진행 타임라인" })).toBeInTheDocument();
+    expect(screen.getByText("기록된 개발 변경 없음")).toBeInTheDocument();
     expect(screen.queryByText("ontology_relations")).not.toBeInTheDocument();
   });
 
@@ -70,7 +90,7 @@ describe("App", () => {
           { status: 409, headers: { "Content-Type": "application/json" } },
         );
       }
-      return new Response(JSON.stringify(caseItem), { status: 200 });
+      return workspaceResponse(_input);
     });
     renderApp("/decisions/CASE-VR-001");
     const user = userEvent.setup();

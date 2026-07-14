@@ -1,9 +1,9 @@
 # SoC 개발 의사결정 디지털 트윈을 어떻게 구현하고 검증할 것인가
 
 > 문서 상태: Product Plan v0.2, 로컬 PoC 구현 승인  
-> 갱신일: 2026-07-11  
+> 갱신일: 2026-07-14
 > 문서 역할: 제품 목표, 범위, 가치 가설, 중단 기준을 정의  
-> 현재 판단: **GO: I0–I7 Replay 및 실행 가능한 결정 계약 Step 1 완료**, **PENDING: I7 Live 외부 입력**, **NO-GO: 사내 연동 및 실제 업무 적용**
+> 현재 판단: **GO: I0–I7 Replay 및 실제 개발 진행 Digital Twin Step 2 완료**, **PENDING: I7 Live 외부 입력**, **NO-GO: 사내 연동 및 실제 업무 적용**
 
 이 계획은 SoC 개발 진행과 불확실성을 재현하고 제한된 정보에서도 저후회 결정을 돕는 제품을 정의한다. 집에서는 synthetic fixture로 의사결정 메커니즘만 검증하며, 실제 비즈니스 가치는 사내 read-only 파일럿에서 별도로 측정한다.
 
@@ -363,7 +363,8 @@ Process evaluation과 Outcome evaluation도 분리한다.
 
 Gate 실패 시 다음 기능을 추가하지 않는다. 원인을 수정하거나 모델·Agent·UI 범위를 줄인 뒤 같은 gate를 다시 실행한다.
 
-현재 로컬 구현은 `simulated-decision.v2` 실행 가능한 다음 행동 계약까지 완료했다.
+현재 로컬 구현은 `simulated-decision.v2` 실행 가능한 다음 행동 계약과
+`development-event.v1` 기반 실제 개발 진행 Digital Twin Step 2까지 완료했다.
 후속 구현 Step은 사용자 지시 전 시작하지 않는다. I7 Live gate는 별도의 외부 입력
 필요 항목으로 유지한다.
 
@@ -458,7 +459,7 @@ C1에서 가치와 보안 gate를 통과한 뒤에만 연다.
 - 데이터: synthetic fixture only
 - 로컬 승인: simulated Chair, 실제 권한 없음
 - 구현 단계: I0~I7
-- 현재 단계: I0–I7 Replay 완료, I7 Live gate 외부 입력 대기
+- 현재 단계: I0–I7 Replay 및 후속 Step 2 완료, I7 Live gate 외부 입력 대기
 - CI provider: ReplayProvider
 - live provider: 구성 가능한 OpenAI Responses API adapter
 - corpus: development 3, validation 2, sealed unseen 3

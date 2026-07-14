@@ -204,6 +204,69 @@
         "title": "AlternativeSummary",
         "type": "object"
       },
+      "BlockerPropagation": {
+        "properties": {
+          "downstream_work_item_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Downstream Work Item Ids",
+            "type": "array"
+          },
+          "downstream_work_item_titles": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Downstream Work Item Titles",
+            "type": "array"
+          },
+          "impacted_milestone_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Impacted Milestone Ids",
+            "type": "array"
+          },
+          "impacted_milestone_titles": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Impacted Milestone Titles",
+            "type": "array"
+          },
+          "impacted_track_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Impacted Track Ids",
+            "type": "array"
+          },
+          "reaches_decision_deadline": {
+            "title": "Reaches Decision Deadline",
+            "type": "boolean"
+          },
+          "source_work_item_id": {
+            "title": "Source Work Item Id",
+            "type": "string"
+          },
+          "source_work_item_title": {
+            "title": "Source Work Item Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "source_work_item_id",
+          "source_work_item_title",
+          "downstream_work_item_ids",
+          "downstream_work_item_titles",
+          "impacted_track_ids",
+          "impacted_milestone_ids",
+          "impacted_milestone_titles",
+          "reaches_decision_deadline"
+        ],
+        "title": "BlockerPropagation",
+        "type": "object"
+      },
       "BlockerSummary": {
         "properties": {
           "blocker": {
@@ -804,6 +867,87 @@
           "uncertainties"
         ],
         "title": "DecisionWorkspaceProjection",
+        "type": "object"
+      },
+      "DevelopmentTimelineProjection": {
+        "properties": {
+          "actions": {
+            "items": {
+              "$ref": "#/components/schemas/TimelineAction"
+            },
+            "title": "Actions",
+            "type": "array"
+          },
+          "aggregate_version": {
+            "title": "Aggregate Version",
+            "type": "integer"
+          },
+          "blocker_propagations": {
+            "items": {
+              "$ref": "#/components/schemas/BlockerPropagation"
+            },
+            "title": "Blocker Propagations",
+            "type": "array"
+          },
+          "case_id": {
+            "title": "Case Id",
+            "type": "string"
+          },
+          "current_step": {
+            "title": "Current Step",
+            "type": "integer"
+          },
+          "events": {
+            "items": {
+              "$ref": "#/components/schemas/TimelineEvent"
+            },
+            "title": "Events",
+            "type": "array"
+          },
+          "evidence": {
+            "items": {
+              "$ref": "#/components/schemas/TimelineEvidence"
+            },
+            "title": "Evidence",
+            "type": "array"
+          },
+          "milestones": {
+            "items": {
+              "$ref": "#/components/schemas/TimelineMilestone"
+            },
+            "title": "Milestones",
+            "type": "array"
+          },
+          "projection_schema_version": {
+            "default": "development-timeline.v1",
+            "title": "Projection Schema Version",
+            "type": "string"
+          },
+          "reconstructed_at_step": {
+            "title": "Reconstructed At Step",
+            "type": "integer"
+          },
+          "work_items": {
+            "items": {
+              "$ref": "#/components/schemas/TimelineWorkItem"
+            },
+            "title": "Work Items",
+            "type": "array"
+          }
+        },
+        "required": [
+          "case_id",
+          "aggregate_version",
+          "current_step",
+          "reconstructed_at_step",
+          "work_items",
+          "milestones",
+          "evidence",
+          "actions",
+          "events",
+          "blocker_propagations"
+        ],
+        "title": "DevelopmentTimelineProjection",
         "type": "object"
       },
       "DissentItem": {
@@ -2048,6 +2192,209 @@
         "title": "SimulatedDecision",
         "type": "object"
       },
+      "TimelineAction": {
+        "properties": {
+          "action_id": {
+            "title": "Action Id",
+            "type": "string"
+          },
+          "blocker": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Blocker"
+          },
+          "due_at_step": {
+            "title": "Due At Step",
+            "type": "integer"
+          },
+          "owner": {
+            "title": "Owner",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "action_id",
+          "title",
+          "owner",
+          "status",
+          "due_at_step",
+          "blocker"
+        ],
+        "title": "TimelineAction",
+        "type": "object"
+      },
+      "TimelineEvent": {
+        "properties": {
+          "affected_entity_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Affected Entity Ids",
+            "type": "array"
+          },
+          "cause": {
+            "title": "Cause",
+            "type": "string"
+          },
+          "effective_at_step": {
+            "title": "Effective At Step",
+            "type": "integer"
+          },
+          "event_id": {
+            "title": "Event Id",
+            "type": "string"
+          },
+          "event_type": {
+            "title": "Event Type",
+            "type": "string"
+          },
+          "impacted_milestone_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Impacted Milestone Ids",
+            "type": "array"
+          },
+          "observed_at_step": {
+            "title": "Observed At Step",
+            "type": "integer"
+          },
+          "summary": {
+            "title": "Summary",
+            "type": "string"
+          }
+        },
+        "required": [
+          "event_id",
+          "event_type",
+          "effective_at_step",
+          "observed_at_step",
+          "summary",
+          "cause",
+          "affected_entity_ids",
+          "impacted_milestone_ids"
+        ],
+        "title": "TimelineEvent",
+        "type": "object"
+      },
+      "TimelineEvidence": {
+        "properties": {
+          "available_at_step": {
+            "title": "Available At Step",
+            "type": "integer"
+          },
+          "eligible_at_step": {
+            "title": "Eligible At Step",
+            "type": "boolean"
+          },
+          "evidence_id": {
+            "title": "Evidence Id",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "evidence_id",
+          "title",
+          "available_at_step",
+          "eligible_at_step"
+        ],
+        "title": "TimelineEvidence",
+        "type": "object"
+      },
+      "TimelineMilestone": {
+        "properties": {
+          "milestone_id": {
+            "title": "Milestone Id",
+            "type": "string"
+          },
+          "planned_at_step": {
+            "title": "Planned At Step",
+            "type": "integer"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "milestone_id",
+          "title",
+          "planned_at_step"
+        ],
+        "title": "TimelineMilestone",
+        "type": "object"
+      },
+      "TimelineWorkItem": {
+        "properties": {
+          "blocker": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Blocker"
+          },
+          "dependency_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Dependency Ids",
+            "type": "array"
+          },
+          "planned_at_step": {
+            "title": "Planned At Step",
+            "type": "integer"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "track_id": {
+            "title": "Track Id",
+            "type": "string"
+          },
+          "work_item_id": {
+            "title": "Work Item Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "work_item_id",
+          "track_id",
+          "title",
+          "status",
+          "blocker",
+          "planned_at_step",
+          "dependency_ids"
+        ],
+        "title": "TimelineWorkItem",
+        "type": "object"
+      },
       "TrackSummary": {
         "properties": {
           "blocker_count": {
@@ -2541,6 +2888,22 @@
               "title": "Case Id",
               "type": "string"
             }
+          },
+          {
+            "in": "query",
+            "name": "at_step",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "At Step"
+            }
           }
         ],
         "responses": {
@@ -2548,12 +2911,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "items": {
-                    "additionalProperties": true,
-                    "type": "object"
-                  },
-                  "title": "Response Get Timeline Api V1 Decision Cases  Case Id  Timeline Get",
-                  "type": "array"
+                  "$ref": "#/components/schemas/DevelopmentTimelineProjection"
                 }
               }
             },
@@ -2629,6 +2987,22 @@
             "schema": {
               "title": "Case Id",
               "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "at_step",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "At Step"
             }
           }
         ],

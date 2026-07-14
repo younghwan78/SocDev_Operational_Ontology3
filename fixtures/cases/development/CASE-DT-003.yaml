@@ -1,0 +1,143 @@
+schema_version: observable-case.v1
+fixture_version: 1
+case_id: CASE-DT-003
+title_ko: 일정 workaround와 기술 부채 진행
+current_step: 13
+status: DECISION_REQUIRED
+decision_question: workaround를 release에 포함하고 제거 action을 추적할 것인가?
+decision_deadline_milestone_id: M-DT3-RELEASE
+tracks:
+  - track_id: TRACK-DT3-SW
+    name: SW Delivery
+    status: IN_PROGRESS
+    next_milestone_id: M-DT3-RELEASE
+  - track_id: TRACK-DT3-DEBT
+    name: Technical Debt
+    status: BLOCKED
+    next_milestone_id: M-DT3-DEBT-CLOSE
+work_items:
+  - work_item_id: WORK-DT3-WA
+    track_id: TRACK-DT3-SW
+    title: boot workaround 구현
+    status: DONE
+    owner: ROLE-SW
+    planned_at_step: 9
+  - work_item_id: WORK-DT3-INTEGRATE
+    track_id: TRACK-DT3-SW
+    title: workaround 통합 검증
+    status: IN_PROGRESS
+    owner: ROLE-VERIF
+    dependency_ids: [WORK-DT3-WA]
+    planned_at_step: 12
+  - work_item_id: WORK-DT3-REMOVE
+    track_id: TRACK-DT3-DEBT
+    title: workaround 제거와 정식 fix 전환
+    status: BLOCKED
+    owner: ROLE-SW
+    dependency_ids: [WORK-DT3-INTEGRATE]
+    blocker: 정식 fix owner 미확정
+    planned_at_step: 18
+milestones:
+  - milestone_id: M-DT3-RELEASE
+    title: Release Candidate
+    planned_at_step: 16
+  - milestone_id: M-DT3-DEBT-CLOSE
+    title: Technical Debt Close
+    planned_at_step: 19
+evidence:
+  - evidence_id: EVD-DT3-WA-TEST
+    title: workaround boot regression
+    evidence_type: regression_test
+    source_ref: FIXTURE:DT3-WA-TEST
+    available_at_step: 10
+    limitations: [long_duration_not_run]
+  - evidence_id: EVD-DT3-REMOVE-EST
+    title: workaround 제거 effort 추정
+    evidence_type: engineering_estimate
+    source_ref: FIXTURE:DT3-REMOVE-EST
+    available_at_step: 15
+    limitations: [future_evidence]
+claims:
+  - claim_id: CLM-DT3-BOOT
+    statement: workaround 적용 build는 기본 boot regression을 통과했다.
+    epistemic_status: fact
+    source_refs: [EVD-DT3-WA-TEST]
+    confidence_level: high
+  - claim_id: CLM-DT3-DEBT
+    statement: 제거 owner가 없으면 workaround가 다음 release로 이월될 수 있다.
+    epistemic_status: inference
+    source_refs: [EVD-DT3-WA-TEST]
+    inference_basis: [RULE-DEBT-OWNER]
+    confidence_level: medium
+uncertainties:
+  - 장시간 boot loop에서 workaround 안정성
+  - 정식 fix와 제거 작업의 실제 effort
+alternatives:
+  - option_id: OPT-DT3-EXPIRY
+    title: expiry와 owner를 조건으로 수용
+    description: release에는 포함하되 제거 기한과 fallback을 강제한다.
+    reversible: true
+    switching_cost: {mode: exact, unit: person_day, value: 3}
+    claim_ids: [CLM-DT3-BOOT, CLM-DT3-DEBT]
+  - option_id: OPT-DT3-BLOCK
+    title: 정식 fix까지 release 차단
+    description: workaround를 수용하지 않고 정식 fix 완료를 기다린다.
+    reversible: true
+    switching_cost: {mode: exact, unit: step, value: 3}
+    claim_ids: [CLM-DT3-DEBT]
+required_role_ids: [sw, verification_measurement, program_risk]
+allowed_decision_types: [APPROVE_WITH_GUARDRAILS, DEFER_UNTIL_TRIGGER, REJECT]
+development_actions:
+  - action_id: ACT-DT3-REMOVE
+    title: workaround 제거 action
+    owner: sw
+    status: IN_PROGRESS
+    due_at_step: 18
+    dependency_work_item_ids: [WORK-DT3-REMOVE]
+development_events:
+  - event_id: DT3-009-WA-DONE
+    event_type: WORK_PROGRESS
+    effective_at_step: 9
+    observed_at_step: 9
+    summary: boot workaround 구현을 완료했다.
+    cause: release 일정 확보를 위한 임시 경로가 승인되었다.
+    work_item_changes:
+      - work_item_id: WORK-DT3-WA
+        before: {status: IN_PROGRESS, planned_at_step: 9, dependency_ids: []}
+        after: {status: DONE, planned_at_step: 9, dependency_ids: []}
+  - event_id: DT3-011-INTEGRATION-START
+    event_type: WORK_PROGRESS
+    effective_at_step: 11
+    observed_at_step: 11
+    summary: workaround 통합 검증과 제거 action을 시작했다.
+    cause: 기본 boot regression이 통과했다.
+    work_item_changes:
+      - work_item_id: WORK-DT3-INTEGRATE
+        before: {status: READY, planned_at_step: 12, dependency_ids: [WORK-DT3-WA]}
+        after: {status: IN_PROGRESS, planned_at_step: 12, dependency_ids: [WORK-DT3-WA]}
+    action_changes:
+      - action_id: ACT-DT3-REMOVE
+        before: {status: PLANNED, due_at_step: 18}
+        after: {status: IN_PROGRESS, due_at_step: 18}
+  - event_id: DT3-012-DEBT-BLOCKED
+    event_type: RESOURCE_CONFLICT
+    effective_at_step: 12
+    observed_at_step: 12
+    summary: 정식 fix owner가 없어 제거 작업이 막혔다.
+    cause: 동일 SW owner가 release blocker 대응에 우선 배정되었다.
+    work_item_changes:
+      - work_item_id: WORK-DT3-REMOVE
+        before: {status: READY, planned_at_step: 18, dependency_ids: [WORK-DT3-INTEGRATE]}
+        after: {status: BLOCKED, blocker: 정식 fix owner 미확정, planned_at_step: 18, dependency_ids: [WORK-DT3-INTEGRATE]}
+    impacted_milestone_ids: [M-DT3-DEBT-CLOSE]
+  - event_id: DT3-013-RELEASE-DELAY
+    event_type: PLAN_CHANGE
+    effective_at_step: 13
+    observed_at_step: 13
+    summary: 추가 회귀를 위해 Release Candidate를 한 step 늦췄다.
+    cause: workaround 장시간 검증 범위를 추가했다.
+    milestone_changes:
+      - milestone_id: M-DT3-RELEASE
+        before: {planned_at_step: 15}
+        after: {planned_at_step: 16}
+    impacted_milestone_ids: [M-DT3-RELEASE]

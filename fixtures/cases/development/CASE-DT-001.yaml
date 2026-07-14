@@ -1,0 +1,143 @@
+schema_version: observable-case.v1
+fixture_version: 1
+case_id: CASE-DT-001
+title_ko: HW/SW interface 불일치와 재작업
+current_step: 10
+status: DECISION_REQUIRED
+decision_question: interface 재작업 중 제한 통합을 병행할 것인가?
+decision_deadline_milestone_id: M-DT1-IF-FREEZE
+tracks:
+  - track_id: TRACK-DT1-HW
+    name: HW Interface
+    status: BLOCKED
+    next_milestone_id: M-DT1-IF-FREEZE
+  - track_id: TRACK-DT1-SW
+    name: SW Driver
+    status: REWORK
+    next_milestone_id: M-DT1-INTEGRATION
+  - track_id: TRACK-DT1-VERIF
+    name: Integration Verification
+    status: BLOCKED
+    next_milestone_id: M-DT1-INTEGRATION
+work_items:
+  - work_item_id: WORK-DT1-HW-IF
+    track_id: TRACK-DT1-HW
+    title: DMA descriptor interface 확정
+    status: BLOCKED
+    owner: ROLE-HW
+    blocker: RTL과 driver의 descriptor 길이 정의 불일치
+    planned_at_step: 8
+  - work_item_id: WORK-DT1-SW-DRIVER
+    track_id: TRACK-DT1-SW
+    title: DMA driver interface 반영
+    status: REWORK
+    owner: ROLE-SW
+    dependency_ids: [WORK-DT1-HW-IF]
+    blocker: interface 재합의 필요
+    planned_at_step: 10
+  - work_item_id: WORK-DT1-INTEGRATION
+    track_id: TRACK-DT1-VERIF
+    title: HW/SW 통합 smoke test
+    status: BLOCKED
+    owner: ROLE-VERIF
+    dependency_ids: [WORK-DT1-SW-DRIVER]
+    blocker: driver rework 미완료
+    planned_at_step: 13
+milestones:
+  - milestone_id: M-DT1-IF-FREEZE
+    title: Interface Freeze
+    planned_at_step: 11
+  - milestone_id: M-DT1-INTEGRATION
+    title: First Integration
+    planned_at_step: 16
+evidence:
+  - evidence_id: EVD-DT1-IF-DIFF
+    title: RTL/driver interface diff
+    evidence_type: interface_review
+    source_ref: FIXTURE:DT1-IF-DIFF
+    available_at_step: 9
+    limitations: [full_regression_not_run]
+  - evidence_id: EVD-DT1-SMOKE
+    title: 수정 driver smoke test
+    evidence_type: integration_measurement
+    source_ref: FIXTURE:DT1-SMOKE
+    available_at_step: 14
+    limitations: [future_evidence]
+claims:
+  - claim_id: CLM-DT1-MISMATCH
+    statement: RTL과 driver의 descriptor 길이 정의가 일치하지 않는다.
+    epistemic_status: fact
+    source_refs: [EVD-DT1-IF-DIFF]
+    confidence_level: high
+  - claim_id: CLM-DT1-REWORK
+    statement: interface를 먼저 고정하지 않으면 통합 재작업이 반복될 수 있다.
+    epistemic_status: inference
+    source_refs: [EVD-DT1-IF-DIFF]
+    inference_basis: [RULE-INTERFACE-CHAIN]
+    confidence_level: medium
+uncertainties:
+  - 수정 RTL 반영 후 driver smoke test 결과
+  - 제한 통합이 전체 회귀 일정에 미치는 영향
+alternatives:
+  - option_id: OPT-DT1-IF-FIRST
+    title: interface 재합의를 먼저 완료
+    description: Interface Freeze 전까지 통합을 중지하고 HW/SW 정의를 일치시킨다.
+    reversible: true
+    switching_cost: {mode: exact, unit: step, value: 2}
+    claim_ids: [CLM-DT1-MISMATCH, CLM-DT1-REWORK]
+  - option_id: OPT-DT1-LIMITED-INTEGRATION
+    title: adapter로 제한 통합 병행
+    description: 임시 adapter 범위를 제한하고 interface 확정 후 제거한다.
+    reversible: true
+    switching_cost: {mode: exact, unit: person_day, value: 3}
+    claim_ids: [CLM-DT1-REWORK]
+required_role_ids: [architecture_system, sw, verification_measurement, program_risk]
+allowed_decision_types: [RUN_REVERSIBLE_TRIAL, DEFER_UNTIL_TRIGGER, COLLECT_MINIMUM_EVIDENCE]
+development_actions:
+  - action_id: ACT-DT1-ALIGN
+    title: HW/SW interface owner 합의
+    owner: program_risk
+    status: BLOCKED
+    due_at_step: 11
+    blocker: RTL owner sign-off 대기
+    dependency_work_item_ids: [WORK-DT1-HW-IF, WORK-DT1-SW-DRIVER]
+development_events:
+  - event_id: DT1-008-HW-START
+    event_type: INTERFACE_CHANGE
+    effective_at_step: 8
+    observed_at_step: 8
+    summary: DMA interface 확정 작업을 시작했다.
+    cause: 초기 RTL interface 초안이 공유되었다.
+    work_item_changes:
+      - work_item_id: WORK-DT1-HW-IF
+        before: {status: READY, planned_at_step: 8, dependency_ids: []}
+        after: {status: IN_PROGRESS, planned_at_step: 8, dependency_ids: []}
+  - event_id: DT1-009-IF-MISMATCH
+    event_type: REWORK
+    effective_at_step: 9
+    observed_at_step: 9
+    summary: RTL과 driver interface 불일치를 확인해 재작업을 열었다.
+    cause: descriptor 길이 정의가 서로 다른 revision을 사용했다.
+    work_item_changes:
+      - work_item_id: WORK-DT1-HW-IF
+        before: {status: IN_PROGRESS, planned_at_step: 8, dependency_ids: []}
+        after: {status: BLOCKED, blocker: RTL과 driver의 descriptor 길이 정의 불일치, planned_at_step: 8, dependency_ids: []}
+      - work_item_id: WORK-DT1-SW-DRIVER
+        before: {status: DONE, planned_at_step: 10, dependency_ids: [WORK-DT1-HW-IF]}
+        after: {status: REWORK, blocker: interface 재합의 필요, planned_at_step: 10, dependency_ids: [WORK-DT1-HW-IF]}
+    impacted_milestone_ids: [M-DT1-IF-FREEZE, M-DT1-INTEGRATION]
+  - event_id: DT1-010-INTEGRATION-BLOCKED
+    event_type: BLOCKER_CHANGE
+    effective_at_step: 10
+    observed_at_step: 10
+    summary: driver 재작업 때문에 smoke test가 막혔다.
+    cause: 통합 binary에 호환 가능한 driver가 없다.
+    work_item_changes:
+      - work_item_id: WORK-DT1-INTEGRATION
+        before: {status: READY, planned_at_step: 13, dependency_ids: [WORK-DT1-SW-DRIVER]}
+        after: {status: BLOCKED, blocker: driver rework 미완료, planned_at_step: 13, dependency_ids: [WORK-DT1-SW-DRIVER]}
+    action_changes:
+      - action_id: ACT-DT1-ALIGN
+        before: {status: PLANNED, due_at_step: 11}
+        after: {status: BLOCKED, due_at_step: 11, blocker: RTL owner sign-off 대기}
+    impacted_milestone_ids: [M-DT1-INTEGRATION]

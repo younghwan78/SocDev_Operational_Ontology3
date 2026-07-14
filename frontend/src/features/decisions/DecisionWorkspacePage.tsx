@@ -2,7 +2,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { Link, useParams } from "react-router";
 
-import { advanceOutcome, cancelReviewRun, createDossierRun, createReviewRun, createSimulatedDecision, evaluateOutcome, getDecisionWorkspace, getReviewRun, isCaseVersionConflict, retryReviewRun } from "../../api/client";
+import { advanceOutcome, cancelReviewRun, createDossierRun, createReviewRun, createSimulatedDecision, evaluateOutcome, getDecisionTimeline, getDecisionWorkspace, getReviewRun, isCaseVersionConflict, retryReviewRun } from "../../api/client";
 
 export function DecisionWorkspacePage() {
   const { caseId = "" } = useParams();
@@ -11,6 +11,11 @@ export function DecisionWorkspacePage() {
   const query = useQuery({
     queryKey: ["decision-workspace", caseId],
     queryFn: () => getDecisionWorkspace(caseId),
+    enabled: Boolean(caseId),
+  });
+  const timelineQuery = useQuery({
+    queryKey: ["development-timeline", caseId],
+    queryFn: () => getDecisionTimeline(caseId),
     enabled: Boolean(caseId),
   });
   const runQuery = useQuery({
@@ -85,7 +90,7 @@ export function DecisionWorkspacePage() {
   ];
   const stale = commandMutations.some((mutation) => isCaseVersionConflict(mutation.error));
   const refreshStaleWorkspace = async () => {
-    await query.refetch();
+    await Promise.all([query.refetch(), timelineQuery.refetch()]);
     commandMutations.forEach((mutation) => mutation.reset());
   };
 
@@ -130,6 +135,32 @@ export function DecisionWorkspacePage() {
             </div>
           ))}
         </div>
+      </section>
+      <section className="panel agent-panel" aria-labelledby="development-timeline-title">
+        <h2 id="development-timeline-title">개발 진행 타임라인</h2>
+        <p>Step별 실제 변경과 그 원인을 기록하고, 현재 blocker가 뒤의 작업과 milestone에 미치는 영향을 보여줍니다.</p>
+        {timelineQuery.isPending && <p role="status">개발 변경 이력을 불러오는 중…</p>}
+        {timelineQuery.isError && <p role="alert">개발 변경 이력을 불러오지 못했습니다.</p>}
+        {timelineQuery.data && timelineQuery.data.events.length === 0 && <p>기록된 개발 변경 없음</p>}
+        {timelineQuery.data && timelineQuery.data.events.length > 0 && (
+          <ol className="timeline-list">
+            {timelineQuery.data.events.map((event) => (
+              <li key={event.event_id}>
+                <strong>Step {event.observed_at_step} · {developmentEventLabel(event.event_type)}</strong>
+                <p>{event.summary}</p>
+                <p><strong>원인:</strong> {event.cause}</p>
+              </li>
+            ))}
+          </ol>
+        )}
+        {timelineQuery.data && timelineQuery.data.blocker_propagations.length > 0 && <>
+          <h3>Blocker 영향</h3>
+          <ul>{timelineQuery.data.blocker_propagations.map((impact) => (
+            <li key={impact.source_work_item_id}>
+              <strong>{impact.source_work_item_title}</strong> → 후속 작업 {impact.downstream_work_item_titles.join(", ") || "없음"} · 영향 milestone {impact.impacted_milestone_titles.join(", ") || "없음"}{impact.reaches_decision_deadline ? " · 결정 기한 영향" : ""}
+            </li>
+          ))}</ul>
+        </>}
       </section>
       <section className="summary-grid">
         <article className="panel"><h2>선택지</h2><p>{item.alternative_count}개</p></article>
@@ -285,4 +316,19 @@ function runStatusLabel(status: string) {
 
 function epistemicLabel(status: string) {
   return ({ fact: "확인된 사실", inference: "근거 기반 추론", assumption: "검토할 가정", unknown: "아직 모름" } as Record<string, string>)[status] ?? status;
+}
+
+function developmentEventLabel(eventType: string) {
+  return ({
+    WORK_PROGRESS: "작업 진행",
+    BLOCKER_CHANGE: "Blocker 변경",
+    PLAN_CHANGE: "계획 변경",
+    DEPENDENCY_CHANGE: "의존성 변경",
+    EVIDENCE_CHANGE: "측정·근거 변경",
+    REWORK: "재작업",
+    INTERFACE_CHANGE: "인터페이스 변경",
+    RESOURCE_CONFLICT: "자원 충돌",
+    PRIORITY_CHANGE: "우선순위 변경",
+    DECISION_ACTION_PROGRESS: "결정 후속 조치",
+  } as Record<string, string>)[eventType] ?? eventType;
 }

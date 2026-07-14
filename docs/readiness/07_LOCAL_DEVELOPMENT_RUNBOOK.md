@@ -78,6 +78,7 @@ docker compose --env-file .env.local -f deploy/local/compose.yaml up -d postgres
 uv sync --all-groups
 uv run alembic upgrade head
 uv run python -m soc_ot.cli fixtures validate --root fixtures
+uv run soc-ot fixtures validate --corpus development
 Get-ChildItem fixtures/cases/observable/*.yaml | ForEach-Object {
   uv run soc-ot fixtures import --case-id $_.BaseName
 }
@@ -118,6 +119,16 @@ Invoke-RestMethod http://127.0.0.1:18080/health/live
 Invoke-RestMethod http://127.0.0.1:18080/health/ready
 Invoke-RestMethod http://127.0.0.1:18080/api/v1/decision-cases
 Invoke-RestMethod http://127.0.0.1:18080/api/v1/decision-cases/CASE-VR-001/workspace
+Invoke-RestMethod http://127.0.0.1:18080/api/v1/decision-cases/CASE-VR-001/timeline
+```
+
+The frozen evaluation corpus remains the default import set. To inspect an independent
+Step 2 development case, validate and import it explicitly:
+
+```powershell
+uv run soc-ot fixtures validate --corpus development --case-id CASE-DT-001
+uv run soc-ot fixtures import --case-id CASE-DT-001
+Invoke-RestMethod "http://127.0.0.1:18080/api/v1/decision-cases/CASE-DT-001/timeline?at_step=9"
 ```
 
 Expected readiness response includes PostgreSQL connectivity and compatible migration revision. It must not require the live LLM provider in replay mode.

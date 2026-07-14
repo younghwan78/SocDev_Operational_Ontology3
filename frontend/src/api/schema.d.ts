@@ -389,6 +389,25 @@ export interface components {
             /** Title */
             title: string;
         };
+        /** BlockerPropagation */
+        BlockerPropagation: {
+            /** Downstream Work Item Ids */
+            downstream_work_item_ids: string[];
+            /** Downstream Work Item Titles */
+            downstream_work_item_titles: string[];
+            /** Impacted Milestone Ids */
+            impacted_milestone_ids: string[];
+            /** Impacted Milestone Titles */
+            impacted_milestone_titles: string[];
+            /** Impacted Track Ids */
+            impacted_track_ids: string[];
+            /** Reaches Decision Deadline */
+            reaches_decision_deadline: boolean;
+            /** Source Work Item Id */
+            source_work_item_id: string;
+            /** Source Work Item Title */
+            source_work_item_title: string;
+        };
         /** BlockerSummary */
         BlockerSummary: {
             /** Blocker */
@@ -607,6 +626,34 @@ export interface components {
             uncertainties: string[];
             /** Uncertainty Count */
             uncertainty_count: number;
+        };
+        /** DevelopmentTimelineProjection */
+        DevelopmentTimelineProjection: {
+            /** Actions */
+            actions: components["schemas"]["TimelineAction"][];
+            /** Aggregate Version */
+            aggregate_version: number;
+            /** Blocker Propagations */
+            blocker_propagations: components["schemas"]["BlockerPropagation"][];
+            /** Case Id */
+            case_id: string;
+            /** Current Step */
+            current_step: number;
+            /** Events */
+            events: components["schemas"]["TimelineEvent"][];
+            /** Evidence */
+            evidence: components["schemas"]["TimelineEvidence"][];
+            /** Milestones */
+            milestones: components["schemas"]["TimelineMilestone"][];
+            /**
+             * Projection Schema Version
+             * @default development-timeline.v1
+             */
+            projection_schema_version: string;
+            /** Reconstructed At Step */
+            reconstructed_at_step: number;
+            /** Work Items */
+            work_items: components["schemas"]["TimelineWorkItem"][];
         };
         /** DissentItem */
         DissentItem: {
@@ -1072,6 +1119,77 @@ export interface components {
              */
             simulated: true;
         };
+        /** TimelineAction */
+        TimelineAction: {
+            /** Action Id */
+            action_id: string;
+            /** Blocker */
+            blocker: string | null;
+            /** Due At Step */
+            due_at_step: number;
+            /** Owner */
+            owner: string;
+            /** Status */
+            status: string;
+            /** Title */
+            title: string;
+        };
+        /** TimelineEvent */
+        TimelineEvent: {
+            /** Affected Entity Ids */
+            affected_entity_ids: string[];
+            /** Cause */
+            cause: string;
+            /** Effective At Step */
+            effective_at_step: number;
+            /** Event Id */
+            event_id: string;
+            /** Event Type */
+            event_type: string;
+            /** Impacted Milestone Ids */
+            impacted_milestone_ids: string[];
+            /** Observed At Step */
+            observed_at_step: number;
+            /** Summary */
+            summary: string;
+        };
+        /** TimelineEvidence */
+        TimelineEvidence: {
+            /** Available At Step */
+            available_at_step: number;
+            /** Eligible At Step */
+            eligible_at_step: boolean;
+            /** Evidence Id */
+            evidence_id: string;
+            /** Title */
+            title: string;
+        };
+        /** TimelineMilestone */
+        TimelineMilestone: {
+            /** Milestone Id */
+            milestone_id: string;
+            /** Planned At Step */
+            planned_at_step: number;
+            /** Title */
+            title: string;
+        };
+        /** TimelineWorkItem */
+        TimelineWorkItem: {
+            /** Blocker */
+            blocker: string | null;
+            /** Dependency Ids */
+            dependency_ids: string[];
+            /** Planned At Step */
+            planned_at_step: number;
+            /** Status */
+            status: string;
+            /** Title */
+            title: string;
+            /** Track Id */
+            track_id: string;
+            /** Work Item Id */
+            work_item_id: string;
+        };
         /** TrackSummary */
         TrackSummary: {
             /** Blocker Count */
@@ -1337,7 +1455,9 @@ export interface operations {
     };
     get_timeline_api_v1_decision_cases__case_id__timeline_get: {
         parameters: {
-            query?: never;
+            query?: {
+                at_step?: number | null;
+            };
             header?: never;
             path: {
                 case_id: string;
@@ -1352,9 +1472,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": {
-                        [key: string]: unknown;
-                    }[];
+                    "application/json": components["schemas"]["DevelopmentTimelineProjection"];
                 };
             };
             /** @description Validation Error */
@@ -1401,7 +1519,9 @@ export interface operations {
     };
     get_observable_packet_api_v1_dev_fixtures__case_id__observable_get: {
         parameters: {
-            query?: never;
+            query?: {
+                at_step?: number | null;
+            };
             header?: never;
             path: {
                 case_id: string;

@@ -54,6 +54,11 @@ def build_parser() -> argparse.ArgumentParser:
     validate.add_argument("--root", type=Path, default=ROOT_DIR / "fixtures")
     validate.add_argument("--case-id")
     validate.add_argument("--include-hidden", action="store_true")
+    validate.add_argument(
+        "--corpus",
+        choices=["evaluation", "development", "all"],
+        default="evaluation",
+    )
     fixture_import = fixtures_sub.add_parser("import")
     fixture_import.add_argument("--root", type=Path, default=ROOT_DIR / "fixtures")
     fixture_import.add_argument("--case-id", required=True)
@@ -165,7 +170,17 @@ def main(argv: Sequence[str] | None = None) -> int:
         return 0
     if args.command == "fixtures" and args.fixtures_command == "validate":
         fixture_repository = FixtureRepository(args.root)
-        case_ids = [args.case_id] if args.case_id else fixture_repository.case_ids()
+        if args.case_id:
+            case_ids = [args.case_id]
+        elif args.corpus == "development":
+            case_ids = fixture_repository.development_case_ids()
+        elif args.corpus == "all":
+            case_ids = (
+                fixture_repository.case_ids()
+                + fixture_repository.development_case_ids()
+            )
+        else:
+            case_ids = fixture_repository.case_ids()
         for case_id in case_ids:
             fixture_repository.validate_case(case_id, include_hidden=args.include_hidden)
         print(f"Validated {len(case_ids)} fixture case(s).")

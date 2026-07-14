@@ -16,6 +16,10 @@ from soc_ot.api.contracts import (
     ReviewRunView,
     RunTelemetryView,
 )
+from soc_ot.application.development_twin import (
+    DevelopmentTimelineProjection,
+    build_development_timeline,
+)
 from soc_ot.application.evaluation import CaseEvaluation
 from soc_ot.application.outcome_advances import (
     InMemoryOutcomeAdvanceRepository,
@@ -56,7 +60,7 @@ from soc_ot.infrastructure.hidden_repository import (
     PostgresHiddenCaseRepository,
 )
 
-EXPECTED_DB_REVISION = "0017_decision_action_plan_v2"
+EXPECTED_DB_REVISION = "0018_development_event_history"
 
 
 def _default_repository() -> CaseRepository:
@@ -172,18 +176,24 @@ def create_app(
     def get_workspace(case_id: str, repo: Repository) -> DecisionWorkspaceProjection:
         return build_workspace_projection(_require_case(repo, case_id))
 
-    @app.get("/api/v1/decision-cases/{case_id}/timeline", tags=["decision-cases"])
-    def get_timeline(case_id: str, repo: Repository) -> list[dict[str, object]]:
+    @app.get(
+        "/api/v1/decision-cases/{case_id}/timeline",
+        response_model=DevelopmentTimelineProjection,
+        tags=["decision-cases"],
+    )
+    def get_timeline(
+        case_id: str, repo: Repository, at_step: int | None = None
+    ) -> DevelopmentTimelineProjection:
         stored = _require_case(repo, case_id)
-        return [
-            {
-                "work_item_id": item.work_item_id,
-                "planned_at_step": item.planned_at_step,
-                "effective_at_step": item.effective_at_step,
-                "status": item.status,
-            }
-            for item in stored.case.work_items
-        ]
+        try:
+            return build_development_timeline(stored, at_step=at_step)
+        except ValueError as error:
+            if str(error) == "DEVELOPMENT_STEP_OUT_OF_RANGE":
+                raise HTTPException(
+                    status_code=422,
+                    detail={"code": "DEVELOPMENT_STEP_OUT_OF_RANGE"},
+                ) from error
+            raise
 
     @app.get(
         "/api/v1/decision-cases/{case_id}/evidence",
@@ -195,8 +205,21 @@ def create_app(
         return [item for item in case.evidence if item.available_at_step <= case.current_step]
 
     @app.get("/api/v1/dev/fixtures/{case_id}/observable", tags=["developer"])
-    def get_observable_packet(case_id: str, repo: Repository) -> dict[str, object]:
-        packet = build_observable_case_packet(_require_case(repo, case_id).case)
+    def get_observable_packet(
+        case_id: str, repo: Repository, at_step: int | None = None
+    ) -> dict[str, object]:
+        try:
+            packet = build_observable_case_packet(
+                _require_case(repo, case_id).case,
+                at_step=at_step,
+            )
+        except ValueError as error:
+            if str(error) == "DEVELOPMENT_STEP_OUT_OF_RANGE":
+                raise HTTPException(
+                    status_code=422,
+                    detail={"code": "DEVELOPMENT_STEP_OUT_OF_RANGE"},
+                ) from error
+            raise
         return packet.model_dump(mode="json")
 
     @app.post("/api/v1/decision-cases/{case_id}/review-runs", tags=["agent-runs"])

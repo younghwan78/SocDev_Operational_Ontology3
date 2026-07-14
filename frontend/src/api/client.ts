@@ -1,4 +1,4 @@
-import type { AblationResult, CaseEvaluation, DecisionWorkspace, OutcomeSnapshot, ReviewRun } from "./generated";
+import type { AblationResult, CaseEvaluation, DecisionWorkspace, DevelopmentTimeline, OutcomeSnapshot, ReviewRun } from "./generated";
 
 const API_BASE = import.meta.env.VITE_SOC_OT_API_BASE_URL ?? "http://127.0.0.1:18080";
 
@@ -35,6 +35,11 @@ export function getDecisionCases(): Promise<DecisionWorkspace[]> {
 
 export function getDecisionWorkspace(caseId: string): Promise<DecisionWorkspace> {
   return getJson(`/api/v1/decision-cases/${encodeURIComponent(caseId)}/workspace`);
+}
+
+export function getDecisionTimeline(caseId: string, atStep?: number): Promise<DevelopmentTimeline> {
+  const query = atStep === undefined ? "" : `?${new URLSearchParams({ at_step: String(atStep) })}`;
+  return getJson(`/api/v1/decision-cases/${encodeURIComponent(caseId)}/timeline${query}`);
 }
 
 function commandHeaders(aggregateVersion: number): Record<string, string> {
