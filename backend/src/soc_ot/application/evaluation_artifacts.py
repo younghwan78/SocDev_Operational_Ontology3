@@ -75,7 +75,13 @@ def write_evaluation_artifacts(
 
     process_scores = [_score_projection(item, "process_evaluation") for item in results]
     outcome_scores = [_score_projection(item, "outcome_evaluation") for item in results]
-    violations = _policy_violations(results)
+    selected_topology = payload.get("selected_topology")
+    violations = _policy_violations(
+        results,
+        selected_topology=(
+            selected_topology if isinstance(selected_topology, str) else None
+        ),
+    )
     _write_json(target / "process_scores.json", process_scores)
     _write_json(target / "outcome_scores.json", outcome_scores)
     _write_json(target / "policy_violations.json", violations)
@@ -125,11 +131,15 @@ def _score_projection(item: object, key: str) -> dict[str, object]:
     }
 
 
-def _policy_violations(results: list[object]) -> list[dict[str, object]]:
+def _policy_violations(
+    results: list[object], *, selected_topology: str | None = None
+) -> list[dict[str, object]]:
     violations: list[dict[str, object]] = []
     for item in results:
         if not isinstance(item, dict):
             violations.append({"case_id": "unknown", "code": "CONTRACT_INVALID"})
+            continue
+        if selected_topology is not None and item.get("topology") != selected_topology:
             continue
         process = item.get("process_evaluation", {})
         if not isinstance(process, dict):
@@ -160,11 +170,31 @@ def _render_report(
     violations: list[dict[str, object]],
     payload: dict[str, Any],
 ) -> str:
-    passed = sum(
-        bool(item.get("passed")) for item in results if isinstance(item, dict)
-    )
+    selected_topology = payload.get("selected_topology")
+    gate_results = [
+        item
+        for item in results
+        if isinstance(item, dict)
+        and (
+            not isinstance(selected_topology, str)
+            or item.get("topology") == selected_topology
+        )
+    ]
+    passed = sum(bool(item.get("passed")) for item in gate_results)
     total_runs = int(payload.get("total_runs", len(results)))
-    gate = passed == total_runs and not violations and not failures
+    gate = bool(
+        payload.get(
+            "release_gate_passed",
+            passed == total_runs and not violations and not failures,
+        )
+    ) and not failures
+    topology_lines = (
+        f"- Selected topology: `{selected_topology}`\n"
+        f"- Stop rule: `{payload.get('stop_rule', 'unknown')}`\n"
+        "- Scope: adjacent-topology ablation; stability is not evaluated here\n"
+        if isinstance(selected_topology, str)
+        else ""
+    )
     return (
         "# Evaluation report\n\n"
         f"> Release: `{release_id}`  \n"
@@ -172,7 +202,9 @@ def _render_report(
         f"> Provider/model: `{provider}` / `{model_identifier}`\n\n"
         "## Result\n\n"
         f"- Gate: **{'PASS' if gate else 'FAIL'}**\n"
-        f"- Case runs passed: {passed}/{total_runs}\n"
+        + topology_lines
+        + f"- Selected case runs passed: {passed}/{len(gate_results)}\n"
+        f"- Total comparison runs: {total_runs}\n"
         f"- Runtime failures: {len(failures)}\n"
         f"- Policy violations: {len(violations)}\n"
         f"- Estimated provider cost: ${float(payload.get('estimated_cost_usd', 0.0)):.4f}\n\n"

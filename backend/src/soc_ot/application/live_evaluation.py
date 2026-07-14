@@ -1,4 +1,5 @@
 from concurrent.futures import ThreadPoolExecutor
+from math import ceil
 from typing import Literal
 
 from pydantic import Field
@@ -24,13 +25,29 @@ class LiveBatchEstimate(StrictModel):
     within_budget: bool
 
 
+class TopologyDeltaEvaluation(StrictModel):
+    baseline_topology: Topology
+    candidate_topology: Topology
+    required_marginal_cases: int
+    marginal_case_ids: list[str]
+    quality_regression_case_ids: list[str]
+    policy_failure_case_ids: list[str]
+    gate_passed: bool
+
+
 class AblationEvaluation(StrictModel):
+    schema_version: Literal["ablation-evaluation.v2"] = "ablation-evaluation.v2"
     provider: str
     results: list[CaseEvaluation]
     total_runs: int
     marginal_value_cases: int
     marginal_gate_passed: bool
-    stop_rule: Literal["keep_b3", "release_b1", "release_b0"]
+    b1_over_b0: TopologyDeltaEvaluation
+    b2_over_b1: TopologyDeltaEvaluation
+    b3_over_b2: TopologyDeltaEvaluation
+    selected_topology: Topology
+    stop_rule: Literal["keep_b3", "release_b2", "release_b1", "release_b0"]
+    release_gate_passed: bool
     estimated_cost_usd: float = Field(ge=0)
 
 
@@ -109,22 +126,64 @@ def run_live_ablation(
     ]
     results = _run_jobs(fixtures, provider, jobs, max_workers)
     _enforce_actual_cost(results, max_cost_usd)
-    marginal_cases = sum(_has_marginal_value(results, case_id) for case_id in case_ids)
-    b1_value_cases = sum(_b1_adds_value(results, case_id) for case_id in case_ids)
-    stop_rule: Literal["keep_b3", "release_b1", "release_b0"]
-    if marginal_cases >= 3:
-        stop_rule = "keep_b3"
-    elif b1_value_cases > 0:
+    return classify_ablation_results(provider.name, results, case_ids)
+
+
+def classify_ablation_results(
+    provider: str,
+    results: list[CaseEvaluation],
+    case_ids: list[str],
+) -> AblationEvaluation:
+    if not case_ids:
+        raise ValueError("ABLATION_CASES_REQUIRED")
+    multi_role_threshold = ceil(len(case_ids) * 0.75)
+    b1_over_b0 = _evaluate_topology_delta(
+        results, case_ids, "B0", "B1", required_marginal_cases=1
+    )
+    b2_over_b1 = _evaluate_topology_delta(
+        results,
+        case_ids,
+        "B1",
+        "B2",
+        required_marginal_cases=multi_role_threshold,
+    )
+    b3_over_b2 = _evaluate_topology_delta(
+        results,
+        case_ids,
+        "B2",
+        "B3",
+        required_marginal_cases=multi_role_threshold,
+    )
+    if b3_over_b2.gate_passed:
+        selected_topology: Topology = "B3"
+        stop_rule: Literal[
+            "keep_b3", "release_b2", "release_b1", "release_b0"
+        ] = "keep_b3"
+    elif b2_over_b1.gate_passed:
+        selected_topology = "B2"
+        stop_rule = "release_b2"
+    elif b1_over_b0.gate_passed:
+        selected_topology = "B1"
         stop_rule = "release_b1"
     else:
+        selected_topology = "B0"
         stop_rule = "release_b0"
+    release_gate_passed = all(
+        _policy_compliant(_by_topology(results, case_id, selected_topology))
+        for case_id in case_ids
+    )
     return AblationEvaluation(
-        provider=provider.name,
+        provider=provider,
         results=results,
         total_runs=len(results),
-        marginal_value_cases=marginal_cases,
-        marginal_gate_passed=marginal_cases >= 3,
+        marginal_value_cases=len(b2_over_b1.marginal_case_ids),
+        marginal_gate_passed=b2_over_b1.gate_passed,
+        b1_over_b0=b1_over_b0,
+        b2_over_b1=b2_over_b1,
+        b3_over_b2=b3_over_b2,
+        selected_topology=selected_topology,
         stop_rule=stop_rule,
+        release_gate_passed=release_gate_passed,
         estimated_cost_usd=_actual_cost(results),
     )
 
@@ -197,25 +256,97 @@ def _estimate(
     )
 
 
-def _has_marginal_value(results: list[CaseEvaluation], case_id: str) -> bool:
-    b1 = _by_topology(results, case_id, "B1")
-    b3 = _by_topology(results, case_id, "B3")
-    b1_concerns = {
-        item.unique_concern for item in b1.ablation.dossier.original_reviews if item.unique_concern
-    }
-    b3_concerns = {
-        item.unique_concern for item in b3.ablation.dossier.original_reviews if item.unique_concern
-    }
-    b1_safeguards = {item.metric_id for item in b1.ablation.decision.safeguards}
-    b3_safeguards = {item.metric_id for item in b3.ablation.decision.safeguards}
-    return bool((b3_concerns - b1_concerns) or (b3_safeguards - b1_safeguards))
+def _evaluate_topology_delta(
+    results: list[CaseEvaluation],
+    case_ids: list[str],
+    baseline_topology: Topology,
+    candidate_topology: Topology,
+    *,
+    required_marginal_cases: int,
+) -> TopologyDeltaEvaluation:
+    marginal_case_ids: list[str] = []
+    quality_regression_case_ids: list[str] = []
+    policy_failure_case_ids: list[str] = []
+    for case_id in case_ids:
+        baseline = _by_topology(results, case_id, baseline_topology)
+        candidate = _by_topology(results, case_id, candidate_topology)
+        regressed = _quality_regressed(baseline, candidate)
+        policy_failed = not _policy_compliant(candidate)
+        if regressed:
+            quality_regression_case_ids.append(case_id)
+        if policy_failed:
+            policy_failure_case_ids.append(case_id)
+        if (
+            not regressed
+            and not policy_failed
+            and _adds_incremental_value(baseline, candidate)
+        ):
+            marginal_case_ids.append(case_id)
+    return TopologyDeltaEvaluation(
+        baseline_topology=baseline_topology,
+        candidate_topology=candidate_topology,
+        required_marginal_cases=required_marginal_cases,
+        marginal_case_ids=marginal_case_ids,
+        quality_regression_case_ids=quality_regression_case_ids,
+        policy_failure_case_ids=policy_failure_case_ids,
+        gate_passed=(
+            len(marginal_case_ids) >= required_marginal_cases
+            and not quality_regression_case_ids
+            and not policy_failure_case_ids
+        ),
+    )
 
 
-def _b1_adds_value(results: list[CaseEvaluation], case_id: str) -> bool:
-    b0 = _by_topology(results, case_id, "B0")
-    b1 = _by_topology(results, case_id, "B1")
-    return b0.ablation.decision != b1.ablation.decision or bool(
-        b1.ablation.dossier.original_reviews[0].unique_concern
+def _adds_incremental_value(
+    baseline: CaseEvaluation, candidate: CaseEvaluation
+) -> bool:
+    baseline_roles = {
+        item.role_id
+        for item in baseline.ablation.dossier.original_reviews
+        if item.unique_concern
+    }
+    candidate_roles = {
+        item.role_id
+        for item in candidate.ablation.dossier.original_reviews
+        if item.unique_concern
+    }
+    baseline_safeguards = {
+        item.metric_id for item in baseline.ablation.decision.safeguards
+    }
+    candidate_safeguards = {
+        item.metric_id for item in candidate.ablation.decision.safeguards
+    }
+    challenger = candidate.ablation.dossier.challenger
+    challenger_added_value = bool(
+        challenger
+        and challenger.objections
+        and baseline.ablation.dossier.challenger is None
+    )
+    return bool(
+        (candidate_roles - baseline_roles)
+        or (candidate_safeguards - baseline_safeguards)
+        or challenger_added_value
+        or _quality_improved(baseline, candidate)
+    )
+
+
+def _quality_improved(
+    baseline: CaseEvaluation, candidate: CaseEvaluation
+) -> bool:
+    return any(
+        not getattr(baseline.process_evaluation, field)
+        and getattr(candidate.process_evaluation, field)
+        for field in _PROCESS_QUALITY_FIELDS
+    )
+
+
+def _quality_regressed(
+    baseline: CaseEvaluation, candidate: CaseEvaluation
+) -> bool:
+    return any(
+        getattr(baseline.process_evaluation, field)
+        and not getattr(candidate.process_evaluation, field)
+        for field in _PROCESS_QUALITY_FIELDS
     )
 
 
@@ -226,15 +357,24 @@ def _by_topology(
 
 
 def _policy_compliant(result: CaseEvaluation) -> bool:
-    process = result.process_evaluation
-    return all(
-        [
-            process.required_roles_contributed,
-            process.role_differentiation,
-            process.unresolved_uncertainty_visible,
-            process.conditional_control_complete,
-        ]
-    )
+    return result.process_evaluation.passed
+
+
+_PROCESS_QUALITY_FIELDS = (
+    "decision_acceptable",
+    "mandatory_claims_covered",
+    "mandatory_dependencies_covered",
+    "mandatory_guardrails_covered",
+    "required_roles_contributed",
+    "role_differentiation",
+    "unresolved_uncertainty_visible",
+    "conditional_control_complete",
+    "decision_action_complete",
+    "decision_action_type_complete",
+    "development_history_reconstructable",
+    "historical_packet_boundary_preserved",
+    "blocker_impact_traceable",
+)
 
 
 def _actual_cost(results: list[CaseEvaluation]) -> float:

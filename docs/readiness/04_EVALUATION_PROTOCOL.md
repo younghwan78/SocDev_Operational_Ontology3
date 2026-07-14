@@ -122,7 +122,8 @@ Good process may still lead to a poor outcome under uncertainty. The report reco
 |Runtime policy violations|0|
 |ReplayProvider regression|byte-stable normalized result for the same release|
 |Role differentiation|each required role has a unique concern or explicit `no_unique_concern` in live evaluation|
-|Multi-role marginal value|B2/B3 adds a valid concern or safeguard over B1 in at least 3 of 5 validation/sealed cases|
+|B2 marginal value|B2 adds a valid concern, safeguard, or deterministic improvement over B1 in at least 3 of 4 v2 validation/sealed cases|
+|B3 marginal value|B3 adds a validated Challenger concern, safeguard, or deterministic improvement over B2 in at least 3 of 4 v2 validation/sealed cases|
 |Validation live stability|at least 4 of 5 runs per validation case stay in an acceptable decision family; all runs remain policy compliant|
 |Sealed-unseen robustness|three frozen B3 runs per sealed case stay policy compliant and at least 2 of 3 use an acceptable decision family|
 
@@ -149,7 +150,13 @@ Run these configurations against the same frozen packet:
 |B2|deterministic core plus routed independent Role Agents|
 |B3|B2 plus Challenger and simulated Chair|
 
-Score deterministic expectations and inferential expectations separately. B2/B3 must not reduce deterministic correctness or policy compliance. If B2/B3 fails the marginal-value gate, release with B1. If B1 also adds no valid concern or safeguard over B0, release the deterministic core without runtime Role Agents.
+Score deterministic expectations and inferential expectations separately. Compare only adjacent topologies: B1 over B0, B2 over B1, and B3 over B2. A candidate must pass every fresh-case Process gate and must not regress any deterministic Process field from its baseline.
+
+For `eval-2026-07-14.2`, B2 and B3 each require valid marginal value in at least 3 of the 4 validation/sealed cases. B1 requires at least one valid contribution over B0 while passing all fresh-case Process gates. Select `keep_b3`, `release_b2`, `release_b1`, or `release_b0` in that order. `release_b0` can still have `release_gate_passed=false` when the deterministic core does not pass the fresh-case gate.
+
+The selected topology is a release candidate, not an activated runtime default. Run validation and sealed stability on that same topology before changing the durable dossier workflow.
+
+New Role IDs with a non-empty unique concern, new canonical safeguard metrics, validated Challenger objections, and deterministic false-to-true improvements count as marginal value. Mere wording changes or a different decision family do not.
 
 Run one ablation pass per validation and sealed-unseen case after candidate freeze. Do not tune against sealed results.
 
@@ -163,7 +170,7 @@ freeze release manifest
   -> advance outcome simulation
   -> run outcome validators
   -> run B0-B3 ablation once on validation and sealed cases
-  -> run B3 stability: validation x5 and sealed unseen x3
+  -> run selected-topology stability: validation x5 and sealed unseen x3
   -> create immutable report
   -> approve or reject release candidate
 ```
@@ -177,6 +184,10 @@ uv run python -m soc_ot.cli evaluation ablate --manifest fixtures/manifests/eval
 uv run python -m soc_ot.cli evaluation stability --manifest fixtures/manifests/eval-2026-07-14.2.yaml --provider openai --partition validation --repeat 5
 uv run python -m soc_ot.cli evaluation stability --manifest fixtures/manifests/eval-2026-07-14.2.yaml --provider openai --partition sealed-unseen --repeat 3
 ```
+
+The current stability runner is B3-only. After a `release_b2` ablation result it must not be
+used as B2 release evidence until the next implementation step adds an explicit, persisted
+selected-topology argument.
 
 Before live execution, print the maximum run count, semantic-call count, timeout envelope, and `runs × SOC_OT_MAX_CASE_COST_USD`. Abort before the first call when the estimate exceeds `SOC_OT_MAX_EVALUATION_COST_USD`; raising the batch cap is an explicit user decision. Store estimated and actual values in the report.
 
@@ -194,6 +205,8 @@ output/evaluations/<release-id>/<run-id>/
 ```
 
 `environment.json` records code revision, provider, model identifier, prompt bundle, contract versions, policy version, and redacted runtime settings.
+
+For ablation, `report.md` records the selected topology, four-way stop rule, selected-topology gate, and all comparison-run counts. `policy_violations.json` is scoped to the selected topology; the complete B0-B3 Process scores remain available for comparison.
 
 ## 11. Sealed-unseen discipline
 

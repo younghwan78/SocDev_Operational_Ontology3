@@ -104,6 +104,11 @@ if ($developmentCases.Count -ne 4) {
 if ($projectPlan -notmatch "corpus v2: development regression 8, validation 2, sealed unseen 2") {
     throw "PROJECT_PLAN.md does not describe the canonical 8/2/2 evaluation partition."
 }
+@("keep_b3", "release_b2", "release_b1", "release_b0") | ForEach-Object {
+    if (-not $projectPlan.Contains($_)) {
+        throw "PROJECT_PLAN.md is missing topology stop rule: $_"
+    }
+}
 
 $requiredPaths = @(
     "/api/v1/decision-cases",

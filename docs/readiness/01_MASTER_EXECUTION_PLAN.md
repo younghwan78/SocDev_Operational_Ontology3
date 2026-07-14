@@ -268,6 +268,8 @@ Deliver:
 - Korean development timeline projection without raw ontology exposure
 - 12-case `eval-2026-07-14.2` with new validation/sealed partitions and explicit source hashes
 - type-specific action-plan and development-history evaluation gates
+- adjacent B1/B0, B2/B1, and B3/B2 topology delta evaluation
+- explicit `keep_b3`, `release_b2`, `release_b1`, or `release_b0` selection artifact
 
 Gate:
 
@@ -282,6 +284,9 @@ Gate:
 - each active blocker reports downstream work and milestone impact deterministically
 - prior opened cases are regression-only and cannot be labeled fresh validation or sealed evidence
 - v1 and v2 manifests validate independently while v2 Replay passes 12/12
+- B2 and B3 require marginal value in at least 3 of 4 fresh v2 cases without Process regression
+- the selected topology passes every fresh-case Process gate or the release gate fails
+- a selected topology remains a candidate until its validation and sealed stability gates pass
 
 ## 7. Crosswalk to supporting plans
 

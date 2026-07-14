@@ -3,7 +3,7 @@
 > 문서 상태: Product Plan v0.2, 로컬 PoC 구현 승인  
 > 갱신일: 2026-07-14
 > 문서 역할: 제품 목표, 범위, 가치 가설, 중단 기준을 정의  
-> 현재 판단: **GO: I0–I7 Replay 및 평가 계약·corpus v2 Step 3 완료**, **PENDING: I7 Live 외부 입력**, **NO-GO: 사내 연동 및 실제 업무 적용**
+> 현재 판단: **GO: I0–I7 Replay 및 Step 4 live ablation에서 B2 candidate 선정**, **PENDING: B2 stability·runtime 활성화**, **NO-GO: 사내 연동 및 실제 업무 적용**
 
 이 계획은 SoC 개발 진행과 불확실성을 재현하고 제한된 정보에서도 저후회 결정을 돕는 제품을 정의한다. 집에서는 synthetic fixture로 의사결정 메커니즘만 검증하며, 실제 비즈니스 가치는 사내 read-only 파일럿에서 별도로 측정한다.
 
@@ -302,15 +302,19 @@ Decision Chair는 Lab mode의 test driver다. 회사 승인자를 대체하지 �
 3. `B2`: deterministic core + routed independent Role Agents
 4. `B3`: B2 + Challenger + simulated Chair
 
-다중 Role 구성을 유지하려면 다음을 모두 만족해야 한다.
+복잡한 topology를 유지하려면 인접 구성을 분리해서 판단한다.
 
-- B0보다 inferential mandatory concern coverage가 높다
-- validation과 sealed unseen 5개 중 3개 이상에서 B1에 없던 유효한 전문 concern 또는 safeguard를 추가한다
+- B1은 B0보다 유효한 concern, safeguard 또는 deterministic 개선을 1개 case 이상에서 추가한다
+- B2는 B1보다 validation/sealed 4개 중 3개 이상에서 유효한 추가 가치를 만든다
+- B3는 B2보다 validation/sealed 4개 중 3개 이상에서 Challenger/Chair 고유 가치를 만든다
 - accepted unsupported authoritative claim은 0건이다
 - decision policy violation은 0건이다
 - case당 비용과 latency가 정해진 상한 안에 있다
 
-향상이 없으면 `B1`로 축소한다. `B1`도 향상이 없으면 deterministic core와 사람이 작성한 checklist만 유지한다.
+각 후보는 모든 fresh case Process gate를 통과하고 baseline보다 deterministic 품질을
+후퇴시키지 않아야 한다. 결과는 `keep_b3`, `release_b2`, `release_b1`, `release_b0` 중
+하나로 기록한다. Replay 결과는 선택 로직의 회귀만 검증하며 실제 Agent 가치 근거로
+사용하지 않는다.
 
 ## 8. Fixture와 평가 전략
 
@@ -364,15 +368,14 @@ Process evaluation과 Outcome evaluation도 분리한다.
 Gate 실패 시 다음 기능을 추가하지 않는다. 원인을 수정하거나 모델·Agent·UI 범위를 줄인 뒤 같은 gate를 다시 실행한다.
 
 현재 로컬 구현은 실행 가능한 다음 행동, 실제 개발 진행 Digital Twin, 그리고
-12-case `eval-2026-07-14.2` 평가 계약·corpus Step 3까지 완료했다.
-후속 구현 Step은 사용자 지시 전 시작하지 않는다. I7 Live gate는 별도의 외부 입력
-필요 항목으로 유지한다.
+12-case `eval-2026-07-14.2`와 인접 topology stop-rule Step 4를 구현하고 live
+ablation에서 B2를 release candidate로 선택했다. B2 stability 전에는 durable dossier
+workflow의 B3 기본값을 바꾸지 않는다. 후속 구현 Step은 사용자 지시 전 시작하지 않는다.
 
 ```text
-현재 provider 가격 확인과 API key 제공
-  → live B0~B3 ablation 비용 승인
-  → validation/sealed stability 실행
-  → Agent topology 유지·축소·제거 판정
+B2 validation/sealed stability 실행
+  → 안정성·policy gate 통과 시 runtime B2 활성화
+  → 실패 시 candidate 재검토 또는 Agent topology 추가 축소
 ```
 
 ## 10. 기술 원칙
@@ -459,7 +462,7 @@ C1에서 가치와 보안 gate를 통과한 뒤에만 연다.
 - 데이터: synthetic fixture only
 - 로컬 승인: simulated Chair, 실제 권한 없음
 - 구현 단계: I0~I7
-- 현재 단계: I0–I7 Replay 및 후속 Step 3 완료, I7 Live gate 외부 입력 대기
+- 현재 단계: Step 4 live ablation 완료, B2 candidate stability·runtime 활성화 대기
 - CI provider: ReplayProvider
 - live provider: 구성 가능한 OpenAI Responses API adapter
 - corpus v2: development regression 8, validation 2, sealed unseen 2

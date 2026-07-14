@@ -186,18 +186,35 @@ def _evaluate_process(
         else set()
     )
     history_checks = _evaluate_development_history(case)
+    review_role_ids = {
+        review.role_id for review in ablation.dossier.original_reviews
+    }
+    if ablation.topology == "B0":
+        required_roles_contributed = ablation.role_count == 0
+        role_differentiation = True
+    elif ablation.topology == "B1":
+        required_roles_contributed = (
+            ablation.role_count == 1
+            and bool(review_role_ids & set(case.required_role_ids))
+        )
+        role_differentiation = all(
+            bool(review.unique_concern) != review.no_unique_concern
+            for review in ablation.dossier.original_reviews
+        )
+    else:
+        required_roles_contributed = set(case.required_role_ids) <= review_role_ids
+        role_differentiation = all(
+            bool(review.unique_concern) != review.no_unique_concern
+            for review in ablation.dossier.original_reviews
+        )
     checks = {
         "decision_acceptable": ablation.decision.decision_type
         in expected.acceptable_decision_types,
         "mandatory_claims_covered": required_claims <= claim_ids,
         "mandatory_dependencies_covered": set(expected.mandatory_dependency_ids) <= work_ids,
         "mandatory_guardrails_covered": required_metrics <= metric_ids,
-        "required_roles_contributed": set(case.required_role_ids)
-        <= {review.role_id for review in ablation.dossier.original_reviews},
-        "role_differentiation": all(
-            bool(review.unique_concern) != review.no_unique_concern
-            for review in ablation.dossier.original_reviews
-        ),
+        "required_roles_contributed": required_roles_contributed,
+        "role_differentiation": role_differentiation,
         "unresolved_uncertainty_visible": set(case.uncertainties)
         <= set(ablation.dossier.unresolved_uncertainties),
         "conditional_control_complete": all(

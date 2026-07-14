@@ -148,7 +148,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
     if args.command == "status":
-        print("I7 Replay + Step 3 evaluation corpus v2; live provider gate pending")
+        print(
+            "I7 Replay + Step 4 B2 release candidate; "
+            "B2 stability/runtime activation pending"
+        )
         return 0
     if args.command == "contracts" and args.contracts_command == "export":
         export_contracts(ROOT_DIR / "contracts/generated", check=args.check)
@@ -380,11 +383,15 @@ def main(argv: Sequence[str] | None = None) -> int:
                 max_workers=max_workers,
                 manifest=manifest,
             )
-            success = True
+            success = ablation_summary.release_gate_passed
             result_line = (
-                "Live ablation marginal cases="
-                f"{ablation_summary.marginal_value_cases}/"
+                "Live ablation B2/B1="
+                f"{len(ablation_summary.b2_over_b1.marginal_case_ids)}/"
                 f"{len(partitions['validation']) + len(partitions['sealed-unseen'])}; "
+                "B3/B2="
+                f"{len(ablation_summary.b3_over_b2.marginal_case_ids)}/"
+                f"{len(partitions['validation']) + len(partitions['sealed-unseen'])}; "
+                f"selected={ablation_summary.selected_topology}; "
                 f"stop_rule={ablation_summary.stop_rule}"
             )
             summary_payload = ablation_summary.model_dump(mode="json")

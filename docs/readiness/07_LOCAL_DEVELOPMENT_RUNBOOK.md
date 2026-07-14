@@ -202,6 +202,15 @@ The command records ChatGPT subscription tokens but reports USD as not applicabl
 failure is terminal and appears in `runtime_failures.json` as `PROVIDER_USAGE_LIMIT`; it must
 not be interpreted as a model-quality result or repaired with repeated schema calls.
 
+The ablation result reports B2-over-B1 and B3-over-B2 counts separately, then selects one of
+`keep_b3`, `release_b2`, `release_b1`, or `release_b0`. Replay/test-double selection verifies
+only the contract. Only a frozen live run can be used as topology evidence. The selection is a
+stability candidate; do not switch the durable dossier runtime before that topology passes its
+validation and sealed stability gates.
+
+Current limitation: the stability command still executes B3 only. Do not run it as evidence
+for the selected B2 candidate until an explicit selected-topology argument is implemented.
+
 ## 9. Authoring hidden fixtures
 
 Hidden inspection is CLI-only and off by default.
