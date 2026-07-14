@@ -1,0 +1,8 @@
+schema_version: expected-result.v1
+fixture_version: 1
+case_id: CASE-DT-001
+acceptable_decision_types: [RUN_REVERSIBLE_TRIAL, DEFER_UNTIL_TRIGGER, COLLECT_MINIMUM_EVIDENCE]
+unacceptable_decision_types: [APPROVE]
+mandatory_claim_ids: [CLM-DT1-MISMATCH, CLM-DT1-REWORK]
+mandatory_dependency_ids: [WORK-DT1-HW-IF, WORK-DT1-SW-DRIVER]
+mandatory_guardrail_metric_ids: [DDR_BANDWIDTH]

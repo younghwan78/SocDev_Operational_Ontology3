@@ -28,20 +28,48 @@ class FixtureRepository:
     def _load(self, relative_path: str, model_type: type[ModelT]) -> ModelT:
         return model_type.model_validate(_load_yaml(self.root / relative_path))
 
-    def load_observable(self, case_id: str) -> ObservableCase:
-        evaluation_path = self.root / f"cases/observable/{case_id}.yaml"
-        relative_path = (
-            f"cases/observable/{case_id}.yaml"
-            if evaluation_path.exists()
-            else f"cases/development/{case_id}.yaml"
-        )
+    def load_observable(
+        self, case_id: str, relative_path: str | None = None
+    ) -> ObservableCase:
+        if relative_path is None:
+            evaluation_path = self.root / f"cases/observable/{case_id}.yaml"
+            relative_path = (
+                f"cases/observable/{case_id}.yaml"
+                if evaluation_path.exists()
+                else f"cases/development/{case_id}.yaml"
+            )
         return self._load(relative_path, ObservableCase)
 
-    def load_hidden(self, case_id: str) -> HiddenCase:
-        return self._load(f"cases/hidden/{case_id}.yaml", HiddenCase)
+    def load_hidden(
+        self, case_id: str, relative_path: str | None = None
+    ) -> HiddenCase:
+        return self._load(relative_path or f"cases/hidden/{case_id}.yaml", HiddenCase)
 
-    def load_expected(self, case_id: str) -> ExpectedResult:
-        return self._load(f"expected/{case_id}.yaml", ExpectedResult)
+    def load_expected(
+        self, case_id: str, relative_path: str | None = None
+    ) -> ExpectedResult:
+        return self._load(relative_path or f"expected/{case_id}.yaml", ExpectedResult)
+
+    def validate_evaluation_case(
+        self,
+        case_id: str,
+        *,
+        observable_path: str | None = None,
+        hidden_path: str | None = None,
+        expected_path: str | None = None,
+    ) -> tuple[ObservableCase, HiddenCase, ExpectedResult]:
+        observable = self.load_observable(case_id, observable_path)
+        hidden = self.load_hidden(case_id, hidden_path)
+        expected = self.load_expected(case_id, expected_path)
+        if {observable.case_id, hidden.case_id, expected.case_id} != {case_id}:
+            raise ValueError("evaluation source case ids differ")
+        if len({observable.fixture_version, hidden.fixture_version, expected.fixture_version}) != 1:
+            raise ValueError("evaluation source fixture versions differ")
+        option_ids = {item.option_id for item in observable.alternatives}
+        path_ids = {item.option_id for item in hidden.outcome_paths}
+        if option_ids != path_ids:
+            raise ValueError("outcome paths must exactly match observable option ids")
+        return observable, hidden, expected
 
     def validate_case(self, case_id: str, *, include_hidden: bool = False) -> ObservableCase:
         observable = self.load_observable(case_id)

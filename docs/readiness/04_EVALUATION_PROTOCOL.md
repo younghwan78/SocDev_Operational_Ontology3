@@ -1,7 +1,7 @@
 # Evaluation protocol
 
 > Status: APPROVED  
-> Date: 2026-07-11  
+> Date: 2026-07-14
 > Scope: fixture-only PoC and optional live-provider stability check
 
 ## 1. Purpose
@@ -12,11 +12,12 @@ This protocol determines whether the system helps make defensible SoC developmen
 
 |Partition|Cases|Use|Prompt or policy tuning|
 |---|---|---|---|
-|Development|`CASE-VR-001` to `CASE-VR-003`|implementation and debugging|allowed|
-|Validation|`CASE-VR-004`, `CASE-VR-005`|release-candidate regression|not within the current candidate|
-|Sealed unseen|`CASE-HO-001` to `CASE-HO-003`|candidate robustness check|prohibited|
+|Development|the eight prior `CASE-VR/HO` cases|known regression and debugging|allowed|
+|Validation|`CASE-DT-001`, `CASE-DT-002`|new release-candidate regression|not within the current candidate|
+|Sealed unseen|`CASE-DT-003`, `CASE-DT-004`|new candidate robustness check|prohibited|
 
-Required sealed-unseen themes:
+The earlier validation and sealed results were inspected and are retired to the
+development partition in v2. Required v2 validation/sealed themes are:
 
 - schedule workaround that creates deferred technical debt
 - important measurement unavailable until silicon, with high irreversibility
@@ -33,13 +34,16 @@ A validation failure may inform the next candidate, but the same case then serve
 Every evaluation release has a committed manifest.
 
 ```yaml
-evaluation_release: eval-2026-07-14.1
-schema_version: evaluation-manifest.v1
+evaluation_release: eval-2026-07-14.2
+schema_version: evaluation-manifest.v2
 policy_version: decision-policy.v1
 prompt_bundle_version: prompts.v2
 cases:
   - case_id: CASE-VR-004
-    partition: validation
+    partition: development
+    observable_path: cases/observable/CASE-VR-004.yaml
+    hidden_path: cases/hidden/CASE-VR-004.yaml
+    expected_path: expected/CASE-VR-004.yaml
     observable_sha256: observable_sha256_placeholder
     hidden_sha256: hidden_sha256_placeholder
     expected_sha256: expected_sha256_placeholder
@@ -48,7 +52,8 @@ cases:
 Changing any frozen file creates a new evaluation release. Results from different releases are not merged as if they were comparable.
 
 `eval-2026-07-11.1` with `prompts.v1` remains an immutable historical release.
-The current executable-action contract uses `eval-2026-07-14.1` with `prompts.v2`.
+`eval-2026-07-14.1` remains a historical eight-case release. The current evaluation
+contract uses `eval-2026-07-14.2`, explicit source paths, 12 cases, and `prompts.v2`.
 
 ## 4. Expected-result contract
 
@@ -81,6 +86,10 @@ Checks whether the system followed the decision process:
 - required roles contributed or explicitly declared no unique concern
 - dissent is preserved in the Dossier
 - constraints, dependencies, owners, and next evidence actions are actionable
+- the action plan is complete for its exact DecisionType
+- development history reconstructs at least three observed steps when events exist
+- historical packets exclude not-yet-observed events and future evidence content
+- active blockers remain traceable to an impacted milestone
 - policy, budget, timeout, and hidden-access boundaries were respected
 
 ### 5.2 Outcome evaluation
@@ -106,6 +115,10 @@ Good process may still lead to a poor outcome under uncertainty. The report reco
 |Mandatory dependency coverage|100% for validation and sealed unseen|
 |Chair decision family|in the case's acceptable set for every validation and sealed-unseen case|
 |Conditional/trial completeness|guardrail, trigger, owner, expiry/review step, and verification plan all present|
+|Decision action completeness|type-specific owner, due step, trigger, verification, fallback, and required subtype fields present|
+|Development history reconstruction|all v2 validation/sealed cases reconstruct at least three observed steps|
+|Historical packet boundary|0 future event or ineligible evidence findings|
+|Blocker impact traceability|100% of active blockers reach a named downstream milestone|
 |Runtime policy violations|0|
 |ReplayProvider regression|byte-stable normalized result for the same release|
 |Role differentiation|each required role has a unique concern or explicit `no_unique_concern` in live evaluation|
@@ -158,11 +171,11 @@ freeze release manifest
 Commands to be implemented:
 
 ```powershell
-uv run python -m soc_ot.cli evaluation validate-release --manifest fixtures/manifests/eval-2026-07-14.1.yaml
-uv run python -m soc_ot.cli evaluation run --manifest fixtures/manifests/eval-2026-07-14.1.yaml --provider replay
-uv run python -m soc_ot.cli evaluation ablate --manifest fixtures/manifests/eval-2026-07-14.1.yaml --provider openai --partitions validation,sealed-unseen
-uv run python -m soc_ot.cli evaluation stability --manifest fixtures/manifests/eval-2026-07-14.1.yaml --provider openai --partition validation --repeat 5
-uv run python -m soc_ot.cli evaluation stability --manifest fixtures/manifests/eval-2026-07-14.1.yaml --provider openai --partition sealed-unseen --repeat 3
+uv run python -m soc_ot.cli evaluation validate-release --manifest fixtures/manifests/eval-2026-07-14.2.yaml
+uv run python -m soc_ot.cli evaluation run --manifest fixtures/manifests/eval-2026-07-14.2.yaml --provider replay
+uv run python -m soc_ot.cli evaluation ablate --manifest fixtures/manifests/eval-2026-07-14.2.yaml --provider openai --partitions validation,sealed-unseen
+uv run python -m soc_ot.cli evaluation stability --manifest fixtures/manifests/eval-2026-07-14.2.yaml --provider openai --partition validation --repeat 5
+uv run python -m soc_ot.cli evaluation stability --manifest fixtures/manifests/eval-2026-07-14.2.yaml --provider openai --partition sealed-unseen --repeat 3
 ```
 
 Before live execution, print the maximum run count, semantic-call count, timeout envelope, and `runs × SOC_OT_MAX_CASE_COST_USD`. Abort before the first call when the estimate exceeds `SOC_OT_MAX_EVALUATION_COST_USD`; raising the batch cap is an explicit user decision. Store estimated and actual values in the report.
@@ -200,6 +213,9 @@ MANDATORY_RISK_MISSED
 MANDATORY_DEPENDENCY_MISSED
 DECISION_FAMILY_INVALID
 CONDITIONAL_CONTROL_INCOMPLETE
+DECISION_ACTION_INCOMPLETE
+DEVELOPMENT_HISTORY_INVALID
+HISTORICAL_PACKET_LEAK
 ROLE_COLLAPSE
 RUNTIME_POLICY_VIOLATION
 OUTCOME_RULE_FAILURE

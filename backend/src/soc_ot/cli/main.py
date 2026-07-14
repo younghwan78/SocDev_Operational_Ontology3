@@ -13,7 +13,9 @@ from soc_ot.application.contracts import export_contracts
 from soc_ot.application.evaluation import run_evaluation
 from soc_ot.application.evaluation_artifacts import write_evaluation_artifacts
 from soc_ot.application.evaluation_manifest import (
+    DEFAULT_EVALUATION_RELEASE,
     freeze_evaluation_manifest,
+    manifest_partitions,
     validate_evaluation_manifest,
 )
 from soc_ot.application.live_evaluation import (
@@ -30,6 +32,9 @@ from soc_ot.infrastructure.hidden_repository import PostgresHiddenCaseRepository
 from soc_ot.infrastructure.tables import HiddenAuthoringAuditRow
 
 ROOT_DIR = Path(__file__).resolve().parents[4]
+DEFAULT_EVALUATION_MANIFEST = (
+    ROOT_DIR / f"fixtures/manifests/{DEFAULT_EVALUATION_RELEASE}.yaml"
+)
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -78,19 +83,19 @@ def build_parser() -> argparse.ArgumentParser:
     freeze = evaluation_sub.add_parser("freeze")
     freeze.add_argument("--root", type=Path, default=ROOT_DIR / "fixtures")
     freeze.add_argument(
-        "--manifest", type=Path, default=ROOT_DIR / "fixtures/manifests/eval-2026-07-14.1.yaml"
+        "--manifest", type=Path, default=DEFAULT_EVALUATION_MANIFEST
     )
     validate_release = evaluation_sub.add_parser("validate-release")
     validate_release.add_argument("--root", type=Path, default=ROOT_DIR / "fixtures")
     validate_release.add_argument(
-        "--manifest", type=Path, default=ROOT_DIR / "fixtures/manifests/eval-2026-07-14.1.yaml"
+        "--manifest", type=Path, default=DEFAULT_EVALUATION_MANIFEST
     )
     run = evaluation_sub.add_parser("run")
     run.add_argument("--root", type=Path, default=ROOT_DIR / "fixtures")
     run.add_argument(
         "--manifest",
         type=Path,
-        default=ROOT_DIR / "fixtures/manifests/eval-2026-07-14.1.yaml",
+        default=DEFAULT_EVALUATION_MANIFEST,
     )
     run.add_argument("--provider", choices=["replay"], default="replay")
     run.add_argument("--topology", choices=["B0", "B1", "B2", "B3"], default="B3")
@@ -101,7 +106,7 @@ def build_parser() -> argparse.ArgumentParser:
     ablate.add_argument(
         "--manifest",
         type=Path,
-        default=ROOT_DIR / "fixtures/manifests/eval-2026-07-14.1.yaml",
+        default=DEFAULT_EVALUATION_MANIFEST,
     )
     ablate.add_argument(
         "--provider", choices=["openai", "codex-cli"], default="openai"
@@ -116,7 +121,7 @@ def build_parser() -> argparse.ArgumentParser:
     stability.add_argument(
         "--manifest",
         type=Path,
-        default=ROOT_DIR / "fixtures/manifests/eval-2026-07-14.1.yaml",
+        default=DEFAULT_EVALUATION_MANIFEST,
     )
     stability.add_argument(
         "--provider", choices=["openai", "codex-cli"], default="openai"
@@ -143,7 +148,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
     if args.command == "status":
-        print("I7 hardening; live provider gate pending")
+        print("I7 Replay + Step 3 evaluation corpus v2; live provider gate pending")
         return 0
     if args.command == "contracts" and args.contracts_command == "export":
         export_contracts(ROOT_DIR / "contracts/generated", check=args.check)
@@ -231,18 +236,17 @@ def main(argv: Sequence[str] | None = None) -> int:
         return 0
     if args.command == "evaluation" and args.evaluation_command == "freeze":
         manifest = freeze_evaluation_manifest(args.root, args.manifest)
-        cases = manifest["cases"]
-        if not isinstance(cases, list):
-            raise ValueError("evaluation manifest cases must be a list")
-        print(f"Frozen {len(cases)} evaluation cases.")
+        print(f"Frozen {len(manifest.cases)} evaluation cases.")
         return 0
     if args.command == "evaluation" and args.evaluation_command == "validate-release":
         validate_evaluation_manifest(args.root, args.manifest)
         print("Evaluation release is current.")
         return 0
     if args.command == "evaluation" and args.evaluation_command == "run":
-        validate_evaluation_manifest(args.root, args.manifest)
-        replay_summary = run_evaluation(FixtureRepository(args.root), topology=args.topology)
+        manifest = validate_evaluation_manifest(args.root, args.manifest)
+        replay_summary = run_evaluation(
+            FixtureRepository(args.root), topology=args.topology, manifest=manifest
+        )
         artifact_dir = write_evaluation_artifacts(
             replay_summary,
             manifest_path=args.manifest,
@@ -306,7 +310,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         if not is_codex_cli and not args.acknowledge_cost:
             print("Use --acknowledge-cost after reviewing the evaluation budget.")
             return 2
-        validate_evaluation_manifest(args.root, args.manifest)
+        manifest = validate_evaluation_manifest(args.root, args.manifest)
+        partitions = manifest_partitions(manifest)
         estimate_case_cost = 0.0 if is_codex_cli else settings.max_case_cost_usd
         estimate_batch_cost = 0.0 if is_codex_cli else settings.max_evaluation_cost_usd
         if args.evaluation_command == "ablate":
@@ -317,6 +322,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 max_case_cost_usd=estimate_case_cost,
                 max_evaluation_cost_usd=estimate_batch_cost,
                 case_timeout_seconds=settings.max_case_runtime_seconds,
+                manifest=manifest,
             )
         else:
             estimate = estimate_stability_batch(
@@ -325,6 +331,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 max_case_cost_usd=estimate_case_cost,
                 max_evaluation_cost_usd=estimate_batch_cost,
                 case_timeout_seconds=settings.max_case_runtime_seconds,
+                manifest=manifest,
             )
         cost_text = (
             "billing=ChatGPT subscription; USD cost=N/A"
@@ -371,10 +378,13 @@ def main(argv: Sequence[str] | None = None) -> int:
                 evaluation_provider,
                 max_cost_usd=max_cost_usd,
                 max_workers=max_workers,
+                manifest=manifest,
             )
             success = True
             result_line = (
-                f"Live ablation marginal cases={ablation_summary.marginal_value_cases}/5; "
+                "Live ablation marginal cases="
+                f"{ablation_summary.marginal_value_cases}/"
+                f"{len(partitions['validation']) + len(partitions['sealed-unseen'])}; "
                 f"stop_rule={ablation_summary.stop_rule}"
             )
             summary_payload = ablation_summary.model_dump(mode="json")
@@ -387,6 +397,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 repeats=args.repeat,
                 max_cost_usd=max_cost_usd,
                 max_workers=max_workers,
+                manifest=manifest,
             )
             success = stability_summary.stability_gate_passed
             result_line = (

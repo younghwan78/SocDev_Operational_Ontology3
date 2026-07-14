@@ -1,0 +1,12 @@
+schema_version: hidden-case.v1
+fixture_version: 1
+case_id: CASE-DT-003
+hidden_root_causes:
+  - workaround가 장시간 boot loop에서 cleanup 누락을 만든다.
+outcome_paths:
+  - option_id: OPT-DT3-EXPIRY
+    rule_id: guarded_sw_eis_path.v1
+    parameters: {reveal_measurement_at_step: 15, bandwidth_gb_s: 20.5, thermal_deg_c: 84}
+  - option_id: OPT-DT3-BLOCK
+    rule_id: deferred_eis_path.v1
+    parameters: {milestone_delay_steps: 3}

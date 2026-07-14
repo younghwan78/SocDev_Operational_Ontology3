@@ -1,0 +1,127 @@
+{
+  "$defs": {
+    "EvaluationManifestCase": {
+      "additionalProperties": false,
+      "properties": {
+        "case_id": {
+          "title": "Case Id",
+          "type": "string"
+        },
+        "partition": {
+          "enum": [
+            "development",
+            "validation",
+            "sealed-unseen"
+          ],
+          "title": "Partition",
+          "type": "string"
+        },
+        "observable_path": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Observable Path"
+        },
+        "hidden_path": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Hidden Path"
+        },
+        "expected_path": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Path"
+        },
+        "observable_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Observable Sha256",
+          "type": "string"
+        },
+        "hidden_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Hidden Sha256",
+          "type": "string"
+        },
+        "expected_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Expected Sha256",
+          "type": "string"
+        }
+      },
+      "required": [
+        "case_id",
+        "partition",
+        "observable_sha256",
+        "hidden_sha256",
+        "expected_sha256"
+      ],
+      "title": "EvaluationManifestCase",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "evaluation_release": {
+      "title": "Evaluation Release",
+      "type": "string"
+    },
+    "schema_version": {
+      "enum": [
+        "evaluation-manifest.v1",
+        "evaluation-manifest.v2"
+      ],
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "policy_version": {
+      "title": "Policy Version",
+      "type": "string"
+    },
+    "prompt_bundle_version": {
+      "title": "Prompt Bundle Version",
+      "type": "string"
+    },
+    "prompt_bundle_hash": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Prompt Bundle Hash",
+      "type": "string"
+    },
+    "cases": {
+      "items": {
+        "$ref": "#/$defs/EvaluationManifestCase"
+      },
+      "title": "Cases",
+      "type": "array"
+    }
+  },
+  "required": [
+    "evaluation_release",
+    "schema_version",
+    "policy_version",
+    "prompt_bundle_version",
+    "prompt_bundle_hash",
+    "cases"
+  ],
+  "title": "EvaluationManifest",
+  "type": "object"
+}

@@ -1,0 +1,8 @@
+schema_version: expected-result.v1
+fixture_version: 1
+case_id: CASE-DT-003
+acceptable_decision_types: [APPROVE_WITH_GUARDRAILS, DEFER_UNTIL_TRIGGER, REJECT]
+unacceptable_decision_types: [APPROVE]
+mandatory_claim_ids: [CLM-DT3-BOOT, CLM-DT3-DEBT]
+mandatory_dependency_ids: [WORK-DT3-INTEGRATE, WORK-DT3-REMOVE]
+mandatory_guardrail_metric_ids: [DDR_BANDWIDTH]

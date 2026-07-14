@@ -1,0 +1,8 @@
+schema_version: expected-result.v1
+fixture_version: 1
+case_id: CASE-DT-002
+acceptable_decision_types: [APPROVE_WITH_GUARDRAILS, COLLECT_MINIMUM_EVIDENCE, DEFER_UNTIL_TRIGGER]
+unacceptable_decision_types: [APPROVE]
+mandatory_claim_ids: [CLM-DT2-MARGIN]
+mandatory_dependency_ids: [WORK-DT2-MEASURE]
+mandatory_guardrail_metric_ids: [DDR_BANDWIDTH]

@@ -1,0 +1,1076 @@
+{
+  "$defs": {
+    "AblationResult": {
+      "additionalProperties": false,
+      "properties": {
+        "topology": {
+          "enum": [
+            "B0",
+            "B1",
+            "B2",
+            "B3"
+          ],
+          "title": "Topology",
+          "type": "string"
+        },
+        "role_count": {
+          "title": "Role Count",
+          "type": "integer"
+        },
+        "challenger_used": {
+          "title": "Challenger Used",
+          "type": "boolean"
+        },
+        "chair_used": {
+          "title": "Chair Used",
+          "type": "boolean"
+        },
+        "input_tokens": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Input Tokens",
+          "type": "integer"
+        },
+        "output_tokens": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Output Tokens",
+          "type": "integer"
+        },
+        "estimated_cost_usd": {
+          "default": 0.0,
+          "minimum": 0,
+          "title": "Estimated Cost Usd",
+          "type": "number"
+        },
+        "provider_attempts": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Provider Attempts",
+          "type": "integer"
+        },
+        "dossier": {
+          "$ref": "#/$defs/DecisionDossier"
+        },
+        "decision": {
+          "$ref": "#/$defs/SimulatedDecision"
+        }
+      },
+      "required": [
+        "topology",
+        "role_count",
+        "challenger_used",
+        "chair_used",
+        "dossier",
+        "decision"
+      ],
+      "title": "AblationResult",
+      "type": "object"
+    },
+    "AgreementGroup": {
+      "additionalProperties": false,
+      "properties": {
+        "recommendation": {
+          "$ref": "#/$defs/DecisionType"
+        },
+        "role_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Role Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "recommendation",
+        "role_ids"
+      ],
+      "title": "AgreementGroup",
+      "type": "object"
+    },
+    "CaseEvaluation": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "default": "case-evaluation.v2",
+          "enum": [
+            "case-evaluation.v1",
+            "case-evaluation.v2"
+          ],
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "case_id": {
+          "title": "Case Id",
+          "type": "string"
+        },
+        "partition": {
+          "title": "Partition",
+          "type": "string"
+        },
+        "topology": {
+          "enum": [
+            "B0",
+            "B1",
+            "B2",
+            "B3"
+          ],
+          "title": "Topology",
+          "type": "string"
+        },
+        "ablation": {
+          "$ref": "#/$defs/AblationResult"
+        },
+        "outcome": {
+          "$ref": "#/$defs/OutcomeSnapshot"
+        },
+        "process_evaluation": {
+          "$ref": "#/$defs/ProcessEvaluation"
+        },
+        "outcome_evaluation": {
+          "$ref": "#/$defs/OutcomeEvaluation"
+        },
+        "passed": {
+          "title": "Passed",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "case_id",
+        "partition",
+        "topology",
+        "ablation",
+        "outcome",
+        "process_evaluation",
+        "outcome_evaluation",
+        "passed"
+      ],
+      "title": "CaseEvaluation",
+      "type": "object"
+    },
+    "ChallengerObjection": {
+      "additionalProperties": false,
+      "properties": {
+        "objection_id": {
+          "title": "Objection Id",
+          "type": "string"
+        },
+        "target_role_id": {
+          "title": "Target Role Id",
+          "type": "string"
+        },
+        "statement": {
+          "title": "Statement",
+          "type": "string"
+        },
+        "claim_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Claim Ids",
+          "type": "array"
+        },
+        "requested_revision": {
+          "title": "Requested Revision",
+          "type": "string"
+        }
+      },
+      "required": [
+        "objection_id",
+        "target_role_id",
+        "statement",
+        "requested_revision"
+      ],
+      "title": "ChallengerObjection",
+      "type": "object"
+    },
+    "ChallengerReview": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "challenger-review.v1",
+          "default": "challenger-review.v1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "objections": {
+          "items": {
+            "$ref": "#/$defs/ChallengerObjection"
+          },
+          "title": "Objections",
+          "type": "array"
+        },
+        "no_objection_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "No Objection Reason"
+        }
+      },
+      "required": [
+        "objections"
+      ],
+      "title": "ChallengerReview",
+      "type": "object"
+    },
+    "DecisionActionPlan": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "decision-action-plan.v1",
+          "default": "decision-action-plan.v1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "action_type": {
+          "enum": [
+            "execute",
+            "collect_evidence",
+            "defer",
+            "escalate",
+            "reject"
+          ],
+          "title": "Action Type",
+          "type": "string"
+        },
+        "owner": {
+          "minLength": 1,
+          "title": "Owner",
+          "type": "string"
+        },
+        "action": {
+          "minLength": 1,
+          "title": "Action",
+          "type": "string"
+        },
+        "due_at_step": {
+          "minimum": 0,
+          "title": "Due At Step",
+          "type": "integer"
+        },
+        "trigger": {
+          "minLength": 1,
+          "title": "Trigger",
+          "type": "string"
+        },
+        "verification": {
+          "minLength": 1,
+          "title": "Verification",
+          "type": "string"
+        },
+        "fallback_action": {
+          "minLength": 1,
+          "title": "Fallback Action",
+          "type": "string"
+        },
+        "evidence_required": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidence Required",
+          "type": "array"
+        },
+        "escalation_target": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Escalation Target"
+        },
+        "questions_to_resolve": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Questions To Resolve",
+          "type": "array"
+        },
+        "reopen_condition": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reopen Condition"
+        }
+      },
+      "required": [
+        "action_type",
+        "owner",
+        "action",
+        "due_at_step",
+        "trigger",
+        "verification",
+        "fallback_action"
+      ],
+      "title": "DecisionActionPlan",
+      "type": "object"
+    },
+    "DecisionDossier": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "decision-dossier.v1",
+          "default": "decision-dossier.v1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "case_id": {
+          "title": "Case Id",
+          "type": "string"
+        },
+        "packet_hash": {
+          "title": "Packet Hash",
+          "type": "string"
+        },
+        "original_reviews": {
+          "items": {
+            "$ref": "#/$defs/RoleReview"
+          },
+          "title": "Original Reviews",
+          "type": "array"
+        },
+        "challenger": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ChallengerReview"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "revised_reviews": {
+          "items": {
+            "$ref": "#/$defs/RoleReview"
+          },
+          "title": "Revised Reviews",
+          "type": "array"
+        },
+        "agreement_groups": {
+          "items": {
+            "$ref": "#/$defs/AgreementGroup"
+          },
+          "title": "Agreement Groups",
+          "type": "array"
+        },
+        "dissent": {
+          "items": {
+            "$ref": "#/$defs/DissentItem"
+          },
+          "title": "Dissent",
+          "type": "array"
+        },
+        "unresolved_uncertainties": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Unresolved Uncertainties",
+          "type": "array"
+        }
+      },
+      "required": [
+        "case_id",
+        "packet_hash",
+        "original_reviews",
+        "agreement_groups",
+        "dissent",
+        "unresolved_uncertainties"
+      ],
+      "title": "DecisionDossier",
+      "type": "object"
+    },
+    "DecisionType": {
+      "enum": [
+        "APPROVE",
+        "APPROVE_WITH_GUARDRAILS",
+        "RUN_REVERSIBLE_TRIAL",
+        "COLLECT_MINIMUM_EVIDENCE",
+        "DEFER_UNTIL_TRIGGER",
+        "REJECT",
+        "ESCALATE"
+      ],
+      "title": "DecisionType",
+      "type": "string"
+    },
+    "DissentItem": {
+      "additionalProperties": false,
+      "properties": {
+        "role_id": {
+          "title": "Role Id",
+          "type": "string"
+        },
+        "recommendation": {
+          "$ref": "#/$defs/DecisionType"
+        },
+        "rationale": {
+          "title": "Rationale",
+          "type": "string"
+        }
+      },
+      "required": [
+        "role_id",
+        "recommendation",
+        "rationale"
+      ],
+      "title": "DissentItem",
+      "type": "object"
+    },
+    "OutcomeEvaluation": {
+      "additionalProperties": false,
+      "properties": {
+        "rule_executed": {
+          "title": "Rule Executed",
+          "type": "boolean"
+        },
+        "evidence_revealed": {
+          "title": "Evidence Revealed",
+          "type": "boolean"
+        },
+        "risk_contained": {
+          "title": "Risk Contained",
+          "type": "boolean"
+        },
+        "passed": {
+          "title": "Passed",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "rule_executed",
+        "evidence_revealed",
+        "risk_contained",
+        "passed"
+      ],
+      "title": "OutcomeEvaluation",
+      "type": "object"
+    },
+    "OutcomeSnapshot": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "outcome-snapshot.v1",
+          "default": "outcome-snapshot.v1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "case_id": {
+          "title": "Case Id",
+          "type": "string"
+        },
+        "decision_id": {
+          "title": "Decision Id",
+          "type": "string"
+        },
+        "selected_option_id": {
+          "title": "Selected Option Id",
+          "type": "string"
+        },
+        "advanced_from_step": {
+          "title": "Advanced From Step",
+          "type": "integer"
+        },
+        "current_step": {
+          "title": "Current Step",
+          "type": "integer"
+        },
+        "rule_id": {
+          "title": "Rule Id",
+          "type": "string"
+        },
+        "outcome_rule_version": {
+          "title": "Outcome Rule Version",
+          "type": "string"
+        },
+        "event_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Event Ids",
+          "type": "array"
+        },
+        "revealed_evidence": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Revealed Evidence",
+          "type": "array"
+        },
+        "metrics": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "title": "Metrics",
+          "type": "object"
+        },
+        "consequences": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Consequences",
+          "type": "array"
+        },
+        "guardrail_state": {
+          "enum": [
+            "not_applicable",
+            "monitoring",
+            "triggered"
+          ],
+          "title": "Guardrail State",
+          "type": "string"
+        },
+        "executed_actions": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Executed Actions",
+          "type": "array"
+        }
+      },
+      "required": [
+        "case_id",
+        "decision_id",
+        "selected_option_id",
+        "advanced_from_step",
+        "current_step",
+        "rule_id",
+        "outcome_rule_version",
+        "event_ids",
+        "revealed_evidence",
+        "metrics",
+        "consequences",
+        "guardrail_state",
+        "executed_actions"
+      ],
+      "title": "OutcomeSnapshot",
+      "type": "object"
+    },
+    "ProcessEvaluation": {
+      "additionalProperties": false,
+      "properties": {
+        "decision_acceptable": {
+          "title": "Decision Acceptable",
+          "type": "boolean"
+        },
+        "mandatory_claims_covered": {
+          "title": "Mandatory Claims Covered",
+          "type": "boolean"
+        },
+        "mandatory_dependencies_covered": {
+          "title": "Mandatory Dependencies Covered",
+          "type": "boolean"
+        },
+        "mandatory_guardrails_covered": {
+          "title": "Mandatory Guardrails Covered",
+          "type": "boolean"
+        },
+        "required_roles_contributed": {
+          "title": "Required Roles Contributed",
+          "type": "boolean"
+        },
+        "role_differentiation": {
+          "title": "Role Differentiation",
+          "type": "boolean"
+        },
+        "unresolved_uncertainty_visible": {
+          "title": "Unresolved Uncertainty Visible",
+          "type": "boolean"
+        },
+        "conditional_control_complete": {
+          "title": "Conditional Control Complete",
+          "type": "boolean"
+        },
+        "decision_action_complete": {
+          "title": "Decision Action Complete",
+          "type": "boolean"
+        },
+        "decision_action_type_complete": {
+          "default": true,
+          "title": "Decision Action Type Complete",
+          "type": "boolean"
+        },
+        "development_history_reconstructable": {
+          "default": true,
+          "title": "Development History Reconstructable",
+          "type": "boolean"
+        },
+        "historical_packet_boundary_preserved": {
+          "default": true,
+          "title": "Historical Packet Boundary Preserved",
+          "type": "boolean"
+        },
+        "blocker_impact_traceable": {
+          "default": true,
+          "title": "Blocker Impact Traceable",
+          "type": "boolean"
+        },
+        "passed": {
+          "title": "Passed",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "decision_acceptable",
+        "mandatory_claims_covered",
+        "mandatory_dependencies_covered",
+        "mandatory_guardrails_covered",
+        "required_roles_contributed",
+        "role_differentiation",
+        "unresolved_uncertainty_visible",
+        "conditional_control_complete",
+        "decision_action_complete",
+        "passed"
+      ],
+      "title": "ProcessEvaluation",
+      "type": "object"
+    },
+    "Quantity": {
+      "additionalProperties": false,
+      "properties": {
+        "mode": {
+          "$ref": "#/$defs/QuantityMode"
+        },
+        "unit": {
+          "enum": [
+            "mW",
+            "mJ",
+            "GB/s",
+            "Mbps",
+            "ms",
+            "fps",
+            "degC",
+            "mm2",
+            "ratio",
+            "count",
+            "person_day",
+            "step"
+          ],
+          "title": "Unit",
+          "type": "string"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Value"
+        },
+        "lower_bound": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Lower Bound"
+        },
+        "upper_bound": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Upper Bound"
+        },
+        "qualitative": {
+          "anyOf": [
+            {
+              "enum": [
+                "low",
+                "medium",
+                "high",
+                "critical"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Qualitative"
+        }
+      },
+      "required": [
+        "mode",
+        "unit"
+      ],
+      "title": "Quantity",
+      "type": "object"
+    },
+    "QuantityMode": {
+      "enum": [
+        "exact",
+        "range",
+        "qualitative",
+        "unknown"
+      ],
+      "title": "QuantityMode",
+      "type": "string"
+    },
+    "RiskAssessment": {
+      "additionalProperties": false,
+      "properties": {
+        "risk_id": {
+          "title": "Risk Id",
+          "type": "string"
+        },
+        "statement": {
+          "title": "Statement",
+          "type": "string"
+        },
+        "severity": {
+          "enum": [
+            "low",
+            "medium",
+            "high",
+            "critical"
+          ],
+          "title": "Severity",
+          "type": "string"
+        },
+        "claim_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Claim Ids",
+          "type": "array"
+        },
+        "mitigation": {
+          "title": "Mitigation",
+          "type": "string"
+        }
+      },
+      "required": [
+        "risk_id",
+        "statement",
+        "severity",
+        "mitigation"
+      ],
+      "title": "RiskAssessment",
+      "type": "object"
+    },
+    "RoleReview": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "role-review.v1",
+          "default": "role-review.v1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "role_id": {
+          "title": "Role Id",
+          "type": "string"
+        },
+        "recommendation": {
+          "$ref": "#/$defs/DecisionType"
+        },
+        "recommended_option_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Recommended Option Id"
+        },
+        "rationale": {
+          "title": "Rationale",
+          "type": "string"
+        },
+        "rationale_claim_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Rationale Claim Ids",
+          "type": "array"
+        },
+        "risks": {
+          "items": {
+            "$ref": "#/$defs/RiskAssessment"
+          },
+          "title": "Risks",
+          "type": "array"
+        },
+        "information_gaps": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Information Gaps",
+          "type": "array"
+        },
+        "unique_concern": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Unique Concern"
+        },
+        "no_unique_concern": {
+          "default": false,
+          "title": "No Unique Concern",
+          "type": "boolean"
+        },
+        "confidence": {
+          "enum": [
+            "low",
+            "medium",
+            "high"
+          ],
+          "title": "Confidence",
+          "type": "string"
+        }
+      },
+      "required": [
+        "role_id",
+        "recommendation",
+        "rationale",
+        "risks",
+        "information_gaps",
+        "confidence"
+      ],
+      "title": "RoleReview",
+      "type": "object"
+    },
+    "Safeguard": {
+      "additionalProperties": false,
+      "properties": {
+        "safeguard_id": {
+          "title": "Safeguard Id",
+          "type": "string"
+        },
+        "metric_id": {
+          "title": "Metric Id",
+          "type": "string"
+        },
+        "operator": {
+          "enum": [
+            "lt",
+            "lte",
+            "gt",
+            "gte",
+            "eq"
+          ],
+          "title": "Operator",
+          "type": "string"
+        },
+        "threshold": {
+          "$ref": "#/$defs/Quantity"
+        },
+        "check_at_step": {
+          "minimum": 0,
+          "title": "Check At Step",
+          "type": "integer"
+        },
+        "expires_at_step": {
+          "minimum": 0,
+          "title": "Expires At Step",
+          "type": "integer"
+        },
+        "violation_action": {
+          "enum": [
+            "rollback",
+            "pause",
+            "escalate",
+            "re_review"
+          ],
+          "title": "Violation Action",
+          "type": "string"
+        },
+        "condition": {
+          "title": "Condition",
+          "type": "string"
+        },
+        "rollback_trigger": {
+          "title": "Rollback Trigger",
+          "type": "string"
+        },
+        "owner": {
+          "title": "Owner",
+          "type": "string"
+        },
+        "verification": {
+          "title": "Verification",
+          "type": "string"
+        }
+      },
+      "required": [
+        "safeguard_id",
+        "metric_id",
+        "operator",
+        "threshold",
+        "check_at_step",
+        "expires_at_step",
+        "violation_action",
+        "condition",
+        "rollback_trigger",
+        "owner",
+        "verification"
+      ],
+      "title": "Safeguard",
+      "type": "object"
+    },
+    "SimulatedDecision": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "simulated-decision.v2",
+          "default": "simulated-decision.v2",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "case_id": {
+          "title": "Case Id",
+          "type": "string"
+        },
+        "decision_type": {
+          "$ref": "#/$defs/DecisionType"
+        },
+        "selected_option_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Selected Option Id"
+        },
+        "rationale": {
+          "title": "Rationale",
+          "type": "string"
+        },
+        "safeguards": {
+          "items": {
+            "$ref": "#/$defs/Safeguard"
+          },
+          "title": "Safeguards",
+          "type": "array"
+        },
+        "action_plan": {
+          "$ref": "#/$defs/DecisionActionPlan"
+        },
+        "dissent_acknowledged": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Dissent Acknowledged",
+          "type": "array"
+        },
+        "decision_source": {
+          "default": "simulated_chair",
+          "enum": [
+            "deterministic_core",
+            "simulated_chair"
+          ],
+          "title": "Decision Source",
+          "type": "string"
+        },
+        "simulated": {
+          "const": true,
+          "default": true,
+          "title": "Simulated",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "case_id",
+        "decision_type",
+        "rationale",
+        "safeguards",
+        "action_plan",
+        "dissent_acknowledged"
+      ],
+      "title": "SimulatedDecision",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "default": "evaluation-summary.v2",
+      "enum": [
+        "evaluation-summary.v1",
+        "evaluation-summary.v2"
+      ],
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "provider": {
+      "default": "replay",
+      "title": "Provider",
+      "type": "string"
+    },
+    "topology": {
+      "enum": [
+        "B0",
+        "B1",
+        "B2",
+        "B3"
+      ],
+      "title": "Topology",
+      "type": "string"
+    },
+    "results": {
+      "items": {
+        "$ref": "#/$defs/CaseEvaluation"
+      },
+      "title": "Results",
+      "type": "array"
+    },
+    "total": {
+      "title": "Total",
+      "type": "integer"
+    },
+    "passed": {
+      "title": "Passed",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "topology",
+    "results",
+    "total",
+    "passed"
+  ],
+  "title": "EvaluationSummary",
+  "type": "object"
+}

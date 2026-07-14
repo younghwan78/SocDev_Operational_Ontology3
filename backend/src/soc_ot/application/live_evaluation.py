@@ -5,7 +5,12 @@ from pydantic import Field
 
 from soc_ot.agents.providers import ReviewProvider
 from soc_ot.application.evaluation import CaseEvaluation, evaluate_case
-from soc_ot.application.evaluation_manifest import PARTITIONS
+from soc_ot.application.evaluation_manifest import (
+    V2_CASE_SOURCES,
+    EvaluationCaseSource,
+    EvaluationManifest,
+    manifest_case_source,
+)
 from soc_ot.application.multi_role import Topology
 from soc_ot.domain.models import StrictModel
 from soc_ot.infrastructure.fixtures import FixtureRepository
@@ -51,9 +56,9 @@ class StabilityEvaluation(StrictModel):
 
 def estimate_ablation_batch(
     *, max_case_cost_usd: float, max_evaluation_cost_usd: float,
-    case_timeout_seconds: int,
+    case_timeout_seconds: int, manifest: EvaluationManifest | None = None,
 ) -> LiveBatchEstimate:
-    case_count = len(PARTITIONS["validation"]) + len(PARTITIONS["sealed-unseen"])
+    case_count = len(_release_sources(manifest, {"validation", "sealed-unseen"}))
     run_count = case_count * 4
     calls_per_case = 0 + 1 + 4 + 8
     return _estimate(
@@ -72,8 +77,9 @@ def estimate_stability_batch(
     max_case_cost_usd: float,
     max_evaluation_cost_usd: float,
     case_timeout_seconds: int,
+    manifest: EvaluationManifest | None = None,
 ) -> LiveBatchEstimate:
-    run_count = len(PARTITIONS[partition]) * repeats
+    run_count = len(_release_sources(manifest, {partition})) * repeats
     return _estimate(
         run_count,
         run_count * 8,
@@ -89,14 +95,16 @@ def run_live_ablation(
     *,
     max_cost_usd: float,
     max_workers: int = 1,
+    manifest: EvaluationManifest | None = None,
 ) -> AblationEvaluation:
     if provider.name == "replay":
         raise ValueError("LIVE_PROVIDER_REQUIRED")
-    case_ids = PARTITIONS["validation"] + PARTITIONS["sealed-unseen"]
+    case_sources = _release_sources(manifest, {"validation", "sealed-unseen"})
+    case_ids = [item.case_id for item in case_sources]
     topologies: tuple[Topology, ...] = ("B0", "B1", "B2", "B3")
-    jobs: list[tuple[str, Topology]] = [
-        (case_id, topology)
-        for case_id in case_ids
+    jobs: list[tuple[EvaluationCaseSource, Topology]] = [
+        (source, topology)
+        for source in case_sources
         for topology in topologies
     ]
     results = _run_jobs(fixtures, provider, jobs, max_workers)
@@ -129,13 +137,15 @@ def run_live_stability(
     repeats: int,
     max_cost_usd: float,
     max_workers: int = 1,
+    manifest: EvaluationManifest | None = None,
 ) -> StabilityEvaluation:
     if provider.name == "replay":
         raise ValueError("LIVE_PROVIDER_REQUIRED")
-    jobs: list[tuple[str, Topology]] = [
-        (case_id, "B3")
+    case_sources = _release_sources(manifest, {partition})
+    jobs: list[tuple[EvaluationCaseSource, Topology]] = [
+        (source, "B3")
         for _ in range(repeats)
-        for case_id in PARTITIONS[partition]
+        for source in case_sources
     ]
     results, failures = _run_jobs_capturing_failures(
         fixtures, provider, jobs, max_workers
@@ -151,7 +161,7 @@ def run_live_stability(
             if result.case_id == case_id
         )
         >= required_acceptable
-        for case_id in PARTITIONS[partition]
+        for case_id in (item.case_id for item in case_sources)
     )
     gate_passed = not failures and per_case_stable and policy_compliant == len(results)
     actual_cost = _actual_cost(results)
@@ -239,21 +249,22 @@ def _enforce_actual_cost(results: list[CaseEvaluation], max_cost_usd: float) -> 
 def _run_jobs(
     fixtures: FixtureRepository,
     provider: ReviewProvider,
-    jobs: list[tuple[str, Topology]],
+    jobs: list[tuple[EvaluationCaseSource, Topology]],
     max_workers: int,
 ) -> list[CaseEvaluation]:
-    def execute(job: tuple[str, Topology]) -> CaseEvaluation:
-        case_id, topology = job
+    def execute(job: tuple[EvaluationCaseSource, Topology]) -> CaseEvaluation:
+        source, topology = job
         try:
             return evaluate_case(
                 fixtures,
-                case_id,
+                source.case_id,
                 topology=topology,
                 provider=provider,
+                source=source,
             )
         except Exception as error:
             raise RuntimeError(
-                f"LIVE_EVALUATION_JOB_FAILED:{case_id}:{topology}:{error}"
+                f"LIVE_EVALUATION_JOB_FAILED:{source.case_id}:{topology}:{error}"
             ) from error
 
     if max_workers <= 1:
@@ -265,24 +276,25 @@ def _run_jobs(
 def _run_jobs_capturing_failures(
     fixtures: FixtureRepository,
     provider: ReviewProvider,
-    jobs: list[tuple[str, Topology]],
+    jobs: list[tuple[EvaluationCaseSource, Topology]],
     max_workers: int,
 ) -> tuple[list[CaseEvaluation], list[LiveEvaluationFailure]]:
     def execute(
-        job: tuple[str, Topology],
+        job: tuple[EvaluationCaseSource, Topology],
     ) -> CaseEvaluation | LiveEvaluationFailure:
-        case_id, topology = job
+        source, topology = job
         try:
             return evaluate_case(
                 fixtures,
-                case_id,
+                source.case_id,
                 topology=topology,
                 provider=provider,
+                source=source,
             )
         except Exception as error:
             code = str(getattr(error, "code", "") or error or type(error).__name__)
             return LiveEvaluationFailure(
-                case_id=case_id,
+                case_id=source.case_id,
                 topology=topology,
                 error_code=code[:200],
             )
@@ -296,3 +308,15 @@ def _run_jobs_capturing_failures(
         [item for item in items if isinstance(item, CaseEvaluation)],
         [item for item in items if isinstance(item, LiveEvaluationFailure)],
     )
+
+
+def _release_sources(
+    manifest: EvaluationManifest | None,
+    partitions: set[str],
+) -> list[EvaluationCaseSource]:
+    sources = (
+        [manifest_case_source(item) for item in manifest.cases]
+        if manifest is not None
+        else V2_CASE_SOURCES
+    )
+    return [item for item in sources if item.partition in partitions]

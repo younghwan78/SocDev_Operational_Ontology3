@@ -1,5 +1,6 @@
 $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent $PSScriptRoot
+$projectPlan = Get-Content -Raw (Join-Path $root "PROJECT_PLAN.md")
 $master = Get-Content -Raw (Join-Path $root "docs/readiness/01_MASTER_EXECUTION_PLAN.md")
 $readiness = Get-Content -Raw (Join-Path $root "docs/readiness/00_IMPLEMENTATION_READINESS_RESULT.md")
 $contract = Get-Content -Raw (Join-Path $root "docs/readiness/08_CANONICAL_TERMS_AND_API_CONTRACT.md")
@@ -83,16 +84,25 @@ $versions = @(
 }
 
 $manifestCases = Select-String -Path (
+    Join-Path $root "fixtures/manifests/eval-2026-07-14.2.yaml"
+) -Pattern '^- case_id: '
+if ($manifestCases.Count -ne 12) {
+    throw "Evaluation manifest v2 must contain exactly 12 cases; found $($manifestCases.Count)."
+}
+$historicalCases = Select-String -Path (
     Join-Path $root "fixtures/manifests/eval-2026-07-14.1.yaml"
 ) -Pattern '^- case_id: '
-if ($manifestCases.Count -ne 8) {
-    throw "Evaluation manifest must contain exactly 8 cases; found $($manifestCases.Count)."
+if ($historicalCases.Count -ne 8) {
+    throw "Historical evaluation manifest must remain at 8 cases; found $($historicalCases.Count)."
 }
 $developmentCases = @(Get-ChildItem -LiteralPath (
     Join-Path $root "fixtures/cases/development"
 ) -Filter "CASE-DT-*.yaml" -File)
 if ($developmentCases.Count -ne 4) {
     throw "Step 2 development corpus must contain exactly 4 cases; found $($developmentCases.Count)."
+}
+if ($projectPlan -notmatch "corpus v2: development regression 8, validation 2, sealed unseen 2") {
+    throw "PROJECT_PLAN.md does not describe the canonical 8/2/2 evaluation partition."
 }
 
 $requiredPaths = @(
@@ -118,4 +128,4 @@ if ($actualPaths | Where-Object { $_ -match "hidden" }) {
     throw "OpenAPI exposes a forbidden hidden resource."
 }
 
-Write-Output "Plan consistency check passed: I0-I7, 8 evaluation cases, 4 development cases, terms, and canonical API agree."
+Write-Output "Plan consistency check passed: I0-I7, 12-case v2, 8-case historical release, terms, and canonical API agree."

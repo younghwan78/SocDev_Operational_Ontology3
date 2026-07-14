@@ -1,0 +1,12 @@
+schema_version: hidden-case.v1
+fixture_version: 1
+case_id: CASE-DT-002
+hidden_root_causes:
+  - chamber fan calibration 문제로 sustained 온도가 analytical model 상단보다 높다.
+outcome_paths:
+  - option_id: OPT-DT2-GUARDED
+    rule_id: guarded_sw_eis_path.v1
+    parameters: {reveal_measurement_at_step: 15, bandwidth_gb_s: 21.1, thermal_deg_c: 91}
+  - option_id: OPT-DT2-DEFER
+    rule_id: deferred_eis_path.v1
+    parameters: {milestone_delay_steps: 2}

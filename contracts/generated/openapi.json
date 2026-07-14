@@ -326,8 +326,11 @@
             "$ref": "#/components/schemas/ProcessEvaluation"
           },
           "schema_version": {
-            "const": "case-evaluation.v1",
-            "default": "case-evaluation.v1",
+            "default": "case-evaluation.v2",
+            "enum": [
+              "case-evaluation.v1",
+              "case-evaluation.v2"
+            ],
             "title": "Schema Version",
             "type": "string"
           },
@@ -1363,6 +1366,11 @@
       "ProcessEvaluation": {
         "additionalProperties": false,
         "properties": {
+          "blocker_impact_traceable": {
+            "default": true,
+            "title": "Blocker Impact Traceable",
+            "type": "boolean"
+          },
           "conditional_control_complete": {
             "title": "Conditional Control Complete",
             "type": "boolean"
@@ -1373,6 +1381,21 @@
           },
           "decision_action_complete": {
             "title": "Decision Action Complete",
+            "type": "boolean"
+          },
+          "decision_action_type_complete": {
+            "default": true,
+            "title": "Decision Action Type Complete",
+            "type": "boolean"
+          },
+          "development_history_reconstructable": {
+            "default": true,
+            "title": "Development History Reconstructable",
+            "type": "boolean"
+          },
+          "historical_packet_boundary_preserved": {
+            "default": true,
+            "title": "Historical Packet Boundary Preserved",
             "type": "boolean"
           },
           "mandatory_claims_covered": {

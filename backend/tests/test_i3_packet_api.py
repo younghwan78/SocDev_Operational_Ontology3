@@ -23,13 +23,13 @@ def _repository() -> InMemoryCaseRepository:
     return repository
 
 
-def test_all_eight_cases_validate_and_partition() -> None:
+def test_legacy_cases_validate_and_v2_partition_has_twelve_cases() -> None:
     fixtures = FixtureRepository(ROOT / "fixtures")
     for case_id in fixtures.case_ids():
         fixtures.validate_case(case_id, include_hidden=True)
 
     assert len(fixtures.case_ids()) == 8
-    assert sum(len(items) for items in PARTITIONS.values()) == 8
+    assert sum(len(items) for items in PARTITIONS.values()) == 12
 
 
 def test_packet_is_deterministic_and_hidden_free() -> None:

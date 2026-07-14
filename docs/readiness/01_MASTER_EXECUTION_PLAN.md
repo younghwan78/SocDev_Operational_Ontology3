@@ -1,6 +1,6 @@
 # Master execution plan
 
-> Status: IMPLEMENTED THROUGH I7 REPLAY + POST-I7 STEP 2 DEVELOPMENT TWIN; I7 LIVE GATE PENDING EXTERNAL INPUT
+> Status: IMPLEMENTED THROUGH I7 REPLAY + POST-I7 STEP 3 EVALUATION CORPUS V2; I7 LIVE GATE PENDING EXTERNAL INPUT
 > Date: 2026-07-14
 > Scope: local fixture-only PoC
 
@@ -266,6 +266,8 @@ Deliver:
 - typed `development-event.v1` history, historical state reconstruction, and blocker propagation
 - independent development fixtures for interface rework, measurement delay, technical debt, and shared-resource conflict
 - Korean development timeline projection without raw ontology exposure
+- 12-case `eval-2026-07-14.2` with new validation/sealed partitions and explicit source hashes
+- type-specific action-plan and development-history evaluation gates
 
 Gate:
 
@@ -278,6 +280,8 @@ Gate:
 - every DecisionType emits a type-correct action plan with owner, due step, trigger, verification, and fallback
 - one event history reconstructs at least three consistent steps and historical Agent packets exclude future observations
 - each active blocker reports downstream work and milestone impact deterministically
+- prior opened cases are regression-only and cannot be labeled fresh validation or sealed evidence
+- v1 and v2 manifests validate independently while v2 Replay passes 12/12
 
 ## 7. Crosswalk to supporting plans
 

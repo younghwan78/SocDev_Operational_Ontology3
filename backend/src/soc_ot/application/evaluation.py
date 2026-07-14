@@ -1,12 +1,22 @@
 from typing import Literal
 
-from soc_ot.agents.multi_role import AblationResult
+from soc_ot.agents.multi_role import AblationResult, SimulatedDecision
 from soc_ot.agents.providers import ReplayProvider, ReviewProvider
-from soc_ot.application.evaluation_manifest import PARTITIONS
+from soc_ot.application.development_twin import (
+    build_development_timeline,
+    reconstruct_case_at_step,
+)
+from soc_ot.application.evaluation_manifest import (
+    V2_CASE_SOURCES,
+    EvaluationCaseSource,
+    EvaluationManifest,
+    manifest_case_source,
+)
 from soc_ot.application.multi_role import Topology, run_ablation
 from soc_ot.application.outcomes import OutcomeSnapshot, advance_outcome
 from soc_ot.application.packets import build_observable_case_packet
-from soc_ot.domain.models import ExpectedResult, ObservableCase, StrictModel
+from soc_ot.application.repositories import StoredCase
+from soc_ot.domain.models import DecisionType, ExpectedResult, ObservableCase, StrictModel
 from soc_ot.infrastructure.fixtures import FixtureRepository
 
 
@@ -20,6 +30,10 @@ class ProcessEvaluation(StrictModel):
     unresolved_uncertainty_visible: bool
     conditional_control_complete: bool
     decision_action_complete: bool
+    decision_action_type_complete: bool = True
+    development_history_reconstructable: bool = True
+    historical_packet_boundary_preserved: bool = True
+    blocker_impact_traceable: bool = True
     passed: bool
 
 
@@ -31,7 +45,9 @@ class OutcomeEvaluation(StrictModel):
 
 
 class CaseEvaluation(StrictModel):
-    schema_version: Literal["case-evaluation.v1"] = "case-evaluation.v1"
+    schema_version: Literal["case-evaluation.v1", "case-evaluation.v2"] = (
+        "case-evaluation.v2"
+    )
     case_id: str
     partition: str
     topology: Topology
@@ -43,7 +59,9 @@ class CaseEvaluation(StrictModel):
 
 
 class EvaluationSummary(StrictModel):
-    schema_version: Literal["evaluation-summary.v1"] = "evaluation-summary.v1"
+    schema_version: Literal["evaluation-summary.v1", "evaluation-summary.v2"] = (
+        "evaluation-summary.v2"
+    )
     provider: str = "replay"
     topology: Topology
     results: list[CaseEvaluation]
@@ -57,10 +75,23 @@ def evaluate_case(
     *,
     topology: Topology = "B3",
     provider: ReviewProvider | None = None,
+    source: EvaluationCaseSource | None = None,
 ) -> CaseEvaluation:
-    case = fixtures.load_observable(case_id)
-    hidden = fixtures.load_hidden(case_id)
-    expected = fixtures.load_expected(case_id)
+    if source is None:
+        case = fixtures.load_observable(case_id)
+        hidden = fixtures.load_hidden(case_id)
+        expected = fixtures.load_expected(case_id)
+        partition = next(
+            item.partition for item in V2_CASE_SOURCES if item.case_id == case_id
+        )
+    else:
+        case, hidden, expected = fixtures.validate_evaluation_case(
+            case_id,
+            observable_path=source.observable_path,
+            hidden_path=source.hidden_path,
+            expected_path=source.expected_path,
+        )
+        partition = source.partition
     packet = build_observable_case_packet(case)
     ablation = run_ablation(
         packet,
@@ -83,7 +114,6 @@ def evaluate_case(
         passed=bool(outcome.revealed_evidence or outcome.consequences)
         and (outcome.guardrail_state != "triggered" or bool(outcome.executed_actions)),
     )
-    partition = next(name for name, ids in PARTITIONS.items() if case_id in ids)
     return CaseEvaluation(
         case_id=case_id,
         partition=partition,
@@ -96,10 +126,20 @@ def evaluate_case(
     )
 
 
-def run_evaluation(fixtures: FixtureRepository, *, topology: Topology = "B3") -> EvaluationSummary:
+def run_evaluation(
+    fixtures: FixtureRepository,
+    *,
+    topology: Topology = "B3",
+    manifest: EvaluationManifest | None = None,
+) -> EvaluationSummary:
+    sources: list[EvaluationCaseSource] = (
+        [manifest_case_source(item) for item in manifest.cases]
+        if manifest is not None
+        else V2_CASE_SOURCES
+    )
     results = [
-        evaluate_case(fixtures, case_id, topology=topology)
-        for case_id in fixtures.case_ids()
+        evaluate_case(fixtures, source.case_id, topology=topology, source=source)
+        for source in sources
     ]
     return EvaluationSummary(
         topology=topology,
@@ -145,6 +185,7 @@ def _evaluate_process(
         if ablation.decision.safeguards
         else set()
     )
+    history_checks = _evaluate_development_history(case)
     checks = {
         "decision_acceptable": ablation.decision.decision_type
         in expected.acceptable_decision_types,
@@ -180,5 +221,96 @@ def _evaluate_process(
             and ablation.decision.action_plan.verification
             and ablation.decision.action_plan.fallback_action
         ),
+        "decision_action_type_complete": _action_plan_type_complete(
+            ablation.decision, case
+        ),
+        **history_checks,
     }
     return ProcessEvaluation(**checks, passed=all(checks.values()))
+
+
+def _action_plan_type_complete(
+    decision: SimulatedDecision, case: ObservableCase
+) -> bool:
+    plan = decision.action_plan
+    if decision.decision_type in {
+        DecisionType.APPROVE,
+        DecisionType.APPROVE_WITH_GUARDRAILS,
+        DecisionType.RUN_REVERSIBLE_TRIAL,
+    }:
+        return bool(
+            plan.action_type == "execute"
+            and decision.selected_option_id
+            and (
+                decision.decision_type is DecisionType.APPROVE
+                or decision.safeguards
+            )
+        )
+    if decision.decision_type is DecisionType.COLLECT_MINIMUM_EVIDENCE:
+        return plan.action_type == "collect_evidence" and bool(plan.evidence_required)
+    if decision.decision_type is DecisionType.DEFER_UNTIL_TRIGGER:
+        deadline = next(
+            item
+            for item in case.milestones
+            if item.milestone_id == case.decision_deadline_milestone_id
+        )
+        return bool(
+            plan.action_type == "defer"
+            and decision.selected_option_id is None
+            and plan.due_at_step <= deadline.planned_at_step
+        )
+    if decision.decision_type is DecisionType.ESCALATE:
+        return bool(
+            plan.action_type == "escalate"
+            and decision.selected_option_id is None
+            and plan.escalation_target
+            and plan.questions_to_resolve
+        )
+    return bool(
+        plan.action_type == "reject"
+        and decision.selected_option_id is None
+        and plan.reopen_condition
+    )
+
+
+def _evaluate_development_history(case: ObservableCase) -> dict[str, bool]:
+    if not case.development_events:
+        return {
+            "development_history_reconstructable": True,
+            "historical_packet_boundary_preserved": True,
+            "blocker_impact_traceable": True,
+        }
+    observed_steps = sorted(
+        {event.observed_at_step for event in case.development_events}
+    )
+    reconstructable = len(observed_steps) >= 3
+    boundary_preserved = True
+    checkpoints = [max(0, observed_steps[0] - 1), *observed_steps]
+    try:
+        for step in checkpoints:
+            reconstructed = reconstruct_case_at_step(case, step)
+            packet = build_observable_case_packet(case, at_step=step)
+            reconstructable = reconstructable and reconstructed.current_step == step
+            boundary_preserved = boundary_preserved and all(
+                event.observed_at_step <= step
+                for event in packet.development_events
+            ) and all(
+                evidence.available_at_step <= step
+                for evidence in packet.eligible_evidence
+            )
+    except (KeyError, ValueError):
+        reconstructable = False
+        boundary_preserved = False
+
+    timeline = build_development_timeline(StoredCase(case=case, aggregate_version=0))
+    traced_blockers = {
+        item.source_work_item_id
+        for item in timeline.blocker_propagations
+        if item.impacted_milestone_ids
+    }
+    blocker_ids = {item.work_item_id for item in case.work_items if item.blocker}
+    return {
+        "development_history_reconstructable": reconstructable,
+        "historical_packet_boundary_preserved": boundary_preserved,
+        "blocker_impact_traceable": blocker_ids <= traced_blockers,
+    }

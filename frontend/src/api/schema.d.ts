@@ -433,10 +433,10 @@ export interface components {
             process_evaluation: components["schemas"]["ProcessEvaluation"];
             /**
              * Schema Version
-             * @default case-evaluation.v1
-             * @constant
+             * @default case-evaluation.v2
+             * @enum {string}
              */
-            schema_version: "case-evaluation.v1";
+            schema_version: "case-evaluation.v1" | "case-evaluation.v2";
             /**
              * Topology
              * @enum {string}
@@ -818,12 +818,32 @@ export interface components {
         };
         /** ProcessEvaluation */
         ProcessEvaluation: {
+            /**
+             * Blocker Impact Traceable
+             * @default true
+             */
+            blocker_impact_traceable: boolean;
             /** Conditional Control Complete */
             conditional_control_complete: boolean;
             /** Decision Acceptable */
             decision_acceptable: boolean;
             /** Decision Action Complete */
             decision_action_complete: boolean;
+            /**
+             * Decision Action Type Complete
+             * @default true
+             */
+            decision_action_type_complete: boolean;
+            /**
+             * Development History Reconstructable
+             * @default true
+             */
+            development_history_reconstructable: boolean;
+            /**
+             * Historical Packet Boundary Preserved
+             * @default true
+             */
+            historical_packet_boundary_preserved: boolean;
             /** Mandatory Claims Covered */
             mandatory_claims_covered: boolean;
             /** Mandatory Dependencies Covered */

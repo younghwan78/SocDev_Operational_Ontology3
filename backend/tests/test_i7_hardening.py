@@ -26,7 +26,7 @@ def test_replay_evaluation_performance_and_zero_cost() -> None:
     summary = run_evaluation(FixtureRepository(ROOT / "fixtures"))
     elapsed = perf_counter() - started
 
-    assert summary.passed == 8
+    assert summary.passed == 12
     assert elapsed < 2.0
     assert all(result.ablation.estimated_cost_usd == 0 for result in summary.results)
 
@@ -73,7 +73,7 @@ def test_live_batch_estimates_abort_before_over_budget_calls() -> None:
         max_evaluation_cost_usd=25,
         case_timeout_seconds=900,
     )
-    assert (ablation.run_count, ablation.semantic_call_count) == (20, 65)
+    assert (ablation.run_count, ablation.semantic_call_count) == (16, 52)
     assert ablation.within_budget is False
     assert (validation.run_count, validation.semantic_call_count) == (10, 80)
     assert validation.within_budget is True
@@ -100,7 +100,7 @@ def test_stability_runner_records_provider_failure_instead_of_aborting() -> None
         name = "failing-live"
 
         def review(self, packet, role_id):
-            if packet.case_id == "CASE-VR-005":
+            if packet.case_id == "CASE-DT-002":
                 raise ConnectionError("synthetic unavailable")
             return super().review(packet, role_id)
 
@@ -114,14 +114,14 @@ def test_stability_runner_records_provider_failure_instead_of_aborting() -> None
 
     assert result.total_runs == 2
     assert len(result.results) == 1
-    assert [failure.case_id for failure in result.failures] == ["CASE-VR-005"]
+    assert [failure.case_id for failure in result.failures] == ["CASE-DT-002"]
     assert result.stability_gate_passed is False
 
 
 def test_evaluation_artifact_bundle_is_complete_and_immutable(tmp_path: Path) -> None:
     summary = run_evaluation(FixtureRepository(ROOT / "fixtures"))
     arguments = {
-        "manifest_path": ROOT / "fixtures/manifests/eval-2026-07-14.1.yaml",
+        "manifest_path": ROOT / "fixtures/manifests/eval-2026-07-14.2.yaml",
         "output_root": tmp_path,
         "provider": "replay",
         "model_identifier": "deterministic-replay",
@@ -146,7 +146,7 @@ def test_evaluation_artifact_bundle_is_complete_and_immutable(tmp_path: Path) ->
             .read_text(encoding="utf-8")
             .splitlines()
         )
-        == 8
+        == 12
     )
     assert '"code_revision": "sha256:' in (output / "environment.json").read_text(
         encoding="utf-8"

@@ -1,0 +1,8 @@
+schema_version: expected-result.v1
+fixture_version: 1
+case_id: CASE-DT-004
+acceptable_decision_types: [RUN_REVERSIBLE_TRIAL, ESCALATE, DEFER_UNTIL_TRIGGER]
+unacceptable_decision_types: [APPROVE]
+mandatory_claim_ids: [CLM-DT4-CONFLICT, CLM-DT4-CASCADE]
+mandatory_dependency_ids: [WORK-DT4-CAMERA, WORK-DT4-NPU, WORK-DT4-RELEASE]
+mandatory_guardrail_metric_ids: [DDR_BANDWIDTH]

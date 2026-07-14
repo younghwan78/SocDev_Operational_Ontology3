@@ -1,0 +1,12 @@
+schema_version: hidden-case.v1
+fixture_version: 1
+case_id: CASE-DT-004
+hidden_root_causes:
+  - full chamber run을 동시에 요구한 이유는 두 과제의 priority owner가 달랐기 때문이다.
+outcome_paths:
+  - option_id: OPT-DT4-CAMERA-FIRST
+    rule_id: deferred_eis_path.v1
+    parameters: {milestone_delay_steps: 2}
+  - option_id: OPT-DT4-TIME-SLICE
+    rule_id: guarded_sw_eis_path.v1
+    parameters: {reveal_measurement_at_step: 12, bandwidth_gb_s: 20.7, thermal_deg_c: 87}

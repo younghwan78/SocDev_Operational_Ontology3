@@ -1,0 +1,12 @@
+schema_version: hidden-case.v1
+fixture_version: 1
+case_id: CASE-DT-001
+hidden_root_causes:
+  - descriptor 길이 변경이 SW 전달 전에 RTL branch에 먼저 반영되었다.
+outcome_paths:
+  - option_id: OPT-DT1-IF-FIRST
+    rule_id: guarded_sw_eis_path.v1
+    parameters: {reveal_measurement_at_step: 12, bandwidth_gb_s: 20.8, thermal_deg_c: 82}
+  - option_id: OPT-DT1-LIMITED-INTEGRATION
+    rule_id: deferred_eis_path.v1
+    parameters: {milestone_delay_steps: 2}

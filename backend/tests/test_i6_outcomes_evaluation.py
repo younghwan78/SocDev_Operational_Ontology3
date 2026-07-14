@@ -28,11 +28,11 @@ from soc_ot.infrastructure.hidden_repository import (
 ROOT = Path(__file__).resolve().parents[2]
 
 
-def test_all_eight_cases_complete_replay_evaluation() -> None:
+def test_all_twelve_v2_cases_complete_replay_evaluation() -> None:
     summary = run_evaluation(FixtureRepository(ROOT / "fixtures"))
 
-    assert summary.total == 8
-    assert summary.passed == 8
+    assert summary.total == 12
+    assert summary.passed == 12
     assert {result.partition for result in summary.results} == {
         "development", "validation", "sealed-unseen"
     }
