@@ -353,6 +353,7 @@ def test_dossier_reclaim_resumes_role_checkpoints_and_counts_abandoned_attempt()
         provider="crashing",
         model="crashing-v1",
         idempotency_key="dossier-checkpoint-crash",
+        topology="B3",
     )
     claimed = runs.claim("crashing-worker", 60)
     assert claimed is not None
@@ -448,16 +449,17 @@ def test_review_run_api_supports_polling_and_sse() -> None:
     assert events.headers["content-type"].startswith("text/event-stream")
     assert "run.queued" in events.text
     assert created.json()["status_url"] == f"/api/v1/runs/{run_id}"
+    assert created.json()["topology"] == "B2"
     assert created.json()["budget_plan"] == {
         "max_logical_calls": 9,
-        "reserved_logical_calls": 8,
-        "remaining_logical_calls": 1,
+        "reserved_logical_calls": 4,
+        "remaining_logical_calls": 5,
         "max_provider_attempts": 12,
-        "reserved_provider_attempts": 8,
-        "remaining_provider_attempts": 4,
+        "reserved_provider_attempts": 4,
+        "remaining_provider_attempts": 8,
         "max_output_tokens": 20_000,
-        "reserved_output_tokens": 14_000,
-        "remaining_output_tokens": 6_000,
+        "reserved_output_tokens": 6_000,
+        "remaining_output_tokens": 14_000,
         "timeout_envelope_seconds": 900,
         "maximum_cost_usd": 2.0,
     }
@@ -472,6 +474,7 @@ def test_review_run_api_supports_polling_and_sse() -> None:
     assert cancelled.json()["status"] == "CANCELLED"
     assert retried.status_code == 200
     assert retried.json()["run_id"] != run_id
+    assert retried.json()["topology"] == "B2"
 
 
 def test_command_rejects_outdated_aggregate_version() -> None:
@@ -576,8 +579,10 @@ def test_postgres_dossier_reclaim_skips_checkpointed_role() -> None:
         provider="crashing",
         model="crashing-v1",
         idempotency_key=f"pg-dossier-checkpoint-{uuid4()}",
+        topology="B3",
     )
     first_claim = _claim_target(runs, queued.run_id, "pg-crash-worker")
+    assert queued.topology == first_claim.topology == "B3"
     role_ids = stored.case.required_role_ids
 
     class CrashDuringSecondRole(ReplayProvider):
@@ -605,6 +610,7 @@ def test_postgres_dossier_reclaim_skips_checkpointed_role() -> None:
             .values(lease_expires_at=datetime.now(UTC) - timedelta(seconds=1))
         )
     reclaimed = _claim_target(runs, queued.run_id, "pg-recovery-worker")
+    assert reclaimed.topology == "B3"
     resumed_calls: list[str] = []
     revision_calls: list[str] = []
 

@@ -187,12 +187,14 @@ uv run soc-ot evaluation ablate `
 
 uv run soc-ot evaluation stability `
   --provider codex-cli `
+  --topology B2 `
   --partition validation `
   --repeat 5 `
   --acknowledge-usage
 
 uv run soc-ot evaluation stability `
   --provider codex-cli `
+  --topology B2 `
   --partition sealed-unseen `
   --repeat 3 `
   --acknowledge-usage
@@ -206,10 +208,8 @@ The ablation result reports B2-over-B1 and B3-over-B2 counts separately, then se
 `keep_b3`, `release_b2`, `release_b1`, or `release_b0`. Replay/test-double selection verifies
 only the contract. Only a frozen live run can be used as topology evidence. The selection is a
 stability candidate; do not switch the durable dossier runtime before that topology passes its
-validation and sealed stability gates.
-
-Current limitation: the stability command still executes B3 only. Do not run it as evidence
-for the selected B2 candidate until an explicit selected-topology argument is implemented.
+validation and sealed stability gates. Step 5 completed this gate for B2 on 2026-07-15, and new
+dossier runs now persist B2. Existing dossier rows remain B3 after migration.
 
 ## 9. Authoring hidden fixtures
 
@@ -293,8 +293,8 @@ Live stability is separate because it incurs external cost:
 ```powershell
 uv run soc-ot agent preflight
 uv run soc-ot evaluation ablate --provider openai --partitions validation,sealed-unseen --acknowledge-cost
-uv run soc-ot evaluation stability --provider openai --partition validation --repeat 5 --acknowledge-cost
-uv run soc-ot evaluation stability --provider openai --partition sealed-unseen --repeat 3 --acknowledge-cost
+uv run soc-ot evaluation stability --provider openai --topology B2 --partition validation --repeat 5 --acknowledge-cost
+uv run soc-ot evaluation stability --provider openai --topology B2 --partition sealed-unseen --repeat 3 --acknowledge-cost
 ```
 
 Each live command prints its maximum runs, semantic calls, timeout envelope, and cost

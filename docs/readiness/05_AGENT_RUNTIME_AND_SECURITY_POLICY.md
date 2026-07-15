@@ -1,7 +1,7 @@
 # Agent runtime and security policy
 
 > Status: APPROVED  
-> Date: 2026-07-11
+> Date: 2026-07-15
 
 ## 1. Purpose
 
@@ -13,6 +13,7 @@ This policy fixes the Agent execution boundary, provider behavior, resource limi
 |---|---|---|---|
 |`replay`|development, CI, deterministic regression|not required|canonical acceptance provider|
 |`openai`|real model behavior and I7 stability|required|supplementary live-provider gate|
+|`codex-cli`|isolated ChatGPT-subscription quality evaluation|Codex login, no API key|frozen topology and stability evidence|
 
 The first live adapter uses the OpenAI Responses API with Structured Outputs. Model identifiers are configuration and audit metadata, not domain constants.
 
@@ -30,9 +31,8 @@ For a formal baseline, pin a dated model snapshot when the provider offers one. 
 
 - Role Router selects at most 5 Role Agents.
 - Required roles are derived from affected development objects, not a fixed all-role panel.
-- One Challenger examines the initial independent reviews.
-- At most two selected roles may revise after the challenge; each selected role may revise at most once.
-- One simulated Decision Chair chooses only from observable option IDs.
+- The 2026-07-15 release topology is B2: routed independent Role Agents plus deterministic core decision.
+- B3 compatibility/ablation adds one Challenger, at most two revisions, and one simulated Decision Chair.
 - Agents do not message one another freely; the orchestrator owns round order and inputs.
 
 ## 4. Hard execution limits
@@ -57,6 +57,10 @@ For a formal baseline, pin a dated model snapshot when the provider offers one. 
 |Schema-repair retry|1|
 
 The nine logical calls are `5 initial roles + 1 Challenger + up to 2 revisions + 1 Chair`. Every transport retry and schema-repair attempt consumes the provider-attempt, token, cost, and time budgets.
+
+These are B3 safety ceilings, not a requirement to reserve every call. A four-role B2 run
+reserves four logical/provider calls and 6,000 output tokens. The persisted run topology decides
+the budget and execution path; retry cannot change it.
 
 Reserve Chair tokens, one provider attempt, and estimated cost before scheduling optional revisions. A request that would exceed any hard cap is rejected with `AGENT_BUDGET_EXCEEDED`.
 

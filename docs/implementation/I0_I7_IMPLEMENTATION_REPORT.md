@@ -1,5 +1,8 @@
 # Canonical implementation report
 
+> Historical baseline: current Step 5 implementation and live B2 evidence are recorded in
+> `internal_docs/26.07.15 Step 5 B2 Stability 및 Runtime 활성화 구현 보고서.md`.
+
 > Updated: 2026-07-11  
 > Scope: local synthetic fixture PoC  
 > Authority: `docs/readiness/01_MASTER_EXECUTION_PLAN.md`
@@ -90,8 +93,8 @@ $env:SOC_OT_ROLE_INPUT_COST_PER_MILLION_USD = "<current-rate>"
 $env:SOC_OT_ROLE_OUTPUT_COST_PER_MILLION_USD = "<current-rate>"
 uv run soc-ot agent preflight
 uv run soc-ot evaluation ablate --provider openai --partitions validation,sealed-unseen --acknowledge-cost
-uv run soc-ot evaluation stability --provider openai --partition validation --repeat 5 --acknowledge-cost
-uv run soc-ot evaluation stability --provider openai --partition sealed-unseen --repeat 3 --acknowledge-cost
+uv run soc-ot evaluation stability --provider openai --topology B3 --partition validation --repeat 5 --acknowledge-cost
+uv run soc-ot evaluation stability --provider openai --topology B3 --partition sealed-unseen --repeat 3 --acknowledge-cost
 ```
 
 The ablation command executes B0–B3 once per frozen validation/sealed case. The two stability commands execute B3 at the required per-case repeat counts. Every command prints and enforces the batch cost envelope before its first call. Do not treat Replay results as proof that multiple LLM roles add marginal business value.

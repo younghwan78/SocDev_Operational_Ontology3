@@ -185,16 +185,25 @@ def _render_report(
     gate = bool(
         payload.get(
             "release_gate_passed",
-            passed == total_runs and not violations and not failures,
+            payload.get(
+                "stability_gate_passed",
+                passed == total_runs and not violations and not failures,
+            ),
         )
     ) and not failures
-    topology_lines = (
-        f"- Selected topology: `{selected_topology}`\n"
-        f"- Stop rule: `{payload.get('stop_rule', 'unknown')}`\n"
-        "- Scope: adjacent-topology ablation; stability is not evaluated here\n"
-        if isinstance(selected_topology, str)
-        else ""
-    )
+    if isinstance(selected_topology, str):
+        topology_lines = (
+            f"- Selected topology: `{selected_topology}`\n"
+            f"- Stop rule: `{payload.get('stop_rule', 'unknown')}`\n"
+            "- Scope: adjacent-topology ablation; stability is not evaluated here\n"
+        )
+    elif isinstance(payload.get("topology"), str):
+        topology_lines = (
+            f"- Evaluated topology: `{payload['topology']}`\n"
+            f"- Stability partition: `{payload.get('partition', 'unknown')}`\n"
+        )
+    else:
+        topology_lines = ""
     return (
         "# Evaluation report\n\n"
         f"> Release: `{release_id}`  \n"

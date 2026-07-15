@@ -65,6 +65,21 @@ INSERT INTO observable.simulated_decisions (
     'simulated', true
   ))
 );
+INSERT INTO observable.agent_runs (
+  run_id, case_id, packet_hash, role_id, provider, requested_model, status,
+  attempt_no, max_attempts, idempotency_key, run_kind, budget_plan
+) VALUES (
+  'RUN-LEGACY-DOSSIER', 'CASE-MIGRATION', repeat('0', 64), '__routed__',
+  'replay', 'replay-v1', 'COMPLETED', 1, 2, 'IDEMPOTENCY-LEGACY-DOSSIER',
+  'dossier', jsonb_build_object(
+    'max_logical_calls', 9, 'reserved_logical_calls', 8,
+    'remaining_logical_calls', 1, 'max_provider_attempts', 12,
+    'reserved_provider_attempts', 8, 'remaining_provider_attempts', 4,
+    'max_output_tokens', 20000, 'reserved_output_tokens', 14000,
+    'remaining_output_tokens', 6000, 'timeout_envelope_seconds', 900,
+    'maximum_cost_usd', 2.0
+  )
+);
 '@
       Invoke-Checked docker ($compose + @(
         "psql", "-U", "soc_ot_admin", "-d", $Database, "-v", "ON_ERROR_STOP=1",
@@ -95,6 +110,12 @@ BEGIN
       AND jsonb_array_length(payload #> '{decision,action_plan,evidence_required}') = 1
   ) THEN
     RAISE EXCEPTION 'v1 decision upgrade assertion failed';
+  END IF;
+  IF NOT EXISTS (
+    SELECT 1 FROM observable.agent_runs
+    WHERE run_id = 'RUN-LEGACY-DOSSIER' AND topology = 'B3'
+  ) THEN
+    RAISE EXCEPTION 'legacy dossier topology upgrade assertion failed';
   END IF;
 END
 $migration$;
@@ -147,7 +168,7 @@ try {
   Test-MigrationPath "soc_ot_mig_$PID`_a" ""
   Test-MigrationPath "soc_ot_mig_$PID`_b" "0001_case_store"
   Test-MigrationPath "soc_ot_mig_$PID`_a" "0016_agent_run_budget_plan" $true
-  Write-Output "Empty, oldest-supported, v1 decision, and development history migration paths passed."
+  Write-Output "Empty, oldest-supported, legacy dossier, v1 decision, and development history migration paths passed."
 } finally {
   if ($null -eq $priorUrl) {
     Remove-Item Env:SOC_OT_MIGRATION_DATABASE_URL -ErrorAction SilentlyContinue

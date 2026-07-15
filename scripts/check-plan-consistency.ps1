@@ -4,6 +4,7 @@ $projectPlan = Get-Content -Raw (Join-Path $root "PROJECT_PLAN.md")
 $master = Get-Content -Raw (Join-Path $root "docs/readiness/01_MASTER_EXECUTION_PLAN.md")
 $readiness = Get-Content -Raw (Join-Path $root "docs/readiness/00_IMPLEMENTATION_READINESS_RESULT.md")
 $contract = Get-Content -Raw (Join-Path $root "docs/readiness/08_CANONICAL_TERMS_AND_API_CONTRACT.md")
+$multiRole = Get-Content -Raw (Join-Path $root "backend/src/soc_ot/application/multi_role.py")
 $openApi = Get-Content -Raw (Join-Path $root "contracts/generated/openapi.json") | ConvertFrom-Json
 
 if ($readiness -notmatch "READY FOR I0 SCAFFOLD") {
@@ -108,6 +109,12 @@ if ($projectPlan -notmatch "corpus v2: development regression 8, validation 2, s
     if (-not $projectPlan.Contains($_)) {
         throw "PROJECT_PLAN.md is missing topology stop rule: $_"
     }
+}
+if ($projectPlan -notmatch "release topology: B2 independent routed Role Agents") {
+    throw "PROJECT_PLAN.md does not record the Step 5 B2 activation."
+}
+if ($multiRole -notmatch 'RELEASE_DOSSIER_TOPOLOGY: DossierTopology = "B2"') {
+    throw "Runtime release topology is not the approved B2 value."
 }
 
 $requiredPaths = @(

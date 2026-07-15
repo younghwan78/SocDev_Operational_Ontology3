@@ -9,6 +9,7 @@ from soc_ot.domain.models import AgentRunStatus, StrictModel
 class ReviewRunView(StrictModel):
     run_id: str
     run_kind: Literal["role_review", "dossier"]
+    topology: Literal["B1", "B2", "B3"] | None
     case_id: str
     actor_id: str
     packet_hash: str

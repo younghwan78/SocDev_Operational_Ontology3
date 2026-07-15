@@ -19,6 +19,7 @@ from soc_ot.agents.multi_role import (
     DissentItem,
     DossierExecution,
     RoleFailure,
+    SimulatedDecision,
 )
 from soc_ot.agents.providers import ReviewProvider
 from soc_ot.agents.runtime import (
@@ -34,6 +35,9 @@ from soc_ot.domain.models import DecisionType
 __all__ = ["simulated_chair_decision", "validate_decision_policy"]
 
 Topology = Literal["B0", "B1", "B2", "B3"]
+DossierTopology = Literal["B1", "B2", "B3"]
+# Step 4 selected B2. Step 5 stability gates this release default.
+RELEASE_DOSSIER_TOPOLOGY: DossierTopology = "B2"
 ReviewCheckpointSink = Callable[[ProviderReviewResult, int], None]
 ChallengerCheckpointSink = Callable[[ChallengerProviderResult], None]
 ChairCheckpointSink = Callable[[ChairProviderResult], None]
@@ -104,7 +108,7 @@ def run_ablation(
 def run_dossier_round(
     packet: ObservableCasePacket,
     provider: ReviewProvider,
-    topology: Literal["B1", "B2", "B3"] = "B3",
+    topology: DossierTopology = RELEASE_DOSSIER_TOPOLOGY,
     *,
     budget: AgentRuntimeBudget | None = None,
     attempt_sink: AttemptSink | None = None,
@@ -344,6 +348,23 @@ def run_dossier_round(
         challenger_provider_result=challenger_result,
         chair_provider_result=chair_result,
         dossier=dossier,
+    )
+
+
+def finalize_dossier_decision(
+    packet: ObservableCasePacket,
+    execution: DossierExecution,
+    allowed_decision_types: list[DecisionType],
+) -> SimulatedDecision:
+    """Produce the canonical decision for the topology stored on the execution."""
+    if execution.topology == "B3":
+        if execution.chair_provider_result is None:
+            raise RuntimeError("CHAIR_RESULT_MISSING")
+        return execution.chair_provider_result.decision
+    return deterministic_core_decision(
+        packet,
+        execution.dossier,
+        allowed_decision_types,
     )
 
 

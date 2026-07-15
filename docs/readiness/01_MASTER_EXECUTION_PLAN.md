@@ -270,6 +270,9 @@ Deliver:
 - type-specific action-plan and development-history evaluation gates
 - adjacent B1/B0, B2/B1, and B3/B2 topology delta evaluation
 - explicit `keep_b3`, `release_b2`, `release_b1`, or `release_b0` selection artifact
+- explicit selected-topology stability CLI and topology-aware semantic-call estimate
+- durable dossier topology across enqueue, PostgreSQL persistence, retry, and execution
+- B2 runtime activation with deterministic core decision and legacy B3 compatibility migration
 
 Gate:
 
@@ -287,6 +290,14 @@ Gate:
 - B2 and B3 require marginal value in at least 3 of 4 fresh v2 cases without Process regression
 - the selected topology passes every fresh-case Process gate or the release gate fails
 - a selected topology remains a candidate until its validation and sealed stability gates pass
+
+Step 5 activation record (2026-07-15):
+
+- Step 4 selected B2 with `release_b2` after B2/B1 4/4 and B3/B2 0/4
+- B2 validation passed 10/10 acceptable and 10/10 policy compliant
+- B2 sealed-unseen passed 6/6 acceptable and 6/6 policy compliant
+- new durable dossier runs persist and execute B2; pre-Step-5 dossier rows migrate to B3
+- PostgreSQL migration head is `0019_agent_run_topology`
 
 ## 7. Crosswalk to supporting plans
 

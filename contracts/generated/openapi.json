@@ -1829,6 +1829,22 @@
             "title": "Status Url",
             "type": "string"
           },
+          "topology": {
+            "anyOf": [
+              {
+                "enum": [
+                  "B1",
+                  "B2",
+                  "B3"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Topology"
+          },
           "updated_at": {
             "anyOf": [
               {
@@ -1845,6 +1861,7 @@
         "required": [
           "run_id",
           "run_kind",
+          "topology",
           "case_id",
           "actor_id",
           "packet_hash",

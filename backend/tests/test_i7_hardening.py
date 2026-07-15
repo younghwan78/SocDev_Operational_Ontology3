@@ -69,29 +69,32 @@ def test_live_batch_estimates_abort_before_over_budget_calls() -> None:
     validation = estimate_stability_batch(
         "validation",
         5,
+        topology="B2",
         max_case_cost_usd=2,
         max_evaluation_cost_usd=25,
         case_timeout_seconds=900,
     )
     assert (ablation.run_count, ablation.semantic_call_count) == (16, 52)
     assert ablation.within_budget is False
-    assert (validation.run_count, validation.semantic_call_count) == (10, 80)
+    assert (validation.run_count, validation.semantic_call_count) == (10, 40)
     assert validation.within_budget is True
 
 
-def test_stability_runner_uses_only_b3_and_applies_per_case_threshold() -> None:
+def test_stability_runner_uses_requested_topology_and_per_case_threshold() -> None:
     class FakeLiveProvider(ReplayProvider):
         name = "fake-live"
 
     result = run_live_stability(
         FixtureRepository(ROOT / "fixtures"),
         FakeLiveProvider(),
+        topology="B2",
         partition="validation",
         repeats=5,
         max_cost_usd=25,
     )
     assert result.total_runs == 10
-    assert all(item.topology == "B3" for item in result.results)
+    assert result.topology == "B2"
+    assert all(item.topology == "B2" for item in result.results)
     assert result.stability_gate_passed is True
 
 
@@ -107,6 +110,7 @@ def test_stability_runner_records_provider_failure_instead_of_aborting() -> None
     result = run_live_stability(
         FixtureRepository(ROOT / "fixtures"),
         FailingLiveProvider(),
+        topology="B2",
         partition="validation",
         repeats=1,
         max_cost_usd=25,

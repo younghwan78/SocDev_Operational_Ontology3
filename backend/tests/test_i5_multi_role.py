@@ -374,6 +374,7 @@ def test_durable_dossier_run_stores_bounded_logical_steps() -> None:
         provider="replay",
         model="replay-v1",
         idempotency_key="dossier-run",
+        topology="B3",
     )
     claimed = runs.claim("dossier-worker", 60)
     assert claimed is not None and claimed.run_id == queued.run_id
@@ -387,7 +388,7 @@ def test_durable_dossier_run_stores_bounded_logical_steps() -> None:
     assert runs.chair_checkpoint(queued.run_id) == result.chair_provider_result
 
 
-def test_chair_command_consumes_completed_dossier_run() -> None:
+def test_simulated_decision_consumes_completed_b2_dossier_run() -> None:
     fixture = FixtureRepository(ROOT / "fixtures").load_observable("CASE-VR-001")
     cases = InMemoryCaseRepository()
     cases.save(fixture, event_type="fixture_imported", expected_aggregate_version=None)
@@ -409,7 +410,13 @@ def test_chair_command_consumes_completed_dossier_run() -> None:
         headers={"Idempotency-Key": "api-chair", "If-Match": '"1"'},
     )
     assert created.json()["run_kind"] == "dossier"
+    assert created.json()["topology"] == "B2"
+    assert result.topology == "B2"
+    assert result.chair_provider_result is None
     assert decision.status_code == 200
+    assert decision.json()["topology"] == "B2"
+    assert decision.json()["chair_used"] is False
+    assert decision.json()["decision"]["decision_source"] == "deterministic_core"
     assert decision.json()["dossier"]["dissent"]
     cases.save(
         fixture,

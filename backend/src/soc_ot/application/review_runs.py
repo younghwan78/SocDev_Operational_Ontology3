@@ -22,9 +22,11 @@ from soc_ot.agents.prompts import PROMPT_BUNDLE_HASH, PROMPT_BUNDLE_VERSION
 from soc_ot.agents.providers import ReviewProvider
 from soc_ot.agents.runtime import AttemptSink, execute_grounded_review
 from soc_ot.application.multi_role import (
+    RELEASE_DOSSIER_TOPOLOGY,
     AgentRuntimeBudget,
     ChairCheckpointSink,
     ChallengerCheckpointSink,
+    DossierTopology,
     ReviewCheckpointSink,
     run_dossier_round,
 )
@@ -46,6 +48,7 @@ RESULT_ADAPTER: TypeAdapter[AgentRunResult] = TypeAdapter(AgentRunResult)
 class ReviewRun:
     run_id: str
     run_kind: Literal["role_review", "dossier"]
+    topology: DossierTopology | None
     case_id: str
     packet_hash: str
     role_id: str
@@ -275,6 +278,7 @@ class InMemoryReviewRunRepository:
             ReviewRun(
                 run_id=str(uuid4()),
                 run_kind=failed.run_kind,
+                topology=failed.topology,
                 case_id=failed.case_id,
                 packet_hash=failed.packet_hash,
                 role_id=failed.role_id,
@@ -447,6 +451,7 @@ class PostgresReviewRunRepository:
             row = AgentRunRow(
                 run_id=run.run_id, case_id=run.case_id, packet_hash=run.packet_hash,
                 run_kind=run.run_kind,
+                topology=run.topology,
                 actor_id=run.actor_id,
                 role_id=run.role_id,
                 provider=run.provider,
@@ -630,6 +635,7 @@ class PostgresReviewRunRepository:
             ReviewRun(
                 run_id=str(uuid4()),
                 run_kind=failed.run_kind,
+                topology=failed.topology,
                 case_id=failed.case_id,
                 packet_hash=failed.packet_hash,
                 role_id=failed.role_id,
@@ -883,6 +889,7 @@ def enqueue_role_review(
         ReviewRun(
             run_id=str(uuid4()), case_id=case_id, packet_hash=packet.packet_hash,
             run_kind="role_review",
+            topology=None,
             role_id=role_id,
             provider=provider,
             requested_model=model,
@@ -910,6 +917,7 @@ def enqueue_dossier_review(
     idempotency_key: str,
     actor_id: str = "local-home-reviewer",
     max_case_cost_usd: float = 2.0,
+    topology: DossierTopology = RELEASE_DOSSIER_TOPOLOGY,
 ) -> ReviewRun:
     stored = case_repository.get(case_id)
     if stored is None:
@@ -919,6 +927,7 @@ def enqueue_dossier_review(
         ReviewRun(
             run_id=str(uuid4()),
             run_kind="dossier",
+            topology=topology,
             case_id=case_id,
             packet_hash=packet.packet_hash,
             role_id="__routed__",
@@ -930,7 +939,7 @@ def enqueue_dossier_review(
             prompt_bundle_hash=PROMPT_BUNDLE_HASH,
             policy_version="decision-policy.v1",
             budget_plan=_build_budget_plan(
-                "dossier", len(packet.selected_role_ids), max_case_cost_usd
+                "dossier", len(packet.selected_role_ids), max_case_cost_usd, topology
             ),
             status=AgentRunStatus.QUEUED,
             attempt_no=0,
@@ -963,10 +972,12 @@ def execute_claimed_run(
     if packet.packet_hash != run.packet_hash:
         raise ValueError("OBSERVABLE_PACKET_CHANGED")
     if run.run_kind == "dossier":
+        if run.topology is None:
+            raise ValueError("DOSSIER_TOPOLOGY_REQUIRED")
         return run_dossier_round(
             packet,
             provider,
-            "B3",
+            run.topology,
             budget=runtime_budget or AgentRuntimeBudget(),
             attempt_sink=attempt_sink,
             initial_role_results=initial_role_results,
@@ -1019,6 +1030,7 @@ def _run_from_row(row: AgentRunRow) -> ReviewRun:
     return ReviewRun(
         run_id=row.run_id,
         run_kind=cast(Literal["role_review", "dossier"], row.run_kind),
+        topology=cast(DossierTopology | None, row.topology),
         case_id=row.case_id,
         actor_id=row.actor_id,
         packet_hash=row.packet_hash,
@@ -1052,7 +1064,9 @@ def _event_row(run_id: str, sequence: int, event_type: str) -> AgentRunEventRow:
     )
 
 
-def _command_fingerprint(run: ReviewRun) -> tuple[str, str, str, str, str, str, str, str]:
+def _command_fingerprint(
+    run: ReviewRun,
+) -> tuple[str, str, str, str, str, str, str, str, DossierTopology | None]:
     return (
         run.case_id,
         run.packet_hash,
@@ -1062,6 +1076,7 @@ def _command_fingerprint(run: ReviewRun) -> tuple[str, str, str, str, str, str, 
         run.requested_model,
         run.prompt_bundle_hash,
         run.actor_id,
+        run.topology,
     )
 
 
@@ -1081,6 +1096,7 @@ def _build_budget_plan(
     run_kind: Literal["role_review", "dossier"],
     role_count: int,
     maximum_cost_usd: float,
+    topology: DossierTopology | None = None,
 ) -> AgentRunBudgetPlan:
     if run_kind == "role_review":
         logical_calls = 1
@@ -1088,10 +1104,15 @@ def _build_budget_plan(
         output_tokens = 1_500
         timeout_seconds = 120
     else:
-        revisions = min(2, role_count)
-        logical_calls = role_count + 1 + revisions + 1
+        if topology is None:
+            raise ValueError("DOSSIER_TOPOLOGY_REQUIRED")
+        effective_roles = 1 if topology == "B1" else role_count
+        revisions = min(2, effective_roles) if topology == "B3" else 0
+        logical_calls = effective_roles + (2 + revisions if topology == "B3" else 0)
         provider_attempts = logical_calls
-        output_tokens = role_count * 1_500 + 2_000 + revisions * 1_500 + 3_000
+        output_tokens = effective_roles * 1_500
+        if topology == "B3":
+            output_tokens += 2_000 + revisions * 1_500 + 3_000
         timeout_seconds = 900
     return AgentRunBudgetPlan(
         reserved_logical_calls=logical_calls,

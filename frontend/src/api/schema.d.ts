@@ -996,6 +996,8 @@ export interface components {
             status: components["schemas"]["AgentRunStatus"];
             /** Status Url */
             status_url: string;
+            /** Topology */
+            topology: ("B1" | "B2" | "B3") | null;
             /** Updated At */
             updated_at?: string | null;
         };

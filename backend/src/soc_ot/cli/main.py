@@ -129,6 +129,9 @@ def build_parser() -> argparse.ArgumentParser:
     stability.add_argument(
         "--partition", choices=["validation", "sealed-unseen"], required=True
     )
+    stability.add_argument(
+        "--topology", choices=["B1", "B2", "B3"], required=True
+    )
     stability.add_argument("--repeat", type=int, required=True)
     stability.add_argument("--output-root", type=Path, default=ROOT_DIR / "output/evaluations")
     stability.add_argument("--output", type=Path, help="Optional legacy summary JSON path")
@@ -149,8 +152,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = parser.parse_args(argv)
     if args.command == "status":
         print(
-            "I7 Replay + Step 4 B2 release candidate; "
-            "B2 stability/runtime activation pending"
+            "I7 Replay + Step 5 B2 stability gates complete; "
+            "B2 durable dossier runtime active"
         )
         return 0
     if args.command == "contracts" and args.contracts_command == "export":
@@ -331,6 +334,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             estimate = estimate_stability_batch(
                 args.partition,
                 args.repeat,
+                topology=args.topology,
                 max_case_cost_usd=estimate_case_cost,
                 max_evaluation_cost_usd=estimate_batch_cost,
                 case_timeout_seconds=settings.max_case_runtime_seconds,
@@ -400,6 +404,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             stability_summary = run_live_stability(
                 FixtureRepository(args.root),
                 evaluation_provider,
+                topology=args.topology,
                 partition=args.partition,
                 repeats=args.repeat,
                 max_cost_usd=max_cost_usd,
@@ -408,7 +413,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             )
             success = stability_summary.stability_gate_passed
             result_line = (
-                f"Live stability acceptable={stability_summary.acceptable_runs}/"
+                f"Live stability topology={stability_summary.topology}; "
+                f"acceptable={stability_summary.acceptable_runs}/"
                 f"{stability_summary.total_runs}; "
                 f"policy={stability_summary.policy_compliant_runs}/"
                 f"{stability_summary.total_runs}"
@@ -434,6 +440,9 @@ def main(argv: Sequence[str] | None = None) -> int:
                     "chatgpt-subscription" if is_codex_cli else "api-token-rates"
                 ),
                 "parallelism": max_workers,
+                "evaluation_topology": (
+                    args.topology if args.evaluation_command == "stability" else None
+                ),
             }
         )
         artifact_dir = write_evaluation_artifacts(

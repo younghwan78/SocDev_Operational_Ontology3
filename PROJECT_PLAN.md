@@ -1,9 +1,9 @@
 # SoC 개발 의사결정 디지털 트윈을 어떻게 구현하고 검증할 것인가
 
 > 문서 상태: Product Plan v0.2, 로컬 PoC 구현 승인  
-> 갱신일: 2026-07-14
+> 갱신일: 2026-07-15
 > 문서 역할: 제품 목표, 범위, 가치 가설, 중단 기준을 정의  
-> 현재 판단: **GO: I0–I7 Replay 및 Step 4 live ablation에서 B2 candidate 선정**, **PENDING: B2 stability·runtime 활성화**, **NO-GO: 사내 연동 및 실제 업무 적용**
+> 현재 판단: **GO: I0–I7 Replay 및 Step 5 B2 live stability·runtime 활성화 완료**, **NO-GO: 사내 연동 및 실제 업무 적용**
 
 이 계획은 SoC 개발 진행과 불확실성을 재현하고 제한된 정보에서도 저후회 결정을 돕는 제품을 정의한다. 집에서는 synthetic fixture로 의사결정 메커니즘만 검증하며, 실제 비즈니스 가치는 사내 read-only 파일럿에서 별도로 측정한다.
 
@@ -367,15 +367,16 @@ Process evaluation과 Outcome evaluation도 분리한다.
 
 Gate 실패 시 다음 기능을 추가하지 않는다. 원인을 수정하거나 모델·Agent·UI 범위를 줄인 뒤 같은 gate를 다시 실행한다.
 
-현재 로컬 구현은 실행 가능한 다음 행동, 실제 개발 진행 Digital Twin, 그리고
-12-case `eval-2026-07-14.2`와 인접 topology stop-rule Step 4를 구현하고 live
-ablation에서 B2를 release candidate로 선택했다. B2 stability 전에는 durable dossier
-workflow의 B3 기본값을 바꾸지 않는다. 후속 구현 Step은 사용자 지시 전 시작하지 않는다.
+현재 로컬 구현은 실행 가능한 다음 행동, 실제 개발 진행 Digital Twin, 12-case
+`eval-2026-07-14.2`, 인접 topology stop-rule과 selected-topology stability를 구현했다.
+Step 4 live ablation은 B2를 선택했고 Step 5의 B2 validation x5와 sealed-unseen x3가
+모두 통과해 durable dossier workflow의 기본값을 B2로 활성화했다. 후속 구현 Step은
+사용자 지시 전 시작하지 않는다.
 
 ```text
-B2 validation/sealed stability 실행
-  → 안정성·policy gate 통과 시 runtime B2 활성화
-  → 실패 시 candidate 재검토 또는 Agent topology 추가 축소
+B2 validation 10/10 + sealed-unseen 6/6 PASS
+  → persisted runtime topology B2 활성화
+  → legacy dossier는 migration에서 B3로 보존
 ```
 
 ## 10. 기술 원칙
@@ -462,7 +463,8 @@ C1에서 가치와 보안 gate를 통과한 뒤에만 연다.
 - 데이터: synthetic fixture only
 - 로컬 승인: simulated Chair, 실제 권한 없음
 - 구현 단계: I0~I7
-- 현재 단계: Step 4 live ablation 완료, B2 candidate stability·runtime 활성화 대기
+- 현재 단계: Step 5 B2 stability gate 및 durable runtime 활성화 완료
+- release topology: B2 independent routed Role Agents, deterministic core decision
 - CI provider: ReplayProvider
 - live provider: 구성 가능한 OpenAI Responses API adapter
 - corpus v2: development regression 8, validation 2, sealed unseen 2

@@ -223,7 +223,9 @@ POST /api/v1/decision-cases/{case_id}/outcome-advances
 POST /api/v1/decision-cases/{case_id}/evaluations
 ```
 
-Review runs perform routing, independent Role review, optional challenge/revision, and Dossier creation according to runtime policy. A Chair decision remains a distinct command.
+Review runs perform routing, independent Role review, optional challenge/revision, and Dossier
+creation according to their persisted topology. The simulated decision remains a distinct command;
+B2 uses the deterministic core and B3 uses the provider Chair result.
 
 ### 6.3 Run API
 
@@ -262,13 +264,17 @@ Example asynchronous response:
 ```json
 {
   "run_id": "RUN-001",
+  "run_kind": "dossier",
+  "topology": "B2",
   "status": "QUEUED",
   "status_url": "/api/v1/runs/RUN-001",
   "events_url": "/api/v1/runs/RUN-001/events"
 }
 ```
 
-Outdated versions fail with `CASE_VERSION_CONFLICT`. A repeated idempotency key with a different payload fails with `IDEMPOTENCY_KEY_REUSED`.
+For role-review runs `topology` is null. Dossier runs require B1, B2, or B3, and retry preserves
+the stored value. Outdated versions fail with `CASE_VERSION_CONFLICT`. A repeated idempotency key
+with a different payload or topology fails with `IDEMPOTENCY_KEY_REUSED`.
 
 ## 8. ObservableCasePacket
 

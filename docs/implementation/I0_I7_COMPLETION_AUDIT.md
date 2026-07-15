@@ -1,5 +1,8 @@
 # I0–I7 completion audit
 
+> Historical snapshot: this 2026-07-11 audit is superseded for current live/topology status by
+> `internal_docs/26.07.15 Step 5 B2 Stability 및 Runtime 활성화 구현 보고서.md`.
+
 > Audit date: 2026-07-11  
 > Authority: `../readiness/01_MASTER_EXECUTION_PLAN.md`  
 > Scope: local synthetic-fixture PoC  

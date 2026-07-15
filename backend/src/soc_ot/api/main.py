@@ -21,6 +21,7 @@ from soc_ot.application.development_twin import (
     build_development_timeline,
 )
 from soc_ot.application.evaluation import CaseEvaluation
+from soc_ot.application.multi_role import finalize_dossier_decision
 from soc_ot.application.outcome_advances import (
     InMemoryOutcomeAdvanceRepository,
     OutcomeAdvanceConflict,
@@ -60,7 +61,7 @@ from soc_ot.infrastructure.hidden_repository import (
     PostgresHiddenCaseRepository,
 )
 
-EXPECTED_DB_REVISION = "0018_development_event_history"
+EXPECTED_DB_REVISION = "0019_agent_run_topology"
 
 
 def _default_repository() -> CaseRepository:
@@ -372,20 +373,23 @@ def create_app(
             review_run is None
             or review_run.status is not AgentRunStatus.COMPLETED
             or not isinstance(review_run.result, DossierExecution)
-            or review_run.result.chair_provider_result is None
         ):
             raise HTTPException(status_code=409, detail={"code": "DOSSIER_RUN_NOT_READY"})
 
         def build_result() -> AblationResult:
             assert review_run is not None
             assert isinstance(review_run.result, DossierExecution)
-            assert review_run.result.chair_provider_result is not None
-            decision = review_run.result.chair_provider_result.decision
+            packet = build_observable_case_packet(stored.case)
+            decision = finalize_dossier_decision(
+                packet,
+                review_run.result,
+                stored.case.allowed_decision_types,
+            )
             return AblationResult(
-                topology="B3",
+                topology=review_run.result.topology,
                 role_count=review_run.result.role_count,
                 challenger_used=review_run.result.challenger_used,
-                chair_used=True,
+                chair_used=review_run.result.topology == "B3",
                 input_tokens=review_run.result.input_tokens,
                 output_tokens=review_run.result.output_tokens,
                 estimated_cost_usd=review_run.result.estimated_cost_usd,

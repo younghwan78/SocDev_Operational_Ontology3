@@ -12,7 +12,7 @@ from soc_ot.application.evaluation_manifest import (
     EvaluationManifest,
     manifest_case_source,
 )
-from soc_ot.application.multi_role import Topology
+from soc_ot.application.multi_role import DossierTopology, Topology
 from soc_ot.domain.models import StrictModel
 from soc_ot.infrastructure.fixtures import FixtureRepository
 
@@ -59,6 +59,7 @@ class LiveEvaluationFailure(StrictModel):
 
 class StabilityEvaluation(StrictModel):
     provider: str
+    topology: DossierTopology
     partition: Literal["validation", "sealed-unseen"]
     repeats: int
     results: list[CaseEvaluation]
@@ -91,6 +92,7 @@ def estimate_stability_batch(
     partition: Literal["validation", "sealed-unseen"],
     repeats: int,
     *,
+    topology: DossierTopology,
     max_case_cost_usd: float,
     max_evaluation_cost_usd: float,
     case_timeout_seconds: int,
@@ -99,7 +101,7 @@ def estimate_stability_batch(
     run_count = len(_release_sources(manifest, {partition})) * repeats
     return _estimate(
         run_count,
-        run_count * 8,
+        run_count * {"B1": 1, "B2": 4, "B3": 8}[topology],
         max_case_cost_usd,
         max_evaluation_cost_usd,
         case_timeout_seconds,
@@ -192,6 +194,7 @@ def run_live_stability(
     fixtures: FixtureRepository,
     provider: ReviewProvider,
     *,
+    topology: DossierTopology,
     partition: Literal["validation", "sealed-unseen"],
     repeats: int,
     max_cost_usd: float,
@@ -202,7 +205,7 @@ def run_live_stability(
         raise ValueError("LIVE_PROVIDER_REQUIRED")
     case_sources = _release_sources(manifest, {partition})
     jobs: list[tuple[EvaluationCaseSource, Topology]] = [
-        (source, "B3")
+        (source, topology)
         for _ in range(repeats)
         for source in case_sources
     ]
@@ -226,6 +229,7 @@ def run_live_stability(
     actual_cost = _actual_cost(results)
     return StabilityEvaluation(
         provider=provider.name,
+        topology=topology,
         partition=partition,
         repeats=repeats,
         results=results,

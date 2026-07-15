@@ -84,6 +84,7 @@ class AgentRunRow(Base):
 
     run_id: Mapped[str] = mapped_column(String(80), primary_key=True)
     run_kind: Mapped[str] = mapped_column(String(40), nullable=False)
+    topology: Mapped[str | None] = mapped_column(String(2))
     case_id: Mapped[str] = mapped_column(String(80), nullable=False, index=True)
     actor_id: Mapped[str] = mapped_column(String(120), nullable=False)
     packet_hash: Mapped[str] = mapped_column(String(64), nullable=False)

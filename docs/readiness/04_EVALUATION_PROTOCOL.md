@@ -125,7 +125,7 @@ Good process may still lead to a poor outcome under uncertainty. The report reco
 |B2 marginal value|B2 adds a valid concern, safeguard, or deterministic improvement over B1 in at least 3 of 4 v2 validation/sealed cases|
 |B3 marginal value|B3 adds a validated Challenger concern, safeguard, or deterministic improvement over B2 in at least 3 of 4 v2 validation/sealed cases|
 |Validation live stability|at least 4 of 5 runs per validation case stay in an acceptable decision family; all runs remain policy compliant|
-|Sealed-unseen robustness|three frozen B3 runs per sealed case stay policy compliant and at least 2 of 3 use an acceptable decision family|
+|Sealed-unseen robustness|three frozen selected-topology runs per sealed case stay policy compliant and at least 2 of 3 use an acceptable decision family|
 
 ReplayProvider proves contract, persistence, orchestration, and UI regression only. It does not prove model grounding, role differentiation, decision stability, or marginal Agent value. Live gates are required for I7, not I0–I6.
 
@@ -154,7 +154,9 @@ Score deterministic expectations and inferential expectations separately. Compar
 
 For `eval-2026-07-14.2`, B2 and B3 each require valid marginal value in at least 3 of the 4 validation/sealed cases. B1 requires at least one valid contribution over B0 while passing all fresh-case Process gates. Select `keep_b3`, `release_b2`, `release_b1`, or `release_b0` in that order. `release_b0` can still have `release_gate_passed=false` when the deterministic core does not pass the fresh-case gate.
 
-The selected topology is a release candidate, not an activated runtime default. Run validation and sealed stability on that same topology before changing the durable dossier workflow.
+The selected topology is a release candidate until validation and sealed stability pass on that
+same topology. Persist the topology on each dossier run before changing the durable workflow so
+retry and historical execution cannot silently switch topology.
 
 New Role IDs with a non-empty unique concern, new canonical safeguard metrics, validated Challenger objections, and deterministic false-to-true improvements count as marginal value. Mere wording changes or a different decision family do not.
 
@@ -181,13 +183,13 @@ Commands to be implemented:
 uv run python -m soc_ot.cli evaluation validate-release --manifest fixtures/manifests/eval-2026-07-14.2.yaml
 uv run python -m soc_ot.cli evaluation run --manifest fixtures/manifests/eval-2026-07-14.2.yaml --provider replay
 uv run python -m soc_ot.cli evaluation ablate --manifest fixtures/manifests/eval-2026-07-14.2.yaml --provider openai --partitions validation,sealed-unseen
-uv run python -m soc_ot.cli evaluation stability --manifest fixtures/manifests/eval-2026-07-14.2.yaml --provider openai --partition validation --repeat 5
-uv run python -m soc_ot.cli evaluation stability --manifest fixtures/manifests/eval-2026-07-14.2.yaml --provider openai --partition sealed-unseen --repeat 3
+uv run python -m soc_ot.cli evaluation stability --manifest fixtures/manifests/eval-2026-07-14.2.yaml --provider openai --topology B2 --partition validation --repeat 5
+uv run python -m soc_ot.cli evaluation stability --manifest fixtures/manifests/eval-2026-07-14.2.yaml --provider openai --topology B2 --partition sealed-unseen --repeat 3
 ```
 
-The current stability runner is B3-only. After a `release_b2` ablation result it must not be
-used as B2 release evidence until the next implementation step adds an explicit, persisted
-selected-topology argument.
+`--topology` is required for stability. The artifact stores the evaluated topology, and the
+semantic-call estimate uses B1=1, B2=4, or B3=8 calls per case run. The 2026-07-15 B2 release
+passed validation 10/10 and sealed-unseen 6/6 with zero policy or runtime failures.
 
 Before live execution, print the maximum run count, semantic-call count, timeout envelope, and `runs × SOC_OT_MAX_CASE_COST_USD`. Abort before the first call when the estimate exceeds `SOC_OT_MAX_EVALUATION_COST_USD`; raising the batch cap is an explicit user decision. Store estimated and actual values in the report.
 

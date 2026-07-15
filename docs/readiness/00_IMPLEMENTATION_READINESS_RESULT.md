@@ -1,7 +1,7 @@
 # P0/P1 Implementation Readiness 결과
 
 > 원 판정: **READY FOR I0 SCAFFOLD**  
-> 현재 상태: **I0–I7 Replay 구현·검증 완료, I7 Live 외부 입력 대기**  
+> 현재 상태: **I0–I7 Replay 및 Codex CLI B2 release gate 완료, B2 runtime 활성**
 > 작성일: 2026-07-11  
 > 범위: 집에서 synthetic fixture로 구현하는 SoC Operational Decision Twin  
 > 주의: 본문은 구현 전 P0/P1 판정 기록이다. 현재 구현 증거는 `docs/implementation/`을 따른다.

@@ -1,5 +1,8 @@
 # I0–I7 gate evidence
 
+> Historical snapshot: this v1-release record is superseded for current live/topology status by
+> `internal_docs/26.07.15 Step 5 B2 Stability 및 Runtime 활성화 구현 보고서.md`.
+
 > Evidence date: 2026-07-11  
 > Release: `eval-2026-07-11.1`  
 > Local scope: synthetic fixtures, ReplayProvider, simulated provider Chair  
