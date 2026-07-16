@@ -1,7 +1,8 @@
 # UI persona and approval boundary
 
 > Status: APPROVED  
-> Date: 2026-07-11
+> Date: 2026-07-16
+> Detailed interaction and information design: `../../internal_docs/26.07.16 결정 중심 UX 설계.md`
 
 ## 1. Primary persona
 
@@ -119,7 +120,7 @@ Default view order:
 
 1. decision question and deadline
 2. one-line recommendation or current state
-3. development progress and blocker
+3. development state at the selected step, causal blocker propagation, and next commitment window
 4. alternative comparison
 5. role agreement/dissent
 6. guardrail, rollback trigger, next action
@@ -150,3 +151,15 @@ At I3, the primary user must answer questions 1 through 4 without raw JSON or an
 8. Why can process quality differ from outcome quality?
 
 At I7, the user must answer all eight questions. The report records pass/fail per question, wrong primary-action clicks, whether raw detail was opened, elapsed task time, and reviewer notes. Failure on an applicable question blocks that stage's usability gate.
+
+## 11. Post-I7 Development Twin UX acceptance
+
+The post-I7 UX redesign adds a supplemental gate without changing the historical I3/I7 result. The primary user must also answer:
+
+1. At a selected simulation step, what are the states of the critical development tracks and WorkItems?
+2. Which DevelopmentEvent caused the blocker, and how did the impact propagate to downstream work and milestones?
+3. Which commitment window closes next, and what option or switching-cost advantage is lost afterward?
+4. What state transitions are expected for each alternative, and which impacts remain unknown?
+5. After a decision and action advance, which WorkItem, milestone, evidence, and action states actually changed?
+
+The user must distinguish `observed state`, `expected transition from the observable model`, and `hidden outcome not yet revealed`. A past-step view must not expose later evidence, decisions, Agent output, or hidden outcome. These checks are required by the UX redesign gate and do not retroactively invalidate the completed I7 Replay gate.

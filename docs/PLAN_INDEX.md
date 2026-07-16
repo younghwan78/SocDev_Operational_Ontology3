@@ -37,6 +37,7 @@
 
 - `internal_docs/26.07.11 Role Agent 기반 단계별 구현 계획.md`
 - `internal_docs/26.07.11 Backend Frontend 및 UX 기술 설계.md`
+- `internal_docs/26.07.16 결정 중심 UX 설계.md`
 
 다음 문서는 과거 판단의 근거다. 새 구현 기준으로 직접 사용하지 않는다.
 
