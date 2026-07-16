@@ -5,6 +5,7 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict
 
 from soc_ot.application.development_twin import reconstruct_case_at_step
+from soc_ot.application.hidden_boundary import assert_hidden_free
 from soc_ot.domain.models import (
     Alternative,
     Claim,
@@ -16,10 +17,6 @@ from soc_ot.domain.models import (
     Milestone,
     ObservableCase,
     WorkItem,
-)
-
-HIDDEN_FIELD_DENYLIST = frozenset(
-    {"hidden_root_causes", "outcome_paths", "expected_result", "acceptable_decision_types"}
 )
 
 
@@ -232,12 +229,4 @@ def _recoverability(alternative: Alternative) -> Literal["high", "medium", "low"
 
 
 def _assert_hidden_free(value: object) -> None:
-    if isinstance(value, dict):
-        forbidden = HIDDEN_FIELD_DENYLIST & value.keys()
-        if forbidden:
-            raise ValueError(f"HIDDEN_FIELD_IN_PACKET:{sorted(forbidden)}")
-        for nested in value.values():
-            _assert_hidden_free(nested)
-    elif isinstance(value, list | tuple):
-        for nested in value:
-            _assert_hidden_free(nested)
+    assert_hidden_free(value, error_code="HIDDEN_FIELD_IN_PACKET")

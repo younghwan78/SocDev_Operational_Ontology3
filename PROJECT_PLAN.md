@@ -3,7 +3,7 @@
 > 문서 상태: Product Plan v0.2, 로컬 PoC 구현 승인  
 > 갱신일: 2026-07-15
 > 문서 역할: 제품 목표, 범위, 가치 가설, 중단 기준을 정의  
-> 현재 판단: **GO: I0–I7 Replay 및 Step 5 B2 live stability·runtime 활성화 완료**, **NO-GO: 사내 연동 및 실제 업무 적용**
+> 현재 판단: **GO: I0–I7 Replay, Step 5 B2 runtime 및 post-I7 UX-A 계약 완료**, **NO-GO: 사내 연동 및 실제 업무 적용**
 
 이 계획은 SoC 개발 진행과 불확실성을 재현하고 제한된 정보에서도 저후회 결정을 돕는 제품을 정의한다. 집에서는 synthetic fixture로 의사결정 메커니즘만 검증하며, 실제 비즈니스 가치는 사내 read-only 파일럿에서 별도로 측정한다.
 
@@ -370,8 +370,9 @@ Gate 실패 시 다음 기능을 추가하지 않는다. 원인을 수정하거�
 현재 로컬 구현은 실행 가능한 다음 행동, 실제 개발 진행 Digital Twin, 12-case
 `eval-2026-07-14.2`, 인접 topology stop-rule과 selected-topology stability를 구현했다.
 Step 4 live ablation은 B2를 선택했고 Step 5의 B2 validation x5와 sealed-unseen x3가
-모두 통과해 durable dossier workflow의 기본값을 B2로 활성화했다. 후속 구현 Step은
-사용자 지시 전 시작하지 않는다.
+모두 통과해 durable dossier workflow의 기본값을 B2로 활성화했다. Post-I7 UX-A는
+Development Twin의 selected-step, causal chain, commitment window, expected/observed/hidden
+경계와 phase content fixture를 계약으로 고정했다. UX-B는 사용자 지시 전 시작하지 않는다.
 
 ```text
 B2 validation 10/10 + sealed-unseen 6/6 PASS
@@ -463,7 +464,7 @@ C1에서 가치와 보안 gate를 통과한 뒤에만 연다.
 - 데이터: synthetic fixture only
 - 로컬 승인: simulated Chair, 실제 권한 없음
 - 구현 단계: I0~I7
-- 현재 단계: Step 5 B2 stability gate 및 durable runtime 활성화 완료
+- 현재 단계: Post-I7 UX-A Development Twin 계약 및 content fixture 완료, UX-B 미시작
 - release topology: B2 independent routed Role Agents, deterministic core decision
 - CI provider: ReplayProvider
 - live provider: 구성 가능한 OpenAI Responses API adapter
@@ -489,6 +490,8 @@ Active planning documents:
 - `docs/readiness/01_MASTER_EXECUTION_PLAN.md`
 - `internal_docs/26.07.11 Role Agent 기반 단계별 구현 계획.md`
 - `internal_docs/26.07.11 Backend Frontend 및 UX 기술 설계.md`
+- `internal_docs/26.07.16 결정 중심 UX 설계.md`
+- `internal_docs/26.07.17 UX-A Development Twin 계약 및 Content Fixture 구현 보고서.md`
 
 Review and historical context:
 

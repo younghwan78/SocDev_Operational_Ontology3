@@ -15,4 +15,27 @@ DecisionType:
   DEFER_UNTIL_TRIGGER: 조건 충족까지 연기
   REJECT: 진행하지 않음
   ESCALATE: 상위 검토 필요
-
+WorkspacePhase:
+  CONTEXT_PREPARATION: 상황 구성 중
+  READY_FOR_REVIEW: 가상 검토 준비
+  REVIEW_RUNNING: 가상 검토 중
+  DOSSIER_READY: 의견 종합 준비
+  DECISION_REQUIRED: 가상 판단 필요
+  OUTCOME_RUNNING: 실행·관찰 중
+  EVALUATION_READY: 평가 확인 가능
+  CLOSED: 종료
+WorkspaceAction:
+  BUILD_CONTEXT: 상황 구성
+  RUN_VIRTUAL_REVIEW: 가상 역할 검토 실행
+  VIEW_REVIEW_PROGRESS: 진행 상태 보기
+  VIEW_DOSSIER: 의견 종합 보기
+  RUN_SIMULATED_DECISION: 가상 최종 판단 실행
+  ADVANCE_SIMULATION: 다음 Simulation Step 진행
+  VIEW_EVALUATION: 판단 평가 보기
+  VIEW_LEARNING_SUMMARY: 학습 요약 보기
+  REFRESH_STALE: 최신 상태 불러오기
+DevelopmentTwinKnowledge:
+  observed: 관측된 상태
+  expected_model: 예상 상태 변화
+  unknown: 현재 모델로 알 수 없음
+  hidden_until_step_advance: 아직 공개되지 않은 결과

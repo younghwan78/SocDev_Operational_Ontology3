@@ -1,7 +1,7 @@
 # Master execution plan
 
-> Status: IMPLEMENTED THROUGH I7 REPLAY + POST-I7 STEP 3 EVALUATION CORPUS V2; I7 LIVE GATE PENDING EXTERNAL INPUT
-> Date: 2026-07-14
+> Status: IMPLEMENTED THROUGH I7 REPLAY + STEP 5 B2 RUNTIME + POST-I7 UX-A; I7 RESPONSES API GATE PENDING EXTERNAL INPUT
+> Date: 2026-07-17
 > Scope: local fixture-only PoC
 
 ## 1. Purpose
@@ -298,6 +298,14 @@ Step 5 activation record (2026-07-15):
 - B2 sealed-unseen passed 6/6 acceptable and 6/6 policy compliant
 - new durable dossier runs persist and execute B2; pre-Step-5 dossier rows migrate to B3
 - PostgreSQL migration head is `0019_agent_run_topology`
+
+Post-I7 UX-A record (2026-07-17):
+
+- generated `decision-workspace.v2` and `workspace-ux-fixture.v1` contracts
+- CASE-VR-001 phase content fixture without changing frozen evaluation fixtures or manifests
+- selected-step, causal-chain, commitment-window, expected/observed/hidden boundaries
+- canonical phase primary actions and Korean labels
+- UX-B API and React UI are not started
 
 ## 7. Crosswalk to supporting plans
 

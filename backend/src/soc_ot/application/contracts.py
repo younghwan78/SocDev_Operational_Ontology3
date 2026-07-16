@@ -10,6 +10,10 @@ from soc_ot.application.evaluation import CaseEvaluation, EvaluationSummary
 from soc_ot.application.evaluation_manifest import EvaluationManifest
 from soc_ot.application.outcomes import OutcomeSnapshot
 from soc_ot.application.packets import ObservableCasePacket
+from soc_ot.application.workspace_contracts import (
+    DecisionWorkspaceProjectionV2,
+    WorkspaceUxFixture,
+)
 from soc_ot.domain.models import DevelopmentEvent, ExpectedResult, HiddenCase, ObservableCase
 
 CONTRACT_MODELS: dict[str, type[BaseModel]] = {
@@ -27,6 +31,8 @@ CONTRACT_MODELS: dict[str, type[BaseModel]] = {
     "decision-action-plan.v1": DecisionActionPlan,
     "simulated-decision.v2": SimulatedDecision,
     "outcome-snapshot.v1": OutcomeSnapshot,
+    "decision-workspace.v2": DecisionWorkspaceProjectionV2,
+    "workspace-ux-fixture.v1": WorkspaceUxFixture,
 }
 
 
