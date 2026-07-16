@@ -41,13 +41,18 @@ test("CASE-VR-001 complete Replay decision workflow is accessible", async ({ pag
   await expect(targetCard.getByText(/Architecture Freeze까지 1 Step/)).toBeVisible();
   await targetCard.getByRole("link", { name: "결정 검토" }).click();
 
-  await expect(page.getByRole("heading", { name: "UHD60 EIS 전력 여유 검토" })).toBeVisible();
-  await expect(page.getByText("결정 기한: Step 13 · Architecture Freeze")).toBeVisible();
-  await expect(page.getByRole("cell", { name: "BLOCKED" })).toBeVisible();
-  await expect(page.getByText("SW feature flag로 제한 진행")).toBeVisible();
-  await expect(page.getByText("현재 사용 가능").first()).toBeVisible();
-  await expect(page.getByRole("heading", { name: "개발 진행 타임라인" })).toBeVisible();
-  await expect(page.getByText("기록된 개발 변경 없음")).toBeVisible();
+  await expect(page.getByText("UHD60 EIS 전력 여유 검토")).toBeVisible();
+  await expect(page.getByRole("heading", { name: /UHD60 EIS/ }).first()).toBeVisible();
+  await expect(page.getByText("Step 13 · Architecture Freeze")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "선택한 시점의 개발 상태와 변화 원인" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "가장 가까운 Commitment Window" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "선택지별 예상 상태 변화" })).toBeVisible();
+  await expect(page.getByText("관측", { exact: true })).toBeVisible();
+  await expect(
+    page
+      .getByLabel("선택지별 예상 상태 변화")
+      .getByRole("heading", { name: "SW feature flag로 제한 진행" }),
+  ).toBeVisible();
 
   await page.getByRole("button", { name: "역할 검토 시작", exact: true }).click();
   for (let attempt = 0; attempt < 20; attempt += 1) {
@@ -106,8 +111,15 @@ test("CASE-VR-001 complete Replay decision workflow is accessible", async ({ pag
 test("workspace remains usable at 390px", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/decisions/CASE-VR-001");
-  await expect(page.getByRole("heading", { name: "현재 개발 상황" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "선택한 시점의 개발 상태와 변화 원인" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "선택지와 되돌릴 수 있는 정도" })).toBeVisible();
+  await page.getByLabel("관찰 시점").selectOption("9");
+  await expect(page.getByText("선택한 Step의 당시 개발 상태")).toBeVisible();
+  await expect(page.getByText("과거 Step에서는 실행할 수 없습니다.")).toBeVisible();
+  const hasPageOverflow = await page.evaluate(
+    () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
+  );
+  expect(hasPageOverflow).toBe(false);
   const accessibility = await new AxeBuilder({ page }).analyze();
   expect(accessibility.violations).toEqual([]);
 });

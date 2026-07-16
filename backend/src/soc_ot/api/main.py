@@ -33,9 +33,7 @@ from soc_ot.application.packets import build_observable_case_packet
 from soc_ot.application.ports import EvaluationRepository, HiddenCaseReader
 from soc_ot.application.projections import (
     DecisionListItemProjection,
-    DecisionWorkspaceProjection,
     build_decision_list_item,
-    build_workspace_projection,
     sort_decision_list_items,
 )
 from soc_ot.application.repositories import CaseRepository, PostgresCaseRepository, StoredCase
@@ -53,6 +51,8 @@ from soc_ot.application.simulated_decisions import (
     SimulatedDecisionConflict,
     SimulatedDecisionRepository,
 )
+from soc_ot.application.workspace_contracts import DecisionWorkspaceProjectionV2
+from soc_ot.application.workspace_projection_v2 import build_workspace_projection_v2
 from soc_ot.config import ROOT_DIR, get_settings
 from soc_ot.domain.models import AgentRunStatus, Evidence
 from soc_ot.infrastructure.database import get_outcome_engine, get_runtime_engine
@@ -183,11 +183,25 @@ def create_app(
 
     @app.get(
         "/api/v1/decision-cases/{case_id}/workspace",
-        response_model=DecisionWorkspaceProjection,
+        response_model=DecisionWorkspaceProjectionV2,
         tags=["decision-cases"],
     )
-    def get_workspace(case_id: str, repo: Repository) -> DecisionWorkspaceProjection:
-        return build_workspace_projection(_require_case(repo, case_id))
+    def get_workspace(
+        case_id: str, repo: Repository, at_step: int | None = None
+    ) -> DecisionWorkspaceProjectionV2:
+        try:
+            return build_workspace_projection_v2(
+                _require_case(repo, case_id),
+                at_step=at_step,
+                content=local_fixtures.load_workspace_ux(case_id),
+            )
+        except ValueError as error:
+            if str(error) == "DEVELOPMENT_STEP_OUT_OF_RANGE":
+                raise HTTPException(
+                    status_code=422,
+                    detail={"code": "DEVELOPMENT_STEP_OUT_OF_RANGE"},
+                ) from error
+            raise
 
     @app.get(
         "/api/v1/decision-cases/{case_id}/timeline",

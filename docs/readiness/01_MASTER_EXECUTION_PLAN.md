@@ -1,6 +1,6 @@
 # Master execution plan
 
-> Status: IMPLEMENTED THROUGH I7 REPLAY + STEP 5 B2 RUNTIME + POST-I7 UX-B; I7 RESPONSES API GATE PENDING EXTERNAL INPUT
+> Status: IMPLEMENTED THROUGH I7 REPLAY + STEP 5 B2 RUNTIME + POST-I7 UX-C; I7 RESPONSES API GATE PENDING EXTERNAL INPUT
 > Date: 2026-07-17
 > Scope: local fixture-only PoC
 
@@ -314,8 +314,19 @@ Post-I7 UX-B record (2026-07-17):
   milestone impact, why-now explanation and next-action label
 - Korean Decision Inbox with one primary action, no raw ID, and no normal-user fixture navigation
 - responsive loading, empty and recoverable error states with mobile accessibility coverage
-- `decision-workspace.v1` detail remains unchanged; UX-C v2 connection is not started
+- UX-C replaces the detail response with the approved `decision-workspace.v2`
 - run-aware `IN_REVIEW` and persisted list freshness remain explicit follow-up boundaries
+
+Post-I7 UX-C record (2026-07-17):
+
+- live `decision-workspace.v2` projection built from current or reconstructed observable case state
+- optional Workspace `at_step` with validated earliest/latest boundary and no future workflow state
+- validated UX content supplies commitment and expected-transition models only when compatible;
+  unsupported cases return explicit unknowns instead of invented transitions
+- Context Bar, phase-adaptive Decision Brief, Development Twin, causal chain, commitment window,
+  Decision Posture and visually separate expected/observed transition cards
+- responsive 390px layout keeps the primary action before why-now and has no page overflow
+- latest durable run phase and decision-linked observed transitions remain later integration boundaries
 
 ## 7. Crosswalk to supporting plans
 

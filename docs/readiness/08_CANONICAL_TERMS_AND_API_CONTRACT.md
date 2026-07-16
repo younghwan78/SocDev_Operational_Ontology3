@@ -213,6 +213,12 @@ The decision-case collection returns `decision-list-item.v1`, already ordered by
 attention priority and grouped with an explicit list-group field. Frontend consumers do not
 recalculate urgency, blocker propagation, milestone impact, or next-action labels.
 
+The workspace resource returns `decision-workspace.v2`. Optional `at_step` reconstructs the
+observable development state within the projection's declared earliest/latest boundary. A
+historical response omits current workflow phase, case status and command actions so later Agent or
+decision state cannot leak backward. Commitment and expected transitions require validated model
+content; missing model content is returned as unknown rather than inferred by Frontend.
+
 The timeline resource returns `development-timeline.v1`. Optional query parameter
 `at_step` reconstructs the case at that logical step and returns only events with
 `observed_at_step <= at_step`. An out-of-range step returns

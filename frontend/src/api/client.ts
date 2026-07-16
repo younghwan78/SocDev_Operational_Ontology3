@@ -33,8 +33,9 @@ export function getDecisionCases(): Promise<DecisionListItem[]> {
   return getJson("/api/v1/decision-cases");
 }
 
-export function getDecisionWorkspace(caseId: string): Promise<DecisionWorkspace> {
-  return getJson(`/api/v1/decision-cases/${encodeURIComponent(caseId)}/workspace`);
+export function getDecisionWorkspace(caseId: string, atStep?: number): Promise<DecisionWorkspace> {
+  const query = atStep === undefined ? "" : `?${new URLSearchParams({ at_step: String(atStep) })}`;
+  return getJson(`/api/v1/decision-cases/${encodeURIComponent(caseId)}/workspace${query}`);
 }
 
 export function getDecisionTimeline(caseId: string, atStep?: number): Promise<DevelopmentTimeline> {

@@ -378,17 +378,6 @@ export interface components {
             /** Role Ids */
             role_ids: string[];
         };
-        /** AlternativeSummary */
-        AlternativeSummary: {
-            /** Description */
-            description: string;
-            /** Option Id */
-            option_id: string;
-            /** Reversible */
-            reversible: boolean;
-            /** Title */
-            title: string;
-        };
         /** BlockerPropagation */
         BlockerPropagation: {
             /** Downstream Work Item Ids */
@@ -407,17 +396,6 @@ export interface components {
             source_work_item_id: string;
             /** Source Work Item Title */
             source_work_item_title: string;
-        };
-        /** BlockerSummary */
-        BlockerSummary: {
-            /** Blocker */
-            blocker: string;
-            /** Dependency Ids */
-            dependency_ids: string[];
-            /** Track Id */
-            track_id: string;
-            /** Work Item Title */
-            work_item_title: string;
         };
         /** CaseEvaluation */
         CaseEvaluation: {
@@ -502,19 +480,6 @@ export interface components {
              * @constant
              */
             schema_version: "challenger-review.v1";
-        };
-        /** ClaimSummary */
-        ClaimSummary: {
-            /** Claim Id */
-            claim_id: string;
-            /** Confidence Level */
-            confidence_level: string;
-            /** Epistemic Status */
-            epistemic_status: string;
-            /** Source Refs */
-            source_refs: string[];
-            /** Statement */
-            statement: string;
         };
         /** DecisionActionPlan */
         DecisionActionPlan: {
@@ -663,53 +628,38 @@ export interface components {
          * @enum {string}
          */
         DecisionType: "APPROVE" | "APPROVE_WITH_GUARDRAILS" | "RUN_REVERSIBLE_TRIAL" | "COLLECT_MINIMUM_EVIDENCE" | "DEFER_UNTIL_TRIGGER" | "REJECT" | "ESCALATE";
-        /** DecisionWorkspaceProjection */
-        DecisionWorkspaceProjection: {
+        /** DecisionWorkspaceProjectionV2 */
+        DecisionWorkspaceProjectionV2: {
             /** Aggregate Version */
             aggregate_version: number;
-            /** Alternative Count */
-            alternative_count: number;
-            /** Alternatives */
-            alternatives: components["schemas"]["AlternativeSummary"][];
-            /** Blockers */
-            blockers: components["schemas"]["BlockerSummary"][];
+            alternatives: components["schemas"]["WorkspaceAlternativesV2"];
             /** Case Id */
             case_id: string;
-            /** Case Status */
-            case_status: string;
-            /** Claims */
-            claims: components["schemas"]["ClaimSummary"][];
-            /** Current Step */
-            current_step: number;
-            /** Deadline Milestone Id */
-            deadline_milestone_id: string;
-            /** Deadline Step */
-            deadline_step: number;
-            /** Deadline Title */
-            deadline_title: string;
-            /** Decision Question */
-            decision_question: string;
-            /** Eligible Evidence Titles */
-            eligible_evidence_titles: string[];
-            /** Evidence */
-            evidence: components["schemas"]["EvidenceSummary"][];
-            /** Evidence Count */
-            evidence_count: number;
+            controls: components["schemas"]["WorkspaceControls"];
+            current_brief: components["schemas"]["WorkspaceCurrentBrief"];
+            decision_posture: components["schemas"]["WorkspaceDecisionPosture"];
+            deliberation: components["schemas"]["WorkspaceDeliberation"];
+            details: components["schemas"]["WorkspaceDetails"];
+            development_twin: components["schemas"]["WorkspaceDevelopmentTwin"];
+            /** Expected Option Transitions */
+            expected_option_transitions: components["schemas"]["WorkspaceExpectedOptionTransition"][];
             /** Fixture Version */
             fixture_version: number;
+            /** Generated At */
+            generated_at: string;
+            header: components["schemas"]["WorkspaceHeaderV2"];
+            observed_decision_transitions: components["schemas"]["WorkspaceObservedDecisionTransitions"];
+            outcome_and_evaluation: components["schemas"]["WorkspaceOutcomeAndEvaluation"];
             /**
              * Projection Schema Version
-             * @default decision-workspace.v1
+             * @default decision-workspace.v2
+             * @constant
              */
-            projection_schema_version: string;
-            /** Title Ko */
-            title_ko: string;
-            /** Tracks */
-            tracks: components["schemas"]["TrackSummary"][];
-            /** Uncertainties */
-            uncertainties: string[];
-            /** Uncertainty Count */
-            uncertainty_count: number;
+            projection_schema_version: "decision-workspace.v2";
+            /** Stale */
+            stale: boolean;
+            time_context: components["schemas"]["WorkspaceTimeContext"];
+            workflow: components["schemas"]["WorkspaceWorkflow"];
         };
         /** DevelopmentTimelineProjection */
         DevelopmentTimelineProjection: {
@@ -809,23 +759,6 @@ export interface components {
             /** Limitations */
             limitations?: string[];
             quantity?: components["schemas"]["Quantity"] | null;
-            /** Source Ref */
-            source_ref: string;
-            /** Title */
-            title: string;
-        };
-        /** EvidenceSummary */
-        EvidenceSummary: {
-            /** Available At Step */
-            available_at_step: number;
-            /** Eligible Now */
-            eligible_now: boolean;
-            /** Evidence Id */
-            evidence_id: string;
-            /** Evidence Type */
-            evidence_type: string;
-            /** Limitations */
-            limitations: string[];
             /** Source Ref */
             source_ref: string;
             /** Title */
@@ -1296,17 +1229,6 @@ export interface components {
             /** Work Item Id */
             work_item_id: string;
         };
-        /** TrackSummary */
-        TrackSummary: {
-            /** Blocker Count */
-            blocker_count: number;
-            /** Name */
-            name: string;
-            /** Status */
-            status: string;
-            /** Track Id */
-            track_id: string;
-        };
         /** ValidationError */
         ValidationError: {
             /** Context */
@@ -1319,6 +1241,398 @@ export interface components {
             msg: string;
             /** Error Type */
             type: string;
+        };
+        /**
+         * WorkItemStatus
+         * @enum {string}
+         */
+        WorkItemStatus: "PLANNED" | "READY" | "IN_PROGRESS" | "BLOCKED" | "DONE" | "VERIFIED" | "REWORK" | "CANCELLED";
+        /** WorkspaceActionPlanSummary */
+        WorkspaceActionPlanSummary: {
+            /** Action Ko */
+            action_ko: string;
+            /**
+             * Action Type
+             * @enum {string}
+             */
+            action_type: "execute" | "collect_evidence" | "defer" | "escalate" | "reject";
+            /** Due At Step */
+            due_at_step: number;
+            /** Fallback Action Ko */
+            fallback_action_ko: string;
+            /** Owner */
+            owner: string;
+            /** Trigger Ko */
+            trigger_ko: string;
+            /** Verification Ko */
+            verification_ko: string;
+        };
+        /** WorkspaceAlternativeV2 */
+        WorkspaceAlternativeV2: {
+            /** Description */
+            description: string;
+            /** Option Id */
+            option_id: string;
+            /** Reversible */
+            reversible: boolean;
+            switching_cost: components["schemas"]["Quantity"];
+            /** Title */
+            title: string;
+        };
+        /** WorkspaceAlternativesV2 */
+        WorkspaceAlternativesV2: {
+            /** Comparison Dimensions Ko */
+            comparison_dimensions_ko: string[];
+            /** Items */
+            items: components["schemas"]["WorkspaceAlternativeV2"][];
+        };
+        /** WorkspaceBlockerImpact */
+        WorkspaceBlockerImpact: {
+            /** Blocker Ko */
+            blocker_ko: string;
+            /** Downstream Work Item Titles */
+            downstream_work_item_titles?: string[];
+            /** Impacted Milestone Titles */
+            impacted_milestone_titles?: string[];
+            /** Reaches Decision Deadline */
+            reaches_decision_deadline: boolean;
+            /** Source Work Item Title */
+            source_work_item_title: string;
+        };
+        /** WorkspaceCausalChain */
+        WorkspaceCausalChain: {
+            /** Impacted Milestone Ids */
+            impacted_milestone_ids?: string[];
+            /** Links */
+            links: components["schemas"]["WorkspaceCausalLink"][];
+            /** Observed At Step */
+            observed_at_step: number;
+            /** Source Event Id */
+            source_event_id: string;
+            /** Title Ko */
+            title_ko: string;
+        };
+        /** WorkspaceCausalLink */
+        WorkspaceCausalLink: {
+            /** Inference Basis */
+            inference_basis?: string[];
+            /**
+             * Relation Kind
+             * @enum {string}
+             */
+            relation_kind: "observed" | "inferred";
+            /** Source Refs */
+            source_refs: string[];
+            /** Statement Ko */
+            statement_ko: string;
+        };
+        /** WorkspaceCommitmentWindow */
+        WorkspaceCommitmentWindow: {
+            /** Closes At Milestone Id */
+            closes_at_milestone_id?: string | null;
+            /** Closes At Step */
+            closes_at_step?: number | null;
+            /** Closing Reason Ko */
+            closing_reason_ko: string;
+            /** Owner */
+            owner: string;
+            /** Post Window Impact Ko */
+            post_window_impact_ko: string;
+            /** Subject Id */
+            subject_id: string;
+            /** Subject Title */
+            subject_title: string;
+            /**
+             * Subject Type
+             * @enum {string}
+             */
+            subject_type: "work_item" | "milestone" | "alternative" | "interface" | "verification_plan";
+            switching_cost?: components["schemas"]["Quantity"] | null;
+        };
+        /** WorkspaceControls */
+        WorkspaceControls: {
+            action_plan?: components["schemas"]["WorkspaceActionPlanSummary"] | null;
+            /** Safeguards */
+            safeguards: components["schemas"]["WorkspaceSafeguardSummary"][];
+        };
+        /** WorkspaceCurrentBrief */
+        WorkspaceCurrentBrief: {
+            /** Key Conditions Ko */
+            key_conditions_ko?: string[];
+            /** One Line Reason Ko */
+            one_line_reason_ko: string;
+            /** Residual Risks Ko */
+            residual_risks_ko?: string[];
+            /** State Or Recommendation Ko */
+            state_or_recommendation_ko: string;
+            /** Why Now Ko */
+            why_now_ko: string;
+        };
+        /** WorkspaceDeadline */
+        WorkspaceDeadline: {
+            /** At Step */
+            at_step: number;
+            /** Milestone Id */
+            milestone_id: string;
+            /** Remaining Steps */
+            remaining_steps: number;
+            /** Title */
+            title: string;
+        };
+        /** WorkspaceDecisionPosture */
+        WorkspaceDecisionPosture: {
+            /**
+             * Blast Radius
+             * @enum {string}
+             */
+            blast_radius: "limited" | "cross_track" | "milestone" | "project" | "unknown";
+            /**
+             * Detectability
+             * @enum {string}
+             */
+            detectability: "observable_now" | "observable_later" | "unknown";
+            /**
+             * Downside
+             * @enum {string}
+             */
+            downside: "low" | "medium" | "high" | "critical" | "unknown";
+            /**
+             * Evidence State
+             * @enum {string}
+             */
+            evidence_state: "sufficient" | "partial" | "insufficient";
+            /** Explanations Ko */
+            explanations_ko: string[];
+            /**
+             * Recoverability
+             * @enum {string}
+             */
+            recoverability: "high" | "medium" | "low";
+            /**
+             * Reversibility
+             * @enum {string}
+             */
+            reversibility: "high" | "medium" | "low";
+            /**
+             * Urgency
+             * @enum {string}
+             */
+            urgency: "low" | "medium" | "high" | "expired";
+        };
+        /** WorkspaceDeliberation */
+        WorkspaceDeliberation: {
+            /** Agreement Ko */
+            agreement_ko: string[];
+            /** Changed After Challenge Ko */
+            changed_after_challenge_ko: string[];
+            /** Dissent Ko */
+            dissent_ko: string[];
+            /** Key Assumptions Ko */
+            key_assumptions_ko: string[];
+            /** Key Unknowns Ko */
+            key_unknowns_ko: string[];
+            /** Needs Confirmation Ko */
+            needs_confirmation_ko: string[];
+        };
+        /** WorkspaceDetails */
+        WorkspaceDetails: {
+            /** Evidence Available */
+            evidence_available: boolean;
+            /** Impact Path Available */
+            impact_path_available: boolean;
+            /** Role Originals Available */
+            role_originals_available: boolean;
+            /** Timeline Available */
+            timeline_available: boolean;
+        };
+        /** WorkspaceDevelopmentTwin */
+        WorkspaceDevelopmentTwin: {
+            /** Blocker Impacts */
+            blocker_impacts?: components["schemas"]["WorkspaceBlockerImpact"][];
+            /** Causal Chains */
+            causal_chains: components["schemas"]["WorkspaceCausalChain"][];
+            /** Commitment Windows */
+            commitment_windows: components["schemas"]["WorkspaceCommitmentWindow"][];
+            /** Delay Summary Ko */
+            delay_summary_ko: string;
+            /** Recent Decision Relevant Event Ids */
+            recent_decision_relevant_event_ids: string[];
+            state_at_selected_step: components["schemas"]["WorkspaceStateAtStep"];
+        };
+        /** WorkspaceExpectedOptionTransition */
+        WorkspaceExpectedOptionTransition: {
+            /**
+             * Label
+             * @default expected_from_observable_model
+             * @constant
+             */
+            label: "expected_from_observable_model";
+            /** Lost Options Ko */
+            lost_options_ko?: string[];
+            /** Model Basis */
+            model_basis?: string[];
+            /** Option Id */
+            option_id: string;
+            /** Option Title */
+            option_title: string;
+            /** Preserved Options Ko */
+            preserved_options_ko?: string[];
+            /** State Changes */
+            state_changes: components["schemas"]["WorkspaceStateTransition"][];
+            /** Unknown Impacts Ko */
+            unknown_impacts_ko?: string[];
+        };
+        /** WorkspaceHeaderV2 */
+        WorkspaceHeaderV2: {
+            case_status?: components["schemas"]["DecisionCaseStatus"] | null;
+            deadline: components["schemas"]["WorkspaceDeadline"];
+            /** Decision Question */
+            decision_question: string;
+            /**
+             * Simulated
+             * @default true
+             * @constant
+             */
+            simulated: true;
+            /** Title Ko */
+            title_ko: string;
+            workspace_phase?: components["schemas"]["WorkspacePhase"] | null;
+        };
+        /** WorkspaceObservedDecisionTransitions */
+        WorkspaceObservedDecisionTransitions: {
+            /** Available */
+            available: boolean;
+            /** Decision Id */
+            decision_id?: string | null;
+            /** Guardrail Events Ko */
+            guardrail_events_ko?: string[];
+            /** State Changes */
+            state_changes?: components["schemas"]["WorkspaceStateTransition"][];
+        };
+        /** WorkspaceOutcomeAndEvaluation */
+        WorkspaceOutcomeAndEvaluation: {
+            /** Expectation Vs Actual Ko */
+            expectation_vs_actual_ko?: string[];
+            /** Hidden Until Step Advance */
+            hidden_until_step_advance: boolean;
+            /** Lessons Ko */
+            lessons_ko?: string[];
+            /** Outcome Evaluation Ko */
+            outcome_evaluation_ko?: string | null;
+            /**
+             * Outcome State
+             * @enum {string}
+             */
+            outcome_state: "not_available" | "running" | "available";
+            /** Process Evaluation Ko */
+            process_evaluation_ko?: string | null;
+        };
+        /**
+         * WorkspacePhase
+         * @enum {string}
+         */
+        WorkspacePhase: "CONTEXT_PREPARATION" | "READY_FOR_REVIEW" | "REVIEW_RUNNING" | "DOSSIER_READY" | "DECISION_REQUIRED" | "OUTCOME_RUNNING" | "EVALUATION_READY" | "CLOSED";
+        /** WorkspaceSafeguardSummary */
+        WorkspaceSafeguardSummary: {
+            /** Cause Ko */
+            cause_ko: string;
+            /** Condition Ko */
+            condition_ko: string;
+            /** Owner */
+            owner: string;
+            /** Rollback Trigger Ko */
+            rollback_trigger_ko: string;
+            /** Safeguard Id */
+            safeguard_id: string;
+            /** Verification Ko */
+            verification_ko: string;
+        };
+        /** WorkspaceStateAtStep */
+        WorkspaceStateAtStep: {
+            /** Active Action Ids */
+            active_action_ids: string[];
+            /** Eligible Evidence Ids */
+            eligible_evidence_ids: string[];
+            /** Reconstructed At Step */
+            reconstructed_at_step: number;
+            /** Tracks */
+            tracks: components["schemas"]["WorkspaceTrackState"][];
+            /** Unavailable Evidence Ids */
+            unavailable_evidence_ids: string[];
+        };
+        /** WorkspaceStateTransition */
+        WorkspaceStateTransition: {
+            /** Basis Refs */
+            basis_refs: string[];
+            /** Entity Id */
+            entity_id: string;
+            /** Entity Title */
+            entity_title: string;
+            /**
+             * Entity Type
+             * @enum {string}
+             */
+            entity_type: "action" | "work_item" | "milestone" | "evidence";
+            /** From State */
+            from_state: string;
+            /**
+             * Provenance
+             * @enum {string}
+             */
+            provenance: "expected_model" | "observed_event";
+            /** To State */
+            to_state: string;
+        };
+        /** WorkspaceTimeContext */
+        WorkspaceTimeContext: {
+            /** Commands Allowed At Selected Step */
+            commands_allowed_at_selected_step: boolean;
+            /** Current Step */
+            current_step: number;
+            /** Earliest Available Step */
+            earliest_available_step: number;
+            /** Latest Observable Step */
+            latest_observable_step: number;
+            /**
+             * Mode
+             * @enum {string}
+             */
+            mode: "current" | "historical";
+            /** Next Expected Evidence Step */
+            next_expected_evidence_step?: number | null;
+            /** Selected Step */
+            selected_step: number;
+        };
+        /** WorkspaceTrackState */
+        WorkspaceTrackState: {
+            /** Blocker */
+            blocker?: string | null;
+            /** Current Work Item Id */
+            current_work_item_id: string;
+            /** Current Work Item Title */
+            current_work_item_title: string;
+            /** Name */
+            name: string;
+            /** Next Milestone Id */
+            next_milestone_id?: string | null;
+            /** Next Milestone Step */
+            next_milestone_step?: number | null;
+            /** Next Milestone Title */
+            next_milestone_title?: string | null;
+            /** Owner */
+            owner: string;
+            status: components["schemas"]["WorkItemStatus"];
+            /** Track Id */
+            track_id: string;
+        };
+        /** WorkspaceWorkflow */
+        WorkspaceWorkflow: {
+            /** Allowed Actions */
+            allowed_actions: ("BUILD_CONTEXT" | "RUN_VIRTUAL_REVIEW" | "VIEW_REVIEW_PROGRESS" | "VIEW_DOSSIER" | "RUN_SIMULATED_DECISION" | "ADVANCE_SIMULATION" | "VIEW_EVALUATION" | "VIEW_LEARNING_SUMMARY" | "REFRESH_STALE")[];
+            /** Primary Action */
+            primary_action?: ("BUILD_CONTEXT" | "RUN_VIRTUAL_REVIEW" | "VIEW_REVIEW_PROGRESS" | "VIEW_DOSSIER" | "RUN_SIMULATED_DECISION" | "ADVANCE_SIMULATION" | "VIEW_EVALUATION" | "VIEW_LEARNING_SUMMARY" | "REFRESH_STALE") | null;
+            /** Running Operation Ko */
+            running_operation_ko?: string | null;
         };
     };
     responses: never;
@@ -1594,7 +1908,9 @@ export interface operations {
     };
     get_workspace_api_v1_decision_cases__case_id__workspace_get: {
         parameters: {
-            query?: never;
+            query?: {
+                at_step?: number | null;
+            };
             header?: never;
             path: {
                 case_id: string;
@@ -1609,7 +1925,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["DecisionWorkspaceProjection"];
+                    "application/json": components["schemas"]["DecisionWorkspaceProjectionV2"];
                 };
             };
             /** @description Validation Error */

@@ -1,9 +1,8 @@
 // Aliases over OpenAPI-generated schema.d.ts. Business rules do not belong here.
 import type { components } from "./schema";
 
-export type TrackSummary = components["schemas"]["TrackSummary"];
 export type DecisionListItem = components["schemas"]["DecisionListItemProjection"];
-export type DecisionWorkspace = components["schemas"]["DecisionWorkspaceProjection"];
+export type DecisionWorkspace = components["schemas"]["DecisionWorkspaceProjectionV2"];
 export type DevelopmentTimeline = components["schemas"]["DevelopmentTimelineProjection"];
 export type RoleReview = components["schemas"]["RoleReview"];
 export type ReviewRun = components["schemas"]["ReviewRunView"];

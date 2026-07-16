@@ -237,6 +237,46 @@
       "title": "WorkspaceAlternativesV2",
       "type": "object"
     },
+    "WorkspaceBlockerImpact": {
+      "additionalProperties": false,
+      "properties": {
+        "source_work_item_title": {
+          "minLength": 1,
+          "title": "Source Work Item Title",
+          "type": "string"
+        },
+        "blocker_ko": {
+          "minLength": 1,
+          "title": "Blocker Ko",
+          "type": "string"
+        },
+        "downstream_work_item_titles": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Downstream Work Item Titles",
+          "type": "array"
+        },
+        "impacted_milestone_titles": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Impacted Milestone Titles",
+          "type": "array"
+        },
+        "reaches_decision_deadline": {
+          "title": "Reaches Decision Deadline",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "source_work_item_title",
+        "blocker_ko",
+        "reaches_decision_deadline"
+      ],
+      "title": "WorkspaceBlockerImpact",
+      "type": "object"
+    },
     "WorkspaceCausalChain": {
       "additionalProperties": false,
       "properties": {
@@ -548,7 +588,8 @@
             "low",
             "medium",
             "high",
-            "critical"
+            "critical",
+            "unknown"
           ],
           "title": "Downside",
           "type": "string"
@@ -558,7 +599,8 @@
             "limited",
             "cross_track",
             "milestone",
-            "project"
+            "project",
+            "unknown"
           ],
           "title": "Blast Radius",
           "type": "string"
@@ -695,6 +737,13 @@
           "title": "Causal Chains",
           "type": "array"
         },
+        "blocker_impacts": {
+          "items": {
+            "$ref": "#/$defs/WorkspaceBlockerImpact"
+          },
+          "title": "Blocker Impacts",
+          "type": "array"
+        },
         "commitment_windows": {
           "items": {
             "$ref": "#/$defs/WorkspaceCommitmentWindow"
@@ -800,10 +849,26 @@
           "type": "string"
         },
         "workspace_phase": {
-          "$ref": "#/$defs/WorkspacePhase"
+          "anyOf": [
+            {
+              "$ref": "#/$defs/WorkspacePhase"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
         },
         "case_status": {
-          "$ref": "#/$defs/DecisionCaseStatus"
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DecisionCaseStatus"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
         },
         "deadline": {
           "$ref": "#/$defs/WorkspaceDeadline"
@@ -818,8 +883,6 @@
       "required": [
         "title_ko",
         "decision_question",
-        "workspace_phase",
-        "case_status",
         "deadline"
       ],
       "title": "WorkspaceHeaderV2",

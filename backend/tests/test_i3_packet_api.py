@@ -86,6 +86,7 @@ def test_read_api_is_consumer_shaped() -> None:
 
     assert listing.status_code == 200
     assert len(listing.json()) == 8
-    assert workspace.json()["title_ko"] == "UHD60 EIS 전력 여유 검토"
+    assert workspace.json()["projection_schema_version"] == "decision-workspace.v2"
+    assert workspace.json()["header"]["title_ko"] == "UHD60 EIS 전력 여유 검토"
     assert "packet_hash" in packet.json()
     assert "hidden_root_causes" not in packet.text

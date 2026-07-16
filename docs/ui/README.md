@@ -6,6 +6,8 @@
 - 상세 UX 방향: `../../internal_docs/26.07.16 결정 중심 UX 설계.md`
 - 한국어 용어와 표현 기준: `KOREAN_UI_GLOSSARY.md`
 - UX-A 실행 fixture: `../../fixtures/ux/CASE-VR-001.workspace.v1.yaml`
+- UX-B 목록: Backend-ranked `decision-list-item.v1`을 사용하는 `/decisions`
+- UX-C 상세: selected Step을 지원하는 `decision-workspace.v2` 기반 `/decisions/:caseId`
 - 생성 계약: `../../contracts/generated/decision-workspace.v2.schema.json`,
   `../../contracts/generated/workspace-ux-fixture.v1.schema.json`,
   `../../contracts/generated/decision-list-item.v1.schema.json`

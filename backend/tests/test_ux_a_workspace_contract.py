@@ -64,9 +64,13 @@ def test_historical_workspace_disables_commands_and_matches_selected_step() -> N
     payload = deepcopy(_payload()["workspace_example"])
     assert isinstance(payload, dict)
     time_context = payload["time_context"]
+    header = payload["header"]
     development_twin = payload["development_twin"]
+    workflow = payload["workflow"]
     assert isinstance(time_context, dict)
+    assert isinstance(header, dict)
     assert isinstance(development_twin, dict)
+    assert isinstance(workflow, dict)
     state = development_twin["state_at_selected_step"]
     assert isinstance(state, dict)
     time_context.update(
@@ -76,6 +80,10 @@ def test_historical_workspace_disables_commands_and_matches_selected_step() -> N
             "commands_allowed_at_selected_step": False,
         }
     )
+    header["workspace_phase"] = None
+    header["case_status"] = None
+    workflow["primary_action"] = None
+    workflow["allowed_actions"] = []
     state["reconstructed_at_step"] = 10
 
     workspace = DecisionWorkspaceProjectionV2.model_validate(payload)

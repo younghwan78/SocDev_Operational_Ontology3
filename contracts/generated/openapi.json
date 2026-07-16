@@ -176,34 +176,6 @@
         "title": "AgreementGroup",
         "type": "object"
       },
-      "AlternativeSummary": {
-        "properties": {
-          "description": {
-            "title": "Description",
-            "type": "string"
-          },
-          "option_id": {
-            "title": "Option Id",
-            "type": "string"
-          },
-          "reversible": {
-            "title": "Reversible",
-            "type": "boolean"
-          },
-          "title": {
-            "title": "Title",
-            "type": "string"
-          }
-        },
-        "required": [
-          "option_id",
-          "title",
-          "description",
-          "reversible"
-        ],
-        "title": "AlternativeSummary",
-        "type": "object"
-      },
       "BlockerPropagation": {
         "properties": {
           "downstream_work_item_ids": {
@@ -265,37 +237,6 @@
           "reaches_decision_deadline"
         ],
         "title": "BlockerPropagation",
-        "type": "object"
-      },
-      "BlockerSummary": {
-        "properties": {
-          "blocker": {
-            "title": "Blocker",
-            "type": "string"
-          },
-          "dependency_ids": {
-            "items": {
-              "type": "string"
-            },
-            "title": "Dependency Ids",
-            "type": "array"
-          },
-          "track_id": {
-            "title": "Track Id",
-            "type": "string"
-          },
-          "work_item_title": {
-            "title": "Work Item Title",
-            "type": "string"
-          }
-        },
-        "required": [
-          "work_item_title",
-          "track_id",
-          "blocker",
-          "dependency_ids"
-        ],
-        "title": "BlockerSummary",
         "type": "object"
       },
       "CaseEvaluation": {
@@ -514,42 +455,6 @@
           "objections"
         ],
         "title": "ChallengerReview",
-        "type": "object"
-      },
-      "ClaimSummary": {
-        "properties": {
-          "claim_id": {
-            "title": "Claim Id",
-            "type": "string"
-          },
-          "confidence_level": {
-            "title": "Confidence Level",
-            "type": "string"
-          },
-          "epistemic_status": {
-            "title": "Epistemic Status",
-            "type": "string"
-          },
-          "source_refs": {
-            "items": {
-              "type": "string"
-            },
-            "title": "Source Refs",
-            "type": "array"
-          },
-          "statement": {
-            "title": "Statement",
-            "type": "string"
-          }
-        },
-        "required": [
-          "claim_id",
-          "statement",
-          "epistemic_status",
-          "confidence_level",
-          "source_refs"
-        ],
-        "title": "ClaimSummary",
         "type": "object"
       },
       "DecisionActionPlan": {
@@ -940,138 +845,102 @@
         "title": "DecisionType",
         "type": "string"
       },
-      "DecisionWorkspaceProjection": {
+      "DecisionWorkspaceProjectionV2": {
+        "additionalProperties": false,
         "properties": {
           "aggregate_version": {
+            "minimum": 0.0,
             "title": "Aggregate Version",
             "type": "integer"
           },
-          "alternative_count": {
-            "title": "Alternative Count",
-            "type": "integer"
-          },
           "alternatives": {
-            "items": {
-              "$ref": "#/components/schemas/AlternativeSummary"
-            },
-            "title": "Alternatives",
-            "type": "array"
-          },
-          "blockers": {
-            "items": {
-              "$ref": "#/components/schemas/BlockerSummary"
-            },
-            "title": "Blockers",
-            "type": "array"
+            "$ref": "#/components/schemas/WorkspaceAlternativesV2"
           },
           "case_id": {
             "title": "Case Id",
             "type": "string"
           },
-          "case_status": {
-            "title": "Case Status",
-            "type": "string"
+          "controls": {
+            "$ref": "#/components/schemas/WorkspaceControls"
           },
-          "claims": {
+          "current_brief": {
+            "$ref": "#/components/schemas/WorkspaceCurrentBrief"
+          },
+          "decision_posture": {
+            "$ref": "#/components/schemas/WorkspaceDecisionPosture"
+          },
+          "deliberation": {
+            "$ref": "#/components/schemas/WorkspaceDeliberation"
+          },
+          "details": {
+            "$ref": "#/components/schemas/WorkspaceDetails"
+          },
+          "development_twin": {
+            "$ref": "#/components/schemas/WorkspaceDevelopmentTwin"
+          },
+          "expected_option_transitions": {
             "items": {
-              "$ref": "#/components/schemas/ClaimSummary"
+              "$ref": "#/components/schemas/WorkspaceExpectedOptionTransition"
             },
-            "title": "Claims",
+            "title": "Expected Option Transitions",
             "type": "array"
-          },
-          "current_step": {
-            "title": "Current Step",
-            "type": "integer"
-          },
-          "deadline_milestone_id": {
-            "title": "Deadline Milestone Id",
-            "type": "string"
-          },
-          "deadline_step": {
-            "title": "Deadline Step",
-            "type": "integer"
-          },
-          "deadline_title": {
-            "title": "Deadline Title",
-            "type": "string"
-          },
-          "decision_question": {
-            "title": "Decision Question",
-            "type": "string"
-          },
-          "eligible_evidence_titles": {
-            "items": {
-              "type": "string"
-            },
-            "title": "Eligible Evidence Titles",
-            "type": "array"
-          },
-          "evidence": {
-            "items": {
-              "$ref": "#/components/schemas/EvidenceSummary"
-            },
-            "title": "Evidence",
-            "type": "array"
-          },
-          "evidence_count": {
-            "title": "Evidence Count",
-            "type": "integer"
           },
           "fixture_version": {
+            "minimum": 1.0,
             "title": "Fixture Version",
             "type": "integer"
           },
+          "generated_at": {
+            "title": "Generated At",
+            "type": "string"
+          },
+          "header": {
+            "$ref": "#/components/schemas/WorkspaceHeaderV2"
+          },
+          "observed_decision_transitions": {
+            "$ref": "#/components/schemas/WorkspaceObservedDecisionTransitions"
+          },
+          "outcome_and_evaluation": {
+            "$ref": "#/components/schemas/WorkspaceOutcomeAndEvaluation"
+          },
           "projection_schema_version": {
-            "default": "decision-workspace.v1",
+            "const": "decision-workspace.v2",
+            "default": "decision-workspace.v2",
             "title": "Projection Schema Version",
             "type": "string"
           },
-          "title_ko": {
-            "title": "Title Ko",
-            "type": "string"
+          "stale": {
+            "title": "Stale",
+            "type": "boolean"
           },
-          "tracks": {
-            "items": {
-              "$ref": "#/components/schemas/TrackSummary"
-            },
-            "title": "Tracks",
-            "type": "array"
+          "time_context": {
+            "$ref": "#/components/schemas/WorkspaceTimeContext"
           },
-          "uncertainties": {
-            "items": {
-              "type": "string"
-            },
-            "title": "Uncertainties",
-            "type": "array"
-          },
-          "uncertainty_count": {
-            "title": "Uncertainty Count",
-            "type": "integer"
+          "workflow": {
+            "$ref": "#/components/schemas/WorkspaceWorkflow"
           }
         },
         "required": [
+          "generated_at",
+          "aggregate_version",
           "case_id",
           "fixture_version",
-          "aggregate_version",
-          "title_ko",
-          "case_status",
-          "current_step",
-          "decision_question",
-          "deadline_milestone_id",
-          "deadline_title",
-          "deadline_step",
-          "tracks",
-          "alternative_count",
-          "evidence_count",
-          "uncertainty_count",
+          "stale",
+          "time_context",
+          "header",
+          "current_brief",
+          "decision_posture",
+          "development_twin",
+          "expected_option_transitions",
+          "observed_decision_transitions",
           "alternatives",
-          "blockers",
-          "eligible_evidence_titles",
-          "evidence",
-          "claims",
-          "uncertainties"
+          "deliberation",
+          "controls",
+          "outcome_and_evaluation",
+          "workflow",
+          "details"
         ],
-        "title": "DecisionWorkspaceProjection",
+        "title": "DecisionWorkspaceProjectionV2",
         "type": "object"
       },
       "DevelopmentTimelineProjection": {
@@ -1347,52 +1216,6 @@
           "available_at_step"
         ],
         "title": "Evidence",
-        "type": "object"
-      },
-      "EvidenceSummary": {
-        "properties": {
-          "available_at_step": {
-            "title": "Available At Step",
-            "type": "integer"
-          },
-          "eligible_now": {
-            "title": "Eligible Now",
-            "type": "boolean"
-          },
-          "evidence_id": {
-            "title": "Evidence Id",
-            "type": "string"
-          },
-          "evidence_type": {
-            "title": "Evidence Type",
-            "type": "string"
-          },
-          "limitations": {
-            "items": {
-              "type": "string"
-            },
-            "title": "Limitations",
-            "type": "array"
-          },
-          "source_ref": {
-            "title": "Source Ref",
-            "type": "string"
-          },
-          "title": {
-            "title": "Title",
-            "type": "string"
-          }
-        },
-        "required": [
-          "evidence_id",
-          "title",
-          "evidence_type",
-          "source_ref",
-          "available_at_step",
-          "eligible_now",
-          "limitations"
-        ],
-        "title": "EvidenceSummary",
         "type": "object"
       },
       "HTTPValidationError": {
@@ -2637,34 +2460,6 @@
         "title": "TimelineWorkItem",
         "type": "object"
       },
-      "TrackSummary": {
-        "properties": {
-          "blocker_count": {
-            "title": "Blocker Count",
-            "type": "integer"
-          },
-          "name": {
-            "title": "Name",
-            "type": "string"
-          },
-          "status": {
-            "title": "Status",
-            "type": "string"
-          },
-          "track_id": {
-            "title": "Track Id",
-            "type": "string"
-          }
-        },
-        "required": [
-          "track_id",
-          "name",
-          "status",
-          "blocker_count"
-        ],
-        "title": "TrackSummary",
-        "type": "object"
-      },
       "ValidationError": {
         "properties": {
           "ctx": {
@@ -2703,6 +2498,1237 @@
           "type"
         ],
         "title": "ValidationError",
+        "type": "object"
+      },
+      "WorkItemStatus": {
+        "enum": [
+          "PLANNED",
+          "READY",
+          "IN_PROGRESS",
+          "BLOCKED",
+          "DONE",
+          "VERIFIED",
+          "REWORK",
+          "CANCELLED"
+        ],
+        "title": "WorkItemStatus",
+        "type": "string"
+      },
+      "WorkspaceActionPlanSummary": {
+        "additionalProperties": false,
+        "properties": {
+          "action_ko": {
+            "title": "Action Ko",
+            "type": "string"
+          },
+          "action_type": {
+            "enum": [
+              "execute",
+              "collect_evidence",
+              "defer",
+              "escalate",
+              "reject"
+            ],
+            "title": "Action Type",
+            "type": "string"
+          },
+          "due_at_step": {
+            "minimum": 0.0,
+            "title": "Due At Step",
+            "type": "integer"
+          },
+          "fallback_action_ko": {
+            "title": "Fallback Action Ko",
+            "type": "string"
+          },
+          "owner": {
+            "title": "Owner",
+            "type": "string"
+          },
+          "trigger_ko": {
+            "title": "Trigger Ko",
+            "type": "string"
+          },
+          "verification_ko": {
+            "title": "Verification Ko",
+            "type": "string"
+          }
+        },
+        "required": [
+          "action_type",
+          "owner",
+          "action_ko",
+          "due_at_step",
+          "trigger_ko",
+          "verification_ko",
+          "fallback_action_ko"
+        ],
+        "title": "WorkspaceActionPlanSummary",
+        "type": "object"
+      },
+      "WorkspaceAlternativeV2": {
+        "additionalProperties": false,
+        "properties": {
+          "description": {
+            "title": "Description",
+            "type": "string"
+          },
+          "option_id": {
+            "title": "Option Id",
+            "type": "string"
+          },
+          "reversible": {
+            "title": "Reversible",
+            "type": "boolean"
+          },
+          "switching_cost": {
+            "$ref": "#/components/schemas/Quantity"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "option_id",
+          "title",
+          "description",
+          "reversible",
+          "switching_cost"
+        ],
+        "title": "WorkspaceAlternativeV2",
+        "type": "object"
+      },
+      "WorkspaceAlternativesV2": {
+        "additionalProperties": false,
+        "properties": {
+          "comparison_dimensions_ko": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "title": "Comparison Dimensions Ko",
+            "type": "array"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/WorkspaceAlternativeV2"
+            },
+            "minItems": 2,
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "required": [
+          "comparison_dimensions_ko",
+          "items"
+        ],
+        "title": "WorkspaceAlternativesV2",
+        "type": "object"
+      },
+      "WorkspaceBlockerImpact": {
+        "additionalProperties": false,
+        "properties": {
+          "blocker_ko": {
+            "minLength": 1,
+            "title": "Blocker Ko",
+            "type": "string"
+          },
+          "downstream_work_item_titles": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Downstream Work Item Titles",
+            "type": "array"
+          },
+          "impacted_milestone_titles": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Impacted Milestone Titles",
+            "type": "array"
+          },
+          "reaches_decision_deadline": {
+            "title": "Reaches Decision Deadline",
+            "type": "boolean"
+          },
+          "source_work_item_title": {
+            "minLength": 1,
+            "title": "Source Work Item Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "source_work_item_title",
+          "blocker_ko",
+          "reaches_decision_deadline"
+        ],
+        "title": "WorkspaceBlockerImpact",
+        "type": "object"
+      },
+      "WorkspaceCausalChain": {
+        "additionalProperties": false,
+        "properties": {
+          "impacted_milestone_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Impacted Milestone Ids",
+            "type": "array"
+          },
+          "links": {
+            "items": {
+              "$ref": "#/components/schemas/WorkspaceCausalLink"
+            },
+            "minItems": 1,
+            "title": "Links",
+            "type": "array"
+          },
+          "observed_at_step": {
+            "minimum": 0.0,
+            "title": "Observed At Step",
+            "type": "integer"
+          },
+          "source_event_id": {
+            "title": "Source Event Id",
+            "type": "string"
+          },
+          "title_ko": {
+            "minLength": 1,
+            "title": "Title Ko",
+            "type": "string"
+          }
+        },
+        "required": [
+          "source_event_id",
+          "observed_at_step",
+          "title_ko",
+          "links"
+        ],
+        "title": "WorkspaceCausalChain",
+        "type": "object"
+      },
+      "WorkspaceCausalLink": {
+        "additionalProperties": false,
+        "properties": {
+          "inference_basis": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Inference Basis",
+            "type": "array"
+          },
+          "relation_kind": {
+            "enum": [
+              "observed",
+              "inferred"
+            ],
+            "title": "Relation Kind",
+            "type": "string"
+          },
+          "source_refs": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "title": "Source Refs",
+            "type": "array"
+          },
+          "statement_ko": {
+            "minLength": 1,
+            "title": "Statement Ko",
+            "type": "string"
+          }
+        },
+        "required": [
+          "relation_kind",
+          "statement_ko",
+          "source_refs"
+        ],
+        "title": "WorkspaceCausalLink",
+        "type": "object"
+      },
+      "WorkspaceCommitmentWindow": {
+        "additionalProperties": false,
+        "properties": {
+          "closes_at_milestone_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Closes At Milestone Id"
+          },
+          "closes_at_step": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Closes At Step"
+          },
+          "closing_reason_ko": {
+            "minLength": 1,
+            "title": "Closing Reason Ko",
+            "type": "string"
+          },
+          "owner": {
+            "title": "Owner",
+            "type": "string"
+          },
+          "post_window_impact_ko": {
+            "minLength": 1,
+            "title": "Post Window Impact Ko",
+            "type": "string"
+          },
+          "subject_id": {
+            "title": "Subject Id",
+            "type": "string"
+          },
+          "subject_title": {
+            "title": "Subject Title",
+            "type": "string"
+          },
+          "subject_type": {
+            "enum": [
+              "work_item",
+              "milestone",
+              "alternative",
+              "interface",
+              "verification_plan"
+            ],
+            "title": "Subject Type",
+            "type": "string"
+          },
+          "switching_cost": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Quantity"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "subject_type",
+          "subject_id",
+          "subject_title",
+          "closing_reason_ko",
+          "post_window_impact_ko",
+          "owner"
+        ],
+        "title": "WorkspaceCommitmentWindow",
+        "type": "object"
+      },
+      "WorkspaceControls": {
+        "additionalProperties": false,
+        "properties": {
+          "action_plan": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/WorkspaceActionPlanSummary"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "safeguards": {
+            "items": {
+              "$ref": "#/components/schemas/WorkspaceSafeguardSummary"
+            },
+            "title": "Safeguards",
+            "type": "array"
+          }
+        },
+        "required": [
+          "safeguards"
+        ],
+        "title": "WorkspaceControls",
+        "type": "object"
+      },
+      "WorkspaceCurrentBrief": {
+        "additionalProperties": false,
+        "properties": {
+          "key_conditions_ko": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 3,
+            "title": "Key Conditions Ko",
+            "type": "array"
+          },
+          "one_line_reason_ko": {
+            "minLength": 1,
+            "title": "One Line Reason Ko",
+            "type": "string"
+          },
+          "residual_risks_ko": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 2,
+            "title": "Residual Risks Ko",
+            "type": "array"
+          },
+          "state_or_recommendation_ko": {
+            "minLength": 1,
+            "title": "State Or Recommendation Ko",
+            "type": "string"
+          },
+          "why_now_ko": {
+            "minLength": 1,
+            "title": "Why Now Ko",
+            "type": "string"
+          }
+        },
+        "required": [
+          "state_or_recommendation_ko",
+          "one_line_reason_ko",
+          "why_now_ko"
+        ],
+        "title": "WorkspaceCurrentBrief",
+        "type": "object"
+      },
+      "WorkspaceDeadline": {
+        "additionalProperties": false,
+        "properties": {
+          "at_step": {
+            "minimum": 0.0,
+            "title": "At Step",
+            "type": "integer"
+          },
+          "milestone_id": {
+            "title": "Milestone Id",
+            "type": "string"
+          },
+          "remaining_steps": {
+            "title": "Remaining Steps",
+            "type": "integer"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "milestone_id",
+          "title",
+          "at_step",
+          "remaining_steps"
+        ],
+        "title": "WorkspaceDeadline",
+        "type": "object"
+      },
+      "WorkspaceDecisionPosture": {
+        "additionalProperties": false,
+        "properties": {
+          "blast_radius": {
+            "enum": [
+              "limited",
+              "cross_track",
+              "milestone",
+              "project",
+              "unknown"
+            ],
+            "title": "Blast Radius",
+            "type": "string"
+          },
+          "detectability": {
+            "enum": [
+              "observable_now",
+              "observable_later",
+              "unknown"
+            ],
+            "title": "Detectability",
+            "type": "string"
+          },
+          "downside": {
+            "enum": [
+              "low",
+              "medium",
+              "high",
+              "critical",
+              "unknown"
+            ],
+            "title": "Downside",
+            "type": "string"
+          },
+          "evidence_state": {
+            "enum": [
+              "sufficient",
+              "partial",
+              "insufficient"
+            ],
+            "title": "Evidence State",
+            "type": "string"
+          },
+          "explanations_ko": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 7,
+            "minItems": 1,
+            "title": "Explanations Ko",
+            "type": "array"
+          },
+          "recoverability": {
+            "enum": [
+              "high",
+              "medium",
+              "low"
+            ],
+            "title": "Recoverability",
+            "type": "string"
+          },
+          "reversibility": {
+            "enum": [
+              "high",
+              "medium",
+              "low"
+            ],
+            "title": "Reversibility",
+            "type": "string"
+          },
+          "urgency": {
+            "enum": [
+              "low",
+              "medium",
+              "high",
+              "expired"
+            ],
+            "title": "Urgency",
+            "type": "string"
+          }
+        },
+        "required": [
+          "evidence_state",
+          "reversibility",
+          "detectability",
+          "recoverability",
+          "downside",
+          "blast_radius",
+          "urgency",
+          "explanations_ko"
+        ],
+        "title": "WorkspaceDecisionPosture",
+        "type": "object"
+      },
+      "WorkspaceDeliberation": {
+        "additionalProperties": false,
+        "properties": {
+          "agreement_ko": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Agreement Ko",
+            "type": "array"
+          },
+          "changed_after_challenge_ko": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Changed After Challenge Ko",
+            "type": "array"
+          },
+          "dissent_ko": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Dissent Ko",
+            "type": "array"
+          },
+          "key_assumptions_ko": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Key Assumptions Ko",
+            "type": "array"
+          },
+          "key_unknowns_ko": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Key Unknowns Ko",
+            "type": "array"
+          },
+          "needs_confirmation_ko": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Needs Confirmation Ko",
+            "type": "array"
+          }
+        },
+        "required": [
+          "agreement_ko",
+          "dissent_ko",
+          "needs_confirmation_ko",
+          "changed_after_challenge_ko",
+          "key_assumptions_ko",
+          "key_unknowns_ko"
+        ],
+        "title": "WorkspaceDeliberation",
+        "type": "object"
+      },
+      "WorkspaceDetails": {
+        "additionalProperties": false,
+        "properties": {
+          "evidence_available": {
+            "title": "Evidence Available",
+            "type": "boolean"
+          },
+          "impact_path_available": {
+            "title": "Impact Path Available",
+            "type": "boolean"
+          },
+          "role_originals_available": {
+            "title": "Role Originals Available",
+            "type": "boolean"
+          },
+          "timeline_available": {
+            "title": "Timeline Available",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "evidence_available",
+          "timeline_available",
+          "impact_path_available",
+          "role_originals_available"
+        ],
+        "title": "WorkspaceDetails",
+        "type": "object"
+      },
+      "WorkspaceDevelopmentTwin": {
+        "additionalProperties": false,
+        "properties": {
+          "blocker_impacts": {
+            "items": {
+              "$ref": "#/components/schemas/WorkspaceBlockerImpact"
+            },
+            "title": "Blocker Impacts",
+            "type": "array"
+          },
+          "causal_chains": {
+            "items": {
+              "$ref": "#/components/schemas/WorkspaceCausalChain"
+            },
+            "title": "Causal Chains",
+            "type": "array"
+          },
+          "commitment_windows": {
+            "items": {
+              "$ref": "#/components/schemas/WorkspaceCommitmentWindow"
+            },
+            "title": "Commitment Windows",
+            "type": "array"
+          },
+          "delay_summary_ko": {
+            "minLength": 1,
+            "title": "Delay Summary Ko",
+            "type": "string"
+          },
+          "recent_decision_relevant_event_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Recent Decision Relevant Event Ids",
+            "type": "array"
+          },
+          "state_at_selected_step": {
+            "$ref": "#/components/schemas/WorkspaceStateAtStep"
+          }
+        },
+        "required": [
+          "state_at_selected_step",
+          "causal_chains",
+          "commitment_windows",
+          "delay_summary_ko",
+          "recent_decision_relevant_event_ids"
+        ],
+        "title": "WorkspaceDevelopmentTwin",
+        "type": "object"
+      },
+      "WorkspaceExpectedOptionTransition": {
+        "additionalProperties": false,
+        "properties": {
+          "label": {
+            "const": "expected_from_observable_model",
+            "default": "expected_from_observable_model",
+            "title": "Label",
+            "type": "string"
+          },
+          "lost_options_ko": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Lost Options Ko",
+            "type": "array"
+          },
+          "model_basis": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Model Basis",
+            "type": "array"
+          },
+          "option_id": {
+            "title": "Option Id",
+            "type": "string"
+          },
+          "option_title": {
+            "title": "Option Title",
+            "type": "string"
+          },
+          "preserved_options_ko": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Preserved Options Ko",
+            "type": "array"
+          },
+          "state_changes": {
+            "items": {
+              "$ref": "#/components/schemas/WorkspaceStateTransition"
+            },
+            "title": "State Changes",
+            "type": "array"
+          },
+          "unknown_impacts_ko": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Unknown Impacts Ko",
+            "type": "array"
+          }
+        },
+        "required": [
+          "option_id",
+          "option_title",
+          "state_changes"
+        ],
+        "title": "WorkspaceExpectedOptionTransition",
+        "type": "object"
+      },
+      "WorkspaceHeaderV2": {
+        "additionalProperties": false,
+        "properties": {
+          "case_status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DecisionCaseStatus"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "deadline": {
+            "$ref": "#/components/schemas/WorkspaceDeadline"
+          },
+          "decision_question": {
+            "minLength": 1,
+            "title": "Decision Question",
+            "type": "string"
+          },
+          "simulated": {
+            "const": true,
+            "default": true,
+            "title": "Simulated",
+            "type": "boolean"
+          },
+          "title_ko": {
+            "minLength": 1,
+            "title": "Title Ko",
+            "type": "string"
+          },
+          "workspace_phase": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/WorkspacePhase"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "title_ko",
+          "decision_question",
+          "deadline"
+        ],
+        "title": "WorkspaceHeaderV2",
+        "type": "object"
+      },
+      "WorkspaceObservedDecisionTransitions": {
+        "additionalProperties": false,
+        "properties": {
+          "available": {
+            "title": "Available",
+            "type": "boolean"
+          },
+          "decision_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decision Id"
+          },
+          "guardrail_events_ko": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Guardrail Events Ko",
+            "type": "array"
+          },
+          "state_changes": {
+            "items": {
+              "$ref": "#/components/schemas/WorkspaceStateTransition"
+            },
+            "title": "State Changes",
+            "type": "array"
+          }
+        },
+        "required": [
+          "available"
+        ],
+        "title": "WorkspaceObservedDecisionTransitions",
+        "type": "object"
+      },
+      "WorkspaceOutcomeAndEvaluation": {
+        "additionalProperties": false,
+        "properties": {
+          "expectation_vs_actual_ko": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Expectation Vs Actual Ko",
+            "type": "array"
+          },
+          "hidden_until_step_advance": {
+            "title": "Hidden Until Step Advance",
+            "type": "boolean"
+          },
+          "lessons_ko": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Lessons Ko",
+            "type": "array"
+          },
+          "outcome_evaluation_ko": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Outcome Evaluation Ko"
+          },
+          "outcome_state": {
+            "enum": [
+              "not_available",
+              "running",
+              "available"
+            ],
+            "title": "Outcome State",
+            "type": "string"
+          },
+          "process_evaluation_ko": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Process Evaluation Ko"
+          }
+        },
+        "required": [
+          "outcome_state",
+          "hidden_until_step_advance"
+        ],
+        "title": "WorkspaceOutcomeAndEvaluation",
+        "type": "object"
+      },
+      "WorkspacePhase": {
+        "enum": [
+          "CONTEXT_PREPARATION",
+          "READY_FOR_REVIEW",
+          "REVIEW_RUNNING",
+          "DOSSIER_READY",
+          "DECISION_REQUIRED",
+          "OUTCOME_RUNNING",
+          "EVALUATION_READY",
+          "CLOSED"
+        ],
+        "title": "WorkspacePhase",
+        "type": "string"
+      },
+      "WorkspaceSafeguardSummary": {
+        "additionalProperties": false,
+        "properties": {
+          "cause_ko": {
+            "title": "Cause Ko",
+            "type": "string"
+          },
+          "condition_ko": {
+            "title": "Condition Ko",
+            "type": "string"
+          },
+          "owner": {
+            "title": "Owner",
+            "type": "string"
+          },
+          "rollback_trigger_ko": {
+            "title": "Rollback Trigger Ko",
+            "type": "string"
+          },
+          "safeguard_id": {
+            "title": "Safeguard Id",
+            "type": "string"
+          },
+          "verification_ko": {
+            "title": "Verification Ko",
+            "type": "string"
+          }
+        },
+        "required": [
+          "safeguard_id",
+          "cause_ko",
+          "condition_ko",
+          "rollback_trigger_ko",
+          "owner",
+          "verification_ko"
+        ],
+        "title": "WorkspaceSafeguardSummary",
+        "type": "object"
+      },
+      "WorkspaceStateAtStep": {
+        "additionalProperties": false,
+        "properties": {
+          "active_action_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Active Action Ids",
+            "type": "array"
+          },
+          "eligible_evidence_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Eligible Evidence Ids",
+            "type": "array"
+          },
+          "reconstructed_at_step": {
+            "minimum": 0.0,
+            "title": "Reconstructed At Step",
+            "type": "integer"
+          },
+          "tracks": {
+            "items": {
+              "$ref": "#/components/schemas/WorkspaceTrackState"
+            },
+            "title": "Tracks",
+            "type": "array"
+          },
+          "unavailable_evidence_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Unavailable Evidence Ids",
+            "type": "array"
+          }
+        },
+        "required": [
+          "reconstructed_at_step",
+          "tracks",
+          "eligible_evidence_ids",
+          "unavailable_evidence_ids",
+          "active_action_ids"
+        ],
+        "title": "WorkspaceStateAtStep",
+        "type": "object"
+      },
+      "WorkspaceStateTransition": {
+        "additionalProperties": false,
+        "properties": {
+          "basis_refs": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "title": "Basis Refs",
+            "type": "array"
+          },
+          "entity_id": {
+            "title": "Entity Id",
+            "type": "string"
+          },
+          "entity_title": {
+            "title": "Entity Title",
+            "type": "string"
+          },
+          "entity_type": {
+            "enum": [
+              "action",
+              "work_item",
+              "milestone",
+              "evidence"
+            ],
+            "title": "Entity Type",
+            "type": "string"
+          },
+          "from_state": {
+            "title": "From State",
+            "type": "string"
+          },
+          "provenance": {
+            "enum": [
+              "expected_model",
+              "observed_event"
+            ],
+            "title": "Provenance",
+            "type": "string"
+          },
+          "to_state": {
+            "title": "To State",
+            "type": "string"
+          }
+        },
+        "required": [
+          "provenance",
+          "entity_type",
+          "entity_id",
+          "entity_title",
+          "from_state",
+          "to_state",
+          "basis_refs"
+        ],
+        "title": "WorkspaceStateTransition",
+        "type": "object"
+      },
+      "WorkspaceTimeContext": {
+        "additionalProperties": false,
+        "properties": {
+          "commands_allowed_at_selected_step": {
+            "title": "Commands Allowed At Selected Step",
+            "type": "boolean"
+          },
+          "current_step": {
+            "minimum": 0.0,
+            "title": "Current Step",
+            "type": "integer"
+          },
+          "earliest_available_step": {
+            "minimum": 0.0,
+            "title": "Earliest Available Step",
+            "type": "integer"
+          },
+          "latest_observable_step": {
+            "minimum": 0.0,
+            "title": "Latest Observable Step",
+            "type": "integer"
+          },
+          "mode": {
+            "enum": [
+              "current",
+              "historical"
+            ],
+            "title": "Mode",
+            "type": "string"
+          },
+          "next_expected_evidence_step": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Expected Evidence Step"
+          },
+          "selected_step": {
+            "minimum": 0.0,
+            "title": "Selected Step",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "current_step",
+          "selected_step",
+          "mode",
+          "earliest_available_step",
+          "latest_observable_step",
+          "commands_allowed_at_selected_step"
+        ],
+        "title": "WorkspaceTimeContext",
+        "type": "object"
+      },
+      "WorkspaceTrackState": {
+        "additionalProperties": false,
+        "properties": {
+          "blocker": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Blocker"
+          },
+          "current_work_item_id": {
+            "title": "Current Work Item Id",
+            "type": "string"
+          },
+          "current_work_item_title": {
+            "title": "Current Work Item Title",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "next_milestone_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Milestone Id"
+          },
+          "next_milestone_step": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Milestone Step"
+          },
+          "next_milestone_title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Milestone Title"
+          },
+          "owner": {
+            "title": "Owner",
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/WorkItemStatus"
+          },
+          "track_id": {
+            "title": "Track Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "track_id",
+          "name",
+          "status",
+          "current_work_item_id",
+          "current_work_item_title",
+          "owner"
+        ],
+        "title": "WorkspaceTrackState",
+        "type": "object"
+      },
+      "WorkspaceWorkflow": {
+        "additionalProperties": false,
+        "properties": {
+          "allowed_actions": {
+            "items": {
+              "enum": [
+                "BUILD_CONTEXT",
+                "RUN_VIRTUAL_REVIEW",
+                "VIEW_REVIEW_PROGRESS",
+                "VIEW_DOSSIER",
+                "RUN_SIMULATED_DECISION",
+                "ADVANCE_SIMULATION",
+                "VIEW_EVALUATION",
+                "VIEW_LEARNING_SUMMARY",
+                "REFRESH_STALE"
+              ],
+              "type": "string"
+            },
+            "title": "Allowed Actions",
+            "type": "array"
+          },
+          "primary_action": {
+            "anyOf": [
+              {
+                "enum": [
+                  "BUILD_CONTEXT",
+                  "RUN_VIRTUAL_REVIEW",
+                  "VIEW_REVIEW_PROGRESS",
+                  "VIEW_DOSSIER",
+                  "RUN_SIMULATED_DECISION",
+                  "ADVANCE_SIMULATION",
+                  "VIEW_EVALUATION",
+                  "VIEW_LEARNING_SUMMARY",
+                  "REFRESH_STALE"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Primary Action"
+          },
+          "running_operation_ko": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Running Operation Ko"
+          }
+        },
+        "required": [
+          "allowed_actions"
+        ],
+        "title": "WorkspaceWorkflow",
         "type": "object"
       }
     }
@@ -3188,6 +4214,22 @@
               "title": "Case Id",
               "type": "string"
             }
+          },
+          {
+            "in": "query",
+            "name": "at_step",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "At Step"
+            }
           }
         ],
         "responses": {
@@ -3195,7 +4237,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/DecisionWorkspaceProjection"
+                  "$ref": "#/components/schemas/DecisionWorkspaceProjectionV2"
                 }
               }
             },

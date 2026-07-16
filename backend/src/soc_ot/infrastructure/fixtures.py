@@ -4,6 +4,7 @@ from typing import Any, TypeVar
 import yaml
 from pydantic import BaseModel
 
+from soc_ot.application.workspace_contracts import WorkspaceUxFixture
 from soc_ot.domain.models import ExpectedResult, HiddenCase, ObservableCase
 
 ModelT = TypeVar("ModelT", bound=BaseModel)
@@ -49,6 +50,12 @@ class FixtureRepository:
         self, case_id: str, relative_path: str | None = None
     ) -> ExpectedResult:
         return self._load(relative_path or f"expected/{case_id}.yaml", ExpectedResult)
+
+    def load_workspace_ux(self, case_id: str) -> WorkspaceUxFixture | None:
+        path = self.root / f"ux/{case_id}.workspace.v1.yaml"
+        if not path.exists():
+            return None
+        return self._load(f"ux/{case_id}.workspace.v1.yaml", WorkspaceUxFixture)
 
     def validate_evaluation_case(
         self,

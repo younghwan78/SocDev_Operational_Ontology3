@@ -88,8 +88,8 @@ class WorkspaceDeadline(StrictModel):
 class WorkspaceHeaderV2(StrictModel):
     title_ko: str = Field(min_length=1)
     decision_question: str = Field(min_length=1)
-    workspace_phase: WorkspacePhase
-    case_status: DecisionCaseStatus
+    workspace_phase: WorkspacePhase | None = None
+    case_status: DecisionCaseStatus | None = None
     deadline: WorkspaceDeadline
     simulated: Literal[True] = True
 
@@ -107,8 +107,8 @@ class WorkspaceDecisionPosture(StrictModel):
     reversibility: Literal["high", "medium", "low"]
     detectability: Literal["observable_now", "observable_later", "unknown"]
     recoverability: Literal["high", "medium", "low"]
-    downside: Literal["low", "medium", "high", "critical"]
-    blast_radius: Literal["limited", "cross_track", "milestone", "project"]
+    downside: Literal["low", "medium", "high", "critical", "unknown"]
+    blast_radius: Literal["limited", "cross_track", "milestone", "project", "unknown"]
     urgency: Literal["low", "medium", "high", "expired"]
     explanations_ko: list[str] = Field(min_length=1, max_length=7)
 
@@ -155,6 +155,14 @@ class WorkspaceCausalChain(StrictModel):
     impacted_milestone_ids: list[str] = Field(default_factory=list)
 
 
+class WorkspaceBlockerImpact(StrictModel):
+    source_work_item_title: str = Field(min_length=1)
+    blocker_ko: str = Field(min_length=1)
+    downstream_work_item_titles: list[str] = Field(default_factory=list)
+    impacted_milestone_titles: list[str] = Field(default_factory=list)
+    reaches_decision_deadline: bool
+
+
 class WorkspaceCommitmentWindow(StrictModel):
     subject_type: Literal[
         "work_item",
@@ -182,6 +190,7 @@ class WorkspaceCommitmentWindow(StrictModel):
 class WorkspaceDevelopmentTwin(StrictModel):
     state_at_selected_step: WorkspaceStateAtStep
     causal_chains: list[WorkspaceCausalChain]
+    blocker_impacts: list[WorkspaceBlockerImpact] = Field(default_factory=list)
     commitment_windows: list[WorkspaceCommitmentWindow]
     delay_summary_ko: str = Field(min_length=1)
     recent_decision_relevant_event_ids: list[str]
@@ -371,11 +380,19 @@ class DecisionWorkspaceProjectionV2(StrictModel):
             raise ValueError("EXPECTED_OPTION_TRANSITION_DUPLICATE")
         if set(option_ids) != set(expected_option_ids):
             raise ValueError("EXPECTED_OPTION_TRANSITION_INCOMPLETE")
-        expected_primary = PRIMARY_ACTION_BY_PHASE[self.header.workspace_phase]
-        if not self.stale and self.workflow.primary_action != expected_primary:
-            raise ValueError("WORKSPACE_PHASE_PRIMARY_ACTION_MISMATCH")
-        if self.stale and self.workflow.primary_action != "REFRESH_STALE":
-            raise ValueError("STALE_WORKSPACE_REQUIRES_REFRESH")
+        if self.time_context.mode == "historical":
+            if self.header.workspace_phase is not None or self.header.case_status is not None:
+                raise ValueError("HISTORICAL_WORKFLOW_STATE_FORBIDDEN")
+            if self.workflow.primary_action is not None or self.workflow.allowed_actions:
+                raise ValueError("HISTORICAL_WORKSPACE_ACTION_FORBIDDEN")
+        else:
+            if self.header.workspace_phase is None or self.header.case_status is None:
+                raise ValueError("CURRENT_WORKFLOW_STATE_REQUIRED")
+            expected_primary = PRIMARY_ACTION_BY_PHASE[self.header.workspace_phase]
+            if not self.stale and self.workflow.primary_action != expected_primary:
+                raise ValueError("WORKSPACE_PHASE_PRIMARY_ACTION_MISMATCH")
+            if self.stale and self.workflow.primary_action != "REFRESH_STALE":
+                raise ValueError("STALE_WORKSPACE_REQUIRES_REFRESH")
         assert_hidden_free(
             self.model_dump(mode="json"),
             error_code="HIDDEN_FIELD_IN_WORKSPACE",
