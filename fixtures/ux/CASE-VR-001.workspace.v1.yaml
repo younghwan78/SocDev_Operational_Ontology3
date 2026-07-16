@@ -260,6 +260,16 @@ workspace_example:
     key_unknowns_ko:
       - sustained thermal 조건의 실제 DDR bandwidth
       - 장시간 녹화 시 EIS 품질과 FPS 안정성
+    epistemic_items:
+      - epistemic_status: assumption
+        statement_ko: SW feature flag가 UHD60 EIS 경로를 완전히 격리합니다.
+        source_titles_ko: []
+        observed_at_step: null
+        inference_basis_ko: []
+        owner_ko: SW/FW/HAL
+        expires_at_step: 13
+        unknown_reason_ko: null
+        expected_confirmation_step: null
   controls:
     safeguards: []
     action_plan: null

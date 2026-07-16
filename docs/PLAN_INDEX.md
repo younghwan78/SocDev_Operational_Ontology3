@@ -2,7 +2,7 @@
 
 > 상태: Active  
 > 갱신일: 2026-07-17
-> 현재 단계: Post-I7 UX-C Decision Brief·Development Twin 완료, UX-D 미시작, I7 Responses API gate 외부 입력 대기
+> 현재 단계: Post-I7 UX-D 선택지·이견·불확실성 완료, UX-E 미시작, I7 Responses API gate 외부 입력 대기
 
 이 문서는 제품 계획부터 구현 계약까지 어떤 문서를 어떤 순서로 읽고 수정해야 하는지 안내한다. 문서 간 충돌은 전체 순위가 아니라 각 문서가 소유한 결정 영역으로 해결한다.
 
@@ -41,6 +41,7 @@
 - `internal_docs/26.07.17 UX-A Development Twin 계약 및 Content Fixture 구현 보고서.md`
 - `internal_docs/26.07.17 UX-B Decision Inbox 구현 및 검증 보고서.md`
 - `internal_docs/26.07.17 UX-C Decision Brief 및 Development Twin 구현 보고서.md`
+- `internal_docs/26.07.17 UX-D 선택지 이견 및 불확실성 구현 보고서.md`
 
 다음 문서는 과거 판단의 근거다. 새 구현 기준으로 직접 사용하지 않는다.
 
@@ -65,16 +66,16 @@
 
 ## 5. 현재 실행 지점
 
-I0~I7 Replay와 post-I7 UX-A/UX-B/UX-C가 완료됐다. 다음 미착수 단계는 UX-D다.
+I0~I7 Replay와 post-I7 UX-A/UX-B/UX-C/UX-D가 완료됐다. 다음 미착수 단계는 UX-E다.
 
 ```text
-UX-D 선택지·이견·불확실성
-  → desktop 선택지 비교와 mobile card
-  → agreement, dissent, confirmation grouping
-  → fact, inference, assumption, unknown 구분
-  → Role 원문은 detail로 분리
+UX-E 안전 조건·행동·결과
+  → safeguard, rollback과 action plan 연결
+  → phase별 한 개의 primary action
+  → decision-linked observed transition
+  → 기대 대비 실제 결과와 학습
 ```
 
-UX-D는 별도 단계로 시작한다. UX-C 완료 판정은 run-aware phase 합성, 결정 이후 observed
+UX-E는 별도 단계로 시작한다. UX-D 완료 판정은 실제 승인, decision-linked observed
 transition 또는 사내 연동 완료를 의미하지 않는다. I7 Responses API gate도 key·가격·비용
 승인 전에는 실행하지 않는다.

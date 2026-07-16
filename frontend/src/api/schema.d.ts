@@ -1267,14 +1267,46 @@ export interface components {
             /** Verification Ko */
             verification_ko: string;
         };
+        /** WorkspaceAlignmentGroup */
+        WorkspaceAlignmentGroup: {
+            /** Recommendation */
+            recommendation: string;
+            /** Recommendation Ko */
+            recommendation_ko: string;
+            /** Role Labels Ko */
+            role_labels_ko: string[];
+            /** Summary Ko */
+            summary_ko: string;
+        };
         /** WorkspaceAlternativeV2 */
         WorkspaceAlternativeV2: {
             /** Description */
             description: string;
+            /** Expected Effect Ko */
+            expected_effect_ko?: string | null;
+            /** Failure Impact Ko */
+            failure_impact_ko?: string[];
             /** Option Id */
             option_id: string;
+            /** Recommendation Reason Ko */
+            recommendation_reason_ko?: string | null;
+            /**
+             * Recommended
+             * @default false
+             */
+            recommended: boolean;
+            /** Required Evidence Ko */
+            required_evidence_ko?: string[];
+            /** Residual Risks Ko */
+            residual_risks_ko?: string[];
+            /** Reversibility Ko */
+            reversibility_ko?: string | null;
             /** Reversible */
             reversible: boolean;
+            /** Safety Conditions Ko */
+            safety_conditions_ko?: string[];
+            /** Schedule Impact Ko */
+            schedule_impact_ko?: string[];
             switching_cost: components["schemas"]["Quantity"];
             /** Title */
             title: string;
@@ -1325,6 +1357,17 @@ export interface components {
             source_refs: string[];
             /** Statement Ko */
             statement_ko: string;
+        };
+        /** WorkspaceChallengeChange */
+        WorkspaceChallengeChange: {
+            /** After Recommendation Ko */
+            after_recommendation_ko: string;
+            /** Before Recommendation Ko */
+            before_recommendation_ko: string;
+            /** Role Label Ko */
+            role_label_ko: string;
+            /** Summary Ko */
+            summary_ko: string;
         };
         /** WorkspaceCommitmentWindow */
         WorkspaceCommitmentWindow: {
@@ -1421,18 +1464,33 @@ export interface components {
         };
         /** WorkspaceDeliberation */
         WorkspaceDeliberation: {
+            /** Agreement Groups */
+            agreement_groups?: components["schemas"]["WorkspaceAlignmentGroup"][];
             /** Agreement Ko */
             agreement_ko: string[];
+            /**
+             * Alignment Available
+             * @default false
+             */
+            alignment_available: boolean;
+            /** Challenge Changes */
+            challenge_changes?: components["schemas"]["WorkspaceChallengeChange"][];
             /** Changed After Challenge Ko */
             changed_after_challenge_ko: string[];
+            /** Dissent Items */
+            dissent_items?: components["schemas"]["WorkspaceDissentSummary"][];
             /** Dissent Ko */
             dissent_ko: string[];
+            /** Epistemic Items */
+            epistemic_items?: components["schemas"]["WorkspaceEpistemicItem"][];
             /** Key Assumptions Ko */
             key_assumptions_ko: string[];
             /** Key Unknowns Ko */
             key_unknowns_ko: string[];
             /** Needs Confirmation Ko */
             needs_confirmation_ko: string[];
+            /** Role Reviews */
+            role_reviews?: components["schemas"]["WorkspaceRoleReviewDetail"][];
         };
         /** WorkspaceDetails */
         WorkspaceDetails: {
@@ -1458,6 +1516,41 @@ export interface components {
             /** Recent Decision Relevant Event Ids */
             recent_decision_relevant_event_ids: string[];
             state_at_selected_step: components["schemas"]["WorkspaceStateAtStep"];
+        };
+        /** WorkspaceDissentSummary */
+        WorkspaceDissentSummary: {
+            /** Rationale Ko */
+            rationale_ko: string;
+            /** Recommendation */
+            recommendation: string;
+            /** Recommendation Ko */
+            recommendation_ko: string;
+            /** Role Label Ko */
+            role_label_ko: string;
+        };
+        /** WorkspaceEpistemicItem */
+        WorkspaceEpistemicItem: {
+            /**
+             * Epistemic Status
+             * @enum {string}
+             */
+            epistemic_status: "fact" | "inference" | "assumption" | "unknown";
+            /** Expected Confirmation Step */
+            expected_confirmation_step?: number | null;
+            /** Expires At Step */
+            expires_at_step?: number | null;
+            /** Inference Basis Ko */
+            inference_basis_ko?: string[];
+            /** Observed At Step */
+            observed_at_step?: number | null;
+            /** Owner Ko */
+            owner_ko?: string | null;
+            /** Source Titles Ko */
+            source_titles_ko?: string[];
+            /** Statement Ko */
+            statement_ko: string;
+            /** Unknown Reason Ko */
+            unknown_reason_ko?: string | null;
         };
         /** WorkspaceExpectedOptionTransition */
         WorkspaceExpectedOptionTransition: {
@@ -1532,6 +1625,33 @@ export interface components {
          * @enum {string}
          */
         WorkspacePhase: "CONTEXT_PREPARATION" | "READY_FOR_REVIEW" | "REVIEW_RUNNING" | "DOSSIER_READY" | "DECISION_REQUIRED" | "OUTCOME_RUNNING" | "EVALUATION_READY" | "CLOSED";
+        /** WorkspaceRoleReviewDetail */
+        WorkspaceRoleReviewDetail: {
+            /** Confidence Ko */
+            confidence_ko: string;
+            /** Information Gaps Ko */
+            information_gaps_ko?: string[];
+            /** Rationale Ko */
+            rationale_ko: string;
+            /** Recommendation Ko */
+            recommendation_ko: string;
+            /** Recommended Option Title */
+            recommended_option_title?: string | null;
+            revision?: components["schemas"]["WorkspaceRoleRevision"] | null;
+            /** Risks Ko */
+            risks_ko?: string[];
+            /** Role Label Ko */
+            role_label_ko: string;
+            /** Unique Concern Ko */
+            unique_concern_ko?: string | null;
+        };
+        /** WorkspaceRoleRevision */
+        WorkspaceRoleRevision: {
+            /** Rationale Ko */
+            rationale_ko: string;
+            /** Recommendation Ko */
+            recommendation_ko: string;
+        };
         /** WorkspaceSafeguardSummary */
         WorkspaceSafeguardSummary: {
             /** Cause Ko */

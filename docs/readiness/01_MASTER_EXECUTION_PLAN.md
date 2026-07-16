@@ -1,6 +1,6 @@
 # Master execution plan
 
-> Status: IMPLEMENTED THROUGH I7 REPLAY + STEP 5 B2 RUNTIME + POST-I7 UX-C; I7 RESPONSES API GATE PENDING EXTERNAL INPUT
+> Status: IMPLEMENTED THROUGH I7 REPLAY + STEP 5 B2 RUNTIME + POST-I7 UX-D; I7 RESPONSES API GATE PENDING EXTERNAL INPUT
 > Date: 2026-07-17
 > Scope: local fixture-only PoC
 
@@ -326,7 +326,17 @@ Post-I7 UX-C record (2026-07-17):
 - Context Bar, phase-adaptive Decision Brief, Development Twin, causal chain, commitment window,
   Decision Posture and visually separate expected/observed transition cards
 - responsive 390px layout keeps the primary action before why-now and has no page overflow
-- latest durable run phase and decision-linked observed transitions remain later integration boundaries
+- decision-linked observed transitions remain a later integration boundary
+
+Post-I7 UX-D record (2026-07-17):
+
+- latest case-scoped durable Dossier and run status joined into the current Workspace projection
+- Backend-owned equal-dimension option comparison with no score or automatic final rank
+- agreement, key dissent, confirmation and Challenger-change groups before Role originals
+- selected-Step eligible facts/inferences and current-only assumption/unknown boundary
+- semantic desktop comparison table and no-overflow 390px option cards
+- raw Role IDs and provider/token/cost detail absent from the normal user deliberation flow
+- decision-linked safeguards, single phase action and expectation-versus-actual remain UX-E
 
 ## 7. Crosswalk to supporting plans
 

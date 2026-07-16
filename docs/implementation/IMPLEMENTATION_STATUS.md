@@ -1,7 +1,7 @@
 # Implementation status
 
 > Updated: 2026-07-17
-> Current stage: Post-I7 UX-C Decision Brief and Development Twin complete; UX-D not started
+> Current stage: Post-I7 UX-D alternatives, dissent, and uncertainty complete; UX-E not started
 
 ## Stage evidence
 
@@ -19,4 +19,5 @@
 |I7 Responses API|Not executed|The optional API billing/cost/latency surface still requires a user-supplied key, current rates, and explicit cost acknowledgement. It is not inferred from Codex CLI evidence.|
 |Post-I7 UX-A|Passed|Generated `decision-workspace.v2` and `workspace-ux-fixture.v1` contracts, CASE-VR-001 phase content, selected-step/causal/commitment/expected-vs-observed/hidden boundaries, Korean labels, and 7 focused tests. The API and React UI are intentionally not connected yet.|
 |Post-I7 UX-B|Passed|Backend-ranked `decision-list-item.v1`, consumer-shaped collection API, Korean action-needed groups, deadline/why-now/blocker/next-action cards, responsive loading/empty/error UI, 5 focused Backend tests, 5 Frontend unit tests, and 3 Playwright E2E tests. UX-C Workspace v2 remains unconnected.|
-|Post-I7 UX-C|Passed|Live `decision-workspace.v2` projection and `at_step` API, phase-adaptive Decision Brief, observable historical reconstruction, causal chain, commitment window, expected/observed separation, Decision Posture, responsive 390px UI, 9 focused Backend tests, 6 Frontend unit tests, and 3 Playwright E2E tests. UX-D role-alignment redesign is not started.|
+|Post-I7 UX-C|Passed|Live `decision-workspace.v2` projection and `at_step` API, phase-adaptive Decision Brief, observable historical reconstruction, causal chain, commitment window, expected/observed separation, Decision Posture, responsive 390px UI, 9 focused Backend tests, 6 Frontend unit tests, and 3 Playwright E2E tests.|
+|Post-I7 UX-D|Passed|Backend-owned option comparison, latest case-scoped Dossier phase/alignment, agreement/dissent/confirmation/challenge groups, selected-Step epistemic boundary, Role-original detail, desktop semantic table, mobile cards, 5 focused Backend tests, 7 Frontend unit tests, and 3 Playwright E2E tests. UX-E action/outcome redesign is not started.|

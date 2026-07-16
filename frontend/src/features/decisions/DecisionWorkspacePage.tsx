@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router";
 
 import {
@@ -16,6 +16,8 @@ import {
   retryReviewRun,
 } from "../../api/client";
 import type { DecisionWorkspace, DevelopmentTimeline } from "../../api/generated";
+import { AlternativeComparison } from "./AlternativeComparison";
+import { DecisionDeliberation } from "./DecisionDeliberation";
 
 export function DecisionWorkspacePage() {
   const { caseId = "" } = useParams();
@@ -67,11 +69,17 @@ export function DecisionWorkspacePage() {
   });
   const dossierStartMutation = useMutation({
     mutationFn: () => createDossierRun(caseId, query.data?.aggregate_version ?? 0),
-    onSuccess: (run) => setDossierRunId(run.run_id),
+    onSuccess: (run) => {
+      setDossierRunId(run.run_id);
+      void query.refetch();
+    },
   });
   const retryDossier = useMutation({
     mutationFn: (id: string) => retryReviewRun(id, query.data?.aggregate_version ?? 0),
-    onSuccess: (run) => setDossierRunId(run.run_id),
+    onSuccess: (run) => {
+      setDossierRunId(run.run_id);
+      void query.refetch();
+    },
   });
   const decisionMutation = useMutation({
     mutationFn: () => {
@@ -113,6 +121,17 @@ export function DecisionWorkspacePage() {
     evaluationMutation,
   ];
   const stale = commandMutations.some((mutation) => isCaseVersionConflict(mutation.error));
+  const dossierStatus = dossierRunQuery.data?.status;
+  const refetchWorkspace = query.refetch;
+  useEffect(() => {
+    if (
+      selectedStep === undefined
+      && dossierStatus
+      && ["PARTIALLY_COMPLETED", "COMPLETED"].includes(dossierStatus)
+    ) {
+      void refetchWorkspace();
+    }
+  }, [dossierStatus, refetchWorkspace, selectedStep]);
   const refreshStaleWorkspace = async () => {
     setSelectedStep(undefined);
     await Promise.all([query.refetch(), timelineQuery.refetch()]);
@@ -203,28 +222,9 @@ export function DecisionWorkspacePage() {
 
       <DecisionPosture item={item} />
 
-      <section className="panel agent-panel" id="alternatives" aria-labelledby="alternatives-title">
-        <p className="section-kicker">선택지</p>
-        <h2 id="alternatives-title">선택지와 되돌릴 수 있는 정도</h2>
-        <div className="option-grid">
-          {item.alternatives.items.map((option) => (
-            <article className="option-card" key={option.option_id}>
-              <p className="status-chip">{option.reversible ? "되돌릴 수 있음" : "되돌리기 어려움"}</p>
-              <h3>{option.title}</h3>
-              <p>{option.description}</p>
-              <p className="muted-copy">전환 비용: {quantityLabel(option.switching_cost)}</p>
-            </article>
-          ))}
-        </div>
-        <h3>아직 확인할 것</h3>
-        {item.deliberation.key_unknowns_ko.length > 0 ? (
-          <ul>
-            {item.deliberation.key_unknowns_ko.map((unknown) => <li key={unknown}>{unknown}</li>)}
-          </ul>
-        ) : (
-          <p>현재 등록된 미확인 항목 없음</p>
-        )}
-      </section>
+      <AlternativeComparison alternatives={item.alternatives} />
+
+      <DecisionDeliberation deliberation={item.deliberation} />
 
       <section className="panel agent-panel" id="agent-review" aria-labelledby="agent-review-title">
         <p className="section-kicker">가상 조언</p>
@@ -244,7 +244,6 @@ export function DecisionWorkspacePage() {
         {runQuery.data ? (
           <div className="run-progress" aria-live="polite">
             <p><strong>진행 상태:</strong> {runStatusLabel(runQuery.data.status)} · 시도 {runQuery.data.attempt_no}/{runQuery.data.max_attempts}</p>
-            <p><strong>실행 한도:</strong> logical {runQuery.data.budget_plan.reserved_logical_calls}/{runQuery.data.budget_plan.max_logical_calls} · provider 시도 {runQuery.data.budget_plan.reserved_provider_attempts}/{runQuery.data.budget_plan.max_provider_attempts} · 최대 ${runQuery.data.budget_plan.maximum_cost_usd.toFixed(2)}</p>
             {["QUEUED", "RUNNING"].includes(runQuery.data.status) ? (
               <button className="secondary-button" type="button" onClick={() => cancelReview.mutate(runQuery.data.run_id)} disabled={!commandsAllowed}>취소</button>
             ) : null}
@@ -276,7 +275,6 @@ export function DecisionWorkspacePage() {
         {dossierRunQuery.data ? (
           <div aria-live="polite">
             <p><strong>다중 역할 진행:</strong> {runStatusLabel(dossierRunQuery.data.status)}</p>
-            <p><strong>실행 한도:</strong> logical {dossierRunQuery.data.budget_plan.reserved_logical_calls}/{dossierRunQuery.data.budget_plan.max_logical_calls} · provider 시도 {dossierRunQuery.data.budget_plan.reserved_provider_attempts}/{dossierRunQuery.data.budget_plan.max_provider_attempts} · output {dossierRunQuery.data.budget_plan.reserved_output_tokens}/{dossierRunQuery.data.budget_plan.max_output_tokens} tokens · 최대 ${dossierRunQuery.data.budget_plan.maximum_cost_usd.toFixed(2)}</p>
             {dossierFailures.length > 0 ? (
               <>
                 <p><strong>완료:</strong> {completedDossierRoles.map(roleLabel).join(", ")}</p>
@@ -307,10 +305,6 @@ export function DecisionWorkspacePage() {
               <p><strong>확인 방법:</strong> {decisionMutation.data.decision.action_plan.verification}</p>
               <p><strong>실패 시:</strong> {decisionMutation.data.decision.action_plan.fallback_action}</p>
             </article>
-            <h3>합의</h3>
-            <ul>{decisionMutation.data.dossier.agreement_groups.map((group) => <li key={group.recommendation}>{group.recommendation}: {group.role_ids.map(roleLabel).join(", ")}</li>)}</ul>
-            <h3>반대 의견</h3>
-            {decisionMutation.data.dossier.dissent.length === 0 ? <p>기록된 반대 의견 없음</p> : <ul>{decisionMutation.data.dossier.dissent.map((entry) => <li key={entry.role_id}><strong>{roleLabel(entry.role_id)}</strong>: {entry.recommendation} — {entry.rationale}</li>)}</ul>}
             <h3>안전장치</h3>
             {decisionMutation.data.decision.safeguards.map((guard) => (
               <article className="safeguard-card" key={guard.safeguard_id}>

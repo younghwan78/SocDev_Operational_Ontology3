@@ -83,7 +83,11 @@ def test_api_restart_reads_the_same_imported_postgres_state() -> None:
 
     assert before_restart.status_code == 200
     assert after_restart.status_code == 200
-    assert after_restart.json() == before_restart.json()
+    before_projection = before_restart.json()
+    after_projection = after_restart.json()
+    assert before_projection.pop("generated_at").endswith("Z")
+    assert after_projection.pop("generated_at").endswith("Z")
+    assert after_projection == before_projection
     assert after_restart.json()["aggregate_version"] == saved.aggregate_version
 
 

@@ -1,5 +1,8 @@
+from collections import Counter
 from datetime import UTC, datetime
 
+from soc_ot.agents.contracts import RoleReview
+from soc_ot.agents.multi_role import DecisionDossier
 from soc_ot.application.development_twin import (
     BlockerPropagation,
     DevelopmentTimelineProjection,
@@ -11,32 +14,42 @@ from soc_ot.application.repositories import StoredCase
 from soc_ot.application.workspace_contracts import (
     PRIMARY_ACTION_BY_PHASE,
     DecisionWorkspaceProjectionV2,
+    WorkspaceAlignmentGroup,
     WorkspaceAlternativesV2,
     WorkspaceAlternativeV2,
     WorkspaceBlockerImpact,
     WorkspaceCausalChain,
     WorkspaceCausalLink,
+    WorkspaceChallengeChange,
     WorkspaceControls,
     WorkspaceCurrentBrief,
     WorkspaceDeadline,
     WorkspaceDecisionPosture,
+    WorkspaceDeliberation,
     WorkspaceDetails,
     WorkspaceDevelopmentTwin,
+    WorkspaceDissentSummary,
+    WorkspaceEpistemicItem,
     WorkspaceExpectedOptionTransition,
     WorkspaceHeaderV2,
     WorkspaceObservedDecisionTransitions,
     WorkspaceOutcomeAndEvaluation,
+    WorkspaceRoleReviewDetail,
+    WorkspaceRoleRevision,
     WorkspaceStateAtStep,
     WorkspaceTrackState,
     WorkspaceUxFixture,
     WorkspaceWorkflow,
 )
 from soc_ot.domain.models import (
+    AgentRunStatus,
     DecisionCaseStatus,
+    DecisionType,
     DevelopmentActionStatus,
     EpistemicStatus,
     Milestone,
     ObservableCase,
+    Quantity,
     WorkItem,
     WorkItemStatus,
     WorkspacePhase,
@@ -88,12 +101,35 @@ _WORK_PRIORITY: dict[WorkItemStatus, int] = {
     WorkItemStatus.CANCELLED: 7,
 }
 
+_DECISION_LABELS_KO: dict[DecisionType, str] = {
+    DecisionType.APPROVE: "진행 승인",
+    DecisionType.APPROVE_WITH_GUARDRAILS: "조건부 진행",
+    DecisionType.RUN_REVERSIBLE_TRIAL: "가역적 시험",
+    DecisionType.COLLECT_MINIMUM_EVIDENCE: "최소 근거 확보",
+    DecisionType.DEFER_UNTIL_TRIGGER: "조건 충족까지 연기",
+    DecisionType.REJECT: "진행하지 않음",
+    DecisionType.ESCALATE: "상위 검토 필요",
+}
+
+_ROLE_LABELS_KO = {
+    "ROLE-ARCH": "Architecture",
+    "ROLE-HW": "HW/RTL",
+    "ROLE-SW": "SW/FW/HAL",
+    "ROLE-VERIF": "Verification/Measurement",
+    "ROLE-PM": "Technical PM",
+    "non_agent_baseline": "비 Agent 기준선",
+}
+
+_CONFIDENCE_LABELS_KO = {"low": "낮음", "medium": "중간", "high": "높음"}
+
 
 def build_workspace_projection_v2(
     stored: StoredCase,
     *,
     at_step: int | None = None,
     content: WorkspaceUxFixture | None = None,
+    dossier: DecisionDossier | None = None,
+    dossier_run_status: AgentRunStatus | None = None,
 ) -> DecisionWorkspaceProjectionV2:
     current_case = stored.case
     selected_step = current_case.current_step if at_step is None else at_step
@@ -111,7 +147,16 @@ def build_workspace_projection_v2(
     selected_case = reconstruct_case_at_step(current_case, selected_step)
     timeline = build_development_timeline(stored, at_step=selected_step)
     historical = selected_step != current_case.current_step
-    phase = None if historical else _phase_for_status(current_case.status)
+    visible_dossier = None if historical else dossier
+    phase = (
+        None
+        if historical
+        else _phase_for_status(
+            current_case.status,
+            dossier_run_status=dossier_run_status,
+            dossier=visible_dossier,
+        )
+    )
     model_content_available = (
         template is not None and selected_step >= template.time_context.selected_step
     )
@@ -143,6 +188,18 @@ def build_workspace_projection_v2(
         else []
     )
     template_brief = template.current_brief if model_content_available and template else None
+    template_epistemic = (
+        template.deliberation.epistemic_items
+        if model_content_available and template is not None and not historical
+        else []
+    )
+    deliberation = _deliberation(
+        selected_case,
+        visible_dossier,
+        next_evidence_step,
+        template_epistemic=template_epistemic,
+        historical=historical,
+    )
 
     return DecisionWorkspaceProjectionV2(
         generated_at=datetime.now(UTC).isoformat().replace("+00:00", "Z"),
@@ -183,7 +240,9 @@ def build_workspace_projection_v2(
             why_now_ko=why_now,
             key_conditions_ko=(template_brief.key_conditions_ko if template_brief else []),
             residual_risks_ko=(
-                template_brief.residual_risks_ko
+                []
+                if historical
+                else template_brief.residual_risks_ko
                 if template_brief
                 else selected_case.uncertainties[:2]
             ),
@@ -210,32 +269,20 @@ def build_workspace_projection_v2(
             comparison_dimensions_ko=[
                 "기대 효과",
                 "일정 영향",
+                "실패 영향",
                 "되돌리기와 전환 비용",
-                "아직 모르는 영향",
+                "필요한 근거",
+                "안전 조건",
+                "남는 위험",
             ],
-            items=[
-                WorkspaceAlternativeV2(
-                    option_id=item.option_id,
-                    title=item.title,
-                    description=item.description,
-                    reversible=item.reversible,
-                    switching_cost=item.switching_cost,
-                )
-                for item in selected_case.alternatives
-            ],
+            items=_alternative_comparisons(
+                selected_case,
+                expected,
+                visible_dossier,
+                include_future_evidence=not historical,
+            ),
         ),
-        deliberation={
-            "agreement_ko": [],
-            "dissent_ko": [],
-            "needs_confirmation_ko": selected_case.uncertainties,
-            "changed_after_challenge_ko": [],
-            "key_assumptions_ko": [
-                item.statement
-                for item in selected_case.claims
-                if item.epistemic_status is EpistemicStatus.ASSUMPTION
-            ],
-            "key_unknowns_ko": selected_case.uncertainties,
-        },
+        deliberation=deliberation,
         controls=WorkspaceControls(safeguards=[], action_plan=None),
         outcome_and_evaluation=WorkspaceOutcomeAndEvaluation(
             outcome_state="not_available",
@@ -249,14 +296,335 @@ def build_workspace_projection_v2(
             evidence_available=bool(selected_case.evidence),
             timeline_available=bool(timeline.events),
             impact_path_available=bool(timeline.blocker_propagations),
-            role_originals_available=False,
+            role_originals_available=visible_dossier is not None,
         ),
     )
 
 
-def _phase_for_status(status: DecisionCaseStatus) -> WorkspacePhase:
+def _alternative_comparisons(
+    case: ObservableCase,
+    expected_transitions: list[WorkspaceExpectedOptionTransition],
+    dossier: DecisionDossier | None,
+    *,
+    include_future_evidence: bool,
+) -> list[WorkspaceAlternativeV2]:
+    expected_by_option = {item.option_id: item for item in expected_transitions}
+    claims = {item.claim_id: item for item in case.claims}
+    evidence = {item.evidence_id: item for item in case.evidence}
+    reviews = _effective_reviews(dossier)
+    recommended_option = _recommended_option(reviews)
+    items: list[WorkspaceAlternativeV2] = []
+    for option in case.alternatives:
+        transition = expected_by_option[option.option_id]
+        required_evidence = sorted(
+            {
+                evidence[source_ref].title
+                for claim_id in option.claim_ids
+                if claim_id in claims
+                for source_ref in claims[claim_id].source_refs
+                if source_ref in evidence
+                and (
+                    include_future_evidence
+                    or evidence[source_ref].available_at_step <= case.current_step
+                )
+            }
+        )
+        schedule_impact = [
+            f"{change.entity_title}: {change.from_state} → {change.to_state}"
+            for change in transition.state_changes
+            if change.entity_type in {"action", "work_item", "milestone"}
+        ]
+        recommending_roles = [
+            _role_label(review.role_id)
+            for review in reviews
+            if review.recommended_option_id == option.option_id
+        ]
+        is_recommended = recommended_option == option.option_id
+        items.append(
+            WorkspaceAlternativeV2(
+                option_id=option.option_id,
+                title=option.title,
+                description=option.description,
+                reversible=option.reversible,
+                switching_cost=option.switching_cost,
+                expected_effect_ko=option.description,
+                schedule_impact_ko=schedule_impact,
+                failure_impact_ko=[
+                    f"실패 또는 지연 시 상실: {title}"
+                    for title in transition.lost_options_ko
+                ],
+                reversibility_ko=(
+                    f"되돌릴 수 있음 · 전환 비용 {_quantity_ko(option.switching_cost)}"
+                    if option.reversible
+                    else f"되돌리기 어려움 · 전환 비용 {_quantity_ko(option.switching_cost)}"
+                ),
+                required_evidence_ko=required_evidence,
+                safety_conditions_ko=[],
+                residual_risks_ko=transition.unknown_impacts_ko,
+                recommended=is_recommended,
+                recommendation_reason_ko=(
+                    f"{', '.join(recommending_roles)} 관점이 이 선택지를 권고했습니다."
+                    if is_recommended and recommending_roles
+                    else None
+                ),
+            )
+        )
+    return items
+
+
+def _deliberation(
+    case: ObservableCase,
+    dossier: DecisionDossier | None,
+    next_evidence_step: int | None,
+    *,
+    template_epistemic: list[WorkspaceEpistemicItem],
+    historical: bool,
+) -> WorkspaceDeliberation:
+    epistemic_items = _epistemic_items(
+        case,
+        next_evidence_step,
+        include_unversioned=not historical,
+    )
+    statements = {item.statement_ko for item in epistemic_items}
+    epistemic_items.extend(
+        item for item in template_epistemic if item.statement_ko not in statements
+    )
+    assumptions = [
+        item.statement_ko
+        for item in epistemic_items
+        if item.epistemic_status == "assumption"
+    ]
+    unknowns = [
+        item.statement_ko
+        for item in epistemic_items
+        if item.epistemic_status == "unknown"
+    ]
+    if dossier is None:
+        return WorkspaceDeliberation(
+            agreement_ko=[],
+            dissent_ko=[],
+            needs_confirmation_ko=[] if historical else case.uncertainties,
+            changed_after_challenge_ko=[],
+            key_assumptions_ko=assumptions,
+            key_unknowns_ko=unknowns,
+            epistemic_items=epistemic_items,
+        )
+
+    agreement_groups = [
+        WorkspaceAlignmentGroup(
+            recommendation=group.recommendation,
+            recommendation_ko=_DECISION_LABELS_KO[group.recommendation],
+            role_labels_ko=[_role_label(role_id) for role_id in group.role_ids],
+            summary_ko=(
+                f"{', '.join(_role_label(role_id) for role_id in group.role_ids)} 관점이 "
+                f"{_DECISION_LABELS_KO[group.recommendation]} 방향에 일치합니다."
+            ),
+        )
+        for group in dossier.agreement_groups
+    ]
+    dissent_items = [
+        WorkspaceDissentSummary(
+            role_label_ko=_role_label(item.role_id),
+            recommendation=item.recommendation,
+            recommendation_ko=_DECISION_LABELS_KO[item.recommendation],
+            rationale_ko=item.rationale,
+        )
+        for item in dossier.dissent
+    ]
+    original_by_role = {item.role_id: item for item in dossier.original_reviews}
+    revised_by_role = {item.role_id: item for item in dossier.revised_reviews}
+    challenge_changes = [
+        WorkspaceChallengeChange(
+            role_label_ko=_role_label(role_id),
+            before_recommendation_ko=_DECISION_LABELS_KO[original_by_role[role_id].recommendation],
+            after_recommendation_ko=_DECISION_LABELS_KO[revision.recommendation],
+            summary_ko=(
+                "반론 후 권고 방향이 바뀌었습니다."
+                if revision.recommendation != original_by_role[role_id].recommendation
+                else "반론 후 권고 이유와 조건이 보강되었습니다."
+            ),
+        )
+        for role_id, revision in revised_by_role.items()
+        if role_id in original_by_role and revision != original_by_role[role_id]
+    ]
+    option_titles = {item.option_id: item.title for item in case.alternatives}
+    role_reviews = [
+        _role_review_detail(
+            review,
+            revised_by_role.get(review.role_id),
+            option_titles,
+        )
+        for review in dossier.original_reviews
+    ]
+    return WorkspaceDeliberation(
+        agreement_ko=[item.summary_ko for item in agreement_groups],
+        dissent_ko=[
+            f"{item.role_label_ko}: {item.recommendation_ko} — {item.rationale_ko}"
+            for item in dissent_items
+        ],
+        needs_confirmation_ko=dossier.unresolved_uncertainties,
+        changed_after_challenge_ko=[item.summary_ko for item in challenge_changes],
+        key_assumptions_ko=assumptions,
+        key_unknowns_ko=unknowns,
+        alignment_available=bool(agreement_groups or dissent_items or role_reviews),
+        agreement_groups=agreement_groups,
+        dissent_items=dissent_items,
+        challenge_changes=challenge_changes,
+        role_reviews=role_reviews,
+        epistemic_items=epistemic_items,
+    )
+
+
+def _role_review_detail(
+    review: RoleReview,
+    revision: RoleReview | None,
+    option_titles: dict[str, str],
+) -> WorkspaceRoleReviewDetail:
+    return WorkspaceRoleReviewDetail(
+        role_label_ko=_role_label(review.role_id),
+        recommendation_ko=_DECISION_LABELS_KO[review.recommendation],
+        recommended_option_title=(
+            option_titles.get(review.recommended_option_id)
+            if review.recommended_option_id
+            else None
+        ),
+        rationale_ko=review.rationale,
+        risks_ko=[
+            f"{risk.statement} · 대응: {risk.mitigation}" for risk in review.risks
+        ],
+        information_gaps_ko=review.information_gaps,
+        unique_concern_ko=review.unique_concern,
+        confidence_ko=_CONFIDENCE_LABELS_KO[review.confidence],
+        revision=(
+            WorkspaceRoleRevision(
+                recommendation_ko=_DECISION_LABELS_KO[revision.recommendation],
+                rationale_ko=revision.rationale,
+            )
+            if revision is not None and revision != review
+            else None
+        ),
+    )
+
+
+def _epistemic_items(
+    case: ObservableCase,
+    next_evidence_step: int | None,
+    *,
+    include_unversioned: bool,
+) -> list[WorkspaceEpistemicItem]:
+    evidence = {item.evidence_id: item for item in case.evidence}
+    eligible_ids = {
+        item.evidence_id
+        for item in case.evidence
+        if item.available_at_step <= case.current_step
+    }
+    items: list[WorkspaceEpistemicItem] = []
+    for claim in case.claims:
+        if claim.epistemic_status in {EpistemicStatus.FACT, EpistemicStatus.INFERENCE}:
+            if not set(claim.source_refs) <= eligible_ids:
+                continue
+        elif not include_unversioned:
+            continue
+        source_evidence = [evidence[item] for item in claim.source_refs if item in evidence]
+        items.append(
+            WorkspaceEpistemicItem(
+                epistemic_status=claim.epistemic_status,
+                statement_ko=claim.statement,
+                source_titles_ko=[item.title for item in source_evidence],
+                observed_at_step=(
+                    max(item.available_at_step for item in source_evidence)
+                    if source_evidence
+                    else None
+                ),
+                inference_basis_ko=(
+                    [f"등록된 추론 규칙 {len(claim.inference_basis)}개로 연결했습니다."]
+                    if claim.epistemic_status is EpistemicStatus.INFERENCE
+                    else []
+                ),
+                owner_ko=_role_label(claim.owner) if claim.owner else None,
+                expires_at_step=claim.expires_at_step,
+                unknown_reason_ko=(
+                    "현재 observable source로는 확인할 수 없습니다."
+                    if claim.epistemic_status is EpistemicStatus.UNKNOWN
+                    else None
+                ),
+                expected_confirmation_step=(
+                    next_evidence_step
+                    if claim.epistemic_status is EpistemicStatus.UNKNOWN
+                    else None
+                ),
+            )
+        )
+    if include_unversioned:
+        known_statements = {item.statement_ko for item in items}
+        items.extend(
+            WorkspaceEpistemicItem(
+                epistemic_status="unknown",
+                statement_ko=statement,
+                unknown_reason_ko="현재 observable source가 이 질문에 답하지 못합니다.",
+                expected_confirmation_step=next_evidence_step,
+            )
+            for statement in case.uncertainties
+            if statement not in known_statements
+        )
+    return items
+
+
+def _effective_reviews(dossier: DecisionDossier | None) -> list[RoleReview]:
+    if dossier is None:
+        return []
+    revised = {item.role_id: item for item in dossier.revised_reviews}
+    return [revised.get(item.role_id, item) for item in dossier.original_reviews]
+
+
+def _recommended_option(reviews: list[RoleReview]) -> str | None:
+    counts = Counter(
+        review.recommended_option_id
+        for review in reviews
+        if review.recommended_option_id is not None
+    )
+    if not counts:
+        return None
+    ordered = counts.most_common()
+    if len(ordered) > 1 and ordered[0][1] == ordered[1][1]:
+        return None
+    return ordered[0][0]
+
+
+def _role_label(role_id: str) -> str:
+    return _ROLE_LABELS_KO.get(role_id, role_id.removeprefix("ROLE-").replace("_", " "))
+
+
+def _quantity_ko(quantity: Quantity) -> str:
+    if quantity.mode.value == "exact":
+        return (
+            f"{quantity.value:g} {quantity.unit}"
+            if quantity.value is not None
+            else quantity.unit
+        )
+    if quantity.mode.value == "range":
+        return f"{quantity.lower_bound:g}–{quantity.upper_bound:g} {quantity.unit}"
+    if quantity.mode.value == "qualitative":
+        return f"{quantity.qualitative} 수준"
+    return "아직 정량화되지 않음"
+
+
+def _phase_for_status(
+    status: DecisionCaseStatus,
+    *,
+    dossier_run_status: AgentRunStatus | None = None,
+    dossier: DecisionDossier | None = None,
+) -> WorkspacePhase:
     if status in {DecisionCaseStatus.DRAFT, DecisionCaseStatus.CONTEXT_BUILDING}:
         return WorkspacePhase.CONTEXT_PREPARATION
+    if dossier_run_status in {
+        AgentRunStatus.QUEUED,
+        AgentRunStatus.RUNNING,
+        AgentRunStatus.PARTIALLY_COMPLETED,
+    }:
+        return WorkspacePhase.REVIEW_RUNNING
+    if dossier_run_status is AgentRunStatus.COMPLETED and dossier is not None:
+        return WorkspacePhase.DOSSIER_READY
     if status in {
         DecisionCaseStatus.OPTIONS_READY,
         DecisionCaseStatus.DECISION_REQUIRED,

@@ -1,6 +1,6 @@
 # ADR-0007: Serve a live Workspace v2 projection with fail-closed history
 
-> Status: ACCEPTED
+> Status: ACCEPTED; durable Dossier follow-up completed by ADR-0008
 > Date: 2026-07-17
 
 ## Context
@@ -41,5 +41,6 @@ consumer, write-back or database migration.
 - A static UX fixture cannot overwrite live Step, deadline, track or evidence state.
 - Past views cannot reveal a later Agent phase or decision through header/action fields.
 - Cases without a validated model remain usable but show unknown commitment/transition content.
-- Current phase adapts to persisted `DecisionCaseStatus`; the latest durable run is not yet joined.
+- At adoption, current phase adapted only to persisted `DecisionCaseStatus`; ADR-0008 later joined
+  the latest durable Dossier run.
 - Decision-linked observed transitions and expectation-versus-actual belong to a later UX-E boundary.

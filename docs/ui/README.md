@@ -8,6 +8,8 @@
 - UX-A 실행 fixture: `../../fixtures/ux/CASE-VR-001.workspace.v1.yaml`
 - UX-B 목록: Backend-ranked `decision-list-item.v1`을 사용하는 `/decisions`
 - UX-C 상세: selected Step을 지원하는 `decision-workspace.v2` 기반 `/decisions/:caseId`
+- UX-D 판단 비교: Backend-owned 선택지 비교, Dossier 일치·이견·확인 필요,
+  fact/inference/assumption/unknown과 접힌 Role 원문
 - 생성 계약: `../../contracts/generated/decision-workspace.v2.schema.json`,
   `../../contracts/generated/workspace-ux-fixture.v1.schema.json`,
   `../../contracts/generated/decision-list-item.v1.schema.json`

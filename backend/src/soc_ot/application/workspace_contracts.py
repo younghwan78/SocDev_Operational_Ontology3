@@ -255,11 +255,70 @@ class WorkspaceAlternativeV2(StrictModel):
     description: str
     reversible: bool
     switching_cost: Quantity
+    expected_effect_ko: str | None = None
+    schedule_impact_ko: list[str] = Field(default_factory=list)
+    failure_impact_ko: list[str] = Field(default_factory=list)
+    reversibility_ko: str | None = None
+    required_evidence_ko: list[str] = Field(default_factory=list)
+    safety_conditions_ko: list[str] = Field(default_factory=list)
+    residual_risks_ko: list[str] = Field(default_factory=list)
+    recommended: bool = False
+    recommendation_reason_ko: str | None = None
 
 
 class WorkspaceAlternativesV2(StrictModel):
     comparison_dimensions_ko: list[str] = Field(min_length=1)
     items: list[WorkspaceAlternativeV2] = Field(min_length=2)
+
+
+class WorkspaceEpistemicItem(StrictModel):
+    epistemic_status: Literal["fact", "inference", "assumption", "unknown"]
+    statement_ko: str = Field(min_length=1)
+    source_titles_ko: list[str] = Field(default_factory=list)
+    observed_at_step: int | None = Field(default=None, ge=0)
+    inference_basis_ko: list[str] = Field(default_factory=list)
+    owner_ko: str | None = None
+    expires_at_step: int | None = Field(default=None, ge=0)
+    unknown_reason_ko: str | None = None
+    expected_confirmation_step: int | None = Field(default=None, ge=0)
+
+
+class WorkspaceAlignmentGroup(StrictModel):
+    recommendation: str
+    recommendation_ko: str
+    role_labels_ko: list[str] = Field(min_length=1)
+    summary_ko: str = Field(min_length=1)
+
+
+class WorkspaceDissentSummary(StrictModel):
+    role_label_ko: str
+    recommendation: str
+    recommendation_ko: str
+    rationale_ko: str
+
+
+class WorkspaceChallengeChange(StrictModel):
+    role_label_ko: str
+    before_recommendation_ko: str
+    after_recommendation_ko: str
+    summary_ko: str
+
+
+class WorkspaceRoleRevision(StrictModel):
+    recommendation_ko: str
+    rationale_ko: str
+
+
+class WorkspaceRoleReviewDetail(StrictModel):
+    role_label_ko: str
+    recommendation_ko: str
+    recommended_option_title: str | None = None
+    rationale_ko: str
+    risks_ko: list[str] = Field(default_factory=list)
+    information_gaps_ko: list[str] = Field(default_factory=list)
+    unique_concern_ko: str | None = None
+    confidence_ko: str
+    revision: WorkspaceRoleRevision | None = None
 
 
 class WorkspaceDeliberation(StrictModel):
@@ -269,6 +328,24 @@ class WorkspaceDeliberation(StrictModel):
     changed_after_challenge_ko: list[str]
     key_assumptions_ko: list[str]
     key_unknowns_ko: list[str]
+    alignment_available: bool = False
+    agreement_groups: list[WorkspaceAlignmentGroup] = Field(default_factory=list)
+    dissent_items: list[WorkspaceDissentSummary] = Field(default_factory=list)
+    challenge_changes: list[WorkspaceChallengeChange] = Field(default_factory=list)
+    role_reviews: list[WorkspaceRoleReviewDetail] = Field(default_factory=list)
+    epistemic_items: list[WorkspaceEpistemicItem] = Field(default_factory=list)
+
+    @model_validator(mode="after")
+    def validate_alignment_boundary(self) -> "WorkspaceDeliberation":
+        alignment_data = bool(
+            self.agreement_groups
+            or self.dissent_items
+            or self.challenge_changes
+            or self.role_reviews
+        )
+        if self.alignment_available != alignment_data:
+            raise ValueError("WORKSPACE_ALIGNMENT_AVAILABILITY_MISMATCH")
+        return self
 
 
 class WorkspaceSafeguardSummary(StrictModel):

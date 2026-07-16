@@ -177,6 +177,40 @@
       "title": "WorkspaceActionPlanSummary",
       "type": "object"
     },
+    "WorkspaceAlignmentGroup": {
+      "additionalProperties": false,
+      "properties": {
+        "recommendation": {
+          "title": "Recommendation",
+          "type": "string"
+        },
+        "recommendation_ko": {
+          "title": "Recommendation Ko",
+          "type": "string"
+        },
+        "role_labels_ko": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Role Labels Ko",
+          "type": "array"
+        },
+        "summary_ko": {
+          "minLength": 1,
+          "title": "Summary Ko",
+          "type": "string"
+        }
+      },
+      "required": [
+        "recommendation",
+        "recommendation_ko",
+        "role_labels_ko",
+        "summary_ko"
+      ],
+      "title": "WorkspaceAlignmentGroup",
+      "type": "object"
+    },
     "WorkspaceAlternativeV2": {
       "additionalProperties": false,
       "properties": {
@@ -198,6 +232,82 @@
         },
         "switching_cost": {
           "$ref": "#/$defs/Quantity"
+        },
+        "expected_effect_ko": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Effect Ko"
+        },
+        "schedule_impact_ko": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Schedule Impact Ko",
+          "type": "array"
+        },
+        "failure_impact_ko": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Failure Impact Ko",
+          "type": "array"
+        },
+        "reversibility_ko": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reversibility Ko"
+        },
+        "required_evidence_ko": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Required Evidence Ko",
+          "type": "array"
+        },
+        "safety_conditions_ko": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Safety Conditions Ko",
+          "type": "array"
+        },
+        "residual_risks_ko": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Residual Risks Ko",
+          "type": "array"
+        },
+        "recommended": {
+          "default": false,
+          "title": "Recommended",
+          "type": "boolean"
+        },
+        "recommendation_reason_ko": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Recommendation Reason Ko"
         }
       },
       "required": [
@@ -357,6 +467,35 @@
         "source_refs"
       ],
       "title": "WorkspaceCausalLink",
+      "type": "object"
+    },
+    "WorkspaceChallengeChange": {
+      "additionalProperties": false,
+      "properties": {
+        "role_label_ko": {
+          "title": "Role Label Ko",
+          "type": "string"
+        },
+        "before_recommendation_ko": {
+          "title": "Before Recommendation Ko",
+          "type": "string"
+        },
+        "after_recommendation_ko": {
+          "title": "After Recommendation Ko",
+          "type": "string"
+        },
+        "summary_ko": {
+          "title": "Summary Ko",
+          "type": "string"
+        }
+      },
+      "required": [
+        "role_label_ko",
+        "before_recommendation_ko",
+        "after_recommendation_ko",
+        "summary_ko"
+      ],
+      "title": "WorkspaceChallengeChange",
       "type": "object"
     },
     "WorkspaceCommitmentWindow": {
@@ -682,6 +821,46 @@
           },
           "title": "Key Unknowns Ko",
           "type": "array"
+        },
+        "alignment_available": {
+          "default": false,
+          "title": "Alignment Available",
+          "type": "boolean"
+        },
+        "agreement_groups": {
+          "items": {
+            "$ref": "#/$defs/WorkspaceAlignmentGroup"
+          },
+          "title": "Agreement Groups",
+          "type": "array"
+        },
+        "dissent_items": {
+          "items": {
+            "$ref": "#/$defs/WorkspaceDissentSummary"
+          },
+          "title": "Dissent Items",
+          "type": "array"
+        },
+        "challenge_changes": {
+          "items": {
+            "$ref": "#/$defs/WorkspaceChallengeChange"
+          },
+          "title": "Challenge Changes",
+          "type": "array"
+        },
+        "role_reviews": {
+          "items": {
+            "$ref": "#/$defs/WorkspaceRoleReviewDetail"
+          },
+          "title": "Role Reviews",
+          "type": "array"
+        },
+        "epistemic_items": {
+          "items": {
+            "$ref": "#/$defs/WorkspaceEpistemicItem"
+          },
+          "title": "Epistemic Items",
+          "type": "array"
         }
       },
       "required": [
@@ -772,6 +951,138 @@
         "recent_decision_relevant_event_ids"
       ],
       "title": "WorkspaceDevelopmentTwin",
+      "type": "object"
+    },
+    "WorkspaceDissentSummary": {
+      "additionalProperties": false,
+      "properties": {
+        "role_label_ko": {
+          "title": "Role Label Ko",
+          "type": "string"
+        },
+        "recommendation": {
+          "title": "Recommendation",
+          "type": "string"
+        },
+        "recommendation_ko": {
+          "title": "Recommendation Ko",
+          "type": "string"
+        },
+        "rationale_ko": {
+          "title": "Rationale Ko",
+          "type": "string"
+        }
+      },
+      "required": [
+        "role_label_ko",
+        "recommendation",
+        "recommendation_ko",
+        "rationale_ko"
+      ],
+      "title": "WorkspaceDissentSummary",
+      "type": "object"
+    },
+    "WorkspaceEpistemicItem": {
+      "additionalProperties": false,
+      "properties": {
+        "epistemic_status": {
+          "enum": [
+            "fact",
+            "inference",
+            "assumption",
+            "unknown"
+          ],
+          "title": "Epistemic Status",
+          "type": "string"
+        },
+        "statement_ko": {
+          "minLength": 1,
+          "title": "Statement Ko",
+          "type": "string"
+        },
+        "source_titles_ko": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Source Titles Ko",
+          "type": "array"
+        },
+        "observed_at_step": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Observed At Step"
+        },
+        "inference_basis_ko": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Inference Basis Ko",
+          "type": "array"
+        },
+        "owner_ko": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Owner Ko"
+        },
+        "expires_at_step": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expires At Step"
+        },
+        "unknown_reason_ko": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Unknown Reason Ko"
+        },
+        "expected_confirmation_step": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Confirmation Step"
+        }
+      },
+      "required": [
+        "epistemic_status",
+        "statement_ko"
+      ],
+      "title": "WorkspaceEpistemicItem",
       "type": "object"
     },
     "WorkspaceExpectedOptionTransition": {
@@ -1003,6 +1314,103 @@
       ],
       "title": "WorkspacePhase",
       "type": "string"
+    },
+    "WorkspaceRoleReviewDetail": {
+      "additionalProperties": false,
+      "properties": {
+        "role_label_ko": {
+          "title": "Role Label Ko",
+          "type": "string"
+        },
+        "recommendation_ko": {
+          "title": "Recommendation Ko",
+          "type": "string"
+        },
+        "recommended_option_title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Recommended Option Title"
+        },
+        "rationale_ko": {
+          "title": "Rationale Ko",
+          "type": "string"
+        },
+        "risks_ko": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Risks Ko",
+          "type": "array"
+        },
+        "information_gaps_ko": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Information Gaps Ko",
+          "type": "array"
+        },
+        "unique_concern_ko": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Unique Concern Ko"
+        },
+        "confidence_ko": {
+          "title": "Confidence Ko",
+          "type": "string"
+        },
+        "revision": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/WorkspaceRoleRevision"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "role_label_ko",
+        "recommendation_ko",
+        "rationale_ko",
+        "confidence_ko"
+      ],
+      "title": "WorkspaceRoleReviewDetail",
+      "type": "object"
+    },
+    "WorkspaceRoleRevision": {
+      "additionalProperties": false,
+      "properties": {
+        "recommendation_ko": {
+          "title": "Recommendation Ko",
+          "type": "string"
+        },
+        "rationale_ko": {
+          "title": "Rationale Ko",
+          "type": "string"
+        }
+      },
+      "required": [
+        "recommendation_ko",
+        "rationale_ko"
+      ],
+      "title": "WorkspaceRoleRevision",
+      "type": "object"
     },
     "WorkspaceSafeguardSummary": {
       "additionalProperties": false,

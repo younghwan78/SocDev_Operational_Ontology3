@@ -25,12 +25,66 @@ const caseItem = {
   },
   expected_option_transitions: [{ option_id: "OPT-SW-GUARDED", option_title: "SW feature flag로 제한 진행", label: "expected_from_observable_model", state_changes: [{ provenance: "expected_model", entity_type: "action", entity_id: "ACT-1", entity_title: "UHD60 제한 적용", from_state: "PLANNED", to_state: "IN_PROGRESS", basis_refs: ["RULE-1"] }], preserved_options_ko: ["즉시 철회"], lost_options_ko: [], model_basis: ["RULE-1"], unknown_impacts_ko: ["장시간 thermal"] }, { option_id: "OPT-DEFER", option_title: "측정까지 연기", label: "expected_from_observable_model", state_changes: [], preserved_options_ko: ["실측 반영"], lost_options_ko: ["현재 Freeze 확정"], model_basis: [], unknown_impacts_ko: ["일정 지연 폭"] }],
   observed_decision_transitions: { available: false, decision_id: null, state_changes: [], guardrail_events_ko: [] },
-  alternatives: { comparison_dimensions_ko: ["기대 효과"], items: [{ option_id: "OPT-SW-GUARDED", title: "SW feature flag로 제한 진행", description: "feature flag", reversible: true, switching_cost: { mode: "exact", unit: "person_day", value: 3 } }, { option_id: "OPT-DEFER", title: "측정까지 연기", description: "실측 후 판단", reversible: true, switching_cost: { mode: "exact", unit: "step", value: 3 } }] },
-  deliberation: { agreement_ko: [], dissent_ko: [], needs_confirmation_ko: ["실측 bandwidth"], changed_after_challenge_ko: [], key_assumptions_ko: [], key_unknowns_ko: ["실측 bandwidth"] },
+  alternatives: {
+    comparison_dimensions_ko: ["기대 효과", "일정 영향", "실패 영향", "가역성", "필요한 근거", "안전 조건", "남는 위험"],
+    items: [
+      {
+        option_id: "OPT-SW-GUARDED",
+        title: "SW feature flag로 제한 진행",
+        description: "feature flag로 범위를 제한합니다.",
+        reversible: true,
+        switching_cost: { mode: "exact", unit: "person_day", value: 3 },
+        expected_effect_ko: "Architecture Freeze 전에 제한된 구현 경로를 확보합니다.",
+        schedule_impact_ko: ["Step 13 결정을 유지합니다."],
+        failure_impact_ko: ["성능 부족이면 기능을 비활성화해야 합니다."],
+        reversibility_ko: "즉시 철회 가능 · 전환 비용 3 person_day",
+        required_evidence_ko: ["Step 15 DDR 실측"],
+        safety_conditions_ko: ["feature flag 격리"],
+        residual_risks_ko: ["장시간 thermal 거동"],
+        recommended: true,
+        recommendation_reason_ko: "다수 Role이 안전 조건부 진행을 권고했습니다.",
+      },
+      {
+        option_id: "OPT-DEFER",
+        title: "측정까지 연기",
+        description: "실측 후 판단합니다.",
+        reversible: true,
+        switching_cost: { mode: "exact", unit: "step", value: 3 },
+        expected_effect_ko: "실측을 반영한 뒤 구현 여부를 결정합니다.",
+        schedule_impact_ko: ["Architecture Freeze 확정이 늦어집니다."],
+        failure_impact_ko: ["후속 HW 검토가 함께 밀릴 수 있습니다."],
+        reversibility_ko: "결정 전에는 가역적 · 일정 비용 3 step",
+        required_evidence_ko: ["Step 15 DDR 실측"],
+        safety_conditions_ko: [],
+        residual_risks_ko: ["결정 window 상실"],
+        recommended: false,
+        recommendation_reason_ko: null,
+      },
+    ],
+  },
+  deliberation: {
+    agreement_ko: ["Architecture와 SW는 안전 조건부 진행에 동의합니다."],
+    dissent_ko: ["HW는 실측 전 진행을 반대합니다."],
+    needs_confirmation_ko: ["Step 15 DDR 실측 bandwidth"],
+    changed_after_challenge_ko: ["SW가 rollback 조건을 권고에 추가했습니다."],
+    key_assumptions_ko: ["feature flag로 영향 범위를 격리할 수 있습니다."],
+    key_unknowns_ko: ["장시간 thermal 거동"],
+    alignment_available: true,
+    agreement_groups: [{ recommendation: "PROCEED_WITH_SAFEGUARDS", recommendation_ko: "안전 조건부 진행", role_labels_ko: ["Architecture", "SW/FW/HAL"], summary_ko: "격리와 rollback을 전제로 진행합니다." }],
+    dissent_items: [{ role_label_ko: "HW", recommendation: "DEFER", recommendation_ko: "보류", rationale_ko: "실측 없이 power margin을 확정할 수 없습니다." }],
+    challenge_changes: [{ role_label_ko: "SW/FW/HAL", before_recommendation_ko: "진행", after_recommendation_ko: "안전 조건부 진행", summary_ko: "rollback 기준을 명시했습니다." }],
+    role_reviews: [{ role_label_ko: "Architecture", recommendation: "PROCEED_WITH_SAFEGUARDS", recommendation_ko: "안전 조건부 진행", recommended_option_title: "SW feature flag로 제한 진행", rationale_ko: "Freeze 전 가역 경로를 확보할 수 있습니다.", risks_ko: ["장시간 thermal"], information_gaps_ko: ["Step 15 실측"], unique_concern_ko: "commitment window", confidence_ko: "중간", revision: { recommendation_ko: "안전 조건부 진행", rationale_ko: "철회 조건을 추가했습니다." } }],
+    epistemic_items: [
+      { epistemic_status: "fact", statement_ko: "DDR 실측은 Step 15로 예정되어 있습니다.", source_titles_ko: ["측정 일정 변경"], observed_at_step: 10, inference_basis_ko: [], owner_ko: null, expires_at_step: null, unknown_reason_ko: null, expected_confirmation_step: null },
+      { epistemic_status: "inference", statement_ko: "결정 지연은 Architecture Freeze에 영향을 줍니다.", source_titles_ko: ["측정 일정 변경"], observed_at_step: 10, inference_basis_ko: ["등록된 영향 규칙 1개를 적용했습니다."], owner_ko: null, expires_at_step: null, unknown_reason_ko: null, expected_confirmation_step: null },
+      { epistemic_status: "assumption", statement_ko: "feature flag로 영향 범위를 격리할 수 있습니다.", source_titles_ko: [], observed_at_step: null, inference_basis_ko: [], owner_ko: "SW/FW/HAL", expires_at_step: 13, unknown_reason_ko: null, expected_confirmation_step: null },
+      { epistemic_status: "unknown", statement_ko: "장시간 thermal 거동은 아직 모릅니다.", source_titles_ko: [], observed_at_step: null, inference_basis_ko: [], owner_ko: null, expires_at_step: null, unknown_reason_ko: "현재 관찰 범위에 장시간 측정이 없습니다.", expected_confirmation_step: 15 },
+    ],
+  },
   controls: { safeguards: [], action_plan: null },
   outcome_and_evaluation: { outcome_state: "not_available", hidden_until_step_advance: true, expectation_vs_actual_ko: [], process_evaluation_ko: null, outcome_evaluation_ko: null, lessons_ko: [] },
   workflow: { primary_action: "RUN_VIRTUAL_REVIEW", allowed_actions: ["RUN_VIRTUAL_REVIEW"], running_operation_ko: null },
-  details: { evidence_available: true, timeline_available: true, impact_path_available: true, role_originals_available: false },
+  details: { evidence_available: true, timeline_available: true, impact_path_available: true, role_originals_available: true },
 };
 
 const historicalCaseItem = {
@@ -40,7 +94,23 @@ const historicalCaseItem = {
   current_brief: { ...caseItem.current_brief, state_or_recommendation_ko: "선택한 Step의 당시 개발 상태", one_line_reason_ko: "이후에 알려진 검토·판단·결과는 포함하지 않습니다." },
   development_twin: { ...caseItem.development_twin, state_at_selected_step: { ...caseItem.development_twin.state_at_selected_step, reconstructed_at_step: 9 }, causal_chains: [], commitment_windows: [] },
   expected_option_transitions: caseItem.expected_option_transitions.map((item) => ({ ...item, state_changes: [], model_basis: [], unknown_impacts_ko: ["선택한 Step에서 검증된 상태 전이 모델이 없습니다."] })),
+  deliberation: {
+    ...caseItem.deliberation,
+    agreement_ko: [],
+    dissent_ko: [],
+    needs_confirmation_ko: [],
+    changed_after_challenge_ko: [],
+    key_assumptions_ko: [],
+    key_unknowns_ko: [],
+    alignment_available: false,
+    agreement_groups: [],
+    dissent_items: [],
+    challenge_changes: [],
+    role_reviews: [],
+    epistemic_items: caseItem.deliberation.epistemic_items.filter((item) => ["fact", "inference"].includes(item.epistemic_status)),
+  },
   workflow: { primary_action: null, allowed_actions: [], running_operation_ko: null },
+  details: { ...caseItem.details, role_originals_available: false },
 };
 
 const decisionListItem = {
@@ -165,10 +235,31 @@ describe("App", () => {
     expect(await screen.findByRole("heading", { name: "선택한 시점의 개발 상태와 변화 원인" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "가장 가까운 Commitment Window" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "선택지별 예상 상태 변화" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "같은 기준으로 선택지를 비교합니다" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "의견 일치" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "핵심 이견" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "확인 필요" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "확인된 사실" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "근거 기반 추론" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "검토할 가정" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "아직 모름" })).toBeInTheDocument();
+    expect(screen.getByText("Role별 원문 보기")).toBeInTheDocument();
     expect(screen.getAllByText("예상").length).toBeGreaterThan(0);
     expect(screen.getAllByText("관측").length).toBeGreaterThan(0);
     expect(screen.queryByText("ontology_relations")).not.toBeInTheDocument();
     expect(screen.queryByText("CASE-VR-001")).not.toBeInTheDocument();
+  });
+
+  it("moves between comparison cards on a narrow viewport", async () => {
+    vi.spyOn(globalThis, "fetch").mockImplementation(workspaceResponse);
+    const { container } = renderApp("/decisions/CASE-VR-001");
+    const user = userEvent.setup();
+
+    await screen.findByRole("heading", { name: "같은 기준으로 선택지를 비교합니다" });
+    const mobileCard = container.querySelector(".mobile-option-card");
+    expect(mobileCard).toHaveTextContent("SW feature flag로 제한 진행");
+    await user.click(screen.getByRole("button", { name: "다음 선택지" }));
+    expect(mobileCard).toHaveTextContent("측정까지 연기");
   });
 
   it("switches to a historical observable step and disables commands", async () => {
@@ -182,6 +273,9 @@ describe("App", () => {
     expect(screen.getByText("과거 Step에서는 실행할 수 없습니다.")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "역할 검토 시작" })).toBeDisabled();
     expect(screen.getByText("이 Step에서 확인 가능한 commitment window가 없습니다.")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "아직 Role 의견 종합이 없습니다" })).toBeInTheDocument();
+    expect(screen.queryByText("Role별 원문 보기")).not.toBeInTheDocument();
+    expect(screen.queryByText("feature flag로 영향 범위를 격리할 수 있습니다.")).not.toBeInTheDocument();
   });
 
   it("shows a stale-state recovery action after an aggregate conflict", async () => {

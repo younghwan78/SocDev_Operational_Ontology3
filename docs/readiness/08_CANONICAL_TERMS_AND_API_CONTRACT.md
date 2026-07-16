@@ -219,6 +219,11 @@ historical response omits current workflow phase, case status and command action
 decision state cannot leak backward. Commitment and expected transitions require validated model
 content; missing model content is returned as unknown rather than inferred by Frontend.
 
+The current-step Workspace also joins the latest case-scoped durable dossier run. Backend owns the
+run-aware phase, option recommendation badge, agreement/dissent/confirmation groups, Role labels and
+epistemic eligibility. A historical response omits the Dossier, Role originals and unversioned
+assumptions/unknowns. Frontend must not rank alternatives, count Role votes or recover raw Role IDs.
+
 The timeline resource returns `development-timeline.v1`. Optional query parameter
 `at_step` reconstructs the case at that logical step and returns only events with
 `observed_at_step <= at_step`. An out-of-range step returns

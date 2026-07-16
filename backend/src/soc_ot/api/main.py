@@ -187,13 +187,27 @@ def create_app(
         tags=["decision-cases"],
     )
     def get_workspace(
-        case_id: str, repo: Repository, at_step: int | None = None
+        case_id: str,
+        repo: Repository,
+        runs: RunRepository,
+        at_step: int | None = None,
     ) -> DecisionWorkspaceProjectionV2:
         try:
+            latest_dossier_run = runs.latest_for_case(case_id, run_kind="dossier")
+            dossier = (
+                latest_dossier_run.result.dossier
+                if latest_dossier_run is not None
+                and isinstance(latest_dossier_run.result, DossierExecution)
+                else None
+            )
             return build_workspace_projection_v2(
                 _require_case(repo, case_id),
                 at_step=at_step,
                 content=local_fixtures.load_workspace_ux(case_id),
+                dossier=dossier,
+                dossier_run_status=(
+                    latest_dossier_run.status if latest_dossier_run is not None else None
+                ),
             )
         except ValueError as error:
             if str(error) == "DEVELOPMENT_STEP_OUT_OF_RANGE":

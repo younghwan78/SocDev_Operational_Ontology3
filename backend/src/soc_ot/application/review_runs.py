@@ -83,6 +83,12 @@ class RunConflictError(ValueError):
 class ReviewRunRepository(Protocol):
     def enqueue(self, run: ReviewRun, *, idempotency_key: str) -> ReviewRun: ...
     def get(self, run_id: str) -> ReviewRun | None: ...
+    def latest_for_case(
+        self,
+        case_id: str,
+        *,
+        run_kind: Literal["role_review", "dossier"] | None = None,
+    ) -> ReviewRun | None: ...
     def claim(self, worker_id: str, lease_seconds: int) -> ReviewRun | None: ...
     def heartbeat(self, run_id: str, worker_id: str, lease_seconds: int) -> ReviewRun: ...
     def complete(self, run_id: str, worker_id: str, result: AgentRunResult) -> ReviewRun: ...
@@ -143,6 +149,19 @@ class InMemoryReviewRunRepository:
 
     def get(self, run_id: str) -> ReviewRun | None:
         return self.items.get(run_id)
+
+    def latest_for_case(
+        self,
+        case_id: str,
+        *,
+        run_kind: Literal["role_review", "dossier"] | None = None,
+    ) -> ReviewRun | None:
+        matches = [
+            item
+            for item in self.items.values()
+            if item.case_id == case_id and (run_kind is None or item.run_kind == run_kind)
+        ]
+        return max(matches, key=lambda item: (item.created_at, item.run_id), default=None)
 
     def claim(self, worker_id: str, lease_seconds: int) -> ReviewRun | None:
         now = datetime.now(UTC)
@@ -472,6 +491,24 @@ class PostgresReviewRunRepository:
     def get(self, run_id: str) -> ReviewRun | None:
         with Session(self.engine) as session:
             row = session.get(AgentRunRow, run_id)
+            return _run_from_row(row) if row else None
+
+    def latest_for_case(
+        self,
+        case_id: str,
+        *,
+        run_kind: Literal["role_review", "dossier"] | None = None,
+    ) -> ReviewRun | None:
+        filters = [AgentRunRow.case_id == case_id]
+        if run_kind is not None:
+            filters.append(AgentRunRow.run_kind == run_kind)
+        with Session(self.engine) as session:
+            row = session.scalar(
+                select(AgentRunRow)
+                .where(*filters)
+                .order_by(AgentRunRow.created_at.desc(), AgentRunRow.run_id.desc())
+                .limit(1)
+            )
             return _run_from_row(row) if row else None
 
     def claim(self, worker_id: str, lease_seconds: int) -> ReviewRun | None:
