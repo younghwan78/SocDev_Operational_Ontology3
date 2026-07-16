@@ -7,4 +7,5 @@
 - 한국어 용어와 표현 기준: `KOREAN_UI_GLOSSARY.md`
 - UX-A 실행 fixture: `../../fixtures/ux/CASE-VR-001.workspace.v1.yaml`
 - 생성 계약: `../../contracts/generated/decision-workspace.v2.schema.json`,
-  `../../contracts/generated/workspace-ux-fixture.v1.schema.json`
+  `../../contracts/generated/workspace-ux-fixture.v1.schema.json`,
+  `../../contracts/generated/decision-list-item.v1.schema.json`

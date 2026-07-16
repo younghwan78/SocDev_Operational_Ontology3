@@ -10,6 +10,7 @@ from soc_ot.application.evaluation import CaseEvaluation, EvaluationSummary
 from soc_ot.application.evaluation_manifest import EvaluationManifest
 from soc_ot.application.outcomes import OutcomeSnapshot
 from soc_ot.application.packets import ObservableCasePacket
+from soc_ot.application.projections import DecisionListItemProjection
 from soc_ot.application.workspace_contracts import (
     DecisionWorkspaceProjectionV2,
     WorkspaceUxFixture,
@@ -33,6 +34,7 @@ CONTRACT_MODELS: dict[str, type[BaseModel]] = {
     "outcome-snapshot.v1": OutcomeSnapshot,
     "decision-workspace.v2": DecisionWorkspaceProjectionV2,
     "workspace-ux-fixture.v1": WorkspaceUxFixture,
+    "decision-list-item.v1": DecisionListItemProjection,
 }
 
 

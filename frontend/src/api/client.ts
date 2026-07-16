@@ -1,4 +1,4 @@
-import type { AblationResult, CaseEvaluation, DecisionWorkspace, DevelopmentTimeline, OutcomeSnapshot, ReviewRun } from "./generated";
+import type { AblationResult, CaseEvaluation, DecisionListItem, DecisionWorkspace, DevelopmentTimeline, OutcomeSnapshot, ReviewRun } from "./generated";
 
 const API_BASE = import.meta.env.VITE_SOC_OT_API_BASE_URL ?? "http://127.0.0.1:18080";
 
@@ -29,7 +29,7 @@ async function postJson<T>(path: string, headers: Record<string, string> = {}, b
   return response.json() as Promise<T>;
 }
 
-export function getDecisionCases(): Promise<DecisionWorkspace[]> {
+export function getDecisionCases(): Promise<DecisionListItem[]> {
   return getJson("/api/v1/decision-cases");
 }
 

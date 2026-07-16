@@ -651,6 +651,21 @@
         "title": "DecisionActionPlan",
         "type": "object"
       },
+      "DecisionCaseStatus": {
+        "enum": [
+          "DRAFT",
+          "CONTEXT_BUILDING",
+          "OPTIONS_READY",
+          "DECISION_REQUIRED",
+          "DECIDED",
+          "ACTIONING",
+          "VERIFIED",
+          "CLOSED",
+          "REOPENED"
+        ],
+        "title": "DecisionCaseStatus",
+        "type": "string"
+      },
       "DecisionDossier": {
         "additionalProperties": false,
         "properties": {
@@ -723,6 +738,193 @@
           "unresolved_uncertainties"
         ],
         "title": "DecisionDossier",
+        "type": "object"
+      },
+      "DecisionListBlocker": {
+        "additionalProperties": false,
+        "properties": {
+          "blocker_count": {
+            "minimum": 0.0,
+            "title": "Blocker Count",
+            "type": "integer"
+          },
+          "critical_track_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Critical Track Name"
+          },
+          "critical_work_item_title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Critical Work Item Title"
+          },
+          "downstream_work_item_titles": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Downstream Work Item Titles",
+            "type": "array"
+          },
+          "impacted_milestone_titles": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Impacted Milestone Titles",
+            "type": "array"
+          },
+          "summary_ko": {
+            "title": "Summary Ko",
+            "type": "string"
+          }
+        },
+        "required": [
+          "blocker_count",
+          "summary_ko"
+        ],
+        "title": "DecisionListBlocker",
+        "type": "object"
+      },
+      "DecisionListDeadline": {
+        "additionalProperties": false,
+        "properties": {
+          "at_step": {
+            "minimum": 0.0,
+            "title": "At Step",
+            "type": "integer"
+          },
+          "attention": {
+            "enum": [
+              "OVERDUE",
+              "DUE_NOW",
+              "DUE_SOON",
+              "NORMAL"
+            ],
+            "title": "Attention",
+            "type": "string"
+          },
+          "label_ko": {
+            "title": "Label Ko",
+            "type": "string"
+          },
+          "milestone_title": {
+            "title": "Milestone Title",
+            "type": "string"
+          },
+          "remaining_steps": {
+            "title": "Remaining Steps",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "milestone_title",
+          "at_step",
+          "remaining_steps",
+          "attention",
+          "label_ko"
+        ],
+        "title": "DecisionListDeadline",
+        "type": "object"
+      },
+      "DecisionListItemProjection": {
+        "additionalProperties": false,
+        "properties": {
+          "blocker": {
+            "$ref": "#/components/schemas/DecisionListBlocker"
+          },
+          "case_id": {
+            "title": "Case Id",
+            "type": "string"
+          },
+          "case_status": {
+            "$ref": "#/components/schemas/DecisionCaseStatus"
+          },
+          "current_state_ko": {
+            "title": "Current State Ko",
+            "type": "string"
+          },
+          "deadline": {
+            "$ref": "#/components/schemas/DecisionListDeadline"
+          },
+          "decision_question": {
+            "title": "Decision Question",
+            "type": "string"
+          },
+          "group": {
+            "enum": [
+              "ACTION_REQUIRED",
+              "IN_REVIEW",
+              "ACTION_AND_OBSERVATION",
+              "COMPLETED"
+            ],
+            "title": "Group",
+            "type": "string"
+          },
+          "group_label_ko": {
+            "title": "Group Label Ko",
+            "type": "string"
+          },
+          "next_action": {
+            "const": "OPEN_DECISION",
+            "default": "OPEN_DECISION",
+            "title": "Next Action",
+            "type": "string"
+          },
+          "next_action_ko": {
+            "title": "Next Action Ko",
+            "type": "string"
+          },
+          "projection_schema_version": {
+            "const": "decision-list-item.v1",
+            "default": "decision-list-item.v1",
+            "title": "Projection Schema Version",
+            "type": "string"
+          },
+          "simulated": {
+            "const": true,
+            "default": true,
+            "title": "Simulated",
+            "type": "boolean"
+          },
+          "stale": {
+            "default": false,
+            "title": "Stale",
+            "type": "boolean"
+          },
+          "title_ko": {
+            "title": "Title Ko",
+            "type": "string"
+          },
+          "why_now_ko": {
+            "title": "Why Now Ko",
+            "type": "string"
+          }
+        },
+        "required": [
+          "case_id",
+          "title_ko",
+          "decision_question",
+          "case_status",
+          "current_state_ko",
+          "group",
+          "group_label_ko",
+          "deadline",
+          "why_now_ko",
+          "blocker",
+          "next_action_ko"
+        ],
+        "title": "DecisionListItemProjection",
         "type": "object"
       },
       "DecisionType": {
@@ -2520,7 +2722,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/DecisionWorkspaceProjection"
+                    "$ref": "#/components/schemas/DecisionListItemProjection"
                   },
                   "title": "Response List Cases Api V1 Decision Cases Get",
                   "type": "array"

@@ -1,0 +1,206 @@
+{
+  "$defs": {
+    "DecisionCaseStatus": {
+      "enum": [
+        "DRAFT",
+        "CONTEXT_BUILDING",
+        "OPTIONS_READY",
+        "DECISION_REQUIRED",
+        "DECIDED",
+        "ACTIONING",
+        "VERIFIED",
+        "CLOSED",
+        "REOPENED"
+      ],
+      "title": "DecisionCaseStatus",
+      "type": "string"
+    },
+    "DecisionListBlocker": {
+      "additionalProperties": false,
+      "properties": {
+        "blocker_count": {
+          "minimum": 0,
+          "title": "Blocker Count",
+          "type": "integer"
+        },
+        "critical_track_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Critical Track Name"
+        },
+        "critical_work_item_title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Critical Work Item Title"
+        },
+        "downstream_work_item_titles": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Downstream Work Item Titles",
+          "type": "array"
+        },
+        "impacted_milestone_titles": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Impacted Milestone Titles",
+          "type": "array"
+        },
+        "summary_ko": {
+          "title": "Summary Ko",
+          "type": "string"
+        }
+      },
+      "required": [
+        "blocker_count",
+        "summary_ko"
+      ],
+      "title": "DecisionListBlocker",
+      "type": "object"
+    },
+    "DecisionListDeadline": {
+      "additionalProperties": false,
+      "properties": {
+        "milestone_title": {
+          "title": "Milestone Title",
+          "type": "string"
+        },
+        "at_step": {
+          "minimum": 0,
+          "title": "At Step",
+          "type": "integer"
+        },
+        "remaining_steps": {
+          "title": "Remaining Steps",
+          "type": "integer"
+        },
+        "attention": {
+          "enum": [
+            "OVERDUE",
+            "DUE_NOW",
+            "DUE_SOON",
+            "NORMAL"
+          ],
+          "title": "Attention",
+          "type": "string"
+        },
+        "label_ko": {
+          "title": "Label Ko",
+          "type": "string"
+        }
+      },
+      "required": [
+        "milestone_title",
+        "at_step",
+        "remaining_steps",
+        "attention",
+        "label_ko"
+      ],
+      "title": "DecisionListDeadline",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "projection_schema_version": {
+      "const": "decision-list-item.v1",
+      "default": "decision-list-item.v1",
+      "title": "Projection Schema Version",
+      "type": "string"
+    },
+    "case_id": {
+      "title": "Case Id",
+      "type": "string"
+    },
+    "title_ko": {
+      "title": "Title Ko",
+      "type": "string"
+    },
+    "decision_question": {
+      "title": "Decision Question",
+      "type": "string"
+    },
+    "case_status": {
+      "$ref": "#/$defs/DecisionCaseStatus"
+    },
+    "current_state_ko": {
+      "title": "Current State Ko",
+      "type": "string"
+    },
+    "group": {
+      "enum": [
+        "ACTION_REQUIRED",
+        "IN_REVIEW",
+        "ACTION_AND_OBSERVATION",
+        "COMPLETED"
+      ],
+      "title": "Group",
+      "type": "string"
+    },
+    "group_label_ko": {
+      "title": "Group Label Ko",
+      "type": "string"
+    },
+    "deadline": {
+      "$ref": "#/$defs/DecisionListDeadline"
+    },
+    "why_now_ko": {
+      "title": "Why Now Ko",
+      "type": "string"
+    },
+    "blocker": {
+      "$ref": "#/$defs/DecisionListBlocker"
+    },
+    "next_action": {
+      "const": "OPEN_DECISION",
+      "default": "OPEN_DECISION",
+      "title": "Next Action",
+      "type": "string"
+    },
+    "next_action_ko": {
+      "title": "Next Action Ko",
+      "type": "string"
+    },
+    "stale": {
+      "default": false,
+      "title": "Stale",
+      "type": "boolean"
+    },
+    "simulated": {
+      "const": true,
+      "default": true,
+      "title": "Simulated",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "case_id",
+    "title_ko",
+    "decision_question",
+    "case_status",
+    "current_state_ko",
+    "group",
+    "group_label_ko",
+    "deadline",
+    "why_now_ko",
+    "blocker",
+    "next_action_ko"
+  ],
+  "title": "DecisionListItemProjection",
+  "type": "object"
+}

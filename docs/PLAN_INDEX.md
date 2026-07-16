@@ -1,8 +1,8 @@
 # 전체 계획 문서 안내
 
 > 상태: Active  
-> 갱신일: 2026-07-11  
-> 현재 단계: Post-I7 UX-A 계약·content fixture 완료, UX-B 미시작, I7 Live gate 외부 입력 대기
+> 갱신일: 2026-07-17
+> 현재 단계: Post-I7 UX-B Decision Inbox 완료, UX-C 미시작, I7 Responses API gate 외부 입력 대기
 
 이 문서는 제품 계획부터 구현 계약까지 어떤 문서를 어떤 순서로 읽고 수정해야 하는지 안내한다. 문서 간 충돌은 전체 순위가 아니라 각 문서가 소유한 결정 영역으로 해결한다.
 
@@ -38,6 +38,8 @@
 - `internal_docs/26.07.11 Role Agent 기반 단계별 구현 계획.md`
 - `internal_docs/26.07.11 Backend Frontend 및 UX 기술 설계.md`
 - `internal_docs/26.07.16 결정 중심 UX 설계.md`
+- `internal_docs/26.07.17 UX-A Development Twin 계약 및 Content Fixture 구현 보고서.md`
+- `internal_docs/26.07.17 UX-B Decision Inbox 구현 및 검증 보고서.md`
 
 다음 문서는 과거 판단의 근거다. 새 구현 기준으로 직접 사용하지 않는다.
 
@@ -62,15 +64,16 @@
 
 ## 5. 현재 실행 지점
 
-현재 승인된 다음 작업은 I0뿐이다.
+I0~I7 Replay와 post-I7 UX-A/UX-B가 완료됐다. 다음 미착수 단계는 UX-C다.
 
 ```text
-I0 Repository and quality scaffold
-  → canonical folder
-  → root Python package and Frontend package
-  → PostgreSQL Compose
-  → no-key test commands
-  → consistency/security check scripts
+UX-C Decision Brief와 Development Twin
+  → 기존 /decisions/:caseId를 decision-workspace.v2에 연결
+  → Context Bar와 phase-adaptive Brief
+  → current/past Step 전환과 observable state reconstruction
+  → causal blocker propagation, milestone impact, commitment window
+  → expected transition과 observed transition의 시각적 분리
 ```
 
-CASE-VR-001 domain 구현, Agent prompt, UI 기능과 과거 코드 port는 I0 gate를 통과하기 전에 시작하지 않는다.
+UX-C는 별도 단계로 시작한다. UX-B 완료 판정은 Workspace v2 연결이나 사내 연동 완료를
+의미하지 않는다. I7 Responses API gate도 key·가격·비용 승인 전에는 실행하지 않는다.

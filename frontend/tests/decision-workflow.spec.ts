@@ -9,6 +9,23 @@ const root = path.dirname(frontend);
 
 test.describe.configure({ mode: "serial" });
 
+test("decision inbox prioritizes the next decision at 390px", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/decisions");
+
+  await expect(page.getByRole("heading", { name: "지금 확인할 결정" })).toBeVisible();
+  const card = page.getByRole("article").filter({ hasText: "UHD60 EIS 전력 여유 검토" });
+  await expect(card.getByText("왜 지금")).toBeVisible();
+  await expect(card.getByRole("link", { name: "결정 검토" })).toBeVisible();
+  await expect(page.getByText("CASE-VR-001")).toHaveCount(0);
+  const hasPageOverflow = await page.evaluate(
+    () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
+  );
+  expect(hasPageOverflow).toBe(false);
+  const accessibility = await new AxeBuilder({ page }).analyze();
+  expect(accessibility.violations).toEqual([]);
+});
+
 test("CASE-VR-001 complete Replay decision workflow is accessible", async ({ page }) => {
   const consoleProblems: string[] = [];
   page.on("console", (message) => {
@@ -17,11 +34,12 @@ test("CASE-VR-001 complete Replay decision workflow is accessible", async ({ pag
     }
   });
   await page.goto("/decisions");
-  await page
+  await expect(page.getByRole("heading", { name: "지금 확인할 결정" })).toBeVisible();
+  const targetCard = page
     .getByRole("article")
-    .filter({ hasText: "UHD60 EIS 전력 여유 검토" })
-    .getByRole("link", { name: "결정 검토" })
-    .click();
+    .filter({ hasText: "UHD60 EIS 전력 여유 검토" });
+  await expect(targetCard.getByText(/Architecture Freeze까지 1 Step/)).toBeVisible();
+  await targetCard.getByRole("link", { name: "결정 검토" }).click();
 
   await expect(page.getByRole("heading", { name: "UHD60 EIS 전력 여유 검토" })).toBeVisible();
   await expect(page.getByText("결정 기한: Step 13 · Architecture Freeze")).toBeVisible();

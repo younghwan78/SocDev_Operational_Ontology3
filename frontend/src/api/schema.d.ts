@@ -550,6 +550,11 @@ export interface components {
             /** Verification */
             verification: string;
         };
+        /**
+         * DecisionCaseStatus
+         * @enum {string}
+         */
+        DecisionCaseStatus: "DRAFT" | "CONTEXT_BUILDING" | "OPTIONS_READY" | "DECISION_REQUIRED" | "DECIDED" | "ACTIONING" | "VERIFIED" | "CLOSED" | "REOPENED";
         /** DecisionDossier */
         DecisionDossier: {
             /** Agreement Groups */
@@ -573,6 +578,85 @@ export interface components {
             schema_version: "decision-dossier.v1";
             /** Unresolved Uncertainties */
             unresolved_uncertainties: string[];
+        };
+        /** DecisionListBlocker */
+        DecisionListBlocker: {
+            /** Blocker Count */
+            blocker_count: number;
+            /** Critical Track Name */
+            critical_track_name?: string | null;
+            /** Critical Work Item Title */
+            critical_work_item_title?: string | null;
+            /** Downstream Work Item Titles */
+            downstream_work_item_titles?: string[];
+            /** Impacted Milestone Titles */
+            impacted_milestone_titles?: string[];
+            /** Summary Ko */
+            summary_ko: string;
+        };
+        /** DecisionListDeadline */
+        DecisionListDeadline: {
+            /** At Step */
+            at_step: number;
+            /**
+             * Attention
+             * @enum {string}
+             */
+            attention: "OVERDUE" | "DUE_NOW" | "DUE_SOON" | "NORMAL";
+            /** Label Ko */
+            label_ko: string;
+            /** Milestone Title */
+            milestone_title: string;
+            /** Remaining Steps */
+            remaining_steps: number;
+        };
+        /** DecisionListItemProjection */
+        DecisionListItemProjection: {
+            blocker: components["schemas"]["DecisionListBlocker"];
+            /** Case Id */
+            case_id: string;
+            case_status: components["schemas"]["DecisionCaseStatus"];
+            /** Current State Ko */
+            current_state_ko: string;
+            deadline: components["schemas"]["DecisionListDeadline"];
+            /** Decision Question */
+            decision_question: string;
+            /**
+             * Group
+             * @enum {string}
+             */
+            group: "ACTION_REQUIRED" | "IN_REVIEW" | "ACTION_AND_OBSERVATION" | "COMPLETED";
+            /** Group Label Ko */
+            group_label_ko: string;
+            /**
+             * Next Action
+             * @default OPEN_DECISION
+             * @constant
+             */
+            next_action: "OPEN_DECISION";
+            /** Next Action Ko */
+            next_action_ko: string;
+            /**
+             * Projection Schema Version
+             * @default decision-list-item.v1
+             * @constant
+             */
+            projection_schema_version: "decision-list-item.v1";
+            /**
+             * Simulated
+             * @default true
+             * @constant
+             */
+            simulated: true;
+            /**
+             * Stale
+             * @default false
+             */
+            stale: boolean;
+            /** Title Ko */
+            title_ko: string;
+            /** Why Now Ko */
+            why_now_ko: string;
         };
         /**
          * DecisionType
@@ -1260,7 +1344,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["DecisionWorkspaceProjection"][];
+                    "application/json": components["schemas"]["DecisionListItemProjection"][];
                 };
             };
         };

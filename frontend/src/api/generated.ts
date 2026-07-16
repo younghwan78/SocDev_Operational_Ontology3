@@ -2,6 +2,7 @@
 import type { components } from "./schema";
 
 export type TrackSummary = components["schemas"]["TrackSummary"];
+export type DecisionListItem = components["schemas"]["DecisionListItemProjection"];
 export type DecisionWorkspace = components["schemas"]["DecisionWorkspaceProjection"];
 export type DevelopmentTimeline = components["schemas"]["DevelopmentTimelineProjection"];
 export type RoleReview = components["schemas"]["RoleReview"];

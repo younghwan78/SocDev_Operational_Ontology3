@@ -1,9 +1,9 @@
 # SoC 개발 의사결정 디지털 트윈을 어떻게 구현하고 검증할 것인가
 
 > 문서 상태: Product Plan v0.2, 로컬 PoC 구현 승인  
-> 갱신일: 2026-07-15
+> 갱신일: 2026-07-17
 > 문서 역할: 제품 목표, 범위, 가치 가설, 중단 기준을 정의  
-> 현재 판단: **GO: I0–I7 Replay, Step 5 B2 runtime 및 post-I7 UX-A 계약 완료**, **NO-GO: 사내 연동 및 실제 업무 적용**
+> 현재 판단: **GO: I0–I7 Replay, Step 5 B2 runtime 및 post-I7 UX-B 결정 목록 완료**, **NO-GO: 사내 연동 및 실제 업무 적용**
 
 이 계획은 SoC 개발 진행과 불확실성을 재현하고 제한된 정보에서도 저후회 결정을 돕는 제품을 정의한다. 집에서는 synthetic fixture로 의사결정 메커니즘만 검증하며, 실제 비즈니스 가치는 사내 read-only 파일럿에서 별도로 측정한다.
 
@@ -372,7 +372,9 @@ Gate 실패 시 다음 기능을 추가하지 않는다. 원인을 수정하거�
 Step 4 live ablation은 B2를 선택했고 Step 5의 B2 validation x5와 sealed-unseen x3가
 모두 통과해 durable dossier workflow의 기본값을 B2로 활성화했다. Post-I7 UX-A는
 Development Twin의 selected-step, causal chain, commitment window, expected/observed/hidden
-경계와 phase content fixture를 계약으로 고정했다. UX-B는 사용자 지시 전 시작하지 않는다.
+경계와 phase content fixture를 계약으로 고정했다. UX-B는 Backend가 우선순위·기한·막힌
+개발·why-now·다음 행동을 계산하는 전용 목록 projection과 한국어 반응형 Decision Inbox를
+연결했다. 다음 UX-C Workspace v2 연결은 시작하지 않았다.
 
 ```text
 B2 validation 10/10 + sealed-unseen 6/6 PASS
@@ -464,7 +466,7 @@ C1에서 가치와 보안 gate를 통과한 뒤에만 연다.
 - 데이터: synthetic fixture only
 - 로컬 승인: simulated Chair, 실제 권한 없음
 - 구현 단계: I0~I7
-- 현재 단계: Post-I7 UX-A Development Twin 계약 및 content fixture 완료, UX-B 미시작
+- 현재 단계: Post-I7 UX-B Decision Inbox 완료, UX-C 미시작
 - release topology: B2 independent routed Role Agents, deterministic core decision
 - CI provider: ReplayProvider
 - live provider: 구성 가능한 OpenAI Responses API adapter
@@ -492,6 +494,7 @@ Active planning documents:
 - `internal_docs/26.07.11 Backend Frontend 및 UX 기술 설계.md`
 - `internal_docs/26.07.16 결정 중심 UX 설계.md`
 - `internal_docs/26.07.17 UX-A Development Twin 계약 및 Content Fixture 구현 보고서.md`
+- `internal_docs/26.07.17 UX-B Decision Inbox 구현 및 검증 보고서.md`
 
 Review and historical context:
 

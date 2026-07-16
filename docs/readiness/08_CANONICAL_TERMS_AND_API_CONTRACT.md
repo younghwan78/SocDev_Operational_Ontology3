@@ -1,7 +1,7 @@
 # Canonical terms and API contract
 
 > Status: APPROVED  
-> Date: 2026-07-11  
+> Date: 2026-07-17
 > Scope: local fixture-only PoC
 
 This contract removes ambiguous names shared by domain state, Agent runs, UI phases, fixture versions, and HTTP resources. Backend, Frontend, fixtures, tests, and documentation must reuse these names.
@@ -208,6 +208,10 @@ GET /api/v1/decision-cases/{case_id}/timeline
 GET /api/v1/decision-cases/{case_id}/evidence
 GET /api/v1/decision-cases/{case_id}/evaluation
 ```
+
+The decision-case collection returns `decision-list-item.v1`, already ordered by Backend
+attention priority and grouped with an explicit list-group field. Frontend consumers do not
+recalculate urgency, blocker propagation, milestone impact, or next-action labels.
 
 The timeline resource returns `development-timeline.v1`. Optional query parameter
 `at_step` reconstructs the case at that logical step and returns only events with

@@ -1,7 +1,7 @@
 # Implementation status
 
 > Updated: 2026-07-17
-> Current stage: Post-I7 UX-A Development Twin contract and content fixture complete; UX-B not started
+> Current stage: Post-I7 UX-B Decision Inbox complete; UX-C not started
 
 ## Stage evidence
 
@@ -18,3 +18,4 @@
 |I7-C Codex CLI|Passed for B2 release|Frozen v2 ablation selected B2 (B2/B1 4/4, B3/B2 0/4). B2 validation 10/10 and sealed-unseen 6/6 passed with zero policy/runtime failures. See `../../internal_docs/26.07.15 Step 5 B2 Stability 및 Runtime 활성화 구현 보고서.md`.|
 |I7 Responses API|Not executed|The optional API billing/cost/latency surface still requires a user-supplied key, current rates, and explicit cost acknowledgement. It is not inferred from Codex CLI evidence.|
 |Post-I7 UX-A|Passed|Generated `decision-workspace.v2` and `workspace-ux-fixture.v1` contracts, CASE-VR-001 phase content, selected-step/causal/commitment/expected-vs-observed/hidden boundaries, Korean labels, and 7 focused tests. The API and React UI are intentionally not connected yet.|
+|Post-I7 UX-B|Passed|Backend-ranked `decision-list-item.v1`, consumer-shaped collection API, Korean action-needed groups, deadline/why-now/blocker/next-action cards, responsive loading/empty/error UI, 5 focused Backend tests, 5 Frontend unit tests, and 3 Playwright E2E tests. UX-C Workspace v2 remains unconnected.|

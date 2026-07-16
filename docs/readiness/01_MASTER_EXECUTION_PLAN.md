@@ -1,6 +1,6 @@
 # Master execution plan
 
-> Status: IMPLEMENTED THROUGH I7 REPLAY + STEP 5 B2 RUNTIME + POST-I7 UX-A; I7 RESPONSES API GATE PENDING EXTERNAL INPUT
+> Status: IMPLEMENTED THROUGH I7 REPLAY + STEP 5 B2 RUNTIME + POST-I7 UX-B; I7 RESPONSES API GATE PENDING EXTERNAL INPUT
 > Date: 2026-07-17
 > Scope: local fixture-only PoC
 
@@ -305,7 +305,17 @@ Post-I7 UX-A record (2026-07-17):
 - CASE-VR-001 phase content fixture without changing frozen evaluation fixtures or manifests
 - selected-step, causal-chain, commitment-window, expected/observed/hidden boundaries
 - canonical phase primary actions and Korean labels
-- UX-B API and React UI are not started
+- UX-B consumes these boundaries without changing the frozen evaluation corpus
+
+Post-I7 UX-B record (2026-07-17):
+
+- generated `decision-list-item.v1` contract and consumer-shaped collection response
+- Backend-owned attention order, action-needed group, deadline, critical blocker propagation,
+  milestone impact, why-now explanation and next-action label
+- Korean Decision Inbox with one primary action, no raw ID, and no normal-user fixture navigation
+- responsive loading, empty and recoverable error states with mobile accessibility coverage
+- `decision-workspace.v1` detail remains unchanged; UX-C v2 connection is not started
+- run-aware `IN_REVIEW` and persisted list freshness remain explicit follow-up boundaries
 
 ## 7. Crosswalk to supporting plans
 

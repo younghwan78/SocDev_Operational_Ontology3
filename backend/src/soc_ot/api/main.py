@@ -31,7 +31,13 @@ from soc_ot.application.outcome_advances import (
 from soc_ot.application.outcomes import OutcomeSnapshot
 from soc_ot.application.packets import build_observable_case_packet
 from soc_ot.application.ports import EvaluationRepository, HiddenCaseReader
-from soc_ot.application.projections import DecisionWorkspaceProjection, build_workspace_projection
+from soc_ot.application.projections import (
+    DecisionListItemProjection,
+    DecisionWorkspaceProjection,
+    build_decision_list_item,
+    build_workspace_projection,
+    sort_decision_list_items,
+)
 from soc_ot.application.repositories import CaseRepository, PostgresCaseRepository, StoredCase
 from soc_ot.application.review_runs import (
     InMemoryReviewRunRepository,
@@ -165,9 +171,15 @@ def create_app(
             revision = "in-memory"
         return {"status": "ready", "stage": "I7", "database_revision": str(revision)}
 
-    @app.get("/api/v1/decision-cases", tags=["decision-cases"])
-    def list_cases(repo: Repository) -> list[DecisionWorkspaceProjection]:
-        return [build_workspace_projection(item) for item in repo.list()]
+    @app.get(
+        "/api/v1/decision-cases",
+        response_model=list[DecisionListItemProjection],
+        tags=["decision-cases"],
+    )
+    def list_cases(repo: Repository) -> list[DecisionListItemProjection]:
+        return sort_decision_list_items(
+            [build_decision_list_item(item) for item in repo.list()]
+        )
 
     @app.get(
         "/api/v1/decision-cases/{case_id}/workspace",
