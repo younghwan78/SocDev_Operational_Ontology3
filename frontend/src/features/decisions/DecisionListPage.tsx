@@ -15,7 +15,7 @@ export function DecisionListPage() {
   const groups = query.data ? groupInApiOrder(query.data) : [];
 
   return (
-    <main className="app-shell decision-list-shell">
+    <main className="app-shell decision-list-shell" id="main-content" tabIndex={-1}>
       <header className="decision-list-header">
         <p className="eyebrow">Synthetic fixture · 가상 판단</p>
         <h1>결정 목록</h1>

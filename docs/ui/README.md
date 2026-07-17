@@ -12,6 +12,9 @@
   fact/inference/assumption/unknown과 접힌 Role 원문
 - UX-E 실행·결과: durable decision/outcome/evaluation을 연결한 Action Plan, Safeguard,
   Rollback, 관측 상태 변화, 예상 대비 실제, 과정/결과 평가와 학습
+- UX-F Gate: 390/768/desktop·200% 등가 reflow, keyboard/screen-reader semantics,
+  partial/stale/conflict 복구와 frozen 13-question report
+- UX-F evidence: `../../output/usability/UX-F-20260717-CASE-VR-001/report.md`
 - 생성 계약: `../../contracts/generated/decision-workspace.v2.schema.json`,
   `../../contracts/generated/workspace-ux-fixture.v1.schema.json`,
   `../../contracts/generated/decision-list-item.v1.schema.json`

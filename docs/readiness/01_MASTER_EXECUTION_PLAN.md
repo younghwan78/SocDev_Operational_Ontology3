@@ -1,6 +1,6 @@
 # Master execution plan
 
-> Status: IMPLEMENTED THROUGH I7 REPLAY + STEP 5 B2 RUNTIME + POST-I7 UX-E; UX-F NOT STARTED; I7 RESPONSES API GATE PENDING EXTERNAL INPUT
+> Status: IMPLEMENTED THROUGH I7 REPLAY + STEP 5 B2 RUNTIME + POST-I7 UX-F LOCAL GATE; I7 RESPONSES API GATE PENDING EXTERNAL INPUT
 > Date: 2026-07-17
 > Scope: local fixture-only PoC
 
@@ -349,7 +349,19 @@ Post-I7 UX-E record (2026-07-17):
   Guardrail execution and event-backed observed transitions are shown separately
 - Process and Outcome evaluations remain separate and the historical Workspace omits all later
   decision, outcome, evaluation and run state
-- the next unstarted stage is UX-F Responsive, accessibility and usability Gate
+- UX-F is implemented as a separately recorded post-I7 Responsive, accessibility and usability Gate
+
+Post-I7 UX-F record (2026-07-17):
+
+- responsive 390px, 768px, desktop and 200%-equivalent 640 CSS-pixel reflow have no page overflow
+- one skip link, one main landmark, section focus management, reduced motion, 44px targets, semantic
+  table/heading/live-region structure and axe checks pass
+- partial run recovery preserves completed perspectives, translates failure reason, offers retry and
+  blocks Chair; aggregate conflict projects stale state and refreshes the current Workspace
+- frozen CASE-VR-001 canonical 8 + Development Twin 5 task answers pass with zero wrong primary clicks
+  and no Role-original/raw ontology opens for questions 1–6
+- historical Step, expected-versus-observed and hidden-outcome boundary tests pass
+- this local agent-substitute Gate does not establish human task time, comprehension or business value
 
 ## 7. Crosswalk to supporting plans
 

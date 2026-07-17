@@ -30,6 +30,10 @@ test("decision inbox prioritizes the next decision at 390px", async ({ page }) =
   expect(hasPageOverflow).toBe(false);
   const accessibility = await new AxeBuilder({ page }).analyze();
   expect(accessibility.violations).toEqual([]);
+  await page.screenshot({
+    path: path.join(root, "output/playwright/inbox-390px.png"),
+    fullPage: true,
+  });
 });
 
 test("CASE-VR-001 complete Replay decision workflow is accessible", async ({ page }) => {
@@ -50,10 +54,14 @@ test("CASE-VR-001 complete Replay decision workflow is accessible", async ({ pag
   await expect(page.getByText("UHD60 EIS 전력 여유 검토")).toBeVisible();
   await expect(page.getByRole("heading", { name: /UHD60 EIS/ }).first()).toBeVisible();
   await expect(page.getByText("Step 13 · Architecture Freeze")).toBeVisible();
+  await expect(page.getByText(/대기 원인:/).first()).toBeVisible();
   await expect(page.getByRole("heading", { name: "선택한 시점의 개발 상태와 변화 원인" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Step 12 개발 상태/ })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "무엇이 바뀌었고 어디까지 영향을 주는가" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "가장 가까운 Commitment Window" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "선택지별 예상 상태 변화" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "같은 기준으로 선택지를 비교합니다" })).toBeVisible();
+  await expect(page.getByText("가역성", { exact: true }).first()).toBeVisible();
   await expect(page.getByRole("heading", { name: "확인된 사실" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "근거 기반 추론" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "검토할 가정" })).toBeVisible();
@@ -81,14 +89,15 @@ test("CASE-VR-001 complete Replay decision workflow is accessible", async ({ pag
   await expect(page.getByRole("heading", { name: "의견 일치" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "핵심 이견" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "확인 필요" })).toBeVisible();
-  await page.getByText("Role별 원문 보기").click();
-  await expect(page.getByText(/정성적 확신 수준:/).first()).toBeVisible();
+  await expect(page.locator("details.role-originals")).not.toHaveAttribute("open", "");
+  await expect(page.getByText(/정성적 확신 수준:/).first()).not.toBeVisible();
   await expect(page.getByText("ROLE-ARCH", { exact: true })).toHaveCount(0);
   await page.getByRole("button", { name: "가상 최종 판단 실행" }).click();
   await expect(page.getByRole("heading", { name: "판단에서 실행과 확인까지 한 흐름으로 봅니다" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "안전 조건과 Rollback" })).toBeVisible();
   await expect(page.getByText(/20 GB\/s/).first()).toBeVisible();
   await expect(page.getByRole("heading", { name: "결정이 만든 실제 상태 변화" })).toBeVisible();
+  await expect(page.locator(".observed-progress")).toContainText("행동");
   await expect(page.getByRole("heading", { name: "아직 남는 위험" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "결과는 다음 Simulation Step 전까지 숨겨집니다" })).toBeVisible();
   await expect(page.locator(".primary-button")).toHaveCount(1);
@@ -102,6 +111,7 @@ test("CASE-VR-001 complete Replay decision workflow is accessible", async ({ pag
   await expect(page.getByRole("heading", { name: "위험을 실제로 제한했는가" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "다음 판단에 남길 학습" })).toBeVisible();
   await expect(page.getByText("DDR_BANDWIDTH", { exact: false })).toHaveCount(0);
+  await expect(page.locator("details.role-originals[open]")).toHaveCount(0);
 
   const accessibility = await new AxeBuilder({ page }).analyze();
   expect(accessibility.violations).toEqual([]);
@@ -132,4 +142,115 @@ test("workspace remains usable at 390px", async ({ page }) => {
   expect(hasPageOverflow).toBe(false);
   const accessibility = await new AxeBuilder({ page }).analyze();
   expect(accessibility.violations).toEqual([]);
+  await page.screenshot({
+    path: path.join(root, "output/playwright/workspace-390px.png"),
+    fullPage: true,
+  });
+});
+
+test("workspace reflows at 768px and a 200-percent equivalent viewport", async ({ page }) => {
+  for (const viewport of [
+    { width: 768, height: 1024, label: "tablet" },
+    { width: 640, height: 900, label: "200-percent" },
+  ]) {
+    await page.setViewportSize(viewport);
+    await page.goto("/decisions/CASE-VR-001");
+    await expect(page.getByRole("heading", { name: "선택한 시점의 개발 상태와 변화 원인" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "가상 역할 검토 실행", exact: true })).toBeVisible();
+    const hasPageOverflow = await page.evaluate(
+      () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
+    );
+    expect(hasPageOverflow, `${viewport.label} viewport overflow`).toBe(false);
+    const accessibility = await new AxeBuilder({ page }).analyze();
+    expect(accessibility.violations).toEqual([]);
+    await page.screenshot({
+      path: path.join(root, `output/playwright/workspace-${viewport.label}.png`),
+      fullPage: true,
+    });
+  }
+});
+
+test("keyboard and screen-reader semantics expose a direct main-content path", async ({ page }) => {
+  await page.setViewportSize({ width: 768, height: 1024 });
+  await page.goto("/decisions/CASE-VR-001");
+
+  await page.keyboard.press("Tab");
+  const skipLink = page.getByRole("link", { name: "본문으로 건너뛰기" });
+  await expect(skipLink).toBeFocused();
+  await expect(skipLink).toBeVisible();
+  await page.keyboard.press("Enter");
+  await expect(page.locator("main#main-content")).toBeFocused();
+  await expect(page.locator("main")).toHaveCount(1);
+  await expect(page.getByRole("navigation", { name: "결정 검토 문맥" })).toBeVisible();
+
+  const primaryAction = page.getByRole("button", { name: "가상 역할 검토 실행", exact: true });
+  await primaryAction.focus();
+  await expect(primaryAction).toBeFocused();
+  await expect(primaryAction).toHaveCSS("outline-style", "solid");
+  const accessibility = await new AxeBuilder({ page }).analyze();
+  expect(accessibility.violations).toEqual([]);
+});
+
+test("partial role review keeps completed perspectives and gives a recovery action", async ({ page }) => {
+  const partialRun = {
+    run_id: "RUN-UX-F-PARTIAL",
+    status: "PARTIALLY_COMPLETED",
+    error_code: null,
+    result: {
+      dossier: {
+        original_reviews: [
+          { role_id: "architecture_system" },
+          { role_id: "verification_measurement" },
+          { role_id: "program_risk" },
+        ],
+      },
+      failed_roles: [
+        { role_id: "sw", error_code: "PROVIDER_ATTEMPT_FAILED", provider_attempts: 1 },
+      ],
+    },
+  };
+  await page.route("**/api/v1/decision-cases/CASE-VR-001/review-runs", async (route) => {
+    if (route.request().method() === "POST") {
+      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(partialRun) });
+      return;
+    }
+    await route.fallback();
+  });
+  await page.route("**/api/v1/runs/RUN-UX-F-PARTIAL", async (route) => {
+    await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(partialRun) });
+  });
+
+  await page.goto("/decisions/CASE-VR-001");
+  await page.getByRole("button", { name: "가상 역할 검토 실행", exact: true }).click();
+  await expect(page.getByText(/관점별 검토:/).locator("..")).toContainText("일부 완료");
+  await expect(page.getByText(/완료:/).locator("..")).toContainText("Architecture");
+  await expect(page.getByText(/실패:/).locator("..")).toContainText("SW/FW/HAL · 응답 검증 실패");
+  await expect(page.getByText("PROVIDER_ATTEMPT_FAILED", { exact: false })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "가상 역할 검토 재시도" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "가상 최종 판단 실행" })).toHaveCount(0);
+  const accessibility = await new AxeBuilder({ page }).analyze();
+  expect(accessibility.violations).toEqual([]);
+});
+
+test("aggregate conflict announces stale state and restores the current workspace", async ({ page }) => {
+  await page.route("**/api/v1/decision-cases/CASE-VR-001/review-runs", async (route) => {
+    if (route.request().method() === "POST") {
+      await route.fulfill({
+        status: 409,
+        contentType: "application/json",
+        body: JSON.stringify({ detail: { code: "CASE_VERSION_CONFLICT" } }),
+      });
+      return;
+    }
+    await route.fallback();
+  });
+
+  await page.goto("/decisions/CASE-VR-001");
+  await page.getByRole("button", { name: "가상 역할 검토 실행", exact: true }).click();
+  const staleAlert = page.getByRole("alert").filter({ hasText: "개발 상태가 변경되었습니다" });
+  await expect(staleAlert).toBeVisible();
+  await expect(page.locator(".brief-primary-action")).toBeDisabled();
+  await staleAlert.getByRole("button", { name: "최신 상태 불러오기" }).click();
+  await expect(staleAlert).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "가상 역할 검토 실행", exact: true })).toBeEnabled();
 });

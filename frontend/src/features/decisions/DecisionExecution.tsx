@@ -14,7 +14,7 @@ export function DecisionExecution({ item }: { item: DecisionWorkspace }) {
   const lessons = outcome.lessons_ko ?? [];
 
   return (
-    <section className="panel execution-panel" id="execution" aria-labelledby="execution-title">
+    <section className="panel execution-panel" id="execution" aria-labelledby="execution-title" tabIndex={-1}>
       <header className="execution-header">
         <div>
           <p className="section-kicker">판단 이후 실행</p>
@@ -101,7 +101,7 @@ export function DecisionExecution({ item }: { item: DecisionWorkspace }) {
       ) : null}
 
       {outcome.outcome_state === "available" ? (
-        <section className="outcome-comparison" id="outcome" aria-labelledby="outcome-title">
+        <section className="outcome-comparison" id="outcome" aria-labelledby="outcome-title" tabIndex={-1}>
           <header>
             <p className="section-kicker">결과와 학습</p>
             <h3 id="outcome-title">예상과 실제를 분리해서 비교합니다</h3>
@@ -118,7 +118,7 @@ export function DecisionExecution({ item }: { item: DecisionWorkspace }) {
               <article><p className="section-kicker">결과 품질</p><h4>위험을 실제로 제한했는가</h4><p>{outcome.outcome_evaluation_ko ?? "아직 평가되지 않았습니다."}</p></article>
             </div>
           ) : null}
-          {lessons.length > 0 ? <section className="learning-summary" id="learning"><h4>다음 판단에 남길 학습</h4><ul>{lessons.map((lesson) => <li key={lesson}>{lesson}</li>)}</ul></section> : null}
+          {lessons.length > 0 ? <section className="learning-summary" id="learning" tabIndex={-1}><h4>다음 판단에 남길 학습</h4><ul>{lessons.map((lesson) => <li key={lesson}>{lesson}</li>)}</ul></section> : null}
         </section>
       ) : null}
     </section>

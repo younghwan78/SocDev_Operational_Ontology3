@@ -2,7 +2,7 @@
 
 > 상태: Active  
 > 갱신일: 2026-07-17
-> 현재 단계: Post-I7 UX-E 안전 조건·행동·결과 완료, UX-F 미착수, I7 Responses API gate 외부 입력 대기
+> 현재 단계: Post-I7 UX-F 로컬 사용성 Gate 완료, human/C0 및 I7 Responses API gate 외부 입력 대기
 
 이 문서는 제품 계획부터 구현 계약까지 어떤 문서를 어떤 순서로 읽고 수정해야 하는지 안내한다. 문서 간 충돌은 전체 순위가 아니라 각 문서가 소유한 결정 영역으로 해결한다.
 
@@ -43,6 +43,7 @@
 - `internal_docs/26.07.17 UX-C Decision Brief 및 Development Twin 구현 보고서.md`
 - `internal_docs/26.07.17 UX-D 선택지 이견 및 불확실성 구현 보고서.md`
 - `internal_docs/26.07.17 UX-E 안전 조건 행동 및 결과 구현 보고서.md`
+- `internal_docs/26.07.17 UX-F Responsive 접근성 및 사용성 Gate 보고서.md`
 
 다음 문서는 과거 판단의 근거다. 새 구현 기준으로 직접 사용하지 않는다.
 
@@ -67,16 +68,17 @@
 
 ## 5. 현재 실행 지점
 
-I0~I7 Replay와 post-I7 UX-A/UX-B/UX-C/UX-D/UX-E가 완료됐다. 다음 미착수 단계는 UX-F다.
+I0~I7 Replay와 post-I7 UX-A/UX-B/UX-C/UX-D/UX-E/UX-F 로컬 Gate가 완료됐다.
 
 ```text
 UX-F Responsive·접근성·사용성 Gate
-  → 390px, 768px, desktop과 200% zoom 검증
-  → keyboard와 screen reader semantics 검증
-  → partial, stale, conflict E2E
-  → frozen CASE-VR-001 canonical 8 + Development Twin 5 질문 report
+  → 390px, 768px, desktop과 200% zoom 등가 reflow PASS
+  → keyboard와 screen reader semantics PASS
+  → partial, stale, conflict E2E PASS
+  → frozen CASE-VR-001 canonical 8 + Development Twin 5 질문 PASS
 ```
 
-UX-E 완료는 로컬 fixture의 decision-linked 실행·결과 폐루프를 의미하며 실제 승인이나
-사내 연동 완료를 의미하지 않는다. UX-F는 별도 단계로 시작한다. I7 Responses API gate도
-key·가격·비용 승인 전에는 실행하지 않는다.
+UX-F 완료는 local Codex evaluator와 deterministic browser automation의 공학적 Gate다. 실제
+사용자 시간, 의사결정 속도, 조언 품질, 승인이나 사내 연동 완료를 의미하지 않는다. 다음
+human/C0 단계와 I7 Responses API gate는 필요한 사용자·회사 입력과 key·가격·비용 승인 전에는
+시작하지 않는다.

@@ -11,7 +11,7 @@ export function AlternativeComparison({ alternatives }: { alternatives: Alternat
   const active = alternatives.items[activeIndex];
 
   return (
-    <section className="panel alternative-comparison" id="alternatives" aria-labelledby="alternatives-title">
+    <section className="panel alternative-comparison" id="alternatives" aria-labelledby="alternatives-title" tabIndex={-1}>
       <header className="comparison-header">
         <div>
           <p className="section-kicker">선택지 비교</p>

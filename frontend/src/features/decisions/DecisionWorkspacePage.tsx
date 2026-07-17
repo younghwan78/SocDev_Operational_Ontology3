@@ -120,14 +120,14 @@ export function DecisionWorkspacePage() {
 
   if (query.isPending) {
     return (
-      <main className="app-shell workspace-shell">
+      <main className="app-shell workspace-shell" id="main-content" tabIndex={-1}>
         <p role="status">선택한 Step의 검토 정보를 불러오는 중…</p>
       </main>
     );
   }
   if (query.isError) {
     return (
-      <main className="app-shell workspace-shell">
+      <main className="app-shell workspace-shell" id="main-content" tabIndex={-1}>
         <section className="list-feedback" role="alert">
           <h1>결정 검토를 불러오지 못했습니다</h1>
           <p>{query.error.message}</p>
@@ -176,8 +176,7 @@ export function DecisionWorkspacePage() {
       evaluationMutation.mutate();
       return;
     }
-    const target = actionTarget(primaryAction);
-    document.getElementById(target)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    focusSection(actionTarget(primaryAction));
   };
   const preDecisionReview = (
     <>
@@ -197,7 +196,7 @@ export function DecisionWorkspacePage() {
   );
 
   return (
-    <main className="app-shell workspace-shell">
+    <main className="app-shell workspace-shell" id="main-content" tabIndex={-1}>
       <ContextBar item={item} />
 
       <DecisionBrief
@@ -237,22 +236,22 @@ export function DecisionWorkspacePage() {
       ) : preDecisionReview}
 
       {!item.controls.action_plan && item.time_context.mode === "current" ? (
-      <section className="panel virtual-review-panel" id="review" aria-labelledby="review-title">
+      <section className="panel virtual-review-panel" id="review" aria-labelledby="review-title" tabIndex={-1}>
         <p className="section-kicker">가상 조언</p>
         <h2 id="review-title">가상 역할 검토와 최종 판단</h2>
         <p>Release topology인 독립 Role 검토를 한 번 실행합니다. 단일 Role 실험과 topology 비교는 개발자 평가 화면의 범위입니다.</p>
         {!activeDossierRunId ? <p className="empty-copy">화면 상단의 ‘가상 역할 검토 실행’으로 시작합니다.</p> : null}
-        {dossierStartMutation.isError ? <p role="alert">가상 역할 검토를 시작하지 못했습니다.</p> : null}
+        {dossierStartMutation.isError ? <p role="alert">가상 역할 검토를 시작하지 못했습니다. 개발 상태를 새로고침한 뒤 다시 실행하세요.</p> : null}
         {dossierRunQuery.data ? (
           <div aria-live="polite">
             <p><strong>관점별 검토:</strong> {runStatusLabel(dossierRunQuery.data.status)}</p>
             {dossierFailures.length > 0 ? (
               <>
                 <p><strong>완료:</strong> {completedDossierRoles.map(roleLabel).join(", ")}</p>
-                <p><strong>실패:</strong> {dossierFailures.map((failure) => `${roleLabel(failure.role_id)} (${failure.error_code})`).join(", ")}</p>
+                <p><strong>실패:</strong> {dossierFailures.map((failure) => `${roleLabel(failure.role_id)} · ${runErrorLabel(failure.error_code)}`).join(", ")}</p>
               </>
             ) : null}
-            {dossierRunQuery.data.error_code ? <p role="alert">필수 역할 검토 실패: {dossierRunQuery.data.error_code}. 이 상태에서는 Chair 결정을 만들 수 없습니다.</p> : null}
+            {dossierRunQuery.data.error_code ? <p role="alert">필수 역할 검토가 완료되지 않았습니다. 이 상태에서는 가상 최종 판단을 만들 수 없으므로 실패한 역할을 재시도하세요.</p> : null}
             {["QUEUED", "RUNNING"].includes(dossierRunQuery.data.status) ? (
               <button className="secondary-button" type="button" onClick={() => cancelDossier.mutate(dossierRunQuery.data.run_id)} disabled={!commandsAllowed || cancelDossier.isPending}>검토 취소</button>
             ) : null}
@@ -264,11 +263,11 @@ export function DecisionWorkspacePage() {
         {dossierRunQuery.data?.status === "COMPLETED" && !decisionMutation.data ? (
           <button className="secondary-button decision-command" type="button" onClick={() => decisionMutation.mutate()} disabled={decisionMutation.isPending || !commandsAllowed}>{decisionMutation.isPending ? "가상 판단 중…" : "가상 최종 판단 실행"}</button>
         ) : null}
-        {decisionMutation.isError ? <p role="alert">가상 판단을 만들지 못했습니다. 다시 시도하세요.</p> : null}
+        {decisionMutation.isError ? <p role="alert">가상 판단을 만들지 못했습니다. 역할 검토가 완료 상태인지 확인한 뒤 다시 시도하세요.</p> : null}
       </section>
       ) : null}
-      {outcomeMutation.isError ? <p className="panel" role="alert">Simulation Step을 진행하지 못했습니다.</p> : null}
-      {evaluationMutation.isError ? <p className="panel" role="alert">판단 품질 평가를 완료하지 못했습니다.</p> : null}
+      {outcomeMutation.isError ? <p className="panel" role="alert">Simulation Step을 진행하지 못했습니다. 개발 상태를 새로고침한 뒤 다시 실행하세요.</p> : null}
+      {evaluationMutation.isError ? <p className="panel" role="alert">판단 품질 평가를 완료하지 못했습니다. 결과 공개 상태를 확인한 뒤 다시 실행하세요.</p> : null}
     </main>
   );
 }
@@ -350,7 +349,7 @@ function DevelopmentTwin({
     (_, index) => time.earliest_available_step + index,
   );
   return (
-    <section className="development-twin" aria-labelledby="development-twin-title">
+    <section className="development-twin" id="development-twin" aria-labelledby="development-twin-title" tabIndex={-1}>
       <header className="twin-header">
         <div>
           <p className="section-kicker">Development Twin</p>
@@ -513,8 +512,17 @@ function DecisionPosture({ item }: { item: DecisionWorkspace }) {
 function actionTarget(action: DecisionWorkspace["workflow"]["primary_action"]) {
   if (action === "VIEW_DOSSIER") return "deliberation";
   if (action === "VIEW_REVIEW_PROGRESS" || action === "RUN_SIMULATED_DECISION") return "review";
-  if (action === "ADVANCE_SIMULATION" || action === "VIEW_EVALUATION" || action === "VIEW_LEARNING_SUMMARY") return "execution";
-  return "review";
+  if (action === "VIEW_LEARNING_SUMMARY") return "learning";
+  if (action === "ADVANCE_SIMULATION" || action === "VIEW_EVALUATION") return "execution";
+  return "development-twin";
+}
+
+function focusSection(targetId: string) {
+  const target = document.getElementById(targetId);
+  if (!target) return;
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  target.scrollIntoView({ behavior: reducedMotion ? "auto" : "smooth", block: "start" });
+  target.focus({ preventScroll: true });
 }
 
 function workspaceActionLabel(action: DecisionWorkspace["workflow"]["primary_action"]) {
@@ -574,7 +582,21 @@ function roleLabel(roleId: string) {
     "ROLE-SW": "SW/FW/HAL",
     "ROLE-VERIF": "Verification/Measurement",
     "ROLE-PM": "Technical PM",
+    architecture_system: "Architecture",
+    hw_rtl: "HW/RTL",
+    sw: "SW/FW/HAL",
+    verification_measurement: "Verification/Measurement",
+    program_risk: "Technical PM",
   } as Record<string, string>)[roleId] ?? roleId.replace(/^ROLE-/, "");
+}
+
+function runErrorLabel(errorCode: string) {
+  return ({
+    PROVIDER_USAGE_LIMIT: "실행 한도 초과",
+    PROVIDER_ATTEMPT_FAILED: "응답 검증 실패",
+    PROVIDER_ATTEMPT_BUDGET_EXHAUSTED: "재시도 한도 초과",
+    ROLE_REVIEW_FAILED: "역할 검토 실패",
+  } as Record<string, string>)[errorCode] ?? "역할 검토 실패";
 }
 
 function workStatusLabel(status: string) {

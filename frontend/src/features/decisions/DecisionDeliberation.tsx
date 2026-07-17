@@ -13,7 +13,7 @@ const EPISTEMIC_GROUPS = [
 export function DecisionDeliberation({ deliberation }: { deliberation: Deliberation }) {
   const epistemicItems = deliberation.epistemic_items ?? [];
   return (
-    <section className="deliberation-section" id="deliberation" aria-labelledby="deliberation-title">
+    <section className="deliberation-section" id="deliberation" aria-labelledby="deliberation-title" tabIndex={-1}>
       <header className="deliberation-header">
         <p className="section-kicker">쟁점과 불확실성</p>
         <h2 id="deliberation-title">Role이 어디서 일치하고 충돌하는가</h2>

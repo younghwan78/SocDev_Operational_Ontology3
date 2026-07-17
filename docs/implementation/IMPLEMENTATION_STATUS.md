@@ -1,7 +1,7 @@
 # Implementation status
 
 > Updated: 2026-07-17
-> Current stage: Post-I7 UX-E action, safeguards, and outcome complete; UX-F not started
+> Current stage: Post-I7 UX-F local responsive, accessibility, and agent-substitute usability Gate passed
 
 ## Stage evidence
 
@@ -21,7 +21,8 @@
 |Post-I7 UX-B|Passed|Backend-ranked `decision-list-item.v1`, consumer-shaped collection API, Korean action-needed groups, deadline/why-now/blocker/next-action cards, responsive loading/empty/error UI, 5 focused Backend tests, 5 Frontend unit tests, and 3 Playwright E2E tests. UX-C Workspace v2 remains unconnected.|
 |Post-I7 UX-C|Passed|Live `decision-workspace.v2` projection and `at_step` API, phase-adaptive Decision Brief, observable historical reconstruction, causal chain, commitment window, expected/observed separation, Decision Posture, responsive 390px UI, 9 focused Backend tests, 6 Frontend unit tests, and 3 Playwright E2E tests.|
 |Post-I7 UX-D|Passed|Backend-owned option comparison, latest case-scoped Dossier phase/alignment, agreement/dissent/confirmation/challenge groups, selected-Step epistemic boundary, Role-original detail, desktop semantic table, mobile cards, 5 focused Backend tests, 7 Frontend unit tests, and 3 Playwright E2E tests.|
-|Post-I7 UX-E|Passed|Latest durable decision/outcome/evaluation projection, one linked Action Plan/Safeguard/Rollback flow, one Backend-owned primary action per phase, hidden pre-reveal result, event-backed observed transitions, separate expected/actual and Process/Outcome evaluation, reload-safe commands, 5 focused Backend tests, 9 Frontend unit tests, and 3 Playwright E2E tests. UX-F usability Gate is not started.|
+|Post-I7 UX-E|Passed|Latest durable decision/outcome/evaluation projection, one linked Action Plan/Safeguard/Rollback flow, one Backend-owned primary action per phase, hidden pre-reveal result, event-backed observed transitions, separate expected/actual and Process/Outcome evaluation, reload-safe commands, 5 focused Backend tests, 9 Frontend unit tests, and 3 Playwright E2E tests.|
+|Post-I7 UX-F|Passed (local agent substitute)|390/768/desktop and 200%-equivalent reflow, skip-link and section focus, semantic landmarks/table/live states, 44px targets, reduced motion, Korean partial recovery, stale/conflict refresh, 9 Frontend unit tests, 7 Playwright E2E tests, and frozen CASE-VR-001 13/13 task answers with zero raw-detail opens for questions 1–6. Human usability and business-value evidence remain unmeasured.|
 
 Post-I7 UX-E record (2026-07-17):
 
@@ -38,4 +39,15 @@ Post-I7 UX-E record (2026-07-17):
   developer/evaluation surfaces
 - generated JSON Schema, OpenAPI and TypeScript contracts were refreshed together; no migration was
   required
-- UX-F Responsive, accessibility and frozen-task usability Gate remains the next unstarted stage
+- UX-F local Gate evidence is recorded in `../../output/usability/UX-F-20260717-CASE-VR-001/report.md`
+
+Post-I7 UX-F record (2026-07-17):
+
+- one skip link reaches the single main landmark; view actions scroll and focus their named section
+- no page-level horizontal overflow at 390, 640 (200% equivalent), 768 or desktop widths
+- keyboard, semantic accessibility tree, axe, reduced-motion and 44px interactive-target checks pass
+- partial Dossier UI preserves completed Role labels, translates failure reason, offers retry and hides
+  the Chair command; aggregate conflict exposes stale recovery and restores current Workspace
+- frozen CASE-VR-001 canonical 8 + Development Twin 5 questions pass in the normal UI; questions 1–6
+  use neither Role originals nor raw ontology detail
+- this is an agent-substitute engineering Gate, not a human task-time or business-value result

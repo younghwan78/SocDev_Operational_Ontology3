@@ -2,7 +2,7 @@ import { Link } from "react-router";
 
 export function FixturePage() {
   return (
-    <main className="app-shell">
+    <main className="app-shell" id="main-content" tabIndex={-1}>
       <Link className="back-link" to="/decisions">← 결정 목록</Link>
       <p className="eyebrow">개발자 전용</p>
       <h1>Fixture 및 평가 관리</h1>
@@ -11,4 +11,3 @@ export function FixturePage() {
     </main>
   );
 }
-

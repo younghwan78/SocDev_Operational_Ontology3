@@ -5,10 +5,65 @@
   font-synthesis: none;
 }
 
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+}
+
+p,
+li,
+dd,
+td,
+th {
+  overflow-wrap: anywhere;
+}
+
+button,
+a,
+summary,
+select {
+  touch-action: manipulation;
+}
+
+.skip-link {
+  position: fixed;
+  z-index: 100;
+  top: 8px;
+  left: 8px;
+  padding: 12px 16px;
+  border-radius: 10px;
+  background: #172033;
+  color: #fff;
+  font-weight: 800;
+  text-decoration: none;
+  transform: translateY(-160%);
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+[id] {
+  scroll-margin-top: 88px;
 }
 
 .app-shell {
@@ -291,6 +346,7 @@ body {
 }
 
 .context-facts {
+  min-width: 0;
   display: flex;
   flex-wrap: wrap;
   justify-content: end;
@@ -705,7 +761,9 @@ body {
 }
 
 .timeline-details summary {
-  min-height: 28px;
+  display: flex;
+  align-items: center;
+  min-height: 44px;
   color: #234bb5;
   font-weight: 800;
   cursor: pointer;
@@ -1005,7 +1063,9 @@ body {
 }
 
 .role-originals > summary {
-  min-height: 30px;
+  display: flex;
+  align-items: center;
+  min-height: 44px;
   color: #234bb5;
   font-weight: 800;
   cursor: pointer;
@@ -1154,6 +1214,9 @@ body {
 }
 
 .epistemic-group details summary {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
   color: #234bb5;
   font-size: 0.8rem;
   font-weight: 700;
@@ -1399,7 +1462,9 @@ body {
 }
 
 .predecision-review > summary {
-  min-height: 32px;
+  display: flex;
+  align-items: center;
+  min-height: 44px;
   color: #234bb5;
   font-weight: 800;
   cursor: pointer;
@@ -1445,13 +1510,14 @@ h1, h2, p { margin-top: 0; }
 .case-card dd { margin: 4px 0 0; font-weight: 700; }
 .status-chip { display: inline-block; color: #3157c8; background: #edf2ff; border-radius: 999px; padding: 4px 10px; font-size: 0.8rem; }
 .primary-link, .secondary-link, .back-link { color: #234bb5; font-weight: 700; text-decoration: none; }
+.back-link { display: inline-flex; min-height: 44px; align-items: center; }
 .workspace-header { margin: 16px 0; }
 .question { font-size: 1.15rem; line-height: 1.6; }
 .deadline, .notice { color: #9b3f15; font-weight: 700; }
 .track-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; padding: 12px 0; border-top: 1px solid #edf0f5; }
 .summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 16px; }
 .agent-panel { margin-top: 16px; }
-.primary-button, .secondary-button { border-radius: 10px; padding: 10px 16px; font: inherit; font-weight: 700; cursor: pointer; }
+.primary-button, .secondary-button { min-height: 44px; border-radius: 10px; padding: 10px 16px; font: inherit; font-weight: 700; cursor: pointer; }
 .primary-button { color: white; background: #3157c8; border: 1px solid #3157c8; }
 .secondary-button { color: #234bb5; background: white; border: 1px solid #aab8de; }
 .primary-button:disabled { opacity: 0.55; cursor: wait; }
@@ -1465,7 +1531,7 @@ h1, h2, p { margin-top: 0; }
 .evidence-list { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
 .evidence-card { padding: 16px; background: #f8fafc; border: 1px solid #dce2ef; border-radius: 12px; }
 .explanation { padding: 16px; background: #eef6f2; border-radius: 12px; line-height: 1.6; }
-a:focus-visible, button:focus-visible, select:focus-visible { outline: 3px solid #ffb020; outline-offset: 3px; }
+a:focus-visible, button:focus-visible, select:focus-visible, summary:focus-visible, [tabindex="-1"]:focus-visible { outline: 3px solid #ffb020; outline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     scroll-behavior: auto !important;
@@ -1525,4 +1591,14 @@ a:focus-visible, button:focus-visible, select:focus-visible { outline: 3px solid
   .expectation-actual-grid,
   .evaluation-grid { grid-template-columns: 1fr; }
   .action-plan-card dl div { grid-template-columns: 76px 1fr; }
+}
+
+@media (min-width: 701px) and (max-width: 800px) {
+  .workspace-shell { padding-inline: 20px; }
+  .decision-context-bar { align-items: start; }
+  .decision-brief { grid-template-columns: minmax(0, 1fr) 240px; gap: 20px; padding: 24px; }
+  .development-twin,
+  .alternative-comparison,
+  .deliberation-section,
+  .execution-panel { padding: 22px; }
 }
