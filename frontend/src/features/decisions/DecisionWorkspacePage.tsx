@@ -6,7 +6,6 @@ import {
   advanceOutcome,
   cancelReviewRun,
   createDossierRun,
-  createReviewRun,
   createSimulatedDecision,
   evaluateOutcome,
   getDecisionTimeline,
@@ -18,48 +17,27 @@ import {
 import type { DecisionWorkspace, DevelopmentTimeline } from "../../api/generated";
 import { AlternativeComparison } from "./AlternativeComparison";
 import { DecisionDeliberation } from "./DecisionDeliberation";
+import { DecisionExecution } from "./DecisionExecution";
 
 export function DecisionWorkspacePage() {
   const { caseId = "" } = useParams();
   const [selectedStep, setSelectedStep] = useState<number | undefined>();
-  const [runId, setRunId] = useState<string | null>(null);
   const [dossierRunId, setDossierRunId] = useState<string | null>(null);
   const query = useQuery({
     queryKey: ["decision-workspace", caseId, selectedStep ?? "current"],
     queryFn: () => getDecisionWorkspace(caseId, selectedStep),
     enabled: Boolean(caseId),
   });
+  const activeDossierRunId = dossierRunId ?? query.data?.workflow.dossier_run_id ?? null;
   const timelineQuery = useQuery({
     queryKey: ["development-timeline", caseId, selectedStep ?? "current"],
     queryFn: () => getDecisionTimeline(caseId, selectedStep),
     enabled: Boolean(caseId),
   });
-  const runQuery = useQuery({
-    queryKey: ["review-run", runId],
-    queryFn: () => getReviewRun(runId ?? ""),
-    enabled: Boolean(runId),
-    refetchInterval: (current) => {
-      const status = current.state.data?.status;
-      return status && ["PARTIALLY_COMPLETED", "COMPLETED", "FAILED", "CANCELLED"].includes(status)
-        ? false
-        : 1000;
-    },
-  });
-  const startReview = useMutation({
-    mutationFn: () => createReviewRun(caseId, query.data?.aggregate_version ?? 0),
-    onSuccess: (run) => setRunId(run.run_id),
-  });
-  const cancelReview = useMutation({
-    mutationFn: (id: string) => cancelReviewRun(id, query.data?.aggregate_version ?? 0),
-  });
-  const retryReview = useMutation({
-    mutationFn: (id: string) => retryReviewRun(id, query.data?.aggregate_version ?? 0),
-    onSuccess: (run) => setRunId(run.run_id),
-  });
   const dossierRunQuery = useQuery({
-    queryKey: ["dossier-run", dossierRunId],
-    queryFn: () => getReviewRun(dossierRunId ?? ""),
-    enabled: Boolean(dossierRunId),
+    queryKey: ["dossier-run", activeDossierRunId],
+    queryFn: () => getReviewRun(activeDossierRunId ?? ""),
+    enabled: Boolean(activeDossierRunId),
     refetchInterval: (current) => {
       const status = current.state.data?.status;
       return status && ["PARTIALLY_COMPLETED", "COMPLETED", "FAILED", "CANCELLED"].includes(status)
@@ -81,24 +59,27 @@ export function DecisionWorkspacePage() {
       void query.refetch();
     },
   });
+  const cancelDossier = useMutation({
+    mutationFn: (id: string) => cancelReviewRun(id, query.data?.aggregate_version ?? 0),
+    onSuccess: () => void query.refetch(),
+  });
   const decisionMutation = useMutation({
     mutationFn: () => {
-      if (!dossierRunId) throw new Error("먼저 다중 역할 검토를 완료하세요.");
+      if (!activeDossierRunId) throw new Error("먼저 가상 역할 검토를 완료하세요.");
       return createSimulatedDecision(
         caseId,
         query.data?.aggregate_version ?? 0,
-        dossierRunId,
+        activeDossierRunId,
       );
     },
+    onSuccess: () => void query.refetch(),
   });
   const outcomeMutation = useMutation({
     mutationFn: () => {
-      if (!decisionMutation.data) throw new Error("먼저 모의 결정을 실행하세요.");
       const fromStep = query.data?.time_context.current_step ?? 0;
       return advanceOutcome(
         caseId,
         query.data?.aggregate_version ?? 0,
-        decisionMutation.data.decision,
         fromStep,
         Math.max(fromStep + 1, 15),
       );
@@ -109,13 +90,12 @@ export function DecisionWorkspacePage() {
   });
   const evaluationMutation = useMutation({
     mutationFn: () => evaluateOutcome(caseId, query.data?.aggregate_version ?? 0),
+    onSuccess: () => void query.refetch(),
   });
   const commandMutations = [
-    startReview,
-    cancelReview,
-    retryReview,
     dossierStartMutation,
     retryDossier,
+    cancelDossier,
     decisionMutation,
     outcomeMutation,
     evaluationMutation,
@@ -170,14 +150,51 @@ export function DecisionWorkspacePage() {
     ? dossierResult.dossier.original_reviews.map((review) => review.role_id)
     : [];
   const primaryAction = item.workflow.primary_action;
+  const primaryActionPending = (
+    primaryAction === "RUN_VIRTUAL_REVIEW" && dossierStartMutation.isPending
+  ) || (
+    primaryAction === "RUN_SIMULATED_DECISION" && decisionMutation.isPending
+  ) || (
+    primaryAction === "ADVANCE_SIMULATION" && outcomeMutation.isPending
+  ) || (
+    primaryAction === "VIEW_EVALUATION" && evaluationMutation.isPending
+  );
   const runPrimaryAction = () => {
-    if (primaryAction === "RUN_VIRTUAL_REVIEW" && !runId) {
-      startReview.mutate();
+    if (primaryAction === "RUN_VIRTUAL_REVIEW") {
+      dossierStartMutation.mutate();
+      return;
+    }
+    if (primaryAction === "RUN_SIMULATED_DECISION") {
+      decisionMutation.mutate();
+      return;
+    }
+    if (primaryAction === "ADVANCE_SIMULATION") {
+      outcomeMutation.mutate();
+      return;
+    }
+    if (primaryAction === "VIEW_EVALUATION") {
+      evaluationMutation.mutate();
       return;
     }
     const target = actionTarget(primaryAction);
     document.getElementById(target)?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
+  const preDecisionReview = (
+    <>
+      <DevelopmentTwin
+        item={item}
+        timeline={timelineQuery.data}
+        timelinePending={timelineQuery.isPending}
+        timelineError={timelineQuery.isError}
+        onSelectStep={(step) => {
+          setSelectedStep(step === item.time_context.current_step ? undefined : step);
+        }}
+      />
+      <DecisionPosture item={item} />
+      <AlternativeComparison alternatives={item.alternatives} />
+      <DecisionDeliberation deliberation={item.deliberation} />
+    </>
+  );
 
   return (
     <main className="app-shell workspace-shell">
@@ -187,11 +204,10 @@ export function DecisionWorkspacePage() {
         item={item}
         commandsAllowed={commandsAllowed}
         primaryActionLabel={
-          primaryAction === "RUN_VIRTUAL_REVIEW" && runId
-            ? "검토 진행 상태 보기"
-            : workspaceActionLabel(primaryAction)
+          workspaceActionLabel(primaryAction)
         }
-        primaryActionPending={startReview.isPending}
+        primaryActionPending={primaryActionPending}
+        primaryActionPendingLabel={workspaceActionPendingLabel(primaryAction)}
         onPrimaryAction={runPrimaryAction}
       />
 
@@ -210,71 +226,26 @@ export function DecisionWorkspacePage() {
         </section>
       ) : null}
 
-      <DevelopmentTwin
-        item={item}
-        timeline={timelineQuery.data}
-        timelinePending={timelineQuery.isPending}
-        timelineError={timelineQuery.isError}
-        onSelectStep={(step) => {
-          setSelectedStep(step === item.time_context.current_step ? undefined : step);
-        }}
-      />
+      {item.controls.action_plan ? (
+        <>
+          <DecisionExecution item={item} />
+          <details className="predecision-review">
+            <summary>결정 당시 검토 내용 보기</summary>
+            {preDecisionReview}
+          </details>
+        </>
+      ) : preDecisionReview}
 
-      <DecisionPosture item={item} />
-
-      <AlternativeComparison alternatives={item.alternatives} />
-
-      <DecisionDeliberation deliberation={item.deliberation} />
-
-      <section className="panel agent-panel" id="agent-review" aria-labelledby="agent-review-title">
+      {!item.controls.action_plan && item.time_context.mode === "current" ? (
+      <section className="panel virtual-review-panel" id="review" aria-labelledby="review-title">
         <p className="section-kicker">가상 조언</p>
-        <h2 id="agent-review-title">역할 기반 검토</h2>
-        <p>현재 개발 진행, 근거와 불확실성을 함께 보고 위험을 줄이는 선택을 조언합니다.</p>
-        {!runId ? (
-          <button
-            className="primary-button"
-            type="button"
-            onClick={() => startReview.mutate()}
-            disabled={startReview.isPending || !commandsAllowed}
-          >
-            {startReview.isPending ? "검토 요청 중…" : "역할 검토 시작"}
-          </button>
-        ) : null}
-        {startReview.isError ? <p role="alert">{startReview.error.message}</p> : null}
-        {runQuery.data ? (
-          <div className="run-progress" aria-live="polite">
-            <p><strong>진행 상태:</strong> {runStatusLabel(runQuery.data.status)} · 시도 {runQuery.data.attempt_no}/{runQuery.data.max_attempts}</p>
-            {["QUEUED", "RUNNING"].includes(runQuery.data.status) ? (
-              <button className="secondary-button" type="button" onClick={() => cancelReview.mutate(runQuery.data.run_id)} disabled={!commandsAllowed}>취소</button>
-            ) : null}
-            {runQuery.data.error_code ? <p role="alert">실패 원인: {runQuery.data.error_code}</p> : null}
-            {["FAILED", "CANCELLED", "PARTIALLY_COMPLETED"].includes(runQuery.data.status) ? (
-              <button className="primary-button" type="button" onClick={() => retryReview.mutate(runQuery.data.run_id)} disabled={retryReview.isPending || !commandsAllowed}>{retryReview.isPending ? "재시도 요청 중…" : "검토 재시도"}</button>
-            ) : null}
-            {runQuery.data.result && "review" in runQuery.data.result ? (
-              <article className="review-card">
-                <p className="eyebrow">{roleLabel(runQuery.data.result.review.role_id)}</p>
-                <h3>{runQuery.data.result.review.recommendation}</h3>
-                <p>{runQuery.data.result.review.rationale}</p>
-                <p><strong>확신 수준:</strong> {runQuery.data.result.review.confidence}</p>
-              </article>
-            ) : null}
-          </div>
-        ) : null}
-        {runQuery.isError ? <p role="alert">진행 상태를 확인하지 못했습니다. 잠시 후 다시 시도하세요.</p> : null}
-      </section>
-
-      <section className="panel agent-panel" id="dossier" aria-labelledby="dossier-title">
-        <h2 id="dossier-title">다중 역할 판단과 모의 결정</h2>
-        <p>역할별 독립 검토와 반론을 거친 뒤, 실제 승인이 아닌 모의 Chair 결정을 만듭니다.</p>
-        {!dossierRunId ? (
-          <button className="primary-button" type="button" onClick={() => dossierStartMutation.mutate()} disabled={dossierStartMutation.isPending || !commandsAllowed}>
-            {dossierStartMutation.isPending ? "검토 요청 중…" : "다중 역할 검토 시작"}
-          </button>
-        ) : null}
+        <h2 id="review-title">가상 역할 검토와 최종 판단</h2>
+        <p>Release topology인 독립 Role 검토를 한 번 실행합니다. 단일 Role 실험과 topology 비교는 개발자 평가 화면의 범위입니다.</p>
+        {!activeDossierRunId ? <p className="empty-copy">화면 상단의 ‘가상 역할 검토 실행’으로 시작합니다.</p> : null}
+        {dossierStartMutation.isError ? <p role="alert">가상 역할 검토를 시작하지 못했습니다.</p> : null}
         {dossierRunQuery.data ? (
           <div aria-live="polite">
-            <p><strong>다중 역할 진행:</strong> {runStatusLabel(dossierRunQuery.data.status)}</p>
+            <p><strong>관점별 검토:</strong> {runStatusLabel(dossierRunQuery.data.status)}</p>
             {dossierFailures.length > 0 ? (
               <>
                 <p><strong>완료:</strong> {completedDossierRoles.map(roleLabel).join(", ")}</p>
@@ -282,71 +253,22 @@ export function DecisionWorkspacePage() {
               </>
             ) : null}
             {dossierRunQuery.data.error_code ? <p role="alert">필수 역할 검토 실패: {dossierRunQuery.data.error_code}. 이 상태에서는 Chair 결정을 만들 수 없습니다.</p> : null}
+            {["QUEUED", "RUNNING"].includes(dossierRunQuery.data.status) ? (
+              <button className="secondary-button" type="button" onClick={() => cancelDossier.mutate(dossierRunQuery.data.run_id)} disabled={!commandsAllowed || cancelDossier.isPending}>검토 취소</button>
+            ) : null}
             {["FAILED", "CANCELLED", "PARTIALLY_COMPLETED"].includes(dossierRunQuery.data.status) ? (
-              <button className="primary-button" type="button" onClick={() => retryDossier.mutate(dossierRunQuery.data.run_id)} disabled={retryDossier.isPending || !commandsAllowed}>{retryDossier.isPending ? "재시도 요청 중…" : "다중 검토 재시도"}</button>
+              <button className="secondary-button" type="button" onClick={() => retryDossier.mutate(dossierRunQuery.data.run_id)} disabled={retryDossier.isPending || !commandsAllowed}>{retryDossier.isPending ? "재시도 요청 중…" : "가상 역할 검토 재시도"}</button>
             ) : null}
           </div>
         ) : null}
         {dossierRunQuery.data?.status === "COMPLETED" && !decisionMutation.data ? (
-          <button className="primary-button" type="button" onClick={() => decisionMutation.mutate()} disabled={decisionMutation.isPending || !commandsAllowed}>{decisionMutation.isPending ? "Chair 판단 중…" : "모의 Chair 결정"}</button>
+          <button className="secondary-button decision-command" type="button" onClick={() => decisionMutation.mutate()} disabled={decisionMutation.isPending || !commandsAllowed}>{decisionMutation.isPending ? "가상 판단 중…" : "가상 최종 판단 실행"}</button>
         ) : null}
-        {decisionMutation.isError ? <p role="alert">모의 결정을 만들지 못했습니다. 다시 시도하세요.</p> : null}
-        {decisionMutation.data ? (
-          <div className="decision-result">
-            <p className="status-chip">모의 결정 · {decisionMutation.data.topology}</p>
-            <h3>{decisionMutation.data.decision.decision_type}</h3>
-            <p>{decisionMutation.data.decision.rationale}</p>
-            <h3>다음 행동</h3>
-            <article className="safeguard-card">
-              <p><strong>담당:</strong> {roleLabel(decisionMutation.data.decision.action_plan.owner)}</p>
-              <p><strong>할 일:</strong> {decisionMutation.data.decision.action_plan.action}</p>
-              <p><strong>기한:</strong> Step {decisionMutation.data.decision.action_plan.due_at_step}</p>
-              <p><strong>시작 조건:</strong> {decisionMutation.data.decision.action_plan.trigger}</p>
-              <p><strong>확인 방법:</strong> {decisionMutation.data.decision.action_plan.verification}</p>
-              <p><strong>실패 시:</strong> {decisionMutation.data.decision.action_plan.fallback_action}</p>
-            </article>
-            <h3>안전장치</h3>
-            {decisionMutation.data.decision.safeguards.map((guard) => (
-              <article className="safeguard-card" key={guard.safeguard_id}>
-                <p><strong>측정 기준:</strong> {guard.metric_id} {guard.operator} {guard.threshold.value} {guard.threshold.unit} · Step {guard.check_at_step}</p>
-                <p><strong>적용 조건:</strong> {guard.condition}</p>
-                <p><strong>중단·복구 기준:</strong> {guard.rollback_trigger}</p>
-                <p><strong>실행 조치:</strong> {guard.violation_action} · Step {guard.expires_at_step} 재검토</p>
-                <p><strong>담당:</strong> {roleLabel(guard.owner)}</p>
-              </article>
-            ))}
-            <h3>남은 불확실성</h3>
-            <ul>{decisionMutation.data.dossier.unresolved_uncertainties.map((entry) => <li key={entry}>{entry}</li>)}</ul>
-          </div>
-        ) : null}
+        {decisionMutation.isError ? <p role="alert">가상 판단을 만들지 못했습니다. 다시 시도하세요.</p> : null}
       </section>
-
-      <section className="panel agent-panel" id="outcome" aria-labelledby="outcome-title">
-        <h2 id="outcome-title">결과와 판단 품질 확인</h2>
-        <p>모의 시간을 진행해 숨겨진 결과를 공개하고, 판단 과정과 실제 결과를 분리해 평가합니다.</p>
-        {!outcomeMutation.data ? (
-          <button className="primary-button" type="button" onClick={() => outcomeMutation.mutate()} disabled={outcomeMutation.isPending || !decisionMutation.data || !commandsAllowed}>{outcomeMutation.isPending ? "결과 계산 중…" : "다음 Step 진행"}</button>
-        ) : null}
-        {outcomeMutation.isError ? <p role="alert">결과 평가를 완료하지 못했습니다.</p> : null}
-        {outcomeMutation.data ? (
-          <div className="decision-result">
-            <p className="status-chip">Step {outcomeMutation.data.current_step} · {outcomeMutation.data.guardrail_state}</p>
-            <h3>공개된 결과</h3>
-            <ul>{[...outcomeMutation.data.revealed_evidence, ...outcomeMutation.data.consequences].map((entry) => <li key={entry}>{entry}</li>)}</ul>
-            {outcomeMutation.data.executed_actions.length > 0 ? <p><strong>실행된 보호 조치:</strong> {outcomeMutation.data.executed_actions.join(", ")}</p> : null}
-            {!evaluationMutation.data ? (
-              <button className="primary-button" type="button" onClick={() => evaluationMutation.mutate()} disabled={evaluationMutation.isPending || !commandsAllowed}>{evaluationMutation.isPending ? "평가 중…" : "판단 품질 평가"}</button>
-            ) : null}
-            {evaluationMutation.data ? (
-              <>
-                <h3>과정 평가</h3><p>{evaluationMutation.data.process_evaluation.passed ? "필수 근거·의존성·안전장치를 충족했습니다." : "판단 과정의 필수 항목이 부족합니다."}</p>
-                <h3>결과 평가</h3><p>{evaluationMutation.data.outcome_evaluation.passed ? "위험 신호에 보호 조치가 실행되었습니다." : "위험 통제에 실패했습니다."}</p>
-                <p className="explanation"><strong>왜 과정과 결과가 다를 수 있나요?</strong> 당시 이용할 수 있는 근거로 합리적으로 판단했어도 숨겨진 원인 때문에 결과가 나쁠 수 있고, 반대로 근거가 빈약한 판단이 우연히 좋은 결과를 낼 수도 있기 때문입니다.</p>
-              </>
-            ) : null}
-          </div>
-        ) : null}
-      </section>
+      ) : null}
+      {outcomeMutation.isError ? <p className="panel" role="alert">Simulation Step을 진행하지 못했습니다.</p> : null}
+      {evaluationMutation.isError ? <p className="panel" role="alert">판단 품질 평가를 완료하지 못했습니다.</p> : null}
     </main>
   );
 }
@@ -371,12 +293,14 @@ function DecisionBrief({
   commandsAllowed,
   primaryActionLabel,
   primaryActionPending,
+  primaryActionPendingLabel,
   onPrimaryAction,
 }: {
   item: DecisionWorkspace;
   commandsAllowed: boolean;
   primaryActionLabel: string;
   primaryActionPending: boolean;
+  primaryActionPendingLabel: string;
   onPrimaryAction: () => void;
 }) {
   return (
@@ -393,7 +317,7 @@ function DecisionBrief({
         <p>{deadlineLabel(item.header.deadline.remaining_steps)}</p>
         {item.workflow.primary_action ? (
           <button className="primary-button brief-primary-action" type="button" onClick={onPrimaryAction} disabled={!commandsAllowed || primaryActionPending}>
-            {primaryActionPending ? "검토 요청 중…" : primaryActionLabel}
+            {primaryActionPending ? primaryActionPendingLabel : primaryActionLabel}
           </button>
         ) : (
           <p className="historical-notice">과거 Step에서는 실행할 수 없습니다.</p>
@@ -587,9 +511,10 @@ function DecisionPosture({ item }: { item: DecisionWorkspace }) {
 }
 
 function actionTarget(action: DecisionWorkspace["workflow"]["primary_action"]) {
-  if (action === "VIEW_DOSSIER" || action === "RUN_SIMULATED_DECISION") return "dossier";
-  if (action === "ADVANCE_SIMULATION" || action === "VIEW_EVALUATION" || action === "VIEW_LEARNING_SUMMARY") return "outcome";
-  return "agent-review";
+  if (action === "VIEW_DOSSIER") return "deliberation";
+  if (action === "VIEW_REVIEW_PROGRESS" || action === "RUN_SIMULATED_DECISION") return "review";
+  if (action === "ADVANCE_SIMULATION" || action === "VIEW_EVALUATION" || action === "VIEW_LEARNING_SUMMARY") return "execution";
+  return "review";
 }
 
 function workspaceActionLabel(action: DecisionWorkspace["workflow"]["primary_action"]) {
@@ -605,6 +530,14 @@ function workspaceActionLabel(action: DecisionWorkspace["workflow"]["primary_act
     VIEW_LEARNING_SUMMARY: "학습 요약 보기",
     REFRESH_STALE: "최신 상태 불러오기",
   } as const)[action];
+}
+
+function workspaceActionPendingLabel(action: DecisionWorkspace["workflow"]["primary_action"]) {
+  if (action === "RUN_VIRTUAL_REVIEW") return "가상 역할 검토 요청 중…";
+  if (action === "RUN_SIMULATED_DECISION") return "가상 판단 중…";
+  if (action === "ADVANCE_SIMULATION") return "Simulation Step 진행 중…";
+  if (action === "VIEW_EVALUATION") return "판단 품질 평가 중…";
+  return "처리 중…";
 }
 
 function phaseLabel(phase: DecisionWorkspace["header"]["workspace_phase"]) {

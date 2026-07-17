@@ -1,6 +1,6 @@
 # Master execution plan
 
-> Status: IMPLEMENTED THROUGH I7 REPLAY + STEP 5 B2 RUNTIME + POST-I7 UX-D; I7 RESPONSES API GATE PENDING EXTERNAL INPUT
+> Status: IMPLEMENTED THROUGH I7 REPLAY + STEP 5 B2 RUNTIME + POST-I7 UX-E; UX-F NOT STARTED; I7 RESPONSES API GATE PENDING EXTERNAL INPUT
 > Date: 2026-07-17
 > Scope: local fixture-only PoC
 
@@ -337,6 +337,19 @@ Post-I7 UX-D record (2026-07-17):
 - semantic desktop comparison table and no-overflow 390px option cards
 - raw Role IDs and provider/token/cost detail absent from the normal user deliberation flow
 - decision-linked safeguards, single phase action and expectation-versus-actual remain UX-E
+
+Post-I7 UX-E record (2026-07-17):
+
+- current Workspace joins the latest durable simulated decision, outcome and evaluation
+- Action Plan, owner, due Step, verification, fallback, Safeguard threshold, Rollback trigger and
+  residual risk are connected in one actioning flow
+- each phase exposes exactly one Backend-owned primary action; single-Role experiments remain out
+  of the normal user workflow
+- pre-reveal outcome remains hidden; after explicit Step advance, expected and actual results,
+  Guardrail execution and event-backed observed transitions are shown separately
+- Process and Outcome evaluations remain separate and the historical Workspace omits all later
+  decision, outcome, evaluation and run state
+- the next unstarted stage is UX-F Responsive, accessibility and usability Gate
 
 ## 7. Crosswalk to supporting plans
 

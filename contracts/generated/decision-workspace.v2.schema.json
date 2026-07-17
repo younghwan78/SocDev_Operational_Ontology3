@@ -139,6 +139,26 @@
           "title": "Action Type",
           "type": "string"
         },
+        "decision_type_ko": {
+          "title": "Decision Type Ko",
+          "type": "string"
+        },
+        "selected_option_title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Selected Option Title"
+        },
+        "decision_rationale_ko": {
+          "title": "Decision Rationale Ko",
+          "type": "string"
+        },
         "owner": {
           "title": "Owner",
           "type": "string"
@@ -163,16 +183,72 @@
         "fallback_action_ko": {
           "title": "Fallback Action Ko",
           "type": "string"
+        },
+        "status": {
+          "enum": [
+            "in_progress",
+            "completed",
+            "blocked",
+            "cancelled"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "status_ko": {
+          "title": "Status Ko",
+          "type": "string"
+        },
+        "evidence_required_ko": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidence Required Ko",
+          "type": "array"
+        },
+        "escalation_target_ko": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Escalation Target Ko"
+        },
+        "questions_to_resolve_ko": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Questions To Resolve Ko",
+          "type": "array"
+        },
+        "reopen_condition_ko": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reopen Condition Ko"
         }
       },
       "required": [
         "action_type",
+        "decision_type_ko",
+        "decision_rationale_ko",
         "owner",
         "action_ko",
         "due_at_step",
         "trigger_ko",
         "verification_ko",
-        "fallback_action_ko"
+        "fallback_action_ko",
+        "status",
+        "status_ko"
       ],
       "title": "WorkspaceActionPlanSummary",
       "type": "object"
@@ -1262,6 +1338,27 @@
           "title": "Expectation Vs Actual Ko",
           "type": "array"
         },
+        "expected_ko": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Expected Ko",
+          "type": "array"
+        },
+        "actual_ko": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Actual Ko",
+          "type": "array"
+        },
+        "guardrail_results_ko": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Guardrail Results Ko",
+          "type": "array"
+        },
         "process_evaluation_ko": {
           "anyOf": [
             {
@@ -1423,6 +1520,43 @@
           "title": "Cause Ko",
           "type": "string"
         },
+        "metric_id": {
+          "title": "Metric Id",
+          "type": "string"
+        },
+        "metric_label_ko": {
+          "title": "Metric Label Ko",
+          "type": "string"
+        },
+        "operator": {
+          "enum": [
+            "lt",
+            "lte",
+            "gt",
+            "gte",
+            "eq"
+          ],
+          "title": "Operator",
+          "type": "string"
+        },
+        "operator_ko": {
+          "title": "Operator Ko",
+          "type": "string"
+        },
+        "threshold_ko": {
+          "title": "Threshold Ko",
+          "type": "string"
+        },
+        "check_at_step": {
+          "minimum": 0,
+          "title": "Check At Step",
+          "type": "integer"
+        },
+        "expires_at_step": {
+          "minimum": 0,
+          "title": "Expires At Step",
+          "type": "integer"
+        },
         "condition_ko": {
           "title": "Condition Ko",
           "type": "string"
@@ -1438,15 +1572,27 @@
         "verification_ko": {
           "title": "Verification Ko",
           "type": "string"
+        },
+        "violation_action_ko": {
+          "title": "Violation Action Ko",
+          "type": "string"
         }
       },
       "required": [
         "safeguard_id",
         "cause_ko",
+        "metric_id",
+        "metric_label_ko",
+        "operator",
+        "operator_ko",
+        "threshold_ko",
+        "check_at_step",
+        "expires_at_step",
         "condition_ko",
         "rollback_trigger_ko",
         "owner",
-        "verification_ko"
+        "verification_ko",
+        "violation_action_ko"
       ],
       "title": "WorkspaceSafeguardSummary",
       "type": "object"
@@ -1758,6 +1904,18 @@
           ],
           "default": null,
           "title": "Running Operation Ko"
+        },
+        "dossier_run_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Dossier Run Id"
         }
       },
       "required": [

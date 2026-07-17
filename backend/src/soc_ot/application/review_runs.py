@@ -161,7 +161,7 @@ class InMemoryReviewRunRepository:
             for item in self.items.values()
             if item.case_id == case_id and (run_kind is None or item.run_kind == run_kind)
         ]
-        return max(matches, key=lambda item: (item.created_at, item.run_id), default=None)
+        return matches[-1] if matches else None
 
     def claim(self, worker_id: str, lease_seconds: int) -> ReviewRun | None:
         now = datetime.now(UTC)

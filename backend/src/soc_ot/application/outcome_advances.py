@@ -36,6 +36,8 @@ class OutcomeAdvanceRepository(Protocol):
         actor_id: str = "local-home-reviewer",
     ) -> OutcomeSnapshot: ...
 
+    def latest(self, case_id: str) -> OutcomeSnapshot | None: ...
+
 
 class InMemoryOutcomeAdvanceRepository:
     def __init__(self) -> None:
@@ -68,6 +70,12 @@ class InMemoryOutcomeAdvanceRepository:
         self.current_steps[case.case_id] = to_step
         self.commands[idempotency_key] = (fingerprint, result)
         return result
+
+    def latest(self, case_id: str) -> OutcomeSnapshot | None:
+        matches = [
+            result for _, result in self.commands.values() if result.case_id == case_id
+        ]
+        return matches[-1] if matches else None
 
 
 class PostgresOutcomeAdvanceRepository:
@@ -163,6 +171,19 @@ class PostgresOutcomeAdvanceRepository:
             )
             session.flush()
             return result
+
+    def latest(self, case_id: str) -> OutcomeSnapshot | None:
+        with Session(self.engine) as session:
+            row = session.scalar(
+                select(OutcomeAdvanceRow)
+                .where(OutcomeAdvanceRow.case_id == case_id)
+                .order_by(
+                    OutcomeAdvanceRow.recorded_at.desc(),
+                    OutcomeAdvanceRow.advance_id.desc(),
+                )
+                .limit(1)
+            )
+            return OutcomeSnapshot.model_validate(row.result) if row else None
 
 
 def _fingerprint(

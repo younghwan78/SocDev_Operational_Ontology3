@@ -351,20 +351,37 @@ class WorkspaceDeliberation(StrictModel):
 class WorkspaceSafeguardSummary(StrictModel):
     safeguard_id: str
     cause_ko: str
+    metric_id: str
+    metric_label_ko: str
+    operator: Literal["lt", "lte", "gt", "gte", "eq"]
+    operator_ko: str
+    threshold_ko: str
+    check_at_step: int = Field(ge=0)
+    expires_at_step: int = Field(ge=0)
     condition_ko: str
     rollback_trigger_ko: str
     owner: str
     verification_ko: str
+    violation_action_ko: str
 
 
 class WorkspaceActionPlanSummary(StrictModel):
     action_type: Literal["execute", "collect_evidence", "defer", "escalate", "reject"]
+    decision_type_ko: str
+    selected_option_title: str | None = None
+    decision_rationale_ko: str
     owner: str
     action_ko: str
     due_at_step: int = Field(ge=0)
     trigger_ko: str
     verification_ko: str
     fallback_action_ko: str
+    status: Literal["in_progress", "completed", "blocked", "cancelled"]
+    status_ko: str
+    evidence_required_ko: list[str] = Field(default_factory=list)
+    escalation_target_ko: str | None = None
+    questions_to_resolve_ko: list[str] = Field(default_factory=list)
+    reopen_condition_ko: str | None = None
 
 
 class WorkspaceControls(StrictModel):
@@ -376,6 +393,9 @@ class WorkspaceOutcomeAndEvaluation(StrictModel):
     outcome_state: Literal["not_available", "running", "available"]
     hidden_until_step_advance: bool
     expectation_vs_actual_ko: list[str] = Field(default_factory=list)
+    expected_ko: list[str] = Field(default_factory=list)
+    actual_ko: list[str] = Field(default_factory=list)
+    guardrail_results_ko: list[str] = Field(default_factory=list)
     process_evaluation_ko: str | None = None
     outcome_evaluation_ko: str | None = None
     lessons_ko: list[str] = Field(default_factory=list)
@@ -384,6 +404,9 @@ class WorkspaceOutcomeAndEvaluation(StrictModel):
     def validate_outcome_boundary(self) -> "WorkspaceOutcomeAndEvaluation":
         revealed = bool(
             self.expectation_vs_actual_ko
+            or self.expected_ko
+            or self.actual_ko
+            or self.guardrail_results_ko
             or self.process_evaluation_ko
             or self.outcome_evaluation_ko
             or self.lessons_ko
@@ -401,6 +424,7 @@ class WorkspaceWorkflow(StrictModel):
     primary_action: WorkspaceActionId | None = None
     allowed_actions: list[WorkspaceActionId]
     running_operation_ko: str | None = None
+    dossier_run_id: str | None = None
 
     @model_validator(mode="after")
     def validate_primary_action(self) -> "WorkspaceWorkflow":

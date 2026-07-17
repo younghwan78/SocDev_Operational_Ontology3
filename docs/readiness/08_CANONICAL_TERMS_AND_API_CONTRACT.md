@@ -224,6 +224,14 @@ run-aware phase, option recommendation badge, agreement/dissent/confirmation gro
 epistemic eligibility. A historical response omits the Dossier, Role originals and unversioned
 assumptions/unknowns. Frontend must not rank alternatives, count Role votes or recover raw Role IDs.
 
+After a simulated decision exists, the current-step Workspace also joins the latest case-scoped
+durable decision, Outcome and Evaluation. Backend owns the phase precedence
+`decision → OUTCOME_RUNNING`, `Outcome → EVALUATION_READY`, `Evaluation → CLOSED`, the one allowed
+primary action for that phase, Action Plan status, Safeguard summaries, observed transition
+projection and expected/actual separation. Before explicit Outcome advance, outcome fields remain
+hidden. A historical response omits the decision, outcome, evaluation and dossier run identifier.
+Frontend must not infer a completed action or expose a simulated outcome early.
+
 The timeline resource returns `development-timeline.v1`. Optional query parameter
 `at_step` reconstructs the case at that logical step and returns only events with
 `observed_at_step <= at_step`. An out-of-range step returns
@@ -241,6 +249,13 @@ POST /api/v1/decision-cases/{case_id}/evaluations
 Review runs perform routing, independent Role review, optional challenge/revision, and Dossier
 creation according to their persisted topology. The simulated decision remains a distinct command;
 B2 uses the deterministic core and B3 uses the provider Chair result.
+
+`outcome-advance-command.v1` may omit its `decision` body field for the normal Workspace flow. The
+Backend then resolves the latest persisted decision for the case. If no persisted decision exists,
+the command returns `DECISION_NOT_READY`; if a supplied decision differs from the persisted latest
+decision, it returns `DECISION_MISMATCH`. This keeps the Frontend command reload-safe without making
+the browser an authority for decision content. Logical time still advances only through this
+explicit command.
 
 ### 6.3 Run API
 

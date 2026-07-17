@@ -2,7 +2,7 @@
 
 > 상태: Active  
 > 갱신일: 2026-07-17
-> 현재 단계: Post-I7 UX-D 선택지·이견·불확실성 완료, UX-E 미시작, I7 Responses API gate 외부 입력 대기
+> 현재 단계: Post-I7 UX-E 안전 조건·행동·결과 완료, UX-F 미착수, I7 Responses API gate 외부 입력 대기
 
 이 문서는 제품 계획부터 구현 계약까지 어떤 문서를 어떤 순서로 읽고 수정해야 하는지 안내한다. 문서 간 충돌은 전체 순위가 아니라 각 문서가 소유한 결정 영역으로 해결한다.
 
@@ -42,6 +42,7 @@
 - `internal_docs/26.07.17 UX-B Decision Inbox 구현 및 검증 보고서.md`
 - `internal_docs/26.07.17 UX-C Decision Brief 및 Development Twin 구현 보고서.md`
 - `internal_docs/26.07.17 UX-D 선택지 이견 및 불확실성 구현 보고서.md`
+- `internal_docs/26.07.17 UX-E 안전 조건 행동 및 결과 구현 보고서.md`
 
 다음 문서는 과거 판단의 근거다. 새 구현 기준으로 직접 사용하지 않는다.
 
@@ -66,16 +67,16 @@
 
 ## 5. 현재 실행 지점
 
-I0~I7 Replay와 post-I7 UX-A/UX-B/UX-C/UX-D가 완료됐다. 다음 미착수 단계는 UX-E다.
+I0~I7 Replay와 post-I7 UX-A/UX-B/UX-C/UX-D/UX-E가 완료됐다. 다음 미착수 단계는 UX-F다.
 
 ```text
-UX-E 안전 조건·행동·결과
-  → safeguard, rollback과 action plan 연결
-  → phase별 한 개의 primary action
-  → decision-linked observed transition
-  → 기대 대비 실제 결과와 학습
+UX-F Responsive·접근성·사용성 Gate
+  → 390px, 768px, desktop과 200% zoom 검증
+  → keyboard와 screen reader semantics 검증
+  → partial, stale, conflict E2E
+  → frozen CASE-VR-001 canonical 8 + Development Twin 5 질문 report
 ```
 
-UX-E는 별도 단계로 시작한다. UX-D 완료 판정은 실제 승인, decision-linked observed
-transition 또는 사내 연동 완료를 의미하지 않는다. I7 Responses API gate도 key·가격·비용
-승인 전에는 실행하지 않는다.
+UX-E 완료는 로컬 fixture의 decision-linked 실행·결과 폐루프를 의미하며 실제 승인이나
+사내 연동 완료를 의미하지 않는다. UX-F는 별도 단계로 시작한다. I7 Responses API gate도
+key·가격·비용 승인 전에는 실행하지 않는다.

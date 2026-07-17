@@ -93,7 +93,6 @@ export function createSimulatedDecision(
 export function advanceOutcome(
   caseId: string,
   aggregateVersion: number,
-  decision: AblationResult["decision"],
   fromStep: number,
   toStep: number,
 ): Promise<OutcomeSnapshot> {
@@ -102,7 +101,6 @@ export function advanceOutcome(
     command_schema_version: "outcome-advance-command.v1",
     from_step: fromStep,
     to_step: toStep,
-    decision,
   });
   return postJson(path, { ...commandHeaders(aggregateVersion), "Content-Type": "application/json" }, body);
 }

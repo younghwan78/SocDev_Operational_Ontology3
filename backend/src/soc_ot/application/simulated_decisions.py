@@ -30,6 +30,8 @@ class SimulatedDecisionRepository(Protocol):
         factory: DecisionFactory,
     ) -> AblationResult: ...
 
+    def latest(self, case_id: str) -> AblationResult | None: ...
+
 
 class InMemorySimulatedDecisionRepository:
     def __init__(self) -> None:
@@ -59,6 +61,14 @@ class InMemorySimulatedDecisionRepository:
         result = factory()
         self.commands[idempotency_key] = (fingerprint, result)
         return result
+
+    def latest(self, case_id: str) -> AblationResult | None:
+        matches = [
+            result
+            for _, result in self.commands.values()
+            if result.decision.case_id == case_id
+        ]
+        return matches[-1] if matches else None
 
 
 class PostgresSimulatedDecisionRepository(InMemorySimulatedDecisionRepository):
@@ -107,6 +117,19 @@ class PostgresSimulatedDecisionRepository(InMemorySimulatedDecisionRepository):
                 )
             )
         return result
+
+    def latest(self, case_id: str) -> AblationResult | None:
+        with Session(self.engine) as session:
+            row = session.scalar(
+                select(SimulatedDecisionRow)
+                .where(SimulatedDecisionRow.case_id == case_id)
+                .order_by(
+                    SimulatedDecisionRow.recorded_at.desc(),
+                    SimulatedDecisionRow.command_id.desc(),
+                )
+                .limit(1)
+            )
+            return AblationResult.model_validate(row.payload) if row else None
 
 
 def _fingerprint(

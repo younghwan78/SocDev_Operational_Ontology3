@@ -113,6 +113,98 @@ const historicalCaseItem = {
   details: { ...caseItem.details, role_originals_available: false },
 };
 
+const actioningCaseItem = {
+  ...caseItem,
+  header: { ...caseItem.header, workspace_phase: "OUTCOME_RUNNING", case_status: "OUTCOME_RUNNING" },
+  current_brief: {
+    ...caseItem.current_brief,
+    state_or_recommendation_ko: "안전 조건부 진행",
+    one_line_reason_ko: "가역 경로를 열고 Step 15 실측으로 위험을 제한합니다.",
+  },
+  observed_decision_transitions: {
+    available: true,
+    decision_id: "DECISION-1",
+    state_changes: [{ provenance: "observed_event", entity_type: "action", entity_id: "ACTION-1", entity_title: "UHD60 제한 구현", from_state: "PLANNED", to_state: "IN_PROGRESS", basis_refs: ["DECISION-1"] }],
+    guardrail_events_ko: [],
+  },
+  controls: {
+    safeguards: [{
+      safeguard_id: "SAFE-1",
+      cause_ko: "실측 전 power margin은 불확실합니다.",
+      metric_id: "ddr_bandwidth",
+      metric_label_ko: "DDR 대역폭",
+      operator: "gte",
+      operator_ko: "≥",
+      threshold_ko: "20 GB/s",
+      check_at_step: 15,
+      expires_at_step: 16,
+      condition_ko: "UHD60 EIS 활성화 시",
+      rollback_trigger_ko: "DDR bandwidth가 20 GB/s 미만이면 즉시 비활성화",
+      owner: "Verification/Measurement",
+      verification_ko: "Step 15 DDR 실측",
+      violation_action_ko: "rollback 실행",
+    }],
+    action_plan: {
+      action_type: "execute",
+      decision_type_ko: "안전 조건부 진행",
+      selected_option_title: "SW feature flag로 제한 진행",
+      decision_rationale_ko: "Architecture Freeze 전 가역 경로를 확보하되 실측으로 중단 조건을 확인합니다.",
+      owner: "SW/FW/HAL",
+      action_ko: "UHD60 제한 구현",
+      due_at_step: 13,
+      trigger_ko: "가상 판단 기록 완료",
+      verification_ko: "feature flag와 DDR 실측 확인",
+      fallback_action_ko: "feature flag를 끄고 UHD60 EIS를 비활성화",
+      status: "in_progress",
+      status_ko: "진행 중",
+      evidence_required_ko: ["Step 15 DDR 실측"],
+      escalation_target_ko: "Architecture",
+      questions_to_resolve_ko: ["장시간 thermal 거동"],
+      reopen_condition_ko: "DDR bandwidth가 기준 미달일 때",
+    },
+  },
+  outcome_and_evaluation: {
+    outcome_state: "running",
+    hidden_until_step_advance: true,
+    expectation_vs_actual_ko: [],
+    expected_ko: [],
+    actual_ko: [],
+    guardrail_results_ko: [],
+    process_evaluation_ko: null,
+    outcome_evaluation_ko: null,
+    lessons_ko: [],
+  },
+  workflow: { primary_action: "ADVANCE_SIMULATION", allowed_actions: ["ADVANCE_SIMULATION"], running_operation_ko: null, dossier_run_id: "RUN-1" },
+};
+
+const closedCaseItem = {
+  ...actioningCaseItem,
+  header: { ...actioningCaseItem.header, workspace_phase: "CLOSED", case_status: "EVALUATED" },
+  controls: {
+    ...actioningCaseItem.controls,
+    action_plan: { ...actioningCaseItem.controls.action_plan, status: "cancelled", status_ko: "Rollback 완료" },
+  },
+  observed_decision_transitions: {
+    ...actioningCaseItem.observed_decision_transitions,
+    state_changes: [
+      { provenance: "observed_event", entity_type: "action", entity_id: "ACTION-1", entity_title: "UHD60 제한 구현", from_state: "IN_PROGRESS", to_state: "CANCELLED", basis_refs: ["OUTCOME-1"] },
+      { provenance: "observed_event", entity_type: "work_item", entity_id: "WORK-ARCH", entity_title: "EIS 구현 option 결정", from_state: "BLOCKED", to_state: "IN_PROGRESS", basis_refs: ["OUTCOME-1"] },
+    ],
+  },
+  outcome_and_evaluation: {
+    outcome_state: "available",
+    hidden_until_step_advance: false,
+    expectation_vs_actual_ko: [],
+    expected_ko: ["UHD60 제한 적용: PLANNED → IN_PROGRESS"],
+    actual_ko: ["측정: ddr_bandwidth 18 GB/s", "실행된 보호 조치: rollback"],
+    guardrail_results_ko: ["Guardrail 위반 감지 · 보호 조치 rollback 실행"],
+    process_evaluation_ko: "당시 이용 가능한 근거에서 안전 조건과 다음 행동을 모두 갖췄습니다.",
+    outcome_evaluation_ko: "공개된 위험 신호에 필요한 보호 조치가 실행되어 위험을 제한했습니다.",
+    lessons_ko: ["DDR 실측을 다음 유사 결정에서는 decision window 전에 확인합니다."],
+  },
+  workflow: { primary_action: "VIEW_LEARNING_SUMMARY", allowed_actions: ["VIEW_LEARNING_SUMMARY"], running_operation_ko: null, dossier_run_id: "RUN-1" },
+};
+
 const decisionListItem = {
   projection_schema_version: "decision-list-item.v1",
   case_id: "CASE-VR-001",
@@ -166,6 +258,10 @@ function workspaceResponse(input: RequestInfo | URL) {
       ? historicalCaseItem
       : caseItem;
   return Promise.resolve(new Response(JSON.stringify(payload), { status: 200 }));
+}
+
+function workspaceFixtureResponse(payload: unknown, input: RequestInfo | URL) {
+  return Promise.resolve(new Response(JSON.stringify(String(input).includes("/timeline") ? timelineItem : payload), { status: 200 }));
 }
 
 function renderApp(path = "/decisions") {
@@ -248,6 +344,37 @@ describe("App", () => {
     expect(screen.getAllByText("관측").length).toBeGreaterThan(0);
     expect(screen.queryByText("ontology_relations")).not.toBeInTheDocument();
     expect(screen.queryByText("CASE-VR-001")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "가상 역할 검토 실행" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "역할 검토 시작" })).not.toBeInTheDocument();
+  });
+
+  it("shows one linked action, safeguard, rollback, and observed-progress flow after decision", async () => {
+    vi.spyOn(globalThis, "fetch").mockImplementation((input) => workspaceFixtureResponse(actioningCaseItem, input));
+    const { container } = renderApp("/decisions/CASE-VR-001");
+
+    expect(await screen.findByRole("heading", { name: "판단에서 실행과 확인까지 한 흐름으로 봅니다" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "안전 조건과 Rollback" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "DDR 대역폭 ≥ 20 GB/s" })).toBeInTheDocument();
+    expect(screen.getAllByText("SW/FW/HAL").length).toBeGreaterThan(0);
+    expect(screen.getByText("feature flag와 DDR 실측 확인")).toBeInTheDocument();
+    expect(screen.getAllByText("feature flag를 끄고 UHD60 EIS를 비활성화").length).toBeGreaterThan(0);
+    expect(screen.getByRole("heading", { name: "결정이 만든 실제 상태 변화" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "아직 남는 위험" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "결과는 다음 Simulation Step 전까지 숨겨집니다" })).toBeInTheDocument();
+    expect(container.querySelectorAll(".primary-button")).toHaveLength(1);
+    expect(screen.getByText("결정 당시 검토 내용 보기")).toBeInTheDocument();
+  });
+
+  it("separates expectation, actual outcome, process, outcome, and learning after evaluation", async () => {
+    vi.spyOn(globalThis, "fetch").mockImplementation((input) => workspaceFixtureResponse(closedCaseItem, input));
+    renderApp("/decisions/CASE-VR-001");
+
+    expect(await screen.findByRole("heading", { name: "예상과 실제를 분리해서 비교합니다" })).toBeInTheDocument();
+    expect(screen.getByText("측정: ddr_bandwidth 18 GB/s")).toBeInTheDocument();
+    expect(screen.getByText("Guardrail 위반 감지 · 보호 조치 rollback 실행")).toBeInTheDocument();
+    expect(screen.getByText("당시 판단은 적절했는가")).toBeInTheDocument();
+    expect(screen.getByText("위험을 실제로 제한했는가")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "다음 판단에 남길 학습" })).toBeInTheDocument();
   });
 
   it("moves between comparison cards on a narrow viewport", async () => {
@@ -271,7 +398,7 @@ describe("App", () => {
 
     expect(await screen.findByText("선택한 Step의 당시 개발 상태")).toBeInTheDocument();
     expect(screen.getByText("과거 Step에서는 실행할 수 없습니다.")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "역할 검토 시작" })).toBeDisabled();
+    expect(screen.queryByRole("button", { name: "가상 역할 검토 실행" })).not.toBeInTheDocument();
     expect(screen.getByText("이 Step에서 확인 가능한 commitment window가 없습니다.")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "아직 Role 의견 종합이 없습니다" })).toBeInTheDocument();
     expect(screen.queryByText("Role별 원문 보기")).not.toBeInTheDocument();
@@ -291,7 +418,7 @@ describe("App", () => {
     renderApp("/decisions/CASE-VR-001");
     const user = userEvent.setup();
 
-    await user.click(await screen.findByRole("button", { name: "역할 검토 시작" }));
+    await user.click(await screen.findByRole("button", { name: "가상 역할 검토 실행" }));
 
     expect(await screen.findByRole("heading", { name: "개발 상태가 변경되었습니다" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "최신 상태 불러오기" })).toBeInTheDocument();

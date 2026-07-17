@@ -52,7 +52,7 @@ class OutcomeAdvanceRequest(StrictModel):
     command_schema_version: str = "outcome-advance-command.v1"
     from_step: int
     to_step: int
-    decision: SimulatedDecision
+    decision: SimulatedDecision | None = None
 
 
 class ReviewRunRequest(StrictModel):

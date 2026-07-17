@@ -132,7 +132,7 @@ def advance_outcome(
     if rule is None:
         raise ValueError("OUTCOME_RULE_NOT_REGISTERED")
     rule.validate(path.parameters)
-    decision_id = _decision_id(decision)
+    decision_id = decision_id_for(decision)
     snapshot = rule.apply(case, path, decision_id, target_step)
     return _apply_guardrails(snapshot, decision.safeguards)
 
@@ -220,7 +220,7 @@ def _compare(value: float, operator: str, threshold: float) -> bool:
     return comparisons[operator]
 
 
-def _decision_id(decision: SimulatedDecision) -> str:
+def decision_id_for(decision: SimulatedDecision) -> str:
     canonical = json.dumps(
         decision.model_dump(mode="json"),
         ensure_ascii=False,

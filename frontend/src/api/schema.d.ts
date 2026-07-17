@@ -776,7 +776,7 @@ export interface components {
              * @default outcome-advance-command.v1
              */
             command_schema_version: string;
-            decision: components["schemas"]["SimulatedDecision"];
+            decision?: components["schemas"]["SimulatedDecision"] | null;
             /** From Step */
             from_step: number;
             /** To Step */
@@ -1256,12 +1256,33 @@ export interface components {
              * @enum {string}
              */
             action_type: "execute" | "collect_evidence" | "defer" | "escalate" | "reject";
+            /** Decision Rationale Ko */
+            decision_rationale_ko: string;
+            /** Decision Type Ko */
+            decision_type_ko: string;
             /** Due At Step */
             due_at_step: number;
+            /** Escalation Target Ko */
+            escalation_target_ko?: string | null;
+            /** Evidence Required Ko */
+            evidence_required_ko?: string[];
             /** Fallback Action Ko */
             fallback_action_ko: string;
             /** Owner */
             owner: string;
+            /** Questions To Resolve Ko */
+            questions_to_resolve_ko?: string[];
+            /** Reopen Condition Ko */
+            reopen_condition_ko?: string | null;
+            /** Selected Option Title */
+            selected_option_title?: string | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "in_progress" | "completed" | "blocked" | "cancelled";
+            /** Status Ko */
+            status_ko: string;
             /** Trigger Ko */
             trigger_ko: string;
             /** Verification Ko */
@@ -1604,8 +1625,14 @@ export interface components {
         };
         /** WorkspaceOutcomeAndEvaluation */
         WorkspaceOutcomeAndEvaluation: {
+            /** Actual Ko */
+            actual_ko?: string[];
             /** Expectation Vs Actual Ko */
             expectation_vs_actual_ko?: string[];
+            /** Expected Ko */
+            expected_ko?: string[];
+            /** Guardrail Results Ko */
+            guardrail_results_ko?: string[];
             /** Hidden Until Step Advance */
             hidden_until_step_advance: boolean;
             /** Lessons Ko */
@@ -1656,16 +1683,35 @@ export interface components {
         WorkspaceSafeguardSummary: {
             /** Cause Ko */
             cause_ko: string;
+            /** Check At Step */
+            check_at_step: number;
             /** Condition Ko */
             condition_ko: string;
+            /** Expires At Step */
+            expires_at_step: number;
+            /** Metric Id */
+            metric_id: string;
+            /** Metric Label Ko */
+            metric_label_ko: string;
+            /**
+             * Operator
+             * @enum {string}
+             */
+            operator: "lt" | "lte" | "gt" | "gte" | "eq";
+            /** Operator Ko */
+            operator_ko: string;
             /** Owner */
             owner: string;
             /** Rollback Trigger Ko */
             rollback_trigger_ko: string;
             /** Safeguard Id */
             safeguard_id: string;
+            /** Threshold Ko */
+            threshold_ko: string;
             /** Verification Ko */
             verification_ko: string;
+            /** Violation Action Ko */
+            violation_action_ko: string;
         };
         /** WorkspaceStateAtStep */
         WorkspaceStateAtStep: {
@@ -1749,6 +1795,8 @@ export interface components {
         WorkspaceWorkflow: {
             /** Allowed Actions */
             allowed_actions: ("BUILD_CONTEXT" | "RUN_VIRTUAL_REVIEW" | "VIEW_REVIEW_PROGRESS" | "VIEW_DOSSIER" | "RUN_SIMULATED_DECISION" | "ADVANCE_SIMULATION" | "VIEW_EVALUATION" | "VIEW_LEARNING_SUMMARY" | "REFRESH_STALE")[];
+            /** Dossier Run Id */
+            dossier_run_id?: string | null;
             /** Primary Action */
             primary_action?: ("BUILD_CONTEXT" | "RUN_VIRTUAL_REVIEW" | "VIEW_REVIEW_PROGRESS" | "VIEW_DOSSIER" | "RUN_SIMULATED_DECISION" | "ADVANCE_SIMULATION" | "VIEW_EVALUATION" | "VIEW_LEARNING_SUMMARY" | "REFRESH_STALE") | null;
             /** Running Operation Ko */

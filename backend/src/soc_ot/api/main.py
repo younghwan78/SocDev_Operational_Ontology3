@@ -190,10 +190,28 @@ def create_app(
         case_id: str,
         repo: Repository,
         runs: RunRepository,
+        decisions: DecisionCommands,
+        outcomes: OutcomeRepository,
+        evaluations: Evaluations,
         at_step: int | None = None,
     ) -> DecisionWorkspaceProjectionV2:
         try:
+            stored = _require_case(repo, case_id)
             latest_dossier_run = runs.latest_for_case(case_id, run_kind="dossier")
+            latest_decision = decisions.latest(case_id)
+            latest_outcome = outcomes.latest(case_id)
+            latest_evaluation = evaluations.latest(case_id)
+            if (
+                at_step is None
+                and latest_outcome is not None
+                and latest_outcome.current_step > stored.case.current_step
+            ):
+                stored = StoredCase(
+                    case=stored.case.model_copy(
+                        update={"current_step": latest_outcome.current_step}
+                    ),
+                    aggregate_version=stored.aggregate_version,
+                )
             dossier = (
                 latest_dossier_run.result.dossier
                 if latest_dossier_run is not None
@@ -201,13 +219,19 @@ def create_app(
                 else None
             )
             return build_workspace_projection_v2(
-                _require_case(repo, case_id),
+                stored,
                 at_step=at_step,
                 content=local_fixtures.load_workspace_ux(case_id),
                 dossier=dossier,
                 dossier_run_status=(
                     latest_dossier_run.status if latest_dossier_run is not None else None
                 ),
+                dossier_run_id=(
+                    latest_dossier_run.run_id if latest_dossier_run is not None else None
+                ),
+                decision_result=latest_decision,
+                outcome=latest_outcome,
+                evaluation=latest_evaluation,
             )
         except ValueError as error:
             if str(error) == "DEVELOPMENT_STEP_OUT_OF_RANGE":
@@ -457,6 +481,7 @@ def create_app(
         command: OutcomeAdvanceRequest,
         repo: Repository,
         outcomes: OutcomeRepository,
+        decisions: DecisionCommands,
         hidden_cases: HiddenReader,
         idempotency_key: Annotated[str, Header(alias="Idempotency-Key")],
         if_match: Annotated[str, Header(alias="If-Match")],
@@ -465,11 +490,19 @@ def create_app(
         hidden = hidden_cases.get(case_id)
         if hidden is None:
             raise HTTPException(status_code=404, detail={"code": "HIDDEN_CASE_NOT_FOUND"})
+        latest_decision = decisions.latest(case_id)
+        decision = command.decision or (
+            latest_decision.decision if latest_decision is not None else None
+        )
+        if decision is None:
+            raise HTTPException(status_code=409, detail={"code": "DECISION_NOT_READY"})
+        if latest_decision is not None and decision != latest_decision.decision:
+            raise HTTPException(status_code=409, detail={"code": "DECISION_MISMATCH"})
         try:
             return outcomes.advance(
                 stored.case,
                 hidden,
-                command.decision,
+                decision,
                 from_step=command.from_step,
                 to_step=command.to_step,
                 idempotency_key=idempotency_key,
@@ -484,12 +517,18 @@ def create_app(
         case_id: str,
         repo: Repository,
         evaluations: Evaluations,
+        outcomes: OutcomeRepository,
         idempotency_key: Annotated[str, Header(alias="Idempotency-Key")],
         if_match: Annotated[str, Header(alias="If-Match")],
     ) -> CaseEvaluation:
         stored = _require_case(repo, case_id)
         _require_version(stored, if_match)
-        _require_evaluation_ready(stored, evaluations)
+        latest_outcome = outcomes.latest(case_id)
+        _require_evaluation_ready(
+            stored,
+            evaluations,
+            observed_step=(latest_outcome.current_step if latest_outcome else None),
+        )
         try:
             return evaluations.evaluate(
                 case_id,
@@ -502,10 +541,18 @@ def create_app(
 
     @app.get("/api/v1/decision-cases/{case_id}/evaluation", tags=["evaluations"])
     def get_evaluation(
-        case_id: str, repo: Repository, evaluations: Evaluations
+        case_id: str,
+        repo: Repository,
+        evaluations: Evaluations,
+        outcomes: OutcomeRepository,
     ) -> CaseEvaluation:
         stored = _require_case(repo, case_id)
-        _require_evaluation_ready(stored, evaluations)
+        latest_outcome = outcomes.latest(case_id)
+        _require_evaluation_ready(
+            stored,
+            evaluations,
+            observed_step=(latest_outcome.current_step if latest_outcome else None),
+        )
         result = evaluations.latest(case_id)
         if result is None:
             raise HTTPException(status_code=404, detail={"code": "EVALUATION_NOT_FOUND"})
@@ -541,15 +588,19 @@ def _expected_version(if_match: str) -> int:
 
 
 def _require_evaluation_ready(
-    stored: StoredCase, evaluations: EvaluationRepository
+    stored: StoredCase,
+    evaluations: EvaluationRepository,
+    *,
+    observed_step: int | None = None,
 ) -> None:
     required_step = evaluations.required_step(stored.case.case_id)
-    if stored.case.current_step < required_step:
+    current_step = max(stored.case.current_step, observed_step or 0)
+    if current_step < required_step:
         raise HTTPException(
             status_code=409,
             detail={
                 "code": "OUTCOME_NOT_REVEALED",
-                "current_step": stored.case.current_step,
+                "current_step": current_step,
                 "required_step": required_step,
             },
         )

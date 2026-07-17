@@ -10,6 +10,8 @@
 - UX-C 상세: selected Step을 지원하는 `decision-workspace.v2` 기반 `/decisions/:caseId`
 - UX-D 판단 비교: Backend-owned 선택지 비교, Dossier 일치·이견·확인 필요,
   fact/inference/assumption/unknown과 접힌 Role 원문
+- UX-E 실행·결과: durable decision/outcome/evaluation을 연결한 Action Plan, Safeguard,
+  Rollback, 관측 상태 변화, 예상 대비 실제, 과정/결과 평가와 학습
 - 생성 계약: `../../contracts/generated/decision-workspace.v2.schema.json`,
   `../../contracts/generated/workspace-ux-fixture.v1.schema.json`,
   `../../contracts/generated/decision-list-item.v1.schema.json`

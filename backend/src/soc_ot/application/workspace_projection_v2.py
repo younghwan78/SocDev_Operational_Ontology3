@@ -1,8 +1,9 @@
 from collections import Counter
 from datetime import UTC, datetime
+from typing import Literal
 
 from soc_ot.agents.contracts import RoleReview
-from soc_ot.agents.multi_role import DecisionDossier
+from soc_ot.agents.multi_role import AblationResult, DecisionDossier, SimulatedDecision
 from soc_ot.application.development_twin import (
     BlockerPropagation,
     DevelopmentTimelineProjection,
@@ -10,10 +11,13 @@ from soc_ot.application.development_twin import (
     build_development_timeline,
     reconstruct_case_at_step,
 )
+from soc_ot.application.evaluation import CaseEvaluation
+from soc_ot.application.outcomes import OutcomeSnapshot, decision_id_for
 from soc_ot.application.repositories import StoredCase
 from soc_ot.application.workspace_contracts import (
     PRIMARY_ACTION_BY_PHASE,
     DecisionWorkspaceProjectionV2,
+    WorkspaceActionPlanSummary,
     WorkspaceAlignmentGroup,
     WorkspaceAlternativesV2,
     WorkspaceAlternativeV2,
@@ -36,12 +40,15 @@ from soc_ot.application.workspace_contracts import (
     WorkspaceOutcomeAndEvaluation,
     WorkspaceRoleReviewDetail,
     WorkspaceRoleRevision,
+    WorkspaceSafeguardSummary,
     WorkspaceStateAtStep,
+    WorkspaceStateTransition,
     WorkspaceTrackState,
     WorkspaceUxFixture,
     WorkspaceWorkflow,
 )
 from soc_ot.domain.models import (
+    GUARDRAIL_METRIC_UNITS,
     AgentRunStatus,
     DecisionCaseStatus,
     DecisionType,
@@ -117,10 +124,58 @@ _ROLE_LABELS_KO = {
     "ROLE-SW": "SW/FW/HAL",
     "ROLE-VERIF": "Verification/Measurement",
     "ROLE-PM": "Technical PM",
+    "architecture_system": "Architecture",
+    "hw_rtl": "HW/RTL",
+    "sw": "SW/FW/HAL",
+    "verification_measurement": "Verification/Measurement",
+    "program_risk": "Technical PM",
+    "evidence_owner": "근거 담당",
+    "decision_chair": "가상 Decision Chair",
     "non_agent_baseline": "비 Agent 기준선",
 }
 
+_METRIC_LABELS_KO = {
+    "DDR_BANDWIDTH": "DDR 대역폭",
+    "THERMAL": "온도",
+}
+
+_OPERATOR_LABELS_KO = {
+    "lt": "<",
+    "lte": "≤",
+    "gt": ">",
+    "gte": "≥",
+    "eq": "=",
+}
+
+_UNIT_LABELS_KO = {"degC": "°C"}
+
+_STATE_LABELS_KO = {
+    "PLANNED": "계획됨",
+    "READY": "시작 가능",
+    "IN_PROGRESS": "진행 중",
+    "BLOCKED": "대기 중",
+    "COMPLETED": "완료",
+    "DONE": "완료",
+    "VERIFIED": "검증 완료",
+    "REWORK": "재작업",
+    "CANCELLED": "취소됨",
+}
+
 _CONFIDENCE_LABELS_KO = {"low": "낮음", "medium": "중간", "high": "높음"}
+
+_ACTION_STATUS_LABELS_KO = {
+    "in_progress": "실행·관찰 중",
+    "completed": "계획한 행동 완료",
+    "blocked": "보호 조치 후 재검토 필요",
+    "cancelled": "Rollback으로 중단",
+}
+
+_VIOLATION_ACTION_LABELS_KO = {
+    "rollback": "되돌리기",
+    "pause": "일시 중지",
+    "escalate": "상위 검토",
+    "re_review": "재검토",
+}
 
 
 def build_workspace_projection_v2(
@@ -130,6 +185,10 @@ def build_workspace_projection_v2(
     content: WorkspaceUxFixture | None = None,
     dossier: DecisionDossier | None = None,
     dossier_run_status: AgentRunStatus | None = None,
+    dossier_run_id: str | None = None,
+    decision_result: AblationResult | None = None,
+    outcome: OutcomeSnapshot | None = None,
+    evaluation: CaseEvaluation | None = None,
 ) -> DecisionWorkspaceProjectionV2:
     current_case = stored.case
     selected_step = current_case.current_step if at_step is None else at_step
@@ -148,6 +207,9 @@ def build_workspace_projection_v2(
     timeline = build_development_timeline(stored, at_step=selected_step)
     historical = selected_step != current_case.current_step
     visible_dossier = None if historical else dossier
+    visible_decision = None if historical else decision_result
+    visible_outcome = None if historical else outcome
+    visible_evaluation = None if historical else evaluation
     phase = (
         None
         if historical
@@ -155,6 +217,9 @@ def build_workspace_projection_v2(
             current_case.status,
             dossier_run_status=dossier_run_status,
             dossier=visible_dossier,
+            decision_result=visible_decision,
+            outcome=visible_outcome,
+            evaluation=visible_evaluation,
         )
     )
     model_content_available = (
@@ -264,7 +329,11 @@ def build_workspace_projection_v2(
             ],
         ),
         expected_option_transitions=expected,
-        observed_decision_transitions=WorkspaceObservedDecisionTransitions(available=False),
+        observed_decision_transitions=_observed_transitions(
+            expected,
+            visible_decision,
+            visible_outcome,
+        ),
         alternatives=WorkspaceAlternativesV2(
             comparison_dimensions_ko=[
                 "기대 효과",
@@ -279,18 +348,26 @@ def build_workspace_projection_v2(
                 selected_case,
                 expected,
                 visible_dossier,
+                visible_decision.decision if visible_decision is not None else None,
                 include_future_evidence=not historical,
             ),
         ),
         deliberation=deliberation,
-        controls=WorkspaceControls(safeguards=[], action_plan=None),
-        outcome_and_evaluation=WorkspaceOutcomeAndEvaluation(
-            outcome_state="not_available",
-            hidden_until_step_advance=True,
+        controls=_controls(
+            selected_case,
+            visible_decision,
+            visible_outcome,
+        ),
+        outcome_and_evaluation=_outcome_and_evaluation(
+            expected,
+            visible_decision,
+            visible_outcome,
+            visible_evaluation,
         ),
         workflow=WorkspaceWorkflow(
             primary_action=primary_action,
             allowed_actions=[] if primary_action is None else [primary_action],
+            dossier_run_id=None if historical else dossier_run_id,
         ),
         details=WorkspaceDetails(
             evidence_available=bool(selected_case.evidence),
@@ -305,6 +382,7 @@ def _alternative_comparisons(
     case: ObservableCase,
     expected_transitions: list[WorkspaceExpectedOptionTransition],
     dossier: DecisionDossier | None,
+    decision: SimulatedDecision | None,
     *,
     include_future_evidence: bool,
 ) -> list[WorkspaceAlternativeV2]:
@@ -359,7 +437,15 @@ def _alternative_comparisons(
                     else f"되돌리기 어려움 · 전환 비용 {_quantity_ko(option.switching_cost)}"
                 ),
                 required_evidence_ko=required_evidence,
-                safety_conditions_ko=[],
+                safety_conditions_ko=(
+                    [
+                        f"{guard.condition} · 위반 시 {guard.rollback_trigger}"
+                        for guard in decision.safeguards
+                    ]
+                    if decision is not None
+                    and decision.selected_option_id == option.option_id
+                    else []
+                ),
                 residual_risks_ko=transition.unknown_impacts_ko,
                 recommended=is_recommended,
                 recommendation_reason_ko=(
@@ -370,6 +456,339 @@ def _alternative_comparisons(
             )
         )
     return items
+
+
+def _controls(
+    case: ObservableCase,
+    decision_result: AblationResult | None,
+    outcome: OutcomeSnapshot | None,
+) -> WorkspaceControls:
+    if decision_result is None:
+        return WorkspaceControls(safeguards=[], action_plan=None)
+    decision = decision_result.decision
+    action_status = _action_status(outcome)
+    option_titles = {item.option_id: item.title for item in case.alternatives}
+    selected_option_title = (
+        option_titles.get(decision.selected_option_id)
+        if decision.selected_option_id is not None
+        else None
+    )
+    rationale_ko = _decision_rationale_ko(decision, selected_option_title)
+    evidence_titles = {item.evidence_id: item.title for item in case.evidence}
+    return WorkspaceControls(
+        safeguards=[
+            WorkspaceSafeguardSummary(
+                safeguard_id=guard.safeguard_id,
+                cause_ko=rationale_ko,
+                metric_id=guard.metric_id,
+                metric_label_ko=_metric_label_ko(guard.metric_id),
+                operator=guard.operator,
+                operator_ko=_OPERATOR_LABELS_KO[guard.operator],
+                threshold_ko=_quantity_ko(guard.threshold),
+                check_at_step=guard.check_at_step,
+                expires_at_step=guard.expires_at_step,
+                condition_ko=guard.condition,
+                rollback_trigger_ko=guard.rollback_trigger,
+                owner=_role_label(guard.owner),
+                verification_ko=guard.verification,
+                violation_action_ko=_VIOLATION_ACTION_LABELS_KO[guard.violation_action],
+            )
+            for guard in decision.safeguards
+        ],
+        action_plan=WorkspaceActionPlanSummary(
+            action_type=decision.action_plan.action_type,
+            decision_type_ko=_DECISION_LABELS_KO[decision.decision_type],
+            selected_option_title=selected_option_title,
+            decision_rationale_ko=rationale_ko,
+            owner=_role_label(decision.action_plan.owner),
+            action_ko=_replace_option_id(
+                decision.action_plan.action,
+                decision.selected_option_id,
+                selected_option_title,
+            ),
+            due_at_step=decision.action_plan.due_at_step,
+            trigger_ko=decision.action_plan.trigger,
+            verification_ko=decision.action_plan.verification,
+            fallback_action_ko=decision.action_plan.fallback_action,
+            status=action_status,
+            status_ko=_ACTION_STATUS_LABELS_KO[action_status],
+            evidence_required_ko=[
+                evidence_titles.get(item, item)
+                for item in decision.action_plan.evidence_required
+            ],
+            escalation_target_ko=(
+                _role_label(decision.action_plan.escalation_target)
+                if decision.action_plan.escalation_target
+                else None
+            ),
+            questions_to_resolve_ko=decision.action_plan.questions_to_resolve,
+            reopen_condition_ko=decision.action_plan.reopen_condition,
+        ),
+    )
+
+
+def _observed_transitions(
+    expected: list[WorkspaceExpectedOptionTransition],
+    decision_result: AblationResult | None,
+    outcome: OutcomeSnapshot | None,
+) -> WorkspaceObservedDecisionTransitions:
+    if decision_result is None:
+        return WorkspaceObservedDecisionTransitions(available=False)
+    decision = decision_result.decision
+    decision_id = decision_id_for(decision)
+    selected = next(
+        (
+            item
+            for item in expected
+            if item.option_id == decision.selected_option_id
+        ),
+        None,
+    )
+    action_title = _replace_option_id(
+        decision.action_plan.action,
+        decision.selected_option_id,
+        selected.option_title if selected is not None else None,
+    )
+    if outcome is None:
+        return WorkspaceObservedDecisionTransitions(
+            available=True,
+            decision_id=decision_id,
+            state_changes=[
+                WorkspaceStateTransition(
+                    provenance="observed_event",
+                    entity_type="action",
+                    entity_id=f"{decision_id}:action",
+                    entity_title=action_title,
+                    from_state="PLANNED",
+                    to_state="IN_PROGRESS",
+                    basis_refs=[decision_id],
+                )
+            ],
+        )
+
+    final_action_state = {
+        "completed": "COMPLETED",
+        "cancelled": "CANCELLED",
+        "blocked": "BLOCKED",
+        "in_progress": "IN_PROGRESS",
+    }[_action_status(outcome)]
+    changes: list[WorkspaceStateTransition] = []
+    action_linked = False
+    for change in selected.state_changes if selected is not None else []:
+        if change.entity_type == "action":
+            action_linked = True
+            if change.to_state == final_action_state:
+                continue
+            from_state = change.to_state
+            to_state = final_action_state
+        else:
+            from_state = change.from_state
+            to_state = change.to_state
+        changes.append(
+            WorkspaceStateTransition(
+                provenance="observed_event",
+                entity_type=change.entity_type,
+                entity_id=change.entity_id,
+                entity_title=change.entity_title,
+                from_state=from_state,
+                to_state=to_state,
+                basis_refs=outcome.event_ids,
+            )
+        )
+    if not action_linked or not any(item.entity_type == "action" for item in changes):
+        changes.append(
+            WorkspaceStateTransition(
+                provenance="observed_event",
+                entity_type="action",
+                entity_id=f"{decision_id}:action",
+                entity_title=action_title,
+                from_state="IN_PROGRESS",
+                to_state=final_action_state,
+                basis_refs=outcome.event_ids,
+            )
+        )
+    return WorkspaceObservedDecisionTransitions(
+        available=True,
+        decision_id=decision_id,
+        state_changes=changes,
+        guardrail_events_ko=_guardrail_results(decision, outcome),
+    )
+
+
+def _outcome_and_evaluation(
+    expected: list[WorkspaceExpectedOptionTransition],
+    decision_result: AblationResult | None,
+    outcome: OutcomeSnapshot | None,
+    evaluation: CaseEvaluation | None,
+) -> WorkspaceOutcomeAndEvaluation:
+    if decision_result is None:
+        return WorkspaceOutcomeAndEvaluation(
+            outcome_state="not_available",
+            hidden_until_step_advance=True,
+        )
+    if outcome is None:
+        return WorkspaceOutcomeAndEvaluation(
+            outcome_state="running",
+            hidden_until_step_advance=True,
+        )
+    decision = decision_result.decision
+    selected = next(
+        (
+            item
+            for item in expected
+            if item.option_id == decision.selected_option_id
+        ),
+        None,
+    )
+    expected_ko = [] if selected is None else [
+        *(
+            (
+                f"{item.entity_title}: {_state_label_ko(item.from_state)} → "
+                f"{_state_label_ko(item.to_state)}"
+            )
+            for item in selected.state_changes
+        ),
+        *(f"확인 전 위험: {item}" for item in selected.unknown_impacts_ko),
+    ]
+    actual_ko = _actual_outcome(decision, outcome)
+    process_evaluation_ko = None
+    outcome_evaluation_ko = None
+    lessons: list[str] = []
+    if evaluation is not None:
+        process_evaluation_ko = (
+            "당시 이용 가능한 근거에서 의존성, 이견, 안전 조건과 다음 행동을 모두 갖췄습니다."
+            if evaluation.process_evaluation.passed
+            else "판단 당시 과정 계약에서 보완할 항목이 확인되었습니다."
+        )
+        outcome_evaluation_ko = (
+            "공개된 위험 신호에 필요한 보호 조치가 실행되어 위험을 제한했습니다."
+            if evaluation.outcome_evaluation.passed
+            else "공개된 결과에서 위험을 충분히 제한하지 못했습니다."
+        )
+        lessons = [
+            *(
+                f"{item}를 다음 유사 결정에서는 decision window 전에 확인합니다."
+                for item in outcome.revealed_evidence
+            ),
+            *(
+                f"{item} fallback을 재사용 가능한 안전 조건으로 유지합니다."
+                for item in outcome.executed_actions
+            ),
+        ]
+    return WorkspaceOutcomeAndEvaluation(
+        outcome_state="available",
+        hidden_until_step_advance=False,
+        expectation_vs_actual_ko=[
+            *(f"예상: {item}" for item in expected_ko),
+            *(f"실제: {item}" for item in actual_ko),
+        ],
+        expected_ko=expected_ko,
+        actual_ko=actual_ko,
+        guardrail_results_ko=_guardrail_results(decision, outcome),
+        process_evaluation_ko=process_evaluation_ko,
+        outcome_evaluation_ko=outcome_evaluation_ko,
+        lessons_ko=_unique(lessons),
+    )
+
+
+def _action_status(
+    outcome: OutcomeSnapshot | None,
+) -> Literal["in_progress", "completed", "blocked", "cancelled"]:
+    if outcome is None:
+        return "in_progress"
+    if "rollback" in outcome.executed_actions:
+        return "cancelled"
+    if outcome.executed_actions:
+        return "blocked"
+    return "completed"
+
+
+def _actual_outcome(
+    decision: SimulatedDecision,
+    outcome: OutcomeSnapshot,
+) -> list[str]:
+    metric_units = GUARDRAIL_METRIC_UNITS
+    return _unique(
+        [
+            *(
+                f"공개 근거: {_replace_metric_codes(item)}"
+                for item in outcome.revealed_evidence
+            ),
+            *(
+                (
+                    f"측정: {_metric_label_ko(metric_id)} {value:g} "
+                    f"{_unit_label_ko(metric_units.get(metric_id, ''))}"
+                ).rstrip()
+                for metric_id, value in outcome.metrics.items()
+            ),
+            *(_replace_metric_codes(item) for item in outcome.consequences),
+            *(f"실행된 보호 조치: {item}" for item in outcome.executed_actions),
+        ]
+    )
+
+
+def _guardrail_results(
+    decision: SimulatedDecision,
+    outcome: OutcomeSnapshot,
+) -> list[str]:
+    if outcome.guardrail_state == "triggered":
+        return [
+            f"안전 조건 위반 감지 · 보호 조치 {', '.join(outcome.executed_actions)} 실행"
+        ]
+    if outcome.guardrail_state == "monitoring":
+        return ["측정값이 등록된 Guardrail 범위 안에 있어 계속 관찰합니다."]
+    if decision.safeguards:
+        return ["현재 Step에는 적용할 Guardrail 측정이 없습니다."]
+    return ["이 판단에는 실행형 Guardrail이 없습니다."]
+
+
+def _unique(items: list[str]) -> list[str]:
+    return list(dict.fromkeys(items))
+
+
+def _metric_label_ko(metric_id: str) -> str:
+    return _METRIC_LABELS_KO.get(metric_id, metric_id.replace("_", " "))
+
+
+def _unit_label_ko(unit: str) -> str:
+    return _UNIT_LABELS_KO.get(unit, unit)
+
+
+def _state_label_ko(state: str) -> str:
+    return _STATE_LABELS_KO.get(state, state)
+
+
+def _replace_metric_codes(value: str) -> str:
+    for metric_id, label in _METRIC_LABELS_KO.items():
+        value = value.replace(metric_id, label)
+    return value
+
+
+def _replace_option_id(
+    value: str,
+    option_id: str | None,
+    option_title: str | None,
+) -> str:
+    if option_id is None or option_title is None:
+        return value
+    return value.replace(option_id, option_title)
+
+
+def _decision_rationale_ko(
+    decision: SimulatedDecision,
+    selected_option_title: str | None,
+) -> str:
+    if decision.decision_source != "deterministic_core":
+        return decision.rationale
+    subject = (
+        f"‘{selected_option_title}’ 선택지"
+        if selected_option_title is not None
+        else "현재 선택지"
+    )
+    return (
+        f"관측 가능한 위험과 선택지의 가역성 규칙으로 {subject}를 비교한 "
+        "결정론적 가상 판단입니다."
+    )
 
 
 def _deliberation(
@@ -596,14 +1015,15 @@ def _role_label(role_id: str) -> str:
 
 
 def _quantity_ko(quantity: Quantity) -> str:
+    unit = _unit_label_ko(quantity.unit)
     if quantity.mode.value == "exact":
         return (
-            f"{quantity.value:g} {quantity.unit}"
+            f"{quantity.value:g} {unit}"
             if quantity.value is not None
-            else quantity.unit
+            else unit
         )
     if quantity.mode.value == "range":
-        return f"{quantity.lower_bound:g}–{quantity.upper_bound:g} {quantity.unit}"
+        return f"{quantity.lower_bound:g}–{quantity.upper_bound:g} {unit}"
     if quantity.mode.value == "qualitative":
         return f"{quantity.qualitative} 수준"
     return "아직 정량화되지 않음"
@@ -614,9 +1034,18 @@ def _phase_for_status(
     *,
     dossier_run_status: AgentRunStatus | None = None,
     dossier: DecisionDossier | None = None,
+    decision_result: AblationResult | None = None,
+    outcome: OutcomeSnapshot | None = None,
+    evaluation: CaseEvaluation | None = None,
 ) -> WorkspacePhase:
     if status in {DecisionCaseStatus.DRAFT, DecisionCaseStatus.CONTEXT_BUILDING}:
         return WorkspacePhase.CONTEXT_PREPARATION
+    if evaluation is not None:
+        return WorkspacePhase.CLOSED
+    if outcome is not None:
+        return WorkspacePhase.EVALUATION_READY
+    if decision_result is not None:
+        return WorkspacePhase.OUTCOME_RUNNING
     if dossier_run_status in {
         AgentRunStatus.QUEUED,
         AgentRunStatus.RUNNING,
