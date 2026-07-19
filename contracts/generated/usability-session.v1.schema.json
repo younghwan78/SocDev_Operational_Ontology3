@@ -1,0 +1,216 @@
+{
+  "$defs": {
+    "BoundaryClassification": {
+      "enum": [
+        "observed",
+        "expected",
+        "unconfirmed",
+        "not_applicable"
+      ],
+      "title": "BoundaryClassification",
+      "type": "string"
+    },
+    "ParticipantKind": {
+      "enum": [
+        "builder",
+        "proxy",
+        "domain"
+      ],
+      "title": "ParticipantKind",
+      "type": "string"
+    },
+    "SessionStatus": {
+      "enum": [
+        "draft",
+        "completed",
+        "excluded"
+      ],
+      "title": "SessionStatus",
+      "type": "string"
+    },
+    "StudyCondition": {
+      "enum": [
+        "baseline",
+        "product"
+      ],
+      "title": "StudyCondition",
+      "type": "string"
+    },
+    "TaskScore": {
+      "enum": [
+        "pass",
+        "fail",
+        "not_reviewed"
+      ],
+      "title": "TaskScore",
+      "type": "string"
+    },
+    "UsabilityEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "event_id": {
+          "title": "Event Id",
+          "type": "string"
+        },
+        "event_type": {
+          "$ref": "#/$defs/UsabilityEventType"
+        },
+        "task_id": {
+          "title": "Task Id",
+          "type": "string"
+        },
+        "occurred_at": {
+          "format": "date-time",
+          "title": "Occurred At",
+          "type": "string"
+        },
+        "detail_ko": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Detail Ko"
+        }
+      },
+      "required": [
+        "event_id",
+        "event_type",
+        "task_id",
+        "occurred_at"
+      ],
+      "title": "UsabilityEvent",
+      "type": "object"
+    },
+    "UsabilityEventType": {
+      "enum": [
+        "task_started",
+        "task_ended",
+        "answer_submitted",
+        "wrong_primary_action",
+        "detail_opened",
+        "recovery_used",
+        "reviewer_response_recorded"
+      ],
+      "title": "UsabilityEventType",
+      "type": "string"
+    },
+    "UsabilityTaskResult": {
+      "additionalProperties": false,
+      "properties": {
+        "task_id": {
+          "title": "Task Id",
+          "type": "string"
+        },
+        "answer_ko": {
+          "default": "",
+          "title": "Answer Ko",
+          "type": "string"
+        },
+        "score": {
+          "$ref": "#/$defs/TaskScore",
+          "default": "not_reviewed"
+        },
+        "boundary_classification": {
+          "$ref": "#/$defs/BoundaryClassification",
+          "default": "not_applicable"
+        },
+        "safeguard_completeness": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Safeguard Completeness"
+        },
+        "reviewer_note_ko": {
+          "default": "",
+          "title": "Reviewer Note Ko",
+          "type": "string"
+        }
+      },
+      "required": [
+        "task_id"
+      ],
+      "title": "UsabilityTaskResult",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "usability-session.v1",
+      "default": "usability-session.v1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "study_id": {
+      "title": "Study Id",
+      "type": "string"
+    },
+    "session_id": {
+      "title": "Session Id",
+      "type": "string"
+    },
+    "condition": {
+      "$ref": "#/$defs/StudyCondition"
+    },
+    "participant_code": {
+      "title": "Participant Code",
+      "type": "string"
+    },
+    "participant_kind": {
+      "$ref": "#/$defs/ParticipantKind"
+    },
+    "status": {
+      "$ref": "#/$defs/SessionStatus",
+      "default": "draft"
+    },
+    "exclusion_reason": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Exclusion Reason"
+    },
+    "events": {
+      "items": {
+        "$ref": "#/$defs/UsabilityEvent"
+      },
+      "title": "Events",
+      "type": "array"
+    },
+    "task_results": {
+      "items": {
+        "$ref": "#/$defs/UsabilityTaskResult"
+      },
+      "title": "Task Results",
+      "type": "array"
+    }
+  },
+  "required": [
+    "study_id",
+    "session_id",
+    "condition",
+    "participant_code",
+    "participant_kind",
+    "task_results"
+  ],
+  "title": "UsabilitySession",
+  "type": "object"
+}

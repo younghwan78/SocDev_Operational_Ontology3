@@ -1,0 +1,87 @@
+schema_version: usability-study-protocol.v1
+study_id: UX-H-20260719-CASE-VR-001
+frozen_at: 2026-07-19T12:00:00+09:00
+case_id: CASE-VR-001
+conditions:
+  - baseline
+  - product
+tasks:
+  - task_id: Q01_DECISION
+    category: canonical
+    prompt_ko: 무엇을 결정해야 하는가?
+    answer_source_paths: [/decision_question]
+  - task_id: Q02_DEADLINE
+    category: canonical
+    prompt_ko: 언제 결정해야 하는가?
+    answer_source_paths: [/decision_deadline_milestone_id, /milestones]
+  - task_id: Q03_BLOCKED_TRACK
+    category: canonical
+    prompt_ko: 어떤 개발 track이 막혔는가?
+    answer_source_paths: [/tracks, /work_items]
+  - task_id: Q04_REVERSIBLE_OPTION
+    category: canonical
+    prompt_ko: 어떤 선택지가 가역적인가?
+    answer_source_paths: [/alternatives]
+  - task_id: Q05_AGENT_DISSENT
+    category: canonical
+    prompt_ko: Agent들은 어디에서 의견이 다른가? 정보가 없다면 없다고 답하라.
+    answer_source_paths: []
+  - task_id: Q06_GUARDRAIL
+    category: canonical
+    prompt_ko: 어떤 guardrail과 rollback trigger가 필요한가? source에 확정값이 없다면 구분하라.
+    answer_source_paths: [/evidence, /claims, /alternatives, /allowed_decision_types]
+  - task_id: Q07_RESIDUAL_RISK
+    category: canonical
+    prompt_ko: Chair가 수용한 residual risk는 무엇인가? 판단 전이면 확정되지 않았다고 답하라.
+    answer_source_paths: []
+  - task_id: Q08_PROCESS_OUTCOME
+    category: canonical
+    prompt_ko: 과정 품질과 결과 품질은 왜 다를 수 있는가?
+    answer_source_paths: [/uncertainties]
+  - task_id: Q09_STATE_AT_STEP
+    category: development_twin
+    prompt_ko: 선택한 step에서 핵심 track과 WorkItem 상태는 무엇인가?
+    answer_source_paths: [/current_step, /tracks, /work_items]
+  - task_id: Q10_CAUSAL_EVENT
+    category: development_twin
+    prompt_ko: 어떤 관측 event가 blocker를 만들었고 어디까지 전파됐는가? event가 없다면 추정하지 말라.
+    answer_source_paths: [/development_events, /work_items]
+    boundary_classification_required: true
+    expected_boundary_classification: observed
+  - task_id: Q11_COMMITMENT_WINDOW
+    category: development_twin
+    prompt_ko: 다음 commitment window는 언제 닫히고 어떤 선택 이점이 사라지는가?
+    answer_source_paths: [/milestones, /alternatives, /work_items]
+  - task_id: Q12_EXPECTED_TRANSITION
+    category: development_twin
+    prompt_ko: 선택지별 예상 state transition과 아직 모르는 영향은 무엇인가?
+    answer_source_paths: [/alternatives, /claims, /uncertainties]
+    boundary_classification_required: true
+    expected_boundary_classification: expected
+  - task_id: Q13_OBSERVED_TRANSITION
+    category: development_twin
+    prompt_ko: 결정 이후 실제로 관측된 state change는 무엇인가? 아직 진행 전이면 hidden outcome을 추정하지 말라.
+    answer_source_paths: [/development_events, /development_actions]
+    boundary_classification_required: true
+    expected_boundary_classification: unconfirmed
+targets:
+  minimum_independent_observations_per_condition: 5
+  question_accuracy_minimum: 1.0
+  boundary_accuracy_minimum: 1.0
+  safeguard_completeness_minimum: 1.0
+  product_median_time_ratio_to_baseline_maximum: 0.8
+  interpretation: directional_only
+independent_participant_kinds:
+  - proxy
+  - domain
+exclusion_reasons:
+  - session_incomplete
+  - study_environment_failure
+  - participant_saw_other_condition_results
+  - protocol_deviation
+result_policy:
+  - 제작자(builder) session은 공학 dry-run이며 독립 관측 수에 포함하지 않는다.
+  - 각 condition에서 proxy/domain reviewer 5명 이상을 확보하기 전에는 human gate를 판정하지 않는다.
+  - 작은 표본의 차이는 directional signal로만 해석하고 business value를 주장하지 않는다.
+  - baseline 결과를 본 뒤 target이나 exclusion rule을 변경하지 않는다.
+  - 실제 최종 승인과 회사 system write-back은 이 study 범위 밖이다.

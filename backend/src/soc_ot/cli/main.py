@@ -1,6 +1,7 @@
 import argparse
 import json
 from collections.abc import Sequence
+from datetime import UTC, datetime
 from pathlib import Path
 from uuid import uuid4
 
@@ -25,6 +26,19 @@ from soc_ot.application.live_evaluation import (
     run_live_stability,
 )
 from soc_ot.application.repositories import PostgresCaseRepository
+from soc_ot.application.usability_study import (
+    ParticipantKind,
+    StudyCondition,
+    create_session_template,
+    load_protocol,
+    load_session,
+    render_baseline_markdown,
+    render_study_report,
+    summarize_sessions,
+    validate_session,
+    validate_study_materials,
+    write_session_template,
+)
 from soc_ot.config import get_settings
 from soc_ot.infrastructure.database import get_outcome_engine, get_runtime_engine
 from soc_ot.infrastructure.fixtures import FixtureRepository
@@ -34,6 +48,10 @@ from soc_ot.infrastructure.tables import HiddenAuthoringAuditRow
 ROOT_DIR = Path(__file__).resolve().parents[4]
 DEFAULT_EVALUATION_MANIFEST = (
     ROOT_DIR / f"fixtures/manifests/{DEFAULT_EVALUATION_RELEASE}.yaml"
+)
+DEFAULT_USABILITY_PROTOCOL = ROOT_DIR / "fixtures/usability/UX-H-20260719.protocol.yaml"
+DEFAULT_BASELINE_PACK = (
+    ROOT_DIR / "fixtures/usability/CASE-VR-001.baseline-pack.v1.yaml"
 )
 
 
@@ -144,6 +162,35 @@ def build_parser() -> argparse.ArgumentParser:
     preflight.add_argument(
         "--provider", choices=["openai", "codex-cli"], default="openai"
     )
+
+    usability = subparsers.add_parser("usability")
+    usability_sub = usability.add_subparsers(dest="usability_command")
+    usability_validate = usability_sub.add_parser("validate")
+    _add_usability_material_arguments(usability_validate)
+    prepare = usability_sub.add_parser("prepare-session")
+    _add_usability_material_arguments(prepare)
+    prepare.add_argument(
+        "--condition",
+        choices=[item.value for item in StudyCondition],
+        required=True,
+    )
+    prepare.add_argument(
+        "--participant-kind",
+        choices=[item.value for item in ParticipantKind],
+        required=True,
+    )
+    prepare.add_argument("--participant-code", required=True)
+    prepare.add_argument("--session-id")
+    prepare.add_argument("--output-root", type=Path, default=ROOT_DIR / "output/usability")
+    prepare.add_argument("--force", action="store_true")
+    session_validate = usability_sub.add_parser("validate-session")
+    session_validate.add_argument("--protocol", type=Path, default=DEFAULT_USABILITY_PROTOCOL)
+    session_validate.add_argument("--session", type=Path, required=True)
+    session_validate.add_argument("--require-complete", action="store_true")
+    summarize = usability_sub.add_parser("summarize")
+    summarize.add_argument("--protocol", type=Path, default=DEFAULT_USABILITY_PROTOCOL)
+    summarize.add_argument("--sessions-root", type=Path, required=True)
+    summarize.add_argument("--output", type=Path, required=True)
     return parser
 
 
@@ -153,7 +200,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     if args.command == "status":
         print(
             "I7 Replay + Step 5 B2 stability gates complete; "
-            "B2 durable dossier runtime active"
+            "B2 durable dossier runtime active; UX-H session tooling ready, "
+            "human gate pending"
         )
         return 0
     if args.command == "contracts" and args.contracts_command == "export":
@@ -239,6 +287,77 @@ def main(argv: Sequence[str] | None = None) -> int:
         print("=== AUTHORING/HIDDEN: hidden fixture inspection is being audited ===")
         _audit_hidden_access("inspect-hidden", args.case_id)
         print(json.dumps(hidden.model_dump(mode="json"), ensure_ascii=False, indent=2))
+        return 0
+    if args.command == "usability" and args.usability_command == "validate":
+        protocol, pack, _ = validate_study_materials(
+            args.root, args.protocol, args.baseline_pack
+        )
+        print(
+            f"Validated study={protocol.study_id}, tasks={len(protocol.tasks)}, "
+            f"baseline_surfaces={len(pack.surfaces)}; human results not evaluated."
+        )
+        return 0
+    if args.command == "usability" and args.usability_command == "prepare-session":
+        protocol, pack, case = validate_study_materials(
+            args.root, args.protocol, args.baseline_pack
+        )
+        session_id = args.session_id or f"UXH-{uuid4()}"
+        session_dir = args.output_root / session_id
+        baseline_path = session_dir / "baseline-pack.md"
+        session_path = session_dir / "session.yaml"
+        if not args.force and (baseline_path.exists() or session_path.exists()):
+            print("Session artifacts already exist; use --force to replace them.")
+            return 2
+        session = create_session_template(
+            protocol,
+            session_id=session_id,
+            condition=StudyCondition(args.condition),
+            participant_code=args.participant_code,
+            participant_kind=ParticipantKind(args.participant_kind),
+        )
+        session_dir.mkdir(parents=True, exist_ok=True)
+        if session.condition is StudyCondition.BASELINE:
+            baseline_path.write_text(
+                render_baseline_markdown(protocol, pack, case), encoding="utf-8"
+            )
+        write_session_template(session, session_path)
+        print(
+            f"Prepared draft session={session_id}; condition={session.condition}; "
+            f"artifacts={session_dir}; no human observation recorded."
+        )
+        return 0
+    if args.command == "usability" and args.usability_command == "validate-session":
+        protocol = load_protocol(args.protocol)
+        session = validate_session(
+            protocol,
+            load_session(args.session),
+            require_complete=args.require_complete,
+        )
+        print(
+            f"Validated session={session.session_id}; status={session.status}; "
+            f"participant_kind={session.participant_kind}."
+        )
+        return 0
+    if args.command == "usability" and args.usability_command == "summarize":
+        protocol = load_protocol(args.protocol)
+        session_paths = sorted(args.sessions_root.rglob("session.yaml"))
+        sessions = [load_session(path) for path in session_paths]
+        summary = summarize_sessions(
+            protocol, sessions, generated_at=datetime.now(UTC)
+        )
+        args.output.parent.mkdir(parents=True, exist_ok=True)
+        args.output.write_text(
+            json.dumps(summary.model_dump(mode="json"), ensure_ascii=False, indent=2)
+            + "\n",
+            encoding="utf-8",
+        )
+        report_path = args.output.with_name("report.md")
+        report_path.write_text(render_study_report(summary), encoding="utf-8")
+        print(
+            f"Summarized sessions={len(sessions)}; "
+            f"human_gate_status={summary.human_gate_status}; "
+            f"interpretation={summary.interpretation}; artifacts={args.output.parent}."
+        )
         return 0
     if args.command == "evaluation" and args.evaluation_command == "freeze":
         manifest = freeze_evaluation_manifest(args.root, args.manifest)
@@ -486,6 +605,16 @@ def _redacted_runtime_settings() -> dict[str, object]:
         "max_evaluation_cost_usd": settings.max_evaluation_cost_usd,
         "raw_provider_retention_days": settings.raw_provider_retention_days,
     }
+
+
+def _add_usability_material_arguments(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument("--root", type=Path, default=ROOT_DIR / "fixtures")
+    parser.add_argument("--protocol", type=Path, default=DEFAULT_USABILITY_PROTOCOL)
+    parser.add_argument(
+        "--baseline-pack",
+        type=Path,
+        default=DEFAULT_BASELINE_PACK,
+    )
 
 
 def _write_legacy_summary(path: Path, payload: object) -> None:

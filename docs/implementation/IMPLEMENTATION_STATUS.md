@@ -1,7 +1,7 @@
 # Implementation status
 
 > Updated: 2026-07-19
-> Current stage: Post-I7 UX-G recovery and review-context persistence Gate passed; UX-H human baseline not started
+> Current stage: Post-I7 UX-H study tooling is session-ready; independent human observations are pending and UX-I is blocked
 
 ## Stage evidence
 
@@ -24,6 +24,22 @@
 |Post-I7 UX-E|Passed|Latest durable decision/outcome/evaluation projection, one linked Action Plan/Safeguard/Rollback flow, one Backend-owned primary action per phase, hidden pre-reveal result, event-backed observed transitions, separate expected/actual and Process/Outcome evaluation, reload-safe commands, 5 focused Backend tests, 9 Frontend unit tests, and 3 Playwright E2E tests.|
 |Post-I7 UX-F|Passed (local agent substitute)|390/768/desktop and 200%-equivalent reflow, skip-link and section focus, semantic landmarks/table/live states, 44px targets, reduced motion, Korean partial recovery, stale/conflict refresh, 9 Frontend unit tests, 7 Playwright E2E tests, and frozen CASE-VR-001 13/13 task answers with zero raw-detail opens for questions 1–6. Human usability and business-value evidence remain unmeasured.|
 |Post-I7 UX-G|Passed (fixture-only)|API-boundary network error normalization, Korean reason/impact/recovery UI, unavailable historical-Step recovery, URL-backed `at_step` and ordinal mobile alternative, reload/Back/Forward restoration without raw option ID, Korean-first supporting copy, explicit interaction states, 12 Frontend unit tests and 8 Playwright E2E tests. Human baseline remains unmeasured.|
+|Post-I7 UX-H tooling|Implemented; human Gate not ready|Hash-pinned observable baseline selectors and rendered Jira/Confluence-shaped fixture, frozen 13-task two-condition protocol, builder/proxy/domain separation, session event/result and summary contracts, validation/preparation/summary CLI, 10 focused Backend tests. Actual human observations: 0; dry-run status: `not_ready`, `not_evaluable`, `no_business_claim`.|
+
+Post-I7 UX-H implementation record (2026-07-19):
+
+- baseline and product conditions share `CASE-VR-001` observable input; the baseline pack stores the
+  normalized SHA-256 and fails validation when the fixture or a JSON-pointer selector becomes stale
+- the protocol freezes 13 questions, minimum five independent proxy/domain observations per condition,
+  exclusions, full-accuracy/safeguard targets and a 0.8 product/baseline median-time ratio
+- completed sessions require task start/end, submitted answer and reviewer response events; wrong
+  primary action, raw detail open and recovery events remain countable without being required
+- expected, observed and unconfirmed boundary classifications are scored against the frozen task rubric
+- builder sessions are engineering dry-runs only and cannot satisfy the independent sample requirement
+- even sufficient small samples produce only `ready_for_directional_review`, never an automated human
+  or business-value pass; the current repository contains no fabricated completed participant session
+- no Frontend product flow, API endpoint, database, authentication, company connector or write-back was
+  introduced in UX-H
 
 Post-I7 UX-G record (2026-07-19):
 

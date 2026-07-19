@@ -13,5 +13,7 @@
 - Provider token cost is an estimate based on operator-supplied rates and must be refreshed when pricing changes.
 - Company security, identity, retention, and write-back controls require a separate pilot design review.
 - Codex CLI evaluation artifacts contain aggregate model usage and normalized results, while normal durable worker attempt telemetry remains Replay-verified unless the Responses API worker is separately authorized.
-- UX-G proves recoverable fixture UI and URL context restoration, not real reviewer comprehension or
-  task-time improvement. UX-H still requires a fair baseline fixture and human participants.
+- UX-H now provides a fair hash-pinned baseline fixture, frozen protocol and measurement tooling, but
+  contains zero completed human observations. Reviewer comprehension, task-time improvement and
+  business value remain unproven; UX-I is blocked until both conditions have the frozen independent
+  sample.

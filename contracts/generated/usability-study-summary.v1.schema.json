@@ -1,0 +1,261 @@
+{
+  "$defs": {
+    "ConditionSummary": {
+      "additionalProperties": false,
+      "properties": {
+        "condition": {
+          "$ref": "#/$defs/StudyCondition"
+        },
+        "completed_sessions": {
+          "title": "Completed Sessions",
+          "type": "integer"
+        },
+        "independent_sessions": {
+          "title": "Independent Sessions",
+          "type": "integer"
+        },
+        "builder_sessions": {
+          "title": "Builder Sessions",
+          "type": "integer"
+        },
+        "median_elapsed_seconds": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Median Elapsed Seconds"
+        },
+        "question_accuracy": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Question Accuracy"
+        },
+        "boundary_accuracy": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Boundary Accuracy"
+        },
+        "safeguard_completeness": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Safeguard Completeness"
+        },
+        "wrong_primary_action_count": {
+          "title": "Wrong Primary Action Count",
+          "type": "integer"
+        },
+        "detail_open_count": {
+          "title": "Detail Open Count",
+          "type": "integer"
+        },
+        "recovery_used_count": {
+          "title": "Recovery Used Count",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "condition",
+        "completed_sessions",
+        "independent_sessions",
+        "builder_sessions",
+        "median_elapsed_seconds",
+        "question_accuracy",
+        "boundary_accuracy",
+        "safeguard_completeness",
+        "wrong_primary_action_count",
+        "detail_open_count",
+        "recovery_used_count"
+      ],
+      "title": "ConditionSummary",
+      "type": "object"
+    },
+    "StudyCondition": {
+      "enum": [
+        "baseline",
+        "product"
+      ],
+      "title": "StudyCondition",
+      "type": "string"
+    },
+    "TargetAssessment": {
+      "additionalProperties": false,
+      "properties": {
+        "question_accuracy_met": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Question Accuracy Met"
+        },
+        "boundary_accuracy_met": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Boundary Accuracy Met"
+        },
+        "safeguard_completeness_met": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Safeguard Completeness Met"
+        },
+        "time_ratio_met": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Time Ratio Met"
+        },
+        "product_to_baseline_time_ratio": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Product To Baseline Time Ratio"
+        },
+        "all_targets_met": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "All Targets Met"
+        }
+      },
+      "required": [
+        "question_accuracy_met",
+        "boundary_accuracy_met",
+        "safeguard_completeness_met",
+        "time_ratio_met",
+        "product_to_baseline_time_ratio",
+        "all_targets_met"
+      ],
+      "title": "TargetAssessment",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "usability-study-summary.v1",
+      "default": "usability-study-summary.v1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "study_id": {
+      "title": "Study Id",
+      "type": "string"
+    },
+    "generated_at": {
+      "format": "date-time",
+      "title": "Generated At",
+      "type": "string"
+    },
+    "condition_summaries": {
+      "items": {
+        "$ref": "#/$defs/ConditionSummary"
+      },
+      "title": "Condition Summaries",
+      "type": "array"
+    },
+    "independent_requirement_met": {
+      "title": "Independent Requirement Met",
+      "type": "boolean"
+    },
+    "human_gate_status": {
+      "enum": [
+        "not_ready",
+        "ready_for_directional_review"
+      ],
+      "title": "Human Gate Status",
+      "type": "string"
+    },
+    "directional_target_status": {
+      "enum": [
+        "not_evaluable",
+        "met",
+        "not_met"
+      ],
+      "title": "Directional Target Status",
+      "type": "string"
+    },
+    "target_assessment": {
+      "$ref": "#/$defs/TargetAssessment"
+    },
+    "interpretation": {
+      "enum": [
+        "no_business_claim",
+        "directional_only"
+      ],
+      "title": "Interpretation",
+      "type": "string"
+    },
+    "reasons": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Reasons",
+      "type": "array"
+    }
+  },
+  "required": [
+    "study_id",
+    "generated_at",
+    "condition_summaries",
+    "independent_requirement_met",
+    "human_gate_status",
+    "directional_target_status",
+    "target_assessment",
+    "interpretation",
+    "reasons"
+  ],
+  "title": "UsabilityStudySummary",
+  "type": "object"
+}

@@ -11,6 +11,12 @@ from soc_ot.application.evaluation_manifest import EvaluationManifest
 from soc_ot.application.outcomes import OutcomeSnapshot
 from soc_ot.application.packets import ObservableCasePacket
 from soc_ot.application.projections import DecisionListItemProjection
+from soc_ot.application.usability_study import (
+    UsabilityBaselinePack,
+    UsabilitySession,
+    UsabilityStudyProtocol,
+    UsabilityStudySummary,
+)
 from soc_ot.application.workspace_contracts import (
     DecisionWorkspaceProjectionV2,
     WorkspaceUxFixture,
@@ -35,6 +41,10 @@ CONTRACT_MODELS: dict[str, type[BaseModel]] = {
     "decision-workspace.v2": DecisionWorkspaceProjectionV2,
     "workspace-ux-fixture.v1": WorkspaceUxFixture,
     "decision-list-item.v1": DecisionListItemProjection,
+    "usability-baseline-pack.v1": UsabilityBaselinePack,
+    "usability-study-protocol.v1": UsabilityStudyProtocol,
+    "usability-session.v1": UsabilitySession,
+    "usability-study-summary.v1": UsabilityStudySummary,
 }
 
 

@@ -1,7 +1,7 @@
 # Master execution plan
 
-> Status: IMPLEMENTED THROUGH I7 REPLAY + STEP 5 B2 RUNTIME + POST-I7 UX-G RECOVERY/CONTEXT GATE; UX-H HUMAN BASELINE AND I7 RESPONSES API GATE PENDING INPUT
-> Date: 2026-07-17
+> Status: IMPLEMENTED THROUGH I7 REPLAY + STEP 5 B2 RUNTIME + POST-I7 UX-H SESSION TOOLING; INDEPENDENT HUMAN OBSERVATIONS AND I7 RESPONSES API GATE PENDING INPUT
+> Date: 2026-07-19
 > Scope: local fixture-only PoC
 
 ## 1. Purpose
@@ -373,8 +373,24 @@ Post-I7 UX-G record (2026-07-19):
   browser history without exposing opaque option IDs
 - supporting terminology and interactive states are improved without changing canonical actions,
   Backend projection rules, database schema or hidden boundaries
-- UX-H is the next planned UX stage and requires a fair baseline fixture plus human participants; UX-G
-  does not establish human usability or business value
+- UX-G does not establish human usability or business value; UX-H therefore owns the separate fair
+  baseline and human-measurement boundary
+
+Post-I7 UX-H implementation record (2026-07-19):
+
+- `CASE-VR-001.baseline-pack.v1.yaml` resolves only allowlisted JSON pointers from the same
+  hash-pinned observable fixture used by the product and renders a Jira/Confluence-shaped local pack
+- `usability-study-protocol.v1` freezes both conditions, canonical 8 + Development Twin 5 tasks,
+  independent participant kinds, exclusions and directional targets before human results
+- `usability-session.v1` records timezone-aware task start/end, answer, wrong action, detail open,
+  recovery, reviewer response, boundary classification and safeguard completeness
+- `usability-study-summary.v1` separates builder from proxy/domain observations, reports condition
+  metrics and never emits a passed human gate; below five independent observations per condition it
+  returns `not_ready`, `not_evaluable` and `no_business_claim`
+- the baseline pack, protocol, session preparation/validation and summary are authoring/evaluation
+  CLI surfaces only; no product API, database, company connector, authentication or write-back changed
+- implementation and synthetic dry-run validation are complete, but actual human observations remain
+  zero; UX-I stays blocked until the frozen minimum is collected
 
 ## 7. Crosswalk to supporting plans
 

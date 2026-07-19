@@ -1,0 +1,95 @@
+{
+  "$defs": {
+    "BaselineSurface": {
+      "additionalProperties": false,
+      "properties": {
+        "surface_id": {
+          "title": "Surface Id",
+          "type": "string"
+        },
+        "surface_kind": {
+          "enum": [
+            "wiki_review_note",
+            "issue_tracker_export",
+            "evidence_note"
+          ],
+          "title": "Surface Kind",
+          "type": "string"
+        },
+        "title_ko": {
+          "minLength": 1,
+          "title": "Title Ko",
+          "type": "string"
+        },
+        "source_paths": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Source Paths",
+          "type": "array"
+        }
+      },
+      "required": [
+        "surface_id",
+        "surface_kind",
+        "title_ko",
+        "source_paths"
+      ],
+      "title": "BaselineSurface",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "usability-baseline-pack.v1",
+      "default": "usability-baseline-pack.v1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "study_id": {
+      "title": "Study Id",
+      "type": "string"
+    },
+    "case_id": {
+      "title": "Case Id",
+      "type": "string"
+    },
+    "source_observable_path": {
+      "title": "Source Observable Path",
+      "type": "string"
+    },
+    "observable_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Observable Sha256",
+      "type": "string"
+    },
+    "surfaces": {
+      "items": {
+        "$ref": "#/$defs/BaselineSurface"
+      },
+      "minItems": 1,
+      "title": "Surfaces",
+      "type": "array"
+    },
+    "prohibited_content": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Prohibited Content",
+      "type": "array"
+    }
+  },
+  "required": [
+    "study_id",
+    "case_id",
+    "source_observable_path",
+    "observable_sha256",
+    "surfaces",
+    "prohibited_content"
+  ],
+  "title": "UsabilityBaselinePack",
+  "type": "object"
+}

@@ -248,6 +248,55 @@ Replay evaluation writes an immutable directory under
 `output/evaluations/eval-2026-07-14.2/<run-id>/` with manifest, environment,
 normalized results, separate Process/Outcome scores, policy violations, and `report.md`.
 
+### 10.1 UX-H human-study preparation
+
+UX-H is an authoring/evaluation workflow, not a product API. Validate the frozen material before
+each study batch:
+
+```powershell
+uv run soc-ot usability validate
+```
+
+Prepare one baseline or product session. Use only an anonymous study code; do not put a name, email,
+company identifier or source export in the fixture repository.
+
+```powershell
+uv run soc-ot usability prepare-session `
+  --condition baseline `
+  --participant-kind proxy `
+  --participant-code P001 `
+  --session-id UXH-BASE-P001
+
+uv run soc-ot usability prepare-session `
+  --condition product `
+  --participant-kind proxy `
+  --participant-code P001 `
+  --session-id UXH-PRODUCT-P001
+```
+
+The baseline session receives `baseline-pack.md`; the product condition uses the local UI. The
+generated `session.yaml` is a draft with no answer or timing. Record the actual participant events and
+reviewer rubric after the session, set `status: completed`, then validate it:
+
+```powershell
+uv run soc-ot usability validate-session `
+  --session output/usability/UXH-BASE-P001/session.yaml `
+  --require-complete
+```
+
+Summarize a batch into machine-readable JSON and `report.md`:
+
+```powershell
+uv run soc-ot usability summarize `
+  --sessions-root output/usability/UX-H-20260719 `
+  --output output/usability/UX-H-20260719/summary.json
+```
+
+Builder sessions are dry-runs and never count toward the independent minimum. Until each condition
+has five completed proxy/domain sessions the summary must remain `not_ready`, `not_evaluable` and
+`no_business_claim`. Even after the minimum, the result is only `ready_for_directional_review`; a
+human or business-value pass is never inferred by this CLI.
+
 ## 11. Stop and preserve data
 
 ```powershell

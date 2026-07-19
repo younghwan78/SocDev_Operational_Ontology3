@@ -1,0 +1,41 @@
+schema_version: usability-baseline-pack.v1
+study_id: UX-H-20260719-CASE-VR-001
+case_id: CASE-VR-001
+source_observable_path: cases/observable/CASE-VR-001.yaml
+observable_sha256: dcceadd509d5cb9deddc757a68f3dedf105fdb8953581291eb3238849a55ec25
+surfaces:
+  - surface_id: BASE-WIKI-REVIEW
+    surface_kind: wiki_review_note
+    title_ko: 검토 배경 문서 (Confluence형 fixture)
+    source_paths:
+      - /title_ko
+      - /current_step
+      - /status
+      - /decision_question
+      - /decision_deadline_milestone_id
+  - surface_id: BASE-ISSUE-BOARD
+    surface_kind: issue_tracker_export
+    title_ko: 개발 진행 현황 (Jira형 fixture)
+    source_paths:
+      - /tracks
+      - /work_items
+      - /milestones
+      - /development_actions
+      - /development_events
+  - surface_id: BASE-EVIDENCE-NOTE
+    surface_kind: evidence_note
+    title_ko: 측정·선택지 근거 메모
+    source_paths:
+      - /evidence
+      - /claims
+      - /uncertainties
+      - /alternatives
+      - /required_role_ids
+      - /allowed_decision_types
+prohibited_content:
+  - hidden_case
+  - expected_result
+  - decision_dossier
+  - simulated_decision
+  - outcome_snapshot
+  - role_review

@@ -1,0 +1,208 @@
+{
+  "$defs": {
+    "BoundaryClassification": {
+      "enum": [
+        "observed",
+        "expected",
+        "unconfirmed",
+        "not_applicable"
+      ],
+      "title": "BoundaryClassification",
+      "type": "string"
+    },
+    "ParticipantKind": {
+      "enum": [
+        "builder",
+        "proxy",
+        "domain"
+      ],
+      "title": "ParticipantKind",
+      "type": "string"
+    },
+    "StudyCondition": {
+      "enum": [
+        "baseline",
+        "product"
+      ],
+      "title": "StudyCondition",
+      "type": "string"
+    },
+    "UsabilityTargets": {
+      "additionalProperties": false,
+      "properties": {
+        "minimum_independent_observations_per_condition": {
+          "minimum": 5,
+          "title": "Minimum Independent Observations Per Condition",
+          "type": "integer"
+        },
+        "question_accuracy_minimum": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Question Accuracy Minimum",
+          "type": "number"
+        },
+        "boundary_accuracy_minimum": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Boundary Accuracy Minimum",
+          "type": "number"
+        },
+        "safeguard_completeness_minimum": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Safeguard Completeness Minimum",
+          "type": "number"
+        },
+        "product_median_time_ratio_to_baseline_maximum": {
+          "exclusiveMinimum": 0,
+          "maximum": 1,
+          "title": "Product Median Time Ratio To Baseline Maximum",
+          "type": "number"
+        },
+        "interpretation": {
+          "const": "directional_only",
+          "default": "directional_only",
+          "title": "Interpretation",
+          "type": "string"
+        }
+      },
+      "required": [
+        "minimum_independent_observations_per_condition",
+        "question_accuracy_minimum",
+        "boundary_accuracy_minimum",
+        "safeguard_completeness_minimum",
+        "product_median_time_ratio_to_baseline_maximum"
+      ],
+      "title": "UsabilityTargets",
+      "type": "object"
+    },
+    "UsabilityTask": {
+      "additionalProperties": false,
+      "properties": {
+        "task_id": {
+          "title": "Task Id",
+          "type": "string"
+        },
+        "category": {
+          "enum": [
+            "canonical",
+            "development_twin"
+          ],
+          "title": "Category",
+          "type": "string"
+        },
+        "prompt_ko": {
+          "minLength": 1,
+          "title": "Prompt Ko",
+          "type": "string"
+        },
+        "answer_source_paths": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Answer Source Paths",
+          "type": "array"
+        },
+        "boundary_classification_required": {
+          "default": false,
+          "title": "Boundary Classification Required",
+          "type": "boolean"
+        },
+        "expected_boundary_classification": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/BoundaryClassification"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "task_id",
+        "category",
+        "prompt_ko"
+      ],
+      "title": "UsabilityTask",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "usability-study-protocol.v1",
+      "default": "usability-study-protocol.v1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "study_id": {
+      "title": "Study Id",
+      "type": "string"
+    },
+    "frozen_at": {
+      "format": "date-time",
+      "title": "Frozen At",
+      "type": "string"
+    },
+    "case_id": {
+      "title": "Case Id",
+      "type": "string"
+    },
+    "conditions": {
+      "items": {
+        "$ref": "#/$defs/StudyCondition"
+      },
+      "title": "Conditions",
+      "type": "array"
+    },
+    "tasks": {
+      "items": {
+        "$ref": "#/$defs/UsabilityTask"
+      },
+      "minItems": 1,
+      "title": "Tasks",
+      "type": "array"
+    },
+    "targets": {
+      "$ref": "#/$defs/UsabilityTargets"
+    },
+    "independent_participant_kinds": {
+      "items": {
+        "$ref": "#/$defs/ParticipantKind"
+      },
+      "title": "Independent Participant Kinds",
+      "type": "array"
+    },
+    "exclusion_reasons": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Exclusion Reasons",
+      "type": "array"
+    },
+    "result_policy": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Result Policy",
+      "type": "array"
+    }
+  },
+  "required": [
+    "study_id",
+    "frozen_at",
+    "case_id",
+    "conditions",
+    "tasks",
+    "targets",
+    "independent_participant_kinds",
+    "exclusion_reasons",
+    "result_policy"
+  ],
+  "title": "UsabilityStudyProtocol",
+  "type": "object"
+}
