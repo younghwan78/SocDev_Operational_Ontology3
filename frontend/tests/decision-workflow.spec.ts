@@ -58,7 +58,7 @@ test("CASE-VR-001 complete Replay decision workflow is accessible", async ({ pag
   await expect(page.getByRole("heading", { name: "선택한 시점의 개발 상태와 변화 원인" })).toBeVisible();
   await expect(page.getByRole("heading", { name: /Step 12 개발 상태/ })).toBeVisible();
   await expect(page.getByRole("heading", { name: "무엇이 바뀌었고 어디까지 영향을 주는가" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "가장 가까운 Commitment Window" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "가장 가까운 선택 가능 기한(Commitment Window)" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "선택지별 예상 상태 변화" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "같은 기준으로 선택지를 비교합니다" })).toBeVisible();
   await expect(page.getByText("가역성", { exact: true }).first()).toBeVisible();
@@ -94,7 +94,7 @@ test("CASE-VR-001 complete Replay decision workflow is accessible", async ({ pag
   await expect(page.getByText("ROLE-ARCH", { exact: true })).toHaveCount(0);
   await page.getByRole("button", { name: "가상 최종 판단 실행" }).click();
   await expect(page.getByRole("heading", { name: "판단에서 실행과 확인까지 한 흐름으로 봅니다" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "안전 조건과 Rollback" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "안전 조건과 되돌리기(Rollback)" })).toBeVisible();
   await expect(page.getByText(/20 GB\/s/).first()).toBeVisible();
   await expect(page.getByRole("heading", { name: "결정이 만든 실제 상태 변화" })).toBeVisible();
   await expect(page.locator(".observed-progress")).toContainText("행동");
@@ -134,8 +134,8 @@ test("workspace remains usable at 390px", async ({ page }) => {
   await page.getByLabel("관찰 시점").selectOption("9");
   await expect(page.getByText("선택한 Step의 당시 개발 상태")).toBeVisible();
   await expect(page.getByText("과거 Step에서는 실행할 수 없습니다.")).toBeVisible();
-  await expect(page.getByRole("heading", { name: "아직 Role 의견 종합이 없습니다" })).toBeVisible();
-  await expect(page.getByText("Role별 원문 보기")).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "아직 역할별 의견 종합이 없습니다" })).toBeVisible();
+  await expect(page.getByText("역할별 원문 보기")).toHaveCount(0);
   const hasPageOverflow = await page.evaluate(
     () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
   );
@@ -146,6 +146,41 @@ test("workspace remains usable at 390px", async ({ page }) => {
     path: path.join(root, "output/playwright/workspace-390px.png"),
     fullPage: true,
   });
+});
+
+test("workspace URL preserves the selected step and mobile alternative", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/decisions/CASE-VR-001");
+
+  const mobileCard = page.locator(".mobile-option-card");
+  await page.getByRole("button", { name: "다음 선택지" }).click();
+  await expect(mobileCard).toContainText("측정 완료까지 EIS 연기");
+  const selectedOption = new URL(page.url()).searchParams.get("option");
+  expect(selectedOption).toBe("2");
+  await page.getByLabel("관찰 시점").selectOption("9");
+  await expect(page).toHaveURL(/at_step=9/);
+  await expect(page).toHaveURL(new RegExp(`option=${selectedOption}`));
+
+  await page.reload();
+  await expect(page.getByText("선택한 Step의 당시 개발 상태")).toBeVisible();
+  await expect(mobileCard).toContainText("측정 완료까지 EIS 연기");
+
+  await page.goBack();
+  await expect(page).not.toHaveURL(/at_step=9/);
+  await expect(page).toHaveURL(new RegExp(`option=${selectedOption}`));
+  await expect(page.getByRole("button", { name: "가상 역할 검토 실행", exact: true })).toBeVisible();
+
+  await page.goBack();
+  await expect(page).not.toHaveURL(/option=/);
+  await expect(mobileCard).toContainText("SW feature flag로 제한 진행");
+
+  await page.goForward();
+  await expect(page).toHaveURL(/option=2/);
+  await expect(mobileCard).toContainText("측정 완료까지 EIS 연기");
+
+  await page.goForward();
+  await expect(page).toHaveURL(/at_step=9/);
+  await expect(page.getByText("선택한 Step의 당시 개발 상태")).toBeVisible();
 });
 
 test("workspace reflows at 768px and a 200-percent equivalent viewport", async ({ page }) => {

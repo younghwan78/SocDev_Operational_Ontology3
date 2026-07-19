@@ -1,7 +1,7 @@
 # P0/P1 Implementation Readiness 결과
 
 > 원 판정: **READY FOR I0 SCAFFOLD**  
-> 현재 상태: **I0–I7 Replay·Codex CLI B2 runtime 및 post-I7 UX-F 로컬 사용성 Gate 완료**
+> 현재 상태: **I0–I7 Replay·Codex CLI B2 runtime 및 post-I7 UX-G 복구·검토 문맥 유지 완료**
 > 작성일: 2026-07-11  
 > 범위: 집에서 synthetic fixture로 구현하는 SoC Operational Decision Twin  
 > 주의: 본문은 구현 전 P0/P1 판정 기록이다. 현재 구현 증거는 `docs/implementation/`을 따른다.
@@ -125,4 +125,4 @@ I0 완료 판정:
 
 ## 9. 최종 판단
 
-**P0/P1 설계 결정은 완료되었고 그 판정에 따라 I0–I7 Replay 구현과 gate 검증까지 완료했다.** 외부 key·가격·비용 승인에 의존하는 I7 Responses API gate는 실행하지 않았다. 별도 post-I7 UX roadmap은 UX-A부터 UX-F 로컬 Responsive·접근성·사용성 Gate까지 완료했다. UX-F 결과는 agent-substitute 공학 검증이며 실제 사람의 이해도, 의사결정 속도나 business value를 증명하지 않는다. 사내 연동과 실제 업무 적용은 여전히 별도 C0 승인 범위다.
+**P0/P1 설계 결정은 완료되었고 그 판정에 따라 I0–I7 Replay 구현과 gate 검증까지 완료했다.** 외부 key·가격·비용 승인에 의존하는 I7 Responses API gate는 실행하지 않았다. 별도 post-I7 UX roadmap은 UX-A부터 UX-G 복구·검토 문맥 유지까지 완료했다. UX-F/UX-G 결과는 agent-substitute 공학 검증이며 실제 사람의 이해도, 의사결정 속도나 business value를 증명하지 않는다. 다음 UX-H는 공정한 baseline fixture와 human participant가 필요하며, 사내 연동과 실제 업무 적용은 여전히 별도 C0 승인 범위다.

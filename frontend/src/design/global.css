@@ -42,6 +42,7 @@ a,
 summary,
 select {
   touch-action: manipulation;
+  -webkit-tap-highlight-color: rgb(49 87 200 / 18%);
 }
 
 .skip-link {
@@ -1517,10 +1518,18 @@ h1, h2, p { margin-top: 0; }
 .track-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; padding: 12px 0; border-top: 1px solid #edf0f5; }
 .summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 16px; }
 .agent-panel { margin-top: 16px; }
-.primary-button, .secondary-button { min-height: 44px; border-radius: 10px; padding: 10px 16px; font: inherit; font-weight: 700; cursor: pointer; }
+.primary-button, .secondary-button { min-height: 44px; border-radius: 10px; padding: 10px 16px; font: inherit; font-weight: 700; cursor: pointer; transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease; }
 .primary-button { color: white; background: #3157c8; border: 1px solid #3157c8; }
 .secondary-button { color: #234bb5; background: white; border: 1px solid #aab8de; }
+.primary-button:not(:disabled):hover { background: #234bb5; border-color: #234bb5; }
+.primary-button:not(:disabled):active { background: #193c99; border-color: #193c99; }
+.secondary-button:not(:disabled):hover { background: #f0f4ff; border-color: #6172f3; color: #193c99; }
+.secondary-button:not(:disabled):active { background: #e4eaff; border-color: #4b5fd2; }
 .primary-button:disabled { opacity: 0.55; cursor: wait; }
+.secondary-button:disabled { opacity: 0.5; cursor: not-allowed; }
+.primary-link:hover, .secondary-link:hover, .back-link:hover, .recovery-link:hover, summary:hover { color: #193c99; text-decoration: underline; text-underline-offset: 3px; }
+.recovery-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+.recovery-link { display: inline-flex; align-items: center; justify-content: center; text-decoration: none; }
 .run-progress { border-top: 1px solid #edf0f5; padding-top: 16px; }
 .review-card { margin-top: 16px; padding: 16px; background: #f7f9ff; border-left: 4px solid #3157c8; }
 .decision-result { margin-top: 20px; }

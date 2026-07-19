@@ -1,9 +1,9 @@
 # SoC 개발 의사결정 디지털 트윈을 어떻게 구현하고 검증할 것인가
 
 > 문서 상태: Product Plan v0.2, 로컬 PoC 구현 승인  
-> 갱신일: 2026-07-17
+> 갱신일: 2026-07-19
 > 문서 역할: 제품 목표, 범위, 가치 가설, 중단 기준을 정의  
-> 현재 판단: **GO: I0–I7 Replay, Step 5 B2 runtime 및 post-I7 UX-F 로컬 사용성 Gate 완료**, **NO-GO: 사내 연동 및 실제 업무 적용**
+> 현재 판단: **GO: I0–I7 Replay, Step 5 B2 runtime 및 post-I7 UX-G 복구·문맥 유지 완료**, **NO-GO: human baseline 전 최종 UX 주장, 사내 연동 및 실제 업무 적용**
 
 이 계획은 SoC 개발 진행과 불확실성을 재현하고 제한된 정보에서도 저후회 결정을 돕는 제품을 정의한다. 집에서는 synthetic fixture로 의사결정 메커니즘만 검증하며, 실제 비즈니스 가치는 사내 read-only 파일럿에서 별도로 측정한다.
 
@@ -383,7 +383,21 @@ evaluation을 현재 Workspace에 합성하고 Action Plan, Safeguard, Rollback,
 예상 대비 실제와 과정/결과 평가를 하나의 실행 흐름으로 연결했다. UX-F는 390/768/desktop,
 200% 등가 reflow, keyboard/screen-reader semantics, partial/stale/conflict와 frozen 13-question
 task를 통과했다. 이는 local agent-substitute Gate이며 human usability 또는 business value
-검증을 의미하지 않는다.
+검증을 의미하지 않는다. UX-G는 raw network 오류를 안전한 한국어 복구 문장으로 바꾸고,
+과거 Step과 모바일 선택지 문맥을 URL에 보존하며, canonical action을 유지한 상태에서 설명용
+용어와 hover/active/disabled 상태를 정리했다.
+
+Post-I7 후속 UX는 다음 순서로만 진행한다.
+
+|단계|목표|상태·Gate|
+|---|---|---|
+|UX-G|복구 가능한 오류, URL 문맥 보존, 한국어 우선 표현과 기본 interaction|완료|
+|UX-H|공정한 fixture baseline, human task protocol과 측정 event 계약|계획; 실제 참여자 결과 전 business claim 금지|
+|UX-I|측정 결과로 Inbox·Workspace·Development Twin 정보 구조 축소·개선|UX-H 결과 없이는 시작하지 않음|
+|UX-J|사용자 판단과 simulated Chair를 분리해 accept/modify/reject와 anchoring 측정|새 ADR과 evaluation-only contract 필요|
+
+UX-G 이후 바로 Jira/Confluence connector를 구현하지 않는다. 먼저 UX-H human baseline을
+고정하고, 사내 source·권한·승인은 C0에서 별도로 연다.
 
 ```text
 B2 validation 10/10 + sealed-unseen 6/6 PASS
@@ -475,7 +489,7 @@ C1에서 가치와 보안 gate를 통과한 뒤에만 연다.
 - 데이터: synthetic fixture only
 - 로컬 승인: simulated Chair, 실제 권한 없음
 - 구현 단계: I0~I7
-- 현재 단계: Post-I7 UX-F 로컬 Responsive·접근성·사용성 Gate 완료
+- 현재 단계: Post-I7 UX-G 복구·검토 문맥 유지 완료, UX-H human baseline 준비 전
 - release topology: B2 independent routed Role Agents, deterministic core decision
 - CI provider: ReplayProvider
 - live provider: 구성 가능한 OpenAI Responses API adapter
@@ -508,6 +522,7 @@ Active planning documents:
 - `internal_docs/26.07.17 UX-D 선택지 이견 및 불확실성 구현 보고서.md`
 - `internal_docs/26.07.17 UX-E 안전 조건 행동 및 결과 구현 보고서.md`
 - `internal_docs/26.07.17 UX-F Responsive 접근성 및 사용성 Gate 보고서.md`
+- `internal_docs/26.07.19 UX-G 복구 및 검토 문맥 유지 구현 보고서.md`
 
 Review and historical context:
 

@@ -1,14 +1,23 @@
-import { useState } from "react";
-
 import type { DecisionWorkspace } from "../../api/generated";
 
 type Alternatives = DecisionWorkspace["alternatives"];
 type Alternative = Alternatives["items"][number];
 
-export function AlternativeComparison({ alternatives }: { alternatives: Alternatives }) {
-  const [mobileIndex, setMobileIndex] = useState(0);
-  const activeIndex = Math.min(mobileIndex, alternatives.items.length - 1);
+export function AlternativeComparison({
+  alternatives,
+  selectedOptionPosition,
+  onSelectOption,
+}: {
+  alternatives: Alternatives;
+  selectedOptionPosition: number | undefined;
+  onSelectOption: (position: number | null) => void;
+}) {
+  const selectedIndex = (selectedOptionPosition ?? 1) - 1;
+  const activeIndex = selectedIndex >= 0 && selectedIndex < alternatives.items.length ? selectedIndex : 0;
   const active = alternatives.items[activeIndex];
+  const selectIndex = (index: number) => {
+    onSelectOption(index === 0 ? null : index + 1);
+  };
 
   return (
     <section className="panel alternative-comparison" id="alternatives" aria-labelledby="alternatives-title" tabIndex={-1}>
@@ -54,9 +63,9 @@ export function AlternativeComparison({ alternatives }: { alternatives: Alternat
 
       <div className="mobile-comparison">
         <div className="mobile-option-controls" aria-label="모바일 선택지 이동">
-          <button type="button" className="secondary-button" disabled={activeIndex === 0} onClick={() => setMobileIndex((current) => Math.max(0, current - 1))}>이전 선택지</button>
+          <button type="button" className="secondary-button" disabled={activeIndex === 0} onClick={() => selectIndex(activeIndex - 1)}>이전 선택지</button>
           <p>{activeIndex + 1} / {alternatives.items.length}</p>
-          <button type="button" className="secondary-button" disabled={activeIndex === alternatives.items.length - 1} onClick={() => setMobileIndex((current) => Math.min(alternatives.items.length - 1, current + 1))}>다음 선택지</button>
+          <button type="button" className="secondary-button" disabled={activeIndex === alternatives.items.length - 1} onClick={() => selectIndex(activeIndex + 1)}>다음 선택지</button>
         </div>
         <article className="mobile-option-card">
           <OptionTitle option={active} />
@@ -76,7 +85,7 @@ export function AlternativeComparison({ alternatives }: { alternatives: Alternat
 function OptionTitle({ option }: { option: Alternative }) {
   return (
     <div className="comparison-option-title">
-      {option.recommended ? <span className="recommendation-badge">Role 검토 권고</span> : null}
+      {option.recommended ? <span className="recommendation-badge">역할 검토 권고</span> : null}
       <strong>{option.title}</strong>
       {option.recommendation_reason_ko ? <small>{option.recommendation_reason_ko}</small> : null}
     </div>

@@ -17,7 +17,7 @@ export function DecisionListPage() {
   return (
     <main className="app-shell decision-list-shell" id="main-content" tabIndex={-1}>
       <header className="decision-list-header">
-        <p className="eyebrow">Synthetic fixture · 가상 판단</p>
+        <p className="eyebrow">합성 데이터 · 가상 판단</p>
         <h1>결정 목록</h1>
         <p className="page-lead">
           기한과 개발 영향을 기준으로 지금 확인할 결정을 먼저 보여줍니다.

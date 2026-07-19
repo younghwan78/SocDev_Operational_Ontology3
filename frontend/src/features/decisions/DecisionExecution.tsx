@@ -34,7 +34,7 @@ export function DecisionExecution({ item }: { item: DecisionWorkspace }) {
         <FlowStep label="다음 행동" value={plan.action_ko} />
         <FlowStep
           label="안전 조건"
-          value={item.controls.safeguards.length > 0 ? item.controls.safeguards.map((guard) => `${guard.metric_label_ko} ${guard.operator_ko} ${guard.threshold_ko}`).join(" · ") : "별도 실행형 Guardrail 없음"}
+          value={item.controls.safeguards.length > 0 ? item.controls.safeguards.map((guard) => `${guard.metric_label_ko} ${guard.operator_ko} ${guard.threshold_ko}`).join(" · ") : "별도 실행형 보호 기준 없음"}
         />
         <FlowStep label="실패 시" value={plan.fallback_action_ko} />
       </div>
@@ -58,7 +58,7 @@ export function DecisionExecution({ item }: { item: DecisionWorkspace }) {
 
         <section className="safeguard-stack" aria-labelledby="safeguard-title">
           <p className="section-kicker">위험 제한</p>
-          <h3 id="safeguard-title">안전 조건과 Rollback</h3>
+          <h3 id="safeguard-title">안전 조건과 되돌리기(Rollback)</h3>
           {item.controls.safeguards.length > 0 ? item.controls.safeguards.map((guard) => (
             <article className="execution-safeguard" key={guard.safeguard_id}>
               <h4>{guard.metric_label_ko} {guard.operator_ko} {guard.threshold_ko}</h4>
@@ -68,7 +68,7 @@ export function DecisionExecution({ item }: { item: DecisionWorkspace }) {
               <p><strong>조치·담당:</strong> {guard.violation_action_ko} · {guard.owner}</p>
               <p><strong>재검토:</strong> Step {guard.expires_at_step}</p>
             </article>
-          )) : <p className="empty-copy">이 판단에는 별도 실행형 Guardrail이 없습니다. Action Plan의 실패 시 조치를 따릅니다.</p>}
+          )) : <p className="empty-copy">이 판단에는 별도 실행형 보호 기준이 없습니다. 다음 행동의 실패 시 조치를 따릅니다.</p>}
         </section>
       </div>
 
@@ -85,18 +85,18 @@ export function DecisionExecution({ item }: { item: DecisionWorkspace }) {
               <p>{transitionStateLabel(change.from_state)} → {transitionStateLabel(change.to_state)}</p>
             </li>
           ))}</ul>
-        ) : <p>아직 결정 이후 event로 확인된 변화가 없습니다.</p>}
+        ) : <p>아직 결정 이후 이벤트로 확인된 변화가 없습니다.</p>}
       </section>
 
       <section className="residual-risk" aria-labelledby="residual-risk-title">
         <h3 id="residual-risk-title">아직 남는 위험</h3>
-        {residualRisks.length > 0 ? <ul>{residualRisks.map((risk) => <li key={risk}>{risk}</li>)}</ul> : <p>현재 projection에 등록된 잔여 위험 없음</p>}
+        {residualRisks.length > 0 ? <ul>{residualRisks.map((risk) => <li key={risk}>{risk}</li>)}</ul> : <p>현재 화면 데이터에 등록된 잔여 위험 없음</p>}
       </section>
 
       {outcome.outcome_state === "running" ? (
         <section className="outcome-waiting" aria-labelledby="outcome-waiting-title">
           <h3 id="outcome-waiting-title">결과는 다음 Simulation Step 전까지 숨겨집니다</h3>
-          <p>현재는 행동, Guardrail과 확인 시점만 사용합니다. 사후 결과를 미리 판단 근거에 섞지 않습니다.</p>
+          <p>현재는 행동, 보호 기준과 확인 시점만 사용합니다. 사후 결과를 미리 판단 근거에 섞지 않습니다.</p>
         </section>
       ) : null}
 
@@ -110,7 +110,7 @@ export function DecisionExecution({ item }: { item: DecisionWorkspace }) {
             <article className="expected-result-card"><h4>예상</h4><ResultList items={expectedResults} empty="선택지에 연결된 예상 모델 없음" /></article>
             <article className="actual-result-card"><h4>실제</h4><ResultList items={actualResults} empty="공개된 실제 결과 없음" /></article>
           </div>
-          <div className="guardrail-results"><h4>보호 조치 결과</h4><ResultList items={guardrailResults} empty="확인된 Guardrail 결과 없음" /></div>
+          <div className="guardrail-results"><h4>보호 조치 결과</h4><ResultList items={guardrailResults} empty="확인된 보호 기준 결과 없음" /></div>
 
           {outcome.process_evaluation_ko || outcome.outcome_evaluation_ko ? (
             <div className="evaluation-grid">

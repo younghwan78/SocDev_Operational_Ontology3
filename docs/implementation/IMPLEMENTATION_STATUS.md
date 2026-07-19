@@ -1,7 +1,7 @@
 # Implementation status
 
-> Updated: 2026-07-17
-> Current stage: Post-I7 UX-F local responsive, accessibility, and agent-substitute usability Gate passed
+> Updated: 2026-07-19
+> Current stage: Post-I7 UX-G recovery and review-context persistence Gate passed; UX-H human baseline not started
 
 ## Stage evidence
 
@@ -23,6 +23,20 @@
 |Post-I7 UX-D|Passed|Backend-owned option comparison, latest case-scoped Dossier phase/alignment, agreement/dissent/confirmation/challenge groups, selected-Step epistemic boundary, Role-original detail, desktop semantic table, mobile cards, 5 focused Backend tests, 7 Frontend unit tests, and 3 Playwright E2E tests.|
 |Post-I7 UX-E|Passed|Latest durable decision/outcome/evaluation projection, one linked Action Plan/Safeguard/Rollback flow, one Backend-owned primary action per phase, hidden pre-reveal result, event-backed observed transitions, separate expected/actual and Process/Outcome evaluation, reload-safe commands, 5 focused Backend tests, 9 Frontend unit tests, and 3 Playwright E2E tests.|
 |Post-I7 UX-F|Passed (local agent substitute)|390/768/desktop and 200%-equivalent reflow, skip-link and section focus, semantic landmarks/table/live states, 44px targets, reduced motion, Korean partial recovery, stale/conflict refresh, 9 Frontend unit tests, 7 Playwright E2E tests, and frozen CASE-VR-001 13/13 task answers with zero raw-detail opens for questions 1–6. Human usability and business-value evidence remain unmeasured.|
+|Post-I7 UX-G|Passed (fixture-only)|API-boundary network error normalization, Korean reason/impact/recovery UI, unavailable historical-Step recovery, URL-backed `at_step` and ordinal mobile alternative, reload/Back/Forward restoration without raw option ID, Korean-first supporting copy, explicit interaction states, 12 Frontend unit tests and 8 Playwright E2E tests. Human baseline remains unmeasured.|
+
+Post-I7 UX-G record (2026-07-19):
+
+- fetch transport failures become a safe `CONNECTION_FAILED` `ApiError`; Workspace never renders the
+  original browser/provider error text
+- 404, invalid historical Step, connection failure and generic service failure expose different
+  impact and recovery paths; invalid Step can return directly to the current view
+- `at_step` and the one-based mobile alternative position share URL query state and survive reload,
+  Back and Forward; opaque option IDs remain absent from the URL and normal page
+- supporting copy uses Korean-first terms while canonical `Simulation Step` actions and Backend
+  contracts remain unchanged
+- primary/secondary controls have explicit hover, active, disabled, focus and reduced-motion behavior
+- no Backend domain, API schema, database migration, Jira/Confluence or company-data scope changed
 
 Post-I7 UX-E record (2026-07-17):
 

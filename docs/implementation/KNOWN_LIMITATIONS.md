@@ -1,6 +1,6 @@
 # Known limitations
 
-> Verified: 2026-07-15
+> Verified: 2026-07-19
 
 - The local product uses synthetic fixtures. It does not connect to company Confluence or Jira.
 - The Decision Chair is explicitly simulated and has no approval authority.
@@ -13,3 +13,5 @@
 - Provider token cost is an estimate based on operator-supplied rates and must be refreshed when pricing changes.
 - Company security, identity, retention, and write-back controls require a separate pilot design review.
 - Codex CLI evaluation artifacts contain aggregate model usage and normalized results, while normal durable worker attempt telemetry remains Replay-verified unless the Responses API worker is separately authorized.
+- UX-G proves recoverable fixture UI and URL context restoration, not real reviewer comprehension or
+  task-time improvement. UX-H still requires a fair baseline fixture and human participants.

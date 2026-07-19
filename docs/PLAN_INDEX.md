@@ -2,7 +2,7 @@
 
 > 상태: Active  
 > 갱신일: 2026-07-17
-> 현재 단계: Post-I7 UX-F 로컬 사용성 Gate 완료, human/C0 및 I7 Responses API gate 외부 입력 대기
+> 현재 단계: Post-I7 UX-G 복구·검토 문맥 유지 완료, UX-H human baseline 준비 및 C0/I7 Responses API 외부 입력 대기
 
 이 문서는 제품 계획부터 구현 계약까지 어떤 문서를 어떤 순서로 읽고 수정해야 하는지 안내한다. 문서 간 충돌은 전체 순위가 아니라 각 문서가 소유한 결정 영역으로 해결한다.
 
@@ -44,6 +44,7 @@
 - `internal_docs/26.07.17 UX-D 선택지 이견 및 불확실성 구현 보고서.md`
 - `internal_docs/26.07.17 UX-E 안전 조건 행동 및 결과 구현 보고서.md`
 - `internal_docs/26.07.17 UX-F Responsive 접근성 및 사용성 Gate 보고서.md`
+- `internal_docs/26.07.19 UX-G 복구 및 검토 문맥 유지 구현 보고서.md`
 
 다음 문서는 과거 판단의 근거다. 새 구현 기준으로 직접 사용하지 않는다.
 
@@ -68,7 +69,7 @@
 
 ## 5. 현재 실행 지점
 
-I0~I7 Replay와 post-I7 UX-A/UX-B/UX-C/UX-D/UX-E/UX-F 로컬 Gate가 완료됐다.
+I0~I7 Replay와 post-I7 UX-A/UX-B/UX-C/UX-D/UX-E/UX-F/UX-G 로컬 Gate가 완료됐다.
 
 ```text
 UX-F Responsive·접근성·사용성 Gate
@@ -76,9 +77,14 @@ UX-F Responsive·접근성·사용성 Gate
   → keyboard와 screen reader semantics PASS
   → partial, stale, conflict E2E PASS
   → frozen CASE-VR-001 canonical 8 + Development Twin 5 질문 PASS
+UX-G 복구·검토 문맥 유지
+  → raw network 오류 비노출과 한국어 recovery action PASS
+  → at_step + 모바일 선택지 URL reload/Back/Forward PASS
+  → canonical action 유지, 설명용 한국어와 interaction state 보강
 ```
 
-UX-F 완료는 local Codex evaluator와 deterministic browser automation의 공학적 Gate다. 실제
-사용자 시간, 의사결정 속도, 조언 품질, 승인이나 사내 연동 완료를 의미하지 않는다. 다음
-human/C0 단계와 I7 Responses API gate는 필요한 사용자·회사 입력과 key·가격·비용 승인 전에는
-시작하지 않는다.
+UX-F/UX-G 완료는 local Codex evaluator와 deterministic browser automation의 공학적 Gate다.
+실제 사용자 시간, 의사결정 속도, 조언 품질, 승인이나 사내 연동 완료를 의미하지 않는다.
+UX-G도 human usability 또는 business value 결과가 아니다. UX-H human baseline은 실제 참여자와
+공정한 비교 fixture가 준비된 뒤 시작한다. C0와 I7 Responses API gate는 필요한 사용자·회사
+입력과 key·가격·비용 승인 전에는 시작하지 않는다.

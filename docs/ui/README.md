@@ -15,6 +15,9 @@
 - UX-F Gate: 390/768/desktop·200% 등가 reflow, keyboard/screen-reader semantics,
   partial/stale/conflict 복구와 frozen 13-question report
 - UX-F evidence: `../../output/usability/UX-F-20260717-CASE-VR-001/report.md`
+- UX-G recovery/context: safe Korean load errors, invalid-Step recovery, URL-backed historical Step and
+  ordinal mobile alternative, reload/Back/Forward restoration, and Korean-first supporting copy
+- UX-G evidence: `../../internal_docs/26.07.19 UX-G 복구 및 검토 문맥 유지 구현 보고서.md`
 - 생성 계약: `../../contracts/generated/decision-workspace.v2.schema.json`,
   `../../contracts/generated/workspace-ux-fixture.v1.schema.json`,
   `../../contracts/generated/decision-list-item.v1.schema.json`

@@ -16,8 +16,8 @@ export function DecisionDeliberation({ deliberation }: { deliberation: Deliberat
     <section className="deliberation-section" id="deliberation" aria-labelledby="deliberation-title" tabIndex={-1}>
       <header className="deliberation-header">
         <p className="section-kicker">쟁점과 불확실성</p>
-        <h2 id="deliberation-title">Role이 어디서 일치하고 충돌하는가</h2>
-        <p>Role별 긴 답변보다 일치, 핵심 이견과 확인 필요를 먼저 보여줍니다.</p>
+        <h2 id="deliberation-title">역할별 관점이 어디서 일치하고 충돌하는가</h2>
+        <p>역할별 긴 답변보다 일치, 핵심 이견과 확인 필요를 먼저 보여줍니다.</p>
       </header>
 
       {deliberation.alignment_available ? (
@@ -49,15 +49,15 @@ export function DecisionDeliberation({ deliberation }: { deliberation: Deliberat
           ) : null}
 
           <details className="role-originals">
-            <summary>Role별 원문 보기</summary>
-            <p className="detail-explanation">권고를 검증할 때만 펼치세요. provider, token과 실행 trace는 일반 사용자 화면에 표시하지 않습니다.</p>
+            <summary>역할별 원문 보기</summary>
+            <p className="detail-explanation">권고를 검증할 때만 펼치세요. 모델 제공자, 토큰 사용량과 실행 기록은 일반 사용자 화면에 표시하지 않습니다.</p>
             <div className="role-review-list">
               {(deliberation.role_reviews ?? []).map((review) => (
                 <article className="role-review-detail" key={review.role_label_ko}>
                   <p className="section-kicker">{review.role_label_ko}</p>
                   <h3>{review.recommendation_ko}{review.recommended_option_title ? ` · ${review.recommended_option_title}` : ""}</h3>
                   <p>{review.rationale_ko}</p>
-                  {review.unique_concern_ko ? <p><strong>고유 concern:</strong> {review.unique_concern_ko}</p> : null}
+                  {review.unique_concern_ko ? <p><strong>고유 우려:</strong> {review.unique_concern_ko}</p> : null}
                   {(review.risks_ko ?? []).length > 0 ? <><h4>위험과 대응</h4><ul>{(review.risks_ko ?? []).map((risk) => <li key={risk}>{risk}</li>)}</ul></> : null}
                   {(review.information_gaps_ko ?? []).length > 0 ? <><h4>정보 공백</h4><ul>{(review.information_gaps_ko ?? []).map((gap) => <li key={gap}>{gap}</li>)}</ul></> : null}
                   <p className="qualitative-confidence">정성적 확신 수준: {review.confidence_ko}</p>
@@ -69,7 +69,7 @@ export function DecisionDeliberation({ deliberation }: { deliberation: Deliberat
         </>
       ) : (
         <section className="alignment-empty">
-          <h3>아직 Role 의견 종합이 없습니다</h3>
+          <h3>아직 역할별 의견 종합이 없습니다</h3>
           <p>다중 역할 검토가 완료되면 일치, 핵심 이견과 확인 필요를 이 위치에서 비교합니다.</p>
         </section>
       )}
@@ -77,7 +77,7 @@ export function DecisionDeliberation({ deliberation }: { deliberation: Deliberat
       <section className="epistemic-section" aria-labelledby="epistemic-title">
         <div className="epistemic-heading">
           <h3 id="epistemic-title">사실·추론·가정·미확인</h3>
-          <p>정밀한 confidence 숫자 대신 지식의 종류와 확인 경계를 표시합니다.</p>
+          <p>정밀한 확신도 숫자 대신 지식의 종류와 확인 경계를 표시합니다.</p>
         </div>
         <div className="epistemic-grid">
           {EPISTEMIC_GROUPS.map((group) => {

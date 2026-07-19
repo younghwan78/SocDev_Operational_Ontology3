@@ -1,6 +1,6 @@
 # Master execution plan
 
-> Status: IMPLEMENTED THROUGH I7 REPLAY + STEP 5 B2 RUNTIME + POST-I7 UX-F LOCAL GATE; I7 RESPONSES API GATE PENDING EXTERNAL INPUT
+> Status: IMPLEMENTED THROUGH I7 REPLAY + STEP 5 B2 RUNTIME + POST-I7 UX-G RECOVERY/CONTEXT GATE; UX-H HUMAN BASELINE AND I7 RESPONSES API GATE PENDING INPUT
 > Date: 2026-07-17
 > Scope: local fixture-only PoC
 
@@ -362,6 +362,19 @@ Post-I7 UX-F record (2026-07-17):
   and no Role-original/raw ontology opens for questions 1–6
 - historical Step, expected-versus-observed and hidden-outcome boundary tests pass
 - this local agent-substitute Gate does not establish human task time, comprehension or business value
+
+Post-I7 UX-G record (2026-07-19):
+
+- network transport exceptions are normalized at the Frontend API boundary and normal UI renders only
+  Korean reason, impact and recovery actions
+- unavailable historical Step can return to the current view; 404 and retryable service failures have
+  separate recovery paths
+- selected observable Step and ordinal mobile alternative are URL-backed and restore through reload and
+  browser history without exposing opaque option IDs
+- supporting terminology and interactive states are improved without changing canonical actions,
+  Backend projection rules, database schema or hidden boundaries
+- UX-H is the next planned UX stage and requires a fair baseline fixture plus human participants; UX-G
+  does not establish human usability or business value
 
 ## 7. Crosswalk to supporting plans
 

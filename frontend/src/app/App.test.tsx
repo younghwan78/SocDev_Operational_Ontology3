@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MemoryRouter } from "react-router";
+import { MemoryRouter, useLocation } from "react-router";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { App } from "./App";
@@ -270,9 +270,15 @@ function renderApp(path = "/decisions") {
     <QueryClientProvider client={queryClient}>
       <MemoryRouter initialEntries={[path]}>
         <App />
+        <LocationProbe />
       </MemoryRouter>
     </QueryClientProvider>,
   );
+}
+
+function LocationProbe() {
+  const location = useLocation();
+  return <output data-testid="test-location" hidden>{location.pathname}{location.search}</output>;
 }
 
 afterEach(() => {
@@ -324,12 +330,26 @@ describe("App", () => {
     expect(await screen.findByText(decisionListItem.decision_question)).toBeInTheDocument();
   });
 
+  it("replaces a raw workspace network error with a Korean recovery path", async () => {
+    vi.spyOn(globalThis, "fetch").mockRejectedValue(new TypeError("Failed to fetch"));
+    renderApp("/decisions/CASE-VR-001");
+
+    expect(
+      await screen.findByRole("heading", { name: "결정 검토를 불러오지 못했습니다" }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("의사결정 트윈 서비스에 연결할 수 없습니다.")).toBeInTheDocument();
+    expect(screen.getByText(/새 검토 정보는 표시하지 않았습니다/)).toBeInTheDocument();
+    expect(screen.queryByText("Failed to fetch")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "다시 시도" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "결정 목록으로 돌아가기" })).toBeInTheDocument();
+  });
+
   it("shows a decision workspace without raw ontology", async () => {
     vi.spyOn(globalThis, "fetch").mockImplementation(workspaceResponse);
     renderApp("/decisions/CASE-VR-001");
     expect(await screen.findByRole("heading", { name: caseItem.header.decision_question })).toBeInTheDocument();
     expect(await screen.findByRole("heading", { name: "선택한 시점의 개발 상태와 변화 원인" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "가장 가까운 Commitment Window" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "가장 가까운 선택 가능 기한(Commitment Window)" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "선택지별 예상 상태 변화" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "같은 기준으로 선택지를 비교합니다" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "의견 일치" })).toBeInTheDocument();
@@ -339,7 +359,7 @@ describe("App", () => {
     expect(screen.getByRole("heading", { name: "근거 기반 추론" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "검토할 가정" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "아직 모름" })).toBeInTheDocument();
-    expect(screen.getByText("Role별 원문 보기")).toBeInTheDocument();
+    expect(screen.getByText("역할별 원문 보기")).toBeInTheDocument();
     expect(screen.getAllByText("예상").length).toBeGreaterThan(0);
     expect(screen.getAllByText("관측").length).toBeGreaterThan(0);
     expect(screen.queryByText("ontology_relations")).not.toBeInTheDocument();
@@ -353,7 +373,7 @@ describe("App", () => {
     const { container } = renderApp("/decisions/CASE-VR-001");
 
     expect(await screen.findByRole("heading", { name: "판단에서 실행과 확인까지 한 흐름으로 봅니다" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "안전 조건과 Rollback" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "안전 조건과 되돌리기(Rollback)" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "DDR 대역폭 ≥ 20 GB/s" })).toBeInTheDocument();
     expect(screen.getAllByText("SW/FW/HAL").length).toBeGreaterThan(0);
     expect(screen.getByText("feature flag와 DDR 실측 확인")).toBeInTheDocument();
@@ -387,6 +407,31 @@ describe("App", () => {
     expect(mobileCard).toHaveTextContent("SW feature flag로 제한 진행");
     await user.click(screen.getByRole("button", { name: "다음 선택지" }));
     expect(mobileCard).toHaveTextContent("측정까지 연기");
+    expect(screen.getByTestId("test-location")).toHaveTextContent("?option=2");
+  });
+
+  it("restores the selected step and mobile option from a deep link", async () => {
+    vi.spyOn(globalThis, "fetch").mockImplementation(workspaceResponse);
+    const { container } = renderApp("/decisions/CASE-VR-001?at_step=9&option=2");
+
+    expect(await screen.findByText("선택한 Step의 당시 개발 상태")).toBeInTheDocument();
+    expect(container.querySelector(".mobile-option-card")).toHaveTextContent("측정까지 연기");
+    expect(screen.getByTestId("test-location")).toHaveTextContent("?at_step=9&option=2");
+  });
+
+  it("recovers an unavailable historical step by returning to the current view", async () => {
+    vi.spyOn(globalThis, "fetch").mockImplementation((input) => (
+      String(input).includes("at_step=99")
+        ? Promise.resolve(new Response(JSON.stringify({ detail: {} }), { status: 422 }))
+        : workspaceResponse(input)
+    ));
+    renderApp("/decisions/CASE-VR-001?at_step=99");
+    const user = userEvent.setup();
+
+    expect(await screen.findByText("선택한 Step 99의 개발 상태를 재구성할 수 없습니다.")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "현재 시점 보기" }));
+    expect(await screen.findByRole("heading", { name: caseItem.header.decision_question })).toBeInTheDocument();
+    expect(screen.getByTestId("test-location")).toHaveTextContent("/decisions/CASE-VR-001");
   });
 
   it("switches to a historical observable step and disables commands", async () => {
@@ -397,11 +442,12 @@ describe("App", () => {
     await user.selectOptions(await screen.findByLabelText("관찰 시점"), "9");
 
     expect(await screen.findByText("선택한 Step의 당시 개발 상태")).toBeInTheDocument();
+    expect(screen.getByTestId("test-location")).toHaveTextContent("?at_step=9");
     expect(screen.getByText("과거 Step에서는 실행할 수 없습니다.")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "가상 역할 검토 실행" })).not.toBeInTheDocument();
     expect(screen.getByText("이 Step에서 확인 가능한 commitment window가 없습니다.")).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "아직 Role 의견 종합이 없습니다" })).toBeInTheDocument();
-    expect(screen.queryByText("Role별 원문 보기")).not.toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "아직 역할별 의견 종합이 없습니다" })).toBeInTheDocument();
+    expect(screen.queryByText("역할별 원문 보기")).not.toBeInTheDocument();
     expect(screen.queryByText("feature flag로 영향 범위를 격리할 수 있습니다.")).not.toBeInTheDocument();
   });
 

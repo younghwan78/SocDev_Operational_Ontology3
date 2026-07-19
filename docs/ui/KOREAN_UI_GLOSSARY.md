@@ -1,7 +1,7 @@
 # 한국어 Decision Workspace 용어 기준
 
-> 상태: UX-A contract
-> 기준일: 2026-07-17
+> 상태: UX-A contract + UX-G presentation guidance
+> 기준일: 2026-07-19
 > 실행 label source: `../../fixtures/dictionaries/labels.ko.yaml`
 
 ## 1. 원칙
@@ -57,3 +57,15 @@ Agent 결과, decision과 hidden outcome을 표시하지 않는다.
 `fixtures/dictionaries/labels.ko.yaml`, `WorkspacePhaseContent`, canonical primary-action
 표와 이 문서는 같은 의미를 가져야 한다. UX-A test는 모든 phase가 한 번씩 존재하고
 action ID와 한국어 label이 일치하는지 검증한다.
+
+## 6. UX-G 한국어 우선 표현
+
+- `Synthetic fixture`는 일반 화면에서 `합성 데이터`로 표시한다.
+- 설명 heading은 `개발 진행 트윈`, `판단 조건`, `역할별 관점`처럼 한국어를 먼저 쓴다.
+- 처음 의미 확인이 필요한 핵심 용어는 `선택 가능 기한(Commitment Window)`,
+  `되돌리기(Rollback)`처럼 한국어 뒤에 원어를 병기할 수 있다.
+- `Guardrail`은 문맥상 `보호 기준` 또는 `안전 조건`으로, `Blocker`는 `대기 원인`으로,
+  `Milestone`은 `기준점`으로 표시한다.
+- `Simulation Step`은 canonical primary-action label이므로 UX-G에서 변경하지 않는다.
+- 실제 팀명, 제품명, ISP/RTL/BW와 같은 현업 약어는 번역하지 않는다.
+- API/provider error, option ID와 ontology ID는 URL과 일반 화면에 노출하지 않는다.

@@ -14,7 +14,7 @@ export class ApiError extends Error {
 }
 
 async function getJson<T>(path: string): Promise<T> {
-  const response = await fetch(`${API_BASE}${path}`);
+  const response = await fetchApi(path);
   if (!response.ok) {
     throw await toApiError(response);
   }
@@ -22,11 +22,23 @@ async function getJson<T>(path: string): Promise<T> {
 }
 
 async function postJson<T>(path: string, headers: Record<string, string> = {}, body?: string): Promise<T> {
-  const response = await fetch(`${API_BASE}${path}`, { method: "POST", headers, body });
+  const response = await fetchApi(path, { method: "POST", headers, body });
   if (!response.ok) {
     throw await toApiError(response);
   }
   return response.json() as Promise<T>;
+}
+
+async function fetchApi(path: string, init?: RequestInit): Promise<Response> {
+  try {
+    return await fetch(`${API_BASE}${path}`, init);
+  } catch {
+    throw new ApiError(
+      "의사결정 트윈 서비스에 연결할 수 없습니다. 연결 상태를 확인한 뒤 다시 시도하세요.",
+      0,
+      "CONNECTION_FAILED",
+    );
+  }
 }
 
 export function getDecisionCases(): Promise<DecisionListItem[]> {

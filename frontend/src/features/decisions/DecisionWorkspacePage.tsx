@@ -1,8 +1,9 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router";
+import { Link, useParams, useSearchParams } from "react-router";
 
 import {
+  ApiError,
   advanceOutcome,
   cancelReviewRun,
   createDossierRun,
@@ -21,7 +22,9 @@ import { DecisionExecution } from "./DecisionExecution";
 
 export function DecisionWorkspacePage() {
   const { caseId = "" } = useParams();
-  const [selectedStep, setSelectedStep] = useState<number | undefined>();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const selectedStep = parseSearchStep(searchParams.get("at_step"));
+  const selectedOptionPosition = parseSearchPosition(searchParams.get("option"));
   const [dossierRunId, setDossierRunId] = useState<string | null>(null);
   const query = useQuery({
     queryKey: ["decision-workspace", caseId, selectedStep ?? "current"],
@@ -112,8 +115,16 @@ export function DecisionWorkspacePage() {
       void refetchWorkspace();
     }
   }, [dossierStatus, refetchWorkspace, selectedStep]);
+  const setWorkspaceParam = (name: "at_step" | "option", value: string | null) => {
+    setSearchParams((current) => {
+      const next = new URLSearchParams(current);
+      if (value === null) next.delete(name);
+      else next.set(name, value);
+      return next;
+    });
+  };
   const refreshStaleWorkspace = async () => {
-    setSelectedStep(undefined);
+    setWorkspaceParam("at_step", null);
     await Promise.all([query.refetch(), timelineQuery.refetch()]);
     commandMutations.forEach((mutation) => mutation.reset());
   };
@@ -126,14 +137,25 @@ export function DecisionWorkspacePage() {
     );
   }
   if (query.isError) {
+    const errorCopy = workspaceLoadErrorCopy(query.error, selectedStep);
     return (
       <main className="app-shell workspace-shell" id="main-content" tabIndex={-1}>
         <section className="list-feedback" role="alert">
           <h1>결정 검토를 불러오지 못했습니다</h1>
-          <p>{query.error.message}</p>
-          <button className="primary-button" type="button" onClick={() => void query.refetch()}>
-            다시 시도
-          </button>
+          <p>{errorCopy.reason}</p>
+          <p>{errorCopy.recovery}</p>
+          <div className="recovery-actions">
+            {errorCopy.action === "current" ? (
+              <button className="primary-button" type="button" onClick={() => setWorkspaceParam("at_step", null)}>
+                현재 시점 보기
+              </button>
+            ) : errorCopy.action === "retry" ? (
+              <button className="primary-button" type="button" onClick={() => void query.refetch()} disabled={query.isFetching}>
+                {query.isFetching ? "다시 불러오는 중…" : "다시 시도"}
+              </button>
+            ) : null}
+            <Link className="secondary-button recovery-link" to="/decisions">결정 목록으로 돌아가기</Link>
+          </div>
         </section>
       </main>
     );
@@ -186,11 +208,15 @@ export function DecisionWorkspacePage() {
         timelinePending={timelineQuery.isPending}
         timelineError={timelineQuery.isError}
         onSelectStep={(step) => {
-          setSelectedStep(step === item.time_context.current_step ? undefined : step);
+          setWorkspaceParam("at_step", step === item.time_context.current_step ? null : String(step));
         }}
       />
       <DecisionPosture item={item} />
-      <AlternativeComparison alternatives={item.alternatives} />
+      <AlternativeComparison
+        alternatives={item.alternatives}
+        selectedOptionPosition={selectedOptionPosition}
+        onSelectOption={(position) => setWorkspaceParam("option", position === null ? null : String(position))}
+      />
       <DecisionDeliberation deliberation={item.deliberation} />
     </>
   );
@@ -239,7 +265,7 @@ export function DecisionWorkspacePage() {
       <section className="panel virtual-review-panel" id="review" aria-labelledby="review-title" tabIndex={-1}>
         <p className="section-kicker">가상 조언</p>
         <h2 id="review-title">가상 역할 검토와 최종 판단</h2>
-        <p>Release topology인 독립 Role 검토를 한 번 실행합니다. 단일 Role 실험과 topology 비교는 개발자 평가 화면의 범위입니다.</p>
+        <p>현재 검증된 독립 역할 검토를 한 번 실행합니다. 단일 역할 실험과 구성 비교는 개발자 평가 화면의 범위입니다.</p>
         {!activeDossierRunId ? <p className="empty-copy">화면 상단의 ‘가상 역할 검토 실행’으로 시작합니다.</p> : null}
         {dossierStartMutation.isError ? <p role="alert">가상 역할 검토를 시작하지 못했습니다. 개발 상태를 새로고침한 뒤 다시 실행하세요.</p> : null}
         {dossierRunQuery.data ? (
@@ -352,7 +378,7 @@ function DevelopmentTwin({
     <section className="development-twin" id="development-twin" aria-labelledby="development-twin-title" tabIndex={-1}>
       <header className="twin-header">
         <div>
-          <p className="section-kicker">Development Twin</p>
+          <p className="section-kicker">개발 진행 트윈</p>
           <h2 id="development-twin-title">선택한 시점의 개발 상태와 변화 원인</h2>
           <p>{time.mode === "historical" ? "이후에 알려진 검토·판단·결과를 제외한 당시 관측 상태입니다." : "현재 결정과 직접 연결된 상태·원인·선택 영향을 보여줍니다."}</p>
         </div>
@@ -386,11 +412,11 @@ function DevelopmentTwin({
         </section>
 
         <section className="twin-card" aria-labelledby="commitment-title">
-          <h3 id="commitment-title">가장 가까운 Commitment Window</h3>
+          <h3 id="commitment-title">가장 가까운 선택 가능 기한(Commitment Window)</h3>
           {item.development_twin.commitment_windows.length > 0 ? (
             item.development_twin.commitment_windows.slice(0, 3).map((window) => (
               <article className="commitment-card" key={`${window.subject_type}-${window.subject_id}`}>
-                <p className="state-label">{window.closes_at_step !== null && window.closes_at_step !== undefined ? `Step ${window.closes_at_step} 종료` : "Milestone에서 종료"}</p>
+                <p className="state-label">{window.closes_at_step !== null && window.closes_at_step !== undefined ? `Step ${window.closes_at_step} 종료` : "기준점에서 종료"}</p>
                 <h4>{window.subject_title}</h4>
                 <p>{window.closing_reason_ko}</p>
                 <p><strong>닫힌 뒤:</strong> {window.post_window_impact_ko}</p>
@@ -501,12 +527,56 @@ function DecisionPosture({ item }: { item: DecisionWorkspace }) {
   ];
   return (
     <section className="panel posture-panel" aria-labelledby="posture-title">
-      <p className="section-kicker">Decision Posture</p>
+      <p className="section-kicker">판단 조건</p>
       <h2 id="posture-title">데이터가 완전하지 않아도 판단할 수 있는 정도</h2>
       <div className="posture-grid">{dimensions.map(([label, value]) => <div key={label}><span>{label}</span><strong>{postureLabel(value)}</strong></div>)}</div>
       <ul>{posture.explanations_ko.map((entry) => <li key={entry}>{entry}</li>)}</ul>
     </section>
   );
+}
+
+function parseSearchStep(value: string | null): number | undefined {
+  if (value === null || value.trim() === "") return undefined;
+  const step = Number(value);
+  return Number.isSafeInteger(step) && step >= 0 ? step : undefined;
+}
+
+function parseSearchPosition(value: string | null): number | undefined {
+  const position = parseSearchStep(value);
+  return position !== undefined && position >= 1 ? position : undefined;
+}
+
+function workspaceLoadErrorCopy(error: unknown, selectedStep: number | undefined) {
+  if (error instanceof ApiError && error.status === 404) {
+    return {
+      reason: "요청한 결정 검토를 찾을 수 없습니다.",
+      recovery: "결정 목록에서 현재 확인 가능한 검토 대상을 다시 선택하세요.",
+      action: "list" as const,
+    };
+  }
+  if (
+    selectedStep !== undefined
+    && error instanceof ApiError
+    && [400, 422].includes(error.status)
+  ) {
+    return {
+      reason: `선택한 Step ${selectedStep}의 개발 상태를 재구성할 수 없습니다.`,
+      recovery: "현재 시점으로 돌아가면 최신 관측 상태에서 검토를 계속할 수 있습니다.",
+      action: "current" as const,
+    };
+  }
+  if (error instanceof ApiError && error.code === "CONNECTION_FAILED") {
+    return {
+      reason: "의사결정 트윈 서비스에 연결할 수 없습니다.",
+      recovery: "새 검토 정보는 표시하지 않았습니다. 연결 상태를 확인한 뒤 다시 시도하세요.",
+      action: "retry" as const,
+    };
+  }
+  return {
+    reason: "의사결정 트윈 서비스가 검토 요청을 완료하지 못했습니다.",
+    recovery: "현재 화면에는 불완전한 정보를 표시하지 않았습니다. 잠시 후 다시 시도하세요.",
+    action: "retry" as const,
+  };
 }
 
 function actionTarget(action: DecisionWorkspace["workflow"]["primary_action"]) {
@@ -626,7 +696,7 @@ function postureLabel(value: string | null | undefined) {
     observable_later: "나중에 관측 가능",
     limited: "제한적",
     cross_track: "여러 Track",
-    milestone: "Milestone",
+    milestone: "기준점",
     project: "과제 전체",
     expired: "기한 경과",
     unknown: "아직 모름",
@@ -640,7 +710,7 @@ function runStatusLabel(status: string) {
 function developmentEventLabel(eventType: string) {
   return ({
     WORK_PROGRESS: "작업 진행",
-    BLOCKER_CHANGE: "Blocker 변경",
+    BLOCKER_CHANGE: "대기 원인 변경",
     PLAN_CHANGE: "계획 변경",
     DEPENDENCY_CHANGE: "의존성 변경",
     EVIDENCE_CHANGE: "측정·근거 변경",
