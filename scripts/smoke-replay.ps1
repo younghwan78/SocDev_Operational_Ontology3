@@ -4,6 +4,9 @@ $api = $null
 Push-Location $root
 try {
   uv run alembic upgrade head
+  Get-ChildItem fixtures/projects/PROJECT-*.yaml | ForEach-Object {
+    uv run soc-ot fixtures import-project --project-id $_.BaseName
+  }
   Get-ChildItem fixtures/cases/observable/*.yaml | ForEach-Object {
     uv run soc-ot fixtures import --case-id $_.BaseName
   }
@@ -35,6 +38,13 @@ try {
     }
   }
   if (-not $ready) { throw "API did not become ready" }
+  $projects = Invoke-RestMethod http://127.0.0.1:18080/api/v1/projects
+  if ($projects.Count -ne 3) { throw "Project portfolio fixture count mismatch" }
+  $projectSituation = Invoke-RestMethod `
+    http://127.0.0.1:18080/api/v1/projects/PROJECT-U/situation
+  if (-not $projectSituation.attention_reasons) {
+    throw "Project attention has no provenance reasons"
+  }
   $key = "smoke-$([DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds())"
   $workspace = Invoke-RestMethod `
     http://127.0.0.1:18080/api/v1/decision-cases/CASE-VR-001/workspace
@@ -62,10 +72,10 @@ try {
   $decision = Invoke-RestMethod -Method Post `
     -Headers $decisionHeaders `
     $decisionUrl
-  $toStep = [Math]::Max($workspace.current_step + 1, 15)
+  $toStep = [Math]::Max($workspace.time_context.current_step + 1, 15)
   $advanceBody = @{
     command_schema_version = "outcome-advance-command.v1"
-    from_step = $workspace.current_step
+    from_step = $workspace.time_context.current_step
     to_step = $toStep
     decision = $decision.decision
   } | ConvertTo-Json -Depth 20

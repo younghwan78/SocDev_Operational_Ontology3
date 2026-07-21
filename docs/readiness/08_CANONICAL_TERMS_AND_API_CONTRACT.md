@@ -380,8 +380,7 @@ MilestoneStatus       = PLANNED | AT_RISK | ACHIEVED
 Source fixtures record ordinal downside, blast radius, urgency and reversibility inputs, but never
 assign `ProjectAttention`, `RiskLevel` or a composite risk score.
 
-The following routes and resources are reserved but are **not executable until their OPS-C Gate
-passes**:
+OPS-C makes the following read-only routes executable. They do not accept Project truth mutations:
 
 ```text
 /projects
@@ -396,7 +395,28 @@ GET /api/v1/projects/{project_id}/timeline
 ```
 
 Historical Project resources use `at_step` and the existing effective/observed/available boundary.
-ADR-0010 owns the full semantic boundary and transition sequence.
+An out-of-range Step returns `PROJECT_STEP_OUT_OF_RANGE`; unknown Project and Risk resources return
+`PROJECT_NOT_FOUND` and `PROJECT_RISK_NOT_FOUND` respectively.
+
+The response contracts are:
+
+```text
+GET /api/v1/projects                                      -> project-list-item.v1[]
+GET /api/v1/projects/{project_id}/situation               -> project-situation.v1
+GET /api/v1/projects/{project_id}/risks                   -> project-risk-summary.v1[]
+GET /api/v1/projects/{project_id}/risks/{risk_id}         -> project-risk-detail.v1
+GET /api/v1/projects/{project_id}/timeline                -> project-timeline.v1
+```
+
+Project attention uses `project-attention.v1`; Risk level and ordering use
+`project-risk-order.v1`. Every result carries reason codes and source references. These policies use
+explicit ordinal fields and never expose or calculate a composite score.
+
+`observable-case.v1` remains unchanged. OPS-C preserves compatibility by keeping Project-to-Case
+references inside `development-project.v1`; adding required Project fields to existing DecisionCase
+payloads would require a new major version and is not part of OPS-C. PostgreSQL migration
+`0020_development_projects` persists the new aggregate independently. ADR-0010 owns the full semantic
+boundary and transition sequence.
 
 ## 11. Compatibility gate
 

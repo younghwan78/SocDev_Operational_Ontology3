@@ -1,0 +1,131 @@
+{
+  "$defs": {
+    "RiskLevel": {
+      "enum": [
+        "LOW",
+        "MEDIUM",
+        "HIGH",
+        "CRITICAL"
+      ],
+      "title": "RiskLevel",
+      "type": "string"
+    },
+    "RiskStatus": {
+      "enum": [
+        "OPEN",
+        "TREATING",
+        "ACCEPTED",
+        "REALIZED",
+        "CLOSED"
+      ],
+      "title": "RiskStatus",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "projection_schema_version": {
+      "const": "project-risk-summary.v1",
+      "default": "project-risk-summary.v1",
+      "title": "Projection Schema Version",
+      "type": "string"
+    },
+    "project_id": {
+      "title": "Project Id",
+      "type": "string"
+    },
+    "risk_id": {
+      "title": "Risk Id",
+      "type": "string"
+    },
+    "statement": {
+      "title": "Statement",
+      "type": "string"
+    },
+    "status": {
+      "$ref": "#/$defs/RiskStatus"
+    },
+    "risk_level": {
+      "$ref": "#/$defs/RiskLevel"
+    },
+    "rank": {
+      "minimum": 1,
+      "title": "Rank",
+      "type": "integer"
+    },
+    "policy_version": {
+      "const": "project-risk-order.v1",
+      "default": "project-risk-order.v1",
+      "title": "Policy Version",
+      "type": "string"
+    },
+    "ranking_reasons": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Ranking Reasons",
+      "type": "array"
+    },
+    "source_refs": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Source Refs",
+      "type": "array"
+    },
+    "affected_work_item_ids": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Affected Work Item Ids",
+      "type": "array"
+    },
+    "affected_milestone_ids": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Affected Milestone Ids",
+      "type": "array"
+    },
+    "treatment_decision_case_ids": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Treatment Decision Case Ids",
+      "type": "array"
+    },
+    "treatment_action_ids": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Treatment Action Ids",
+      "type": "array"
+    },
+    "missing_evidence_ids": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Missing Evidence Ids",
+      "type": "array"
+    }
+  },
+  "required": [
+    "project_id",
+    "risk_id",
+    "statement",
+    "status",
+    "risk_level",
+    "rank",
+    "ranking_reasons",
+    "source_refs",
+    "affected_work_item_ids",
+    "affected_milestone_ids",
+    "treatment_decision_case_ids",
+    "treatment_action_ids",
+    "missing_evidence_ids"
+  ],
+  "title": "ProjectRiskSummary",
+  "type": "object"
+}

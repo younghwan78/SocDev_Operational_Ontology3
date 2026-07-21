@@ -77,6 +77,9 @@ Copy-Item .env.example .env.local
 docker compose --env-file .env.local -f deploy/local/compose.yaml up -d postgres
 uv sync --all-groups
 uv run alembic upgrade head
+Get-ChildItem fixtures/projects/PROJECT-*.yaml | ForEach-Object {
+  uv run soc-ot fixtures import-project --project-id $_.BaseName
+}
 uv run python -m soc_ot.cli fixtures validate --root fixtures
 uv run soc-ot fixtures validate --corpus development
 Get-ChildItem fixtures/cases/observable/*.yaml | ForEach-Object {
@@ -120,6 +123,13 @@ Invoke-RestMethod http://127.0.0.1:18080/health/ready
 Invoke-RestMethod http://127.0.0.1:18080/api/v1/decision-cases
 Invoke-RestMethod http://127.0.0.1:18080/api/v1/decision-cases/CASE-VR-001/workspace
 Invoke-RestMethod http://127.0.0.1:18080/api/v1/decision-cases/CASE-VR-001/timeline
+Invoke-RestMethod http://127.0.0.1:18080/api/v1/projects
+Invoke-RestMethod http://127.0.0.1:18080/api/v1/projects/PROJECT-U/situation
+Invoke-RestMethod http://127.0.0.1:18080/api/v1/projects/PROJECT-V/risks
+Invoke-RestMethod `
+  http://127.0.0.1:18080/api/v1/projects/PROJECT-V/risks/RISK-V-WRONG-COMMIT
+Invoke-RestMethod `
+  http://127.0.0.1:18080/api/v1/projects/PROJECT-W/timeline?at_step=7
 ```
 
 The frozen evaluation corpus remains the default import set. To inspect an independent

@@ -676,7 +676,7 @@ def reconstruct_project_fixture_at_step(
     project: DevelopmentProject, at_step: int
 ) -> ProjectFixtureHistory:
     if at_step < 0 or at_step > project.current_step:
-        raise ValueError("historical step is outside the project observation window")
+        raise ValueError("PROJECT_STEP_OUT_OF_RANGE")
 
     work = {
         item.work_item_id: WorkItemDynamicState(

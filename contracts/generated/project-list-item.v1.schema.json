@@ -1,0 +1,276 @@
+{
+  "$defs": {
+    "ProjectAttention": {
+      "enum": [
+        "ON_TRACK",
+        "WATCH",
+        "AT_RISK",
+        "BLOCKED"
+      ],
+      "title": "ProjectAttention",
+      "type": "string"
+    },
+    "ProjectAttentionReason": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "enum": [
+            "WORK_ITEM_BLOCKED",
+            "CRITICAL_RISK",
+            "HIGH_RISK",
+            "MILESTONE_AT_RISK",
+            "EVIDENCE_LATE",
+            "ACTIVE_RISK",
+            "NO_ACTIVE_ALERT"
+          ],
+          "title": "Code",
+          "type": "string"
+        },
+        "summary_ko": {
+          "title": "Summary Ko",
+          "type": "string"
+        },
+        "source_refs": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Source Refs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "code",
+        "summary_ko",
+        "source_refs"
+      ],
+      "title": "ProjectAttentionReason",
+      "type": "object"
+    },
+    "ProjectRiskSummary": {
+      "additionalProperties": false,
+      "properties": {
+        "projection_schema_version": {
+          "const": "project-risk-summary.v1",
+          "default": "project-risk-summary.v1",
+          "title": "Projection Schema Version",
+          "type": "string"
+        },
+        "project_id": {
+          "title": "Project Id",
+          "type": "string"
+        },
+        "risk_id": {
+          "title": "Risk Id",
+          "type": "string"
+        },
+        "statement": {
+          "title": "Statement",
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/RiskStatus"
+        },
+        "risk_level": {
+          "$ref": "#/$defs/RiskLevel"
+        },
+        "rank": {
+          "minimum": 1,
+          "title": "Rank",
+          "type": "integer"
+        },
+        "policy_version": {
+          "const": "project-risk-order.v1",
+          "default": "project-risk-order.v1",
+          "title": "Policy Version",
+          "type": "string"
+        },
+        "ranking_reasons": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Ranking Reasons",
+          "type": "array"
+        },
+        "source_refs": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Source Refs",
+          "type": "array"
+        },
+        "affected_work_item_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Affected Work Item Ids",
+          "type": "array"
+        },
+        "affected_milestone_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Affected Milestone Ids",
+          "type": "array"
+        },
+        "treatment_decision_case_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Treatment Decision Case Ids",
+          "type": "array"
+        },
+        "treatment_action_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Treatment Action Ids",
+          "type": "array"
+        },
+        "missing_evidence_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Missing Evidence Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "project_id",
+        "risk_id",
+        "statement",
+        "status",
+        "risk_level",
+        "rank",
+        "ranking_reasons",
+        "source_refs",
+        "affected_work_item_ids",
+        "affected_milestone_ids",
+        "treatment_decision_case_ids",
+        "treatment_action_ids",
+        "missing_evidence_ids"
+      ],
+      "title": "ProjectRiskSummary",
+      "type": "object"
+    },
+    "RiskLevel": {
+      "enum": [
+        "LOW",
+        "MEDIUM",
+        "HIGH",
+        "CRITICAL"
+      ],
+      "title": "RiskLevel",
+      "type": "string"
+    },
+    "RiskStatus": {
+      "enum": [
+        "OPEN",
+        "TREATING",
+        "ACCEPTED",
+        "REALIZED",
+        "CLOSED"
+      ],
+      "title": "RiskStatus",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "projection_schema_version": {
+      "const": "project-list-item.v1",
+      "default": "project-list-item.v1",
+      "title": "Projection Schema Version",
+      "type": "string"
+    },
+    "project_id": {
+      "title": "Project Id",
+      "type": "string"
+    },
+    "title_ko": {
+      "title": "Title Ko",
+      "type": "string"
+    },
+    "lifecycle_stage": {
+      "title": "Lifecycle Stage",
+      "type": "string"
+    },
+    "aggregate_version": {
+      "minimum": 1,
+      "title": "Aggregate Version",
+      "type": "integer"
+    },
+    "current_step": {
+      "minimum": 0,
+      "title": "Current Step",
+      "type": "integer"
+    },
+    "attention": {
+      "$ref": "#/$defs/ProjectAttention"
+    },
+    "attention_policy_version": {
+      "const": "project-attention.v1",
+      "default": "project-attention.v1",
+      "title": "Attention Policy Version",
+      "type": "string"
+    },
+    "attention_reasons": {
+      "items": {
+        "$ref": "#/$defs/ProjectAttentionReason"
+      },
+      "minItems": 1,
+      "title": "Attention Reasons",
+      "type": "array"
+    },
+    "active_issue_count": {
+      "minimum": 0,
+      "title": "Active Issue Count",
+      "type": "integer"
+    },
+    "active_risk_count": {
+      "minimum": 0,
+      "title": "Active Risk Count",
+      "type": "integer"
+    },
+    "blocked_work_item_count": {
+      "minimum": 0,
+      "title": "Blocked Work Item Count",
+      "type": "integer"
+    },
+    "nearest_milestone_id": {
+      "title": "Nearest Milestone Id",
+      "type": "string"
+    },
+    "nearest_milestone_step": {
+      "minimum": 0,
+      "title": "Nearest Milestone Step",
+      "type": "integer"
+    },
+    "top_risks": {
+      "items": {
+        "$ref": "#/$defs/ProjectRiskSummary"
+      },
+      "title": "Top Risks",
+      "type": "array"
+    }
+  },
+  "required": [
+    "project_id",
+    "title_ko",
+    "lifecycle_stage",
+    "aggregate_version",
+    "current_step",
+    "attention",
+    "attention_reasons",
+    "active_issue_count",
+    "active_risk_count",
+    "blocked_work_item_count",
+    "nearest_milestone_id",
+    "nearest_milestone_step",
+    "top_risks"
+  ],
+  "title": "ProjectListItemProjection",
+  "type": "object"
+}

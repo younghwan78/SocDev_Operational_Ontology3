@@ -168,7 +168,7 @@ try {
   Test-MigrationPath "soc_ot_mig_$PID`_a" ""
   Test-MigrationPath "soc_ot_mig_$PID`_b" "0001_case_store"
   Test-MigrationPath "soc_ot_mig_$PID`_a" "0016_agent_run_budget_plan" $true
-  Write-Output "Empty, oldest-supported, legacy dossier, v1 decision, and development history migration paths passed."
+  Write-Output "Empty, oldest-supported, legacy decision/history, and Project aggregate migration paths passed."
 } finally {
   if ($null -eq $priorUrl) {
     Remove-Item Env:SOC_OT_MIGRATION_DATABASE_URL -ErrorAction SilentlyContinue

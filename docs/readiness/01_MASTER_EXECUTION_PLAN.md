@@ -1,6 +1,6 @@
 # Master execution plan
 
-> Status: IMPLEMENTED THROUGH I7 REPLAY + STEP 5 B2 RUNTIME + POST-I7 UX-H TOOLING + OPS-B; OPS-C PROJECT RUNTIME NEXT, HUMAN OBSERVATION PAUSED UNTIL OPS-F
+> Status: IMPLEMENTED THROUGH I7 REPLAY + STEP 5 B2 RUNTIME + POST-I7 UX-H TOOLING + OPS-C; OPS-D PROJECT UX NEXT, HUMAN OBSERVATION PAUSED UNTIL OPS-F
 > Date: 2026-07-21
 > Scope: local fixture-only PoC
 
@@ -297,7 +297,7 @@ Step 5 activation record (2026-07-15):
 - B2 validation passed 10/10 acceptable and 10/10 policy compliant
 - B2 sealed-unseen passed 6/6 acceptable and 6/6 policy compliant
 - new durable dossier runs persist and execute B2; pre-Step-5 dossier rows migrate to B3
-- PostgreSQL migration head is `0019_agent_run_topology`
+- PostgreSQL migration head is `0020_development_projects`
 
 Post-I7 UX-A record (2026-07-17):
 
@@ -414,8 +414,8 @@ Post-I7 Project Operations stages run in this order:
 |---|---|---|
 |OPS-A|Scope, semantic boundaries, reserved vocabulary and ADR|Complete: ADR-0010 Accepted|
 |OPS-B|Lifecycle-distinct Project fixtures and event/risk provenance|Complete: 3 projects, 17 typed events, hash manifest and future-leakage tests|
-|OPS-C|Project domain, projection, API and compatibility path|Next: generated API contracts, migration/parity where applicable, no future leakage|
-|OPS-D|Portfolio and Project Situation UX|30-second overall status/top-risk/source task passes|
+|OPS-C|Project domain, projection, API and compatibility path|Complete: migration/repository parity, five read APIs, generated contracts and no-future-leakage parity|
+|OPS-D|Portfolio and Project Situation UX|Next: 30-second overall status/top-risk/source task passes|
 |OPS-E|Risk Detail and Decision linkage|Two-minute source-to-impact-to-decision trace task passes|
 |OPS-F|UX-H protocol v2 and independent observations|Minimum independent observations before UX-I or business claim|
 
@@ -433,6 +433,19 @@ OPS-B implementation record (2026-07-21):
 - selected `world.yaml` top-level event patterns were rewritten as synthetic fixtures; the external
   file is not imported at runtime or during tests
 - existing 12-case evaluation and UX-H baseline remain unchanged
+
+OPS-C implementation record (2026-07-21):
+
+- migration `0020_development_projects`, in-memory/PostgreSQL repository parity and restart-safe
+  fixture imports make `development-project.v1` a durable runtime aggregate
+- `project-attention.v1` and `project-risk-order.v1` derive attention, RiskLevel, ordering, reasons
+  and source references without a composite score or Agent-owned truth
+- Portfolio, Situation, Risk list/detail and Timeline read APIs are executable; every Project detail
+  resource shares the fixture reconstruction boundary and stable error codes
+- existing `observable-case.v1` remains unchanged; Project-to-Decision references provide a compatible
+  one-way bridge until a future major DecisionCase contract is justified
+- generated JSON Schema, OpenAPI and TypeScript contracts are synchronized; OPS-D is the first stage
+  allowed to consume them in the product UI
 
 ## 7. Crosswalk to supporting plans
 

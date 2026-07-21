@@ -131,6 +131,14 @@ if ($projectPlan -notmatch "release topology: B2 independent routed Role Agents"
 if ($multiRole -notmatch 'RELEASE_DOSSIER_TOPOLOGY: DossierTopology = "B2"') {
     throw "Runtime release topology is not the approved B2 value."
 }
+if ($master -notmatch 'PostgreSQL migration head is `0020_development_projects`') {
+    throw "Master plan does not record the OPS-C migration head."
+}
+@("project-attention.v1", "project-risk-order.v1") | ForEach-Object {
+    if (-not $contract.Contains($_)) {
+        throw "Canonical contract is missing OPS-C policy version: $_"
+    }
+}
 
 $requiredPaths = @(
     "/api/v1/decision-cases",
@@ -142,6 +150,11 @@ $requiredPaths = @(
     "/api/v1/decision-cases/{case_id}/simulated-decisions",
     "/api/v1/decision-cases/{case_id}/outcome-advances",
     "/api/v1/decision-cases/{case_id}/evaluations",
+    "/api/v1/projects",
+    "/api/v1/projects/{project_id}/situation",
+    "/api/v1/projects/{project_id}/risks",
+    "/api/v1/projects/{project_id}/risks/{risk_id}",
+    "/api/v1/projects/{project_id}/timeline",
     "/api/v1/runs/{run_id}",
     "/api/v1/runs/{run_id}/events",
     "/api/v1/runs/{run_id}/cancel",
@@ -155,4 +168,4 @@ if ($actualPaths | Where-Object { $_ -match "hidden" }) {
     throw "OpenAPI exposes a forbidden hidden resource."
 }
 
-Write-Output "Plan consistency check passed: I0-I7, OPS-B projects, corpora, terms, and canonical API agree."
+Write-Output "Plan consistency check passed: I0-I7, OPS-C Project runtime, corpora, terms, and canonical API agree."

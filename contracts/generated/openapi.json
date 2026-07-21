@@ -1218,6 +1218,15 @@
         "title": "Evidence",
         "type": "object"
       },
+      "EvidenceStatus": {
+        "enum": [
+          "REQUESTED",
+          "LATE",
+          "RECEIVED"
+        ],
+        "title": "EvidenceStatus",
+        "type": "string"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -1230,6 +1239,15 @@
         },
         "title": "HTTPValidationError",
         "type": "object"
+      },
+      "MilestoneStatus": {
+        "enum": [
+          "PLANNED",
+          "AT_RISK",
+          "ACHIEVED"
+        ],
+        "title": "MilestoneStatus",
+        "type": "string"
       },
       "OutcomeAdvanceRequest": {
         "additionalProperties": false,
@@ -1471,6 +1489,919 @@
           "passed"
         ],
         "title": "ProcessEvaluation",
+        "type": "object"
+      },
+      "ProjectAttention": {
+        "enum": [
+          "ON_TRACK",
+          "WATCH",
+          "AT_RISK",
+          "BLOCKED"
+        ],
+        "title": "ProjectAttention",
+        "type": "string"
+      },
+      "ProjectAttentionReason": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "enum": [
+              "WORK_ITEM_BLOCKED",
+              "CRITICAL_RISK",
+              "HIGH_RISK",
+              "MILESTONE_AT_RISK",
+              "EVIDENCE_LATE",
+              "ACTIVE_RISK",
+              "NO_ACTIVE_ALERT"
+            ],
+            "title": "Code",
+            "type": "string"
+          },
+          "source_refs": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "title": "Source Refs",
+            "type": "array"
+          },
+          "summary_ko": {
+            "title": "Summary Ko",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "summary_ko",
+          "source_refs"
+        ],
+        "title": "ProjectAttentionReason",
+        "type": "object"
+      },
+      "ProjectDecisionReferenceProjection": {
+        "additionalProperties": false,
+        "properties": {
+          "case_id": {
+            "title": "Case Id",
+            "type": "string"
+          },
+          "href": {
+            "title": "Href",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "treated_risk_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Treated Risk Ids",
+            "type": "array"
+          }
+        },
+        "required": [
+          "case_id",
+          "title",
+          "status",
+          "treated_risk_ids",
+          "href"
+        ],
+        "title": "ProjectDecisionReferenceProjection",
+        "type": "object"
+      },
+      "ProjectEvidenceSituation": {
+        "additionalProperties": false,
+        "properties": {
+          "available_at_step": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Available At Step"
+          },
+          "evidence_id": {
+            "title": "Evidence Id",
+            "type": "string"
+          },
+          "evidence_type": {
+            "title": "Evidence Type",
+            "type": "string"
+          },
+          "expected_at_step": {
+            "minimum": 0.0,
+            "title": "Expected At Step",
+            "type": "integer"
+          },
+          "limitations": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Limitations",
+            "type": "array"
+          },
+          "source_ref": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Ref"
+          },
+          "status": {
+            "$ref": "#/components/schemas/EvidenceStatus"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "evidence_id",
+          "title",
+          "evidence_type",
+          "status",
+          "expected_at_step",
+          "available_at_step",
+          "source_ref",
+          "limitations"
+        ],
+        "title": "ProjectEvidenceSituation",
+        "type": "object"
+      },
+      "ProjectIssueSituation": {
+        "additionalProperties": false,
+        "properties": {
+          "affected_milestone_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Affected Milestone Ids",
+            "type": "array"
+          },
+          "affected_work_item_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Affected Work Item Ids",
+            "type": "array"
+          },
+          "issue_id": {
+            "title": "Issue Id",
+            "type": "string"
+          },
+          "observed_at_step": {
+            "minimum": 0.0,
+            "title": "Observed At Step",
+            "type": "integer"
+          },
+          "source_refs": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Source Refs",
+            "type": "array"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "issue_id",
+          "title",
+          "status",
+          "observed_at_step",
+          "source_refs",
+          "affected_work_item_ids",
+          "affected_milestone_ids"
+        ],
+        "title": "ProjectIssueSituation",
+        "type": "object"
+      },
+      "ProjectListItemProjection": {
+        "additionalProperties": false,
+        "properties": {
+          "active_issue_count": {
+            "minimum": 0.0,
+            "title": "Active Issue Count",
+            "type": "integer"
+          },
+          "active_risk_count": {
+            "minimum": 0.0,
+            "title": "Active Risk Count",
+            "type": "integer"
+          },
+          "aggregate_version": {
+            "minimum": 1.0,
+            "title": "Aggregate Version",
+            "type": "integer"
+          },
+          "attention": {
+            "$ref": "#/components/schemas/ProjectAttention"
+          },
+          "attention_policy_version": {
+            "const": "project-attention.v1",
+            "default": "project-attention.v1",
+            "title": "Attention Policy Version",
+            "type": "string"
+          },
+          "attention_reasons": {
+            "items": {
+              "$ref": "#/components/schemas/ProjectAttentionReason"
+            },
+            "minItems": 1,
+            "title": "Attention Reasons",
+            "type": "array"
+          },
+          "blocked_work_item_count": {
+            "minimum": 0.0,
+            "title": "Blocked Work Item Count",
+            "type": "integer"
+          },
+          "current_step": {
+            "minimum": 0.0,
+            "title": "Current Step",
+            "type": "integer"
+          },
+          "lifecycle_stage": {
+            "title": "Lifecycle Stage",
+            "type": "string"
+          },
+          "nearest_milestone_id": {
+            "title": "Nearest Milestone Id",
+            "type": "string"
+          },
+          "nearest_milestone_step": {
+            "minimum": 0.0,
+            "title": "Nearest Milestone Step",
+            "type": "integer"
+          },
+          "project_id": {
+            "title": "Project Id",
+            "type": "string"
+          },
+          "projection_schema_version": {
+            "const": "project-list-item.v1",
+            "default": "project-list-item.v1",
+            "title": "Projection Schema Version",
+            "type": "string"
+          },
+          "title_ko": {
+            "title": "Title Ko",
+            "type": "string"
+          },
+          "top_risks": {
+            "items": {
+              "$ref": "#/components/schemas/ProjectRiskSummary"
+            },
+            "title": "Top Risks",
+            "type": "array"
+          }
+        },
+        "required": [
+          "project_id",
+          "title_ko",
+          "lifecycle_stage",
+          "aggregate_version",
+          "current_step",
+          "attention",
+          "attention_reasons",
+          "active_issue_count",
+          "active_risk_count",
+          "blocked_work_item_count",
+          "nearest_milestone_id",
+          "nearest_milestone_step",
+          "top_risks"
+        ],
+        "title": "ProjectListItemProjection",
+        "type": "object"
+      },
+      "ProjectMilestoneSituation": {
+        "additionalProperties": false,
+        "properties": {
+          "commitment_at_step": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Commitment At Step"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "milestone_id": {
+            "title": "Milestone Id",
+            "type": "string"
+          },
+          "planned_at_step": {
+            "minimum": 0.0,
+            "title": "Planned At Step",
+            "type": "integer"
+          },
+          "remaining_steps": {
+            "title": "Remaining Steps",
+            "type": "integer"
+          },
+          "status": {
+            "$ref": "#/components/schemas/MilestoneStatus"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "milestone_id",
+          "title",
+          "kind",
+          "status",
+          "planned_at_step",
+          "remaining_steps",
+          "commitment_at_step"
+        ],
+        "title": "ProjectMilestoneSituation",
+        "type": "object"
+      },
+      "ProjectRiskDetailProjection": {
+        "additionalProperties": false,
+        "properties": {
+          "affected_objects": {
+            "items": {
+              "$ref": "#/components/schemas/RiskAffectedObjectProjection"
+            },
+            "title": "Affected Objects",
+            "type": "array"
+          },
+          "blast_radius": {
+            "title": "Blast Radius",
+            "type": "string"
+          },
+          "cross_project_sources": {
+            "items": {
+              "$ref": "#/components/schemas/RiskCrossProjectSourceProjection"
+            },
+            "title": "Cross Project Sources",
+            "type": "array"
+          },
+          "decisions": {
+            "items": {
+              "$ref": "#/components/schemas/ProjectDecisionReferenceProjection"
+            },
+            "title": "Decisions",
+            "type": "array"
+          },
+          "downside": {
+            "title": "Downside",
+            "type": "string"
+          },
+          "epistemic_status": {
+            "title": "Epistemic Status",
+            "type": "string"
+          },
+          "inference_basis": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Inference Basis",
+            "type": "array"
+          },
+          "project_id": {
+            "title": "Project Id",
+            "type": "string"
+          },
+          "projection_schema_version": {
+            "const": "project-risk-detail.v1",
+            "default": "project-risk-detail.v1",
+            "title": "Projection Schema Version",
+            "type": "string"
+          },
+          "reconstructed_at_step": {
+            "minimum": 0.0,
+            "title": "Reconstructed At Step",
+            "type": "integer"
+          },
+          "reversibility": {
+            "title": "Reversibility",
+            "type": "string"
+          },
+          "risk": {
+            "$ref": "#/components/schemas/ProjectRiskSummary"
+          },
+          "source_events": {
+            "items": {
+              "$ref": "#/components/schemas/RiskSourceEventProjection"
+            },
+            "title": "Source Events",
+            "type": "array"
+          },
+          "source_evidence": {
+            "items": {
+              "$ref": "#/components/schemas/ProjectEvidenceSituation"
+            },
+            "title": "Source Evidence",
+            "type": "array"
+          },
+          "source_issues": {
+            "items": {
+              "$ref": "#/components/schemas/RiskSourceIssueProjection"
+            },
+            "title": "Source Issues",
+            "type": "array"
+          },
+          "treatment_actions": {
+            "items": {
+              "$ref": "#/components/schemas/RiskTreatmentActionProjection"
+            },
+            "title": "Treatment Actions",
+            "type": "array"
+          },
+          "urgency": {
+            "title": "Urgency",
+            "type": "string"
+          }
+        },
+        "required": [
+          "project_id",
+          "reconstructed_at_step",
+          "risk",
+          "epistemic_status",
+          "inference_basis",
+          "downside",
+          "blast_radius",
+          "urgency",
+          "reversibility",
+          "source_issues",
+          "source_events",
+          "source_evidence",
+          "cross_project_sources",
+          "affected_objects",
+          "decisions",
+          "treatment_actions"
+        ],
+        "title": "ProjectRiskDetailProjection",
+        "type": "object"
+      },
+      "ProjectRiskSummary": {
+        "additionalProperties": false,
+        "properties": {
+          "affected_milestone_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Affected Milestone Ids",
+            "type": "array"
+          },
+          "affected_work_item_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Affected Work Item Ids",
+            "type": "array"
+          },
+          "missing_evidence_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Missing Evidence Ids",
+            "type": "array"
+          },
+          "policy_version": {
+            "const": "project-risk-order.v1",
+            "default": "project-risk-order.v1",
+            "title": "Policy Version",
+            "type": "string"
+          },
+          "project_id": {
+            "title": "Project Id",
+            "type": "string"
+          },
+          "projection_schema_version": {
+            "const": "project-risk-summary.v1",
+            "default": "project-risk-summary.v1",
+            "title": "Projection Schema Version",
+            "type": "string"
+          },
+          "rank": {
+            "minimum": 1.0,
+            "title": "Rank",
+            "type": "integer"
+          },
+          "ranking_reasons": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "title": "Ranking Reasons",
+            "type": "array"
+          },
+          "risk_id": {
+            "title": "Risk Id",
+            "type": "string"
+          },
+          "risk_level": {
+            "$ref": "#/components/schemas/RiskLevel"
+          },
+          "source_refs": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "title": "Source Refs",
+            "type": "array"
+          },
+          "statement": {
+            "title": "Statement",
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/RiskStatus"
+          },
+          "treatment_action_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Treatment Action Ids",
+            "type": "array"
+          },
+          "treatment_decision_case_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Treatment Decision Case Ids",
+            "type": "array"
+          }
+        },
+        "required": [
+          "project_id",
+          "risk_id",
+          "statement",
+          "status",
+          "risk_level",
+          "rank",
+          "ranking_reasons",
+          "source_refs",
+          "affected_work_item_ids",
+          "affected_milestone_ids",
+          "treatment_decision_case_ids",
+          "treatment_action_ids",
+          "missing_evidence_ids"
+        ],
+        "title": "ProjectRiskSummary",
+        "type": "object"
+      },
+      "ProjectSituationProjection": {
+        "additionalProperties": false,
+        "properties": {
+          "aggregate_version": {
+            "minimum": 1.0,
+            "title": "Aggregate Version",
+            "type": "integer"
+          },
+          "attention": {
+            "$ref": "#/components/schemas/ProjectAttention"
+          },
+          "attention_policy_version": {
+            "const": "project-attention.v1",
+            "default": "project-attention.v1",
+            "title": "Attention Policy Version",
+            "type": "string"
+          },
+          "attention_reasons": {
+            "items": {
+              "$ref": "#/components/schemas/ProjectAttentionReason"
+            },
+            "minItems": 1,
+            "title": "Attention Reasons",
+            "type": "array"
+          },
+          "current_step": {
+            "minimum": 0.0,
+            "title": "Current Step",
+            "type": "integer"
+          },
+          "decision_case_refs": {
+            "items": {
+              "$ref": "#/components/schemas/ProjectDecisionReferenceProjection"
+            },
+            "title": "Decision Case Refs",
+            "type": "array"
+          },
+          "evidence": {
+            "items": {
+              "$ref": "#/components/schemas/ProjectEvidenceSituation"
+            },
+            "title": "Evidence",
+            "type": "array"
+          },
+          "fixture_version": {
+            "minimum": 1.0,
+            "title": "Fixture Version",
+            "type": "integer"
+          },
+          "issues": {
+            "items": {
+              "$ref": "#/components/schemas/ProjectIssueSituation"
+            },
+            "title": "Issues",
+            "type": "array"
+          },
+          "lifecycle_stage": {
+            "title": "Lifecycle Stage",
+            "type": "string"
+          },
+          "milestones": {
+            "items": {
+              "$ref": "#/components/schemas/ProjectMilestoneSituation"
+            },
+            "title": "Milestones",
+            "type": "array"
+          },
+          "project_id": {
+            "title": "Project Id",
+            "type": "string"
+          },
+          "projection_schema_version": {
+            "const": "project-situation.v1",
+            "default": "project-situation.v1",
+            "title": "Projection Schema Version",
+            "type": "string"
+          },
+          "reconstructed_at_step": {
+            "minimum": 0.0,
+            "title": "Reconstructed At Step",
+            "type": "integer"
+          },
+          "risks": {
+            "items": {
+              "$ref": "#/components/schemas/ProjectRiskSummary"
+            },
+            "title": "Risks",
+            "type": "array"
+          },
+          "title_ko": {
+            "title": "Title Ko",
+            "type": "string"
+          },
+          "tracks": {
+            "items": {
+              "$ref": "#/components/schemas/ProjectTrackSituation"
+            },
+            "title": "Tracks",
+            "type": "array"
+          },
+          "work_items": {
+            "items": {
+              "$ref": "#/components/schemas/ProjectWorkItemSituation"
+            },
+            "title": "Work Items",
+            "type": "array"
+          }
+        },
+        "required": [
+          "project_id",
+          "title_ko",
+          "lifecycle_stage",
+          "fixture_version",
+          "aggregate_version",
+          "current_step",
+          "reconstructed_at_step",
+          "attention",
+          "attention_reasons",
+          "tracks",
+          "work_items",
+          "milestones",
+          "issues",
+          "risks",
+          "evidence",
+          "decision_case_refs"
+        ],
+        "title": "ProjectSituationProjection",
+        "type": "object"
+      },
+      "ProjectTimelineEventProjection": {
+        "additionalProperties": false,
+        "properties": {
+          "affected_entity_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Affected Entity Ids",
+            "type": "array"
+          },
+          "cause": {
+            "title": "Cause",
+            "type": "string"
+          },
+          "effective_at_step": {
+            "minimum": 0.0,
+            "title": "Effective At Step",
+            "type": "integer"
+          },
+          "event_id": {
+            "title": "Event Id",
+            "type": "string"
+          },
+          "event_type": {
+            "title": "Event Type",
+            "type": "string"
+          },
+          "impacted_milestone_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Impacted Milestone Ids",
+            "type": "array"
+          },
+          "observed_at_step": {
+            "minimum": 0.0,
+            "title": "Observed At Step",
+            "type": "integer"
+          },
+          "summary": {
+            "title": "Summary",
+            "type": "string"
+          }
+        },
+        "required": [
+          "event_id",
+          "event_type",
+          "effective_at_step",
+          "observed_at_step",
+          "summary",
+          "cause",
+          "affected_entity_ids",
+          "impacted_milestone_ids"
+        ],
+        "title": "ProjectTimelineEventProjection",
+        "type": "object"
+      },
+      "ProjectTimelineProjection": {
+        "additionalProperties": false,
+        "properties": {
+          "aggregate_version": {
+            "minimum": 1.0,
+            "title": "Aggregate Version",
+            "type": "integer"
+          },
+          "attention": {
+            "$ref": "#/components/schemas/ProjectAttention"
+          },
+          "current_step": {
+            "minimum": 0.0,
+            "title": "Current Step",
+            "type": "integer"
+          },
+          "events": {
+            "items": {
+              "$ref": "#/components/schemas/ProjectTimelineEventProjection"
+            },
+            "title": "Events",
+            "type": "array"
+          },
+          "project_id": {
+            "title": "Project Id",
+            "type": "string"
+          },
+          "projection_schema_version": {
+            "const": "project-timeline.v1",
+            "default": "project-timeline.v1",
+            "title": "Projection Schema Version",
+            "type": "string"
+          },
+          "reconstructed_at_step": {
+            "minimum": 0.0,
+            "title": "Reconstructed At Step",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "project_id",
+          "aggregate_version",
+          "current_step",
+          "reconstructed_at_step",
+          "attention",
+          "events"
+        ],
+        "title": "ProjectTimelineProjection",
+        "type": "object"
+      },
+      "ProjectTrackSituation": {
+        "additionalProperties": false,
+        "properties": {
+          "blocked_work_item_count": {
+            "minimum": 0.0,
+            "title": "Blocked Work Item Count",
+            "type": "integer"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "next_milestone_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Milestone Id"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "track_id": {
+            "title": "Track Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "track_id",
+          "name",
+          "status",
+          "blocked_work_item_count",
+          "next_milestone_id"
+        ],
+        "title": "ProjectTrackSituation",
+        "type": "object"
+      },
+      "ProjectWorkItemSituation": {
+        "additionalProperties": false,
+        "properties": {
+          "blocker": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Blocker"
+          },
+          "dependency_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Dependency Ids",
+            "type": "array"
+          },
+          "planned_at_step": {
+            "minimum": 0.0,
+            "title": "Planned At Step",
+            "type": "integer"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "track_id": {
+            "title": "Track Id",
+            "type": "string"
+          },
+          "work_item_id": {
+            "title": "Work Item Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "work_item_id",
+          "track_id",
+          "title",
+          "status",
+          "blocker",
+          "planned_at_step",
+          "dependency_ids"
+        ],
+        "title": "ProjectWorkItemSituation",
         "type": "object"
       },
       "ProviderReviewResult": {
@@ -1915,6 +2846,39 @@
         "title": "ReviewRunView",
         "type": "object"
       },
+      "RiskAffectedObjectProjection": {
+        "additionalProperties": false,
+        "properties": {
+          "object_id": {
+            "title": "Object Id",
+            "type": "string"
+          },
+          "object_type": {
+            "enum": [
+              "WORK_ITEM",
+              "MILESTONE"
+            ],
+            "title": "Object Type",
+            "type": "string"
+          },
+          "state": {
+            "title": "State",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "object_id",
+          "title",
+          "object_type",
+          "state"
+        ],
+        "title": "RiskAffectedObjectProjection",
+        "type": "object"
+      },
       "RiskAssessment": {
         "additionalProperties": false,
         "properties": {
@@ -1955,6 +2919,169 @@
           "mitigation"
         ],
         "title": "RiskAssessment",
+        "type": "object"
+      },
+      "RiskCrossProjectSourceProjection": {
+        "additionalProperties": false,
+        "properties": {
+          "available_at_step": {
+            "minimum": 0.0,
+            "title": "Available At Step",
+            "type": "integer"
+          },
+          "lesson": {
+            "title": "Lesson",
+            "type": "string"
+          },
+          "source_event_id": {
+            "title": "Source Event Id",
+            "type": "string"
+          },
+          "source_id": {
+            "title": "Source Id",
+            "type": "string"
+          },
+          "source_project_id": {
+            "title": "Source Project Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "source_id",
+          "source_project_id",
+          "source_event_id",
+          "available_at_step",
+          "lesson"
+        ],
+        "title": "RiskCrossProjectSourceProjection",
+        "type": "object"
+      },
+      "RiskLevel": {
+        "enum": [
+          "LOW",
+          "MEDIUM",
+          "HIGH",
+          "CRITICAL"
+        ],
+        "title": "RiskLevel",
+        "type": "string"
+      },
+      "RiskSourceEventProjection": {
+        "additionalProperties": false,
+        "properties": {
+          "event_id": {
+            "title": "Event Id",
+            "type": "string"
+          },
+          "observed_at_step": {
+            "minimum": 0.0,
+            "title": "Observed At Step",
+            "type": "integer"
+          },
+          "summary": {
+            "title": "Summary",
+            "type": "string"
+          }
+        },
+        "required": [
+          "event_id",
+          "summary",
+          "observed_at_step"
+        ],
+        "title": "RiskSourceEventProjection",
+        "type": "object"
+      },
+      "RiskSourceIssueProjection": {
+        "additionalProperties": false,
+        "properties": {
+          "issue_id": {
+            "title": "Issue Id",
+            "type": "string"
+          },
+          "source_refs": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Source Refs",
+            "type": "array"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "issue_id",
+          "title",
+          "status",
+          "source_refs"
+        ],
+        "title": "RiskSourceIssueProjection",
+        "type": "object"
+      },
+      "RiskStatus": {
+        "enum": [
+          "OPEN",
+          "TREATING",
+          "ACCEPTED",
+          "REALIZED",
+          "CLOSED"
+        ],
+        "title": "RiskStatus",
+        "type": "string"
+      },
+      "RiskTreatmentActionProjection": {
+        "additionalProperties": false,
+        "properties": {
+          "action_id": {
+            "title": "Action Id",
+            "type": "string"
+          },
+          "due_at_step": {
+            "minimum": 0.0,
+            "title": "Due At Step",
+            "type": "integer"
+          },
+          "rollback_condition": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rollback Condition"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "verification_evidence_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Verification Evidence Ids",
+            "type": "array"
+          }
+        },
+        "required": [
+          "action_id",
+          "title",
+          "status",
+          "due_at_step",
+          "verification_evidence_ids",
+          "rollback_condition"
+        ],
+        "title": "RiskTreatmentActionProjection",
         "type": "object"
       },
       "RoleFailure": {
@@ -4874,6 +6001,276 @@
         "summary": "Get Observable Packet",
         "tags": [
           "developer"
+        ]
+      }
+    },
+    "/api/v1/projects": {
+      "get": {
+        "operationId": "list_projects_api_v1_projects_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ProjectListItemProjection"
+                  },
+                  "title": "Response List Projects Api V1 Projects Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List Projects",
+        "tags": [
+          "projects"
+        ]
+      }
+    },
+    "/api/v1/projects/{project_id}/risks": {
+      "get": {
+        "operationId": "get_project_risks_api_v1_projects__project_id__risks_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project_id",
+            "required": true,
+            "schema": {
+              "title": "Project Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "at_step",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "At Step"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ProjectRiskSummary"
+                  },
+                  "title": "Response Get Project Risks Api V1 Projects  Project Id  Risks Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Project Risks",
+        "tags": [
+          "projects"
+        ]
+      }
+    },
+    "/api/v1/projects/{project_id}/risks/{risk_id}": {
+      "get": {
+        "operationId": "get_project_risk_detail_api_v1_projects__project_id__risks__risk_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project_id",
+            "required": true,
+            "schema": {
+              "title": "Project Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "risk_id",
+            "required": true,
+            "schema": {
+              "title": "Risk Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "at_step",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "At Step"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectRiskDetailProjection"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Project Risk Detail",
+        "tags": [
+          "projects"
+        ]
+      }
+    },
+    "/api/v1/projects/{project_id}/situation": {
+      "get": {
+        "operationId": "get_project_situation_api_v1_projects__project_id__situation_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project_id",
+            "required": true,
+            "schema": {
+              "title": "Project Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "at_step",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "At Step"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectSituationProjection"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Project Situation",
+        "tags": [
+          "projects"
+        ]
+      }
+    },
+    "/api/v1/projects/{project_id}/timeline": {
+      "get": {
+        "operationId": "get_project_timeline_api_v1_projects__project_id__timeline_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project_id",
+            "required": true,
+            "schema": {
+              "title": "Project Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "at_step",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "At Step"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectTimelineProjection"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Project Timeline",
+        "tags": [
+          "projects"
         ]
       }
     },

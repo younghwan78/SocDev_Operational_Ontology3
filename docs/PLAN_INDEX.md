@@ -2,7 +2,7 @@
 
 > 상태: Active  
 > 갱신일: 2026-07-21
-> 현재 단계: OPS-A/OPS-B 완료, OPS-C Project domain/projection/API가 다음 단계; human session은 OPS-F까지 보류
+> 현재 단계: OPS-A~OPS-C 완료, OPS-D Project Portfolio/Situation UX가 다음 단계; human session은 OPS-F까지 보류
 
 이 문서는 제품 계획부터 구현 계약까지 어떤 문서를 어떤 순서로 읽고 수정해야 하는지 안내한다. 문서 간 충돌은 전체 순위가 아니라 각 문서가 소유한 결정 영역으로 해결한다.
 
@@ -48,6 +48,7 @@
 - `internal_docs/26.07.19 UX-H Human baseline 및 측정 계약 구현 보고서.md`
 - `internal_docs/26.07.21 OPS-A Project Operations Scope 및 Fixture 전환 계획.md`
 - `internal_docs/26.07.21 OPS-B Project 중심 Fixture 구현 및 검증 보고서.md`
+- `internal_docs/26.07.21 OPS-C Project Runtime Projection API 구현 및 검증 보고서.md`
 - `docs/decisions/ADR-0010-project-operations-and-risk-provenance.md`
 
 다음 문서는 과거 판단의 근거다. 새 구현 기준으로 직접 사용하지 않는다.
@@ -74,7 +75,7 @@
 ## 5. 현재 실행 지점
 
 I0~I7 Replay와 post-I7 UX-A/UX-B/UX-C/UX-D/UX-E/UX-F/UX-G 로컬 Gate,
-UX-H human-study 실행 도구 및 OPS-A/OPS-B 구현이 완료됐다. 다음 실행 단계는 OPS-C다.
+UX-H human-study 실행 도구 및 OPS-A~OPS-C 구현이 완료됐다. 다음 실행 단계는 OPS-D다.
 
 ```text
 UX-F Responsive·접근성·사용성 Gate
@@ -98,6 +99,10 @@ OPS-B Project 중심 Fixture
   → PROJECT-U/V/W의 lifecycle·evidence·commitment posture 분리
   → 17개 typed event와 Issue→Risk→Milestone/Decision provenance 검증
   → historical future-leakage, cross-project lineage와 immutable hash PASS
+OPS-C Project Runtime·Projection·API
+  → PostgreSQL 0020 + in-memory/PostgreSQL parity와 restart persistence PASS
+  → ProjectAttention/RiskLevel·ordering reason/source deterministic policy PASS
+  → Portfolio/Situation/Risk/Timeline 5개 read API와 동일 at_step boundary PASS
 ```
 
 UX-F/UX-G 완료는 local Codex evaluator와 deterministic browser automation의 공학적 Gate다.

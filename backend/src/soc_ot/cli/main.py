@@ -1,4 +1,5 @@
 import argparse
+import hashlib
 import json
 from collections.abc import Sequence
 from datetime import UTC, datetime
@@ -43,6 +44,7 @@ from soc_ot.config import get_settings
 from soc_ot.infrastructure.database import get_outcome_engine, get_runtime_engine
 from soc_ot.infrastructure.fixtures import FixtureRepository
 from soc_ot.infrastructure.hidden_repository import PostgresHiddenCaseRepository
+from soc_ot.infrastructure.project_repository import PostgresProjectRepository
 from soc_ot.infrastructure.tables import HiddenAuthoringAuditRow
 
 ROOT_DIR = Path(__file__).resolve().parents[4]
@@ -86,6 +88,10 @@ def build_parser() -> argparse.ArgumentParser:
     fixture_import.add_argument("--root", type=Path, default=ROOT_DIR / "fixtures")
     fixture_import.add_argument("--case-id", required=True)
     fixture_import.add_argument("--replace-current", action="store_true")
+    project_import = fixtures_sub.add_parser("import-project")
+    project_import.add_argument("--root", type=Path, default=ROOT_DIR / "fixtures")
+    project_import.add_argument("--project-id", required=True)
+    project_import.add_argument("--replace-current", action="store_true")
     hidden_import = fixtures_sub.add_parser("import-hidden")
     hidden_import.add_argument("--root", type=Path, default=ROOT_DIR / "fixtures")
     hidden_import.add_argument("--case-id")
@@ -201,7 +207,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         print(
             "I7 Replay + Step 5 B2 stability gates complete; "
             "B2 durable dossier runtime active; UX-H session tooling ready, "
-            "OPS-B project authoring fixtures ready, OPS-C runtime next; "
+            "OPS-C project runtime/API ready, OPS-D product UX next; "
             "human gate pending"
         )
         return 0
@@ -277,6 +283,50 @@ def main(argv: Sequence[str] | None = None) -> int:
             expected_aggregate_version=expected_version,
         )
         print(f"Imported {case.case_id} at aggregate version {stored.aggregate_version}.")
+        return 0
+    if args.command == "fixtures" and args.fixtures_command == "import-project":
+        fixture_repository = FixtureRepository(args.root)
+        projects = fixture_repository.validate_project_corpus()
+        project = next(
+            (item for item in projects if item.project_id == args.project_id),
+            None,
+        )
+        if project is None:
+            raise ValueError(f"unknown project fixture: {args.project_id}")
+        fixture_hash = hashlib.sha256(
+            (args.root / f"projects/{project.project_id}.yaml").read_bytes()
+        ).hexdigest()
+        project_repository = PostgresProjectRepository(get_runtime_engine())
+        project_current = project_repository.get(project.project_id)
+        if project_current and project.fixture_version < project_current.project.fixture_version:
+            raise ValueError("PROJECT_FIXTURE_VERSION_REGRESSION")
+        if (
+            project_current
+            and project.fixture_version == project_current.project.fixture_version
+            and fixture_hash != project_current.fixture_hash
+        ):
+            raise ValueError("PROJECT_FIXTURE_VERSION_REUSED")
+        if (
+            project_current
+            and project_current.project.fixture_version == project.fixture_version
+            and not args.replace_current
+        ):
+            print(
+                f"Project {project.project_id} version {project.fixture_version} "
+                "already imported."
+            )
+            return 0
+        project_stored = project_repository.save(
+            project,
+            expected_aggregate_version=(
+                project_current.aggregate_version if project_current else None
+            ),
+            fixture_hash=fixture_hash,
+        )
+        print(
+            f"Imported project {project.project_id} at aggregate version "
+            f"{project_stored.aggregate_version}."
+        )
         return 0
     if args.command == "fixtures" and args.fixtures_command == "import-hidden":
         settings = get_settings()

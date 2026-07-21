@@ -1,0 +1,537 @@
+{
+  "$defs": {
+    "EvidenceStatus": {
+      "enum": [
+        "REQUESTED",
+        "LATE",
+        "RECEIVED"
+      ],
+      "title": "EvidenceStatus",
+      "type": "string"
+    },
+    "ProjectDecisionReferenceProjection": {
+      "additionalProperties": false,
+      "properties": {
+        "case_id": {
+          "title": "Case Id",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "status": {
+          "title": "Status",
+          "type": "string"
+        },
+        "treated_risk_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Treated Risk Ids",
+          "type": "array"
+        },
+        "href": {
+          "title": "Href",
+          "type": "string"
+        }
+      },
+      "required": [
+        "case_id",
+        "title",
+        "status",
+        "treated_risk_ids",
+        "href"
+      ],
+      "title": "ProjectDecisionReferenceProjection",
+      "type": "object"
+    },
+    "ProjectEvidenceSituation": {
+      "additionalProperties": false,
+      "properties": {
+        "evidence_id": {
+          "title": "Evidence Id",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "evidence_type": {
+          "title": "Evidence Type",
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/EvidenceStatus"
+        },
+        "expected_at_step": {
+          "minimum": 0,
+          "title": "Expected At Step",
+          "type": "integer"
+        },
+        "available_at_step": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Available At Step"
+        },
+        "source_ref": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Source Ref"
+        },
+        "limitations": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Limitations",
+          "type": "array"
+        }
+      },
+      "required": [
+        "evidence_id",
+        "title",
+        "evidence_type",
+        "status",
+        "expected_at_step",
+        "available_at_step",
+        "source_ref",
+        "limitations"
+      ],
+      "title": "ProjectEvidenceSituation",
+      "type": "object"
+    },
+    "ProjectRiskSummary": {
+      "additionalProperties": false,
+      "properties": {
+        "projection_schema_version": {
+          "const": "project-risk-summary.v1",
+          "default": "project-risk-summary.v1",
+          "title": "Projection Schema Version",
+          "type": "string"
+        },
+        "project_id": {
+          "title": "Project Id",
+          "type": "string"
+        },
+        "risk_id": {
+          "title": "Risk Id",
+          "type": "string"
+        },
+        "statement": {
+          "title": "Statement",
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/RiskStatus"
+        },
+        "risk_level": {
+          "$ref": "#/$defs/RiskLevel"
+        },
+        "rank": {
+          "minimum": 1,
+          "title": "Rank",
+          "type": "integer"
+        },
+        "policy_version": {
+          "const": "project-risk-order.v1",
+          "default": "project-risk-order.v1",
+          "title": "Policy Version",
+          "type": "string"
+        },
+        "ranking_reasons": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Ranking Reasons",
+          "type": "array"
+        },
+        "source_refs": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Source Refs",
+          "type": "array"
+        },
+        "affected_work_item_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Affected Work Item Ids",
+          "type": "array"
+        },
+        "affected_milestone_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Affected Milestone Ids",
+          "type": "array"
+        },
+        "treatment_decision_case_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Treatment Decision Case Ids",
+          "type": "array"
+        },
+        "treatment_action_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Treatment Action Ids",
+          "type": "array"
+        },
+        "missing_evidence_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Missing Evidence Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "project_id",
+        "risk_id",
+        "statement",
+        "status",
+        "risk_level",
+        "rank",
+        "ranking_reasons",
+        "source_refs",
+        "affected_work_item_ids",
+        "affected_milestone_ids",
+        "treatment_decision_case_ids",
+        "treatment_action_ids",
+        "missing_evidence_ids"
+      ],
+      "title": "ProjectRiskSummary",
+      "type": "object"
+    },
+    "RiskAffectedObjectProjection": {
+      "additionalProperties": false,
+      "properties": {
+        "object_id": {
+          "title": "Object Id",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "object_type": {
+          "enum": [
+            "WORK_ITEM",
+            "MILESTONE"
+          ],
+          "title": "Object Type",
+          "type": "string"
+        },
+        "state": {
+          "title": "State",
+          "type": "string"
+        }
+      },
+      "required": [
+        "object_id",
+        "title",
+        "object_type",
+        "state"
+      ],
+      "title": "RiskAffectedObjectProjection",
+      "type": "object"
+    },
+    "RiskCrossProjectSourceProjection": {
+      "additionalProperties": false,
+      "properties": {
+        "source_id": {
+          "title": "Source Id",
+          "type": "string"
+        },
+        "source_project_id": {
+          "title": "Source Project Id",
+          "type": "string"
+        },
+        "source_event_id": {
+          "title": "Source Event Id",
+          "type": "string"
+        },
+        "available_at_step": {
+          "minimum": 0,
+          "title": "Available At Step",
+          "type": "integer"
+        },
+        "lesson": {
+          "title": "Lesson",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source_id",
+        "source_project_id",
+        "source_event_id",
+        "available_at_step",
+        "lesson"
+      ],
+      "title": "RiskCrossProjectSourceProjection",
+      "type": "object"
+    },
+    "RiskLevel": {
+      "enum": [
+        "LOW",
+        "MEDIUM",
+        "HIGH",
+        "CRITICAL"
+      ],
+      "title": "RiskLevel",
+      "type": "string"
+    },
+    "RiskSourceEventProjection": {
+      "additionalProperties": false,
+      "properties": {
+        "event_id": {
+          "title": "Event Id",
+          "type": "string"
+        },
+        "summary": {
+          "title": "Summary",
+          "type": "string"
+        },
+        "observed_at_step": {
+          "minimum": 0,
+          "title": "Observed At Step",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "event_id",
+        "summary",
+        "observed_at_step"
+      ],
+      "title": "RiskSourceEventProjection",
+      "type": "object"
+    },
+    "RiskSourceIssueProjection": {
+      "additionalProperties": false,
+      "properties": {
+        "issue_id": {
+          "title": "Issue Id",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "status": {
+          "title": "Status",
+          "type": "string"
+        },
+        "source_refs": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Source Refs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "issue_id",
+        "title",
+        "status",
+        "source_refs"
+      ],
+      "title": "RiskSourceIssueProjection",
+      "type": "object"
+    },
+    "RiskStatus": {
+      "enum": [
+        "OPEN",
+        "TREATING",
+        "ACCEPTED",
+        "REALIZED",
+        "CLOSED"
+      ],
+      "title": "RiskStatus",
+      "type": "string"
+    },
+    "RiskTreatmentActionProjection": {
+      "additionalProperties": false,
+      "properties": {
+        "action_id": {
+          "title": "Action Id",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "status": {
+          "title": "Status",
+          "type": "string"
+        },
+        "due_at_step": {
+          "minimum": 0,
+          "title": "Due At Step",
+          "type": "integer"
+        },
+        "verification_evidence_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Verification Evidence Ids",
+          "type": "array"
+        },
+        "rollback_condition": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Rollback Condition"
+        }
+      },
+      "required": [
+        "action_id",
+        "title",
+        "status",
+        "due_at_step",
+        "verification_evidence_ids",
+        "rollback_condition"
+      ],
+      "title": "RiskTreatmentActionProjection",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "projection_schema_version": {
+      "const": "project-risk-detail.v1",
+      "default": "project-risk-detail.v1",
+      "title": "Projection Schema Version",
+      "type": "string"
+    },
+    "project_id": {
+      "title": "Project Id",
+      "type": "string"
+    },
+    "reconstructed_at_step": {
+      "minimum": 0,
+      "title": "Reconstructed At Step",
+      "type": "integer"
+    },
+    "risk": {
+      "$ref": "#/$defs/ProjectRiskSummary"
+    },
+    "epistemic_status": {
+      "title": "Epistemic Status",
+      "type": "string"
+    },
+    "inference_basis": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Inference Basis",
+      "type": "array"
+    },
+    "downside": {
+      "title": "Downside",
+      "type": "string"
+    },
+    "blast_radius": {
+      "title": "Blast Radius",
+      "type": "string"
+    },
+    "urgency": {
+      "title": "Urgency",
+      "type": "string"
+    },
+    "reversibility": {
+      "title": "Reversibility",
+      "type": "string"
+    },
+    "source_issues": {
+      "items": {
+        "$ref": "#/$defs/RiskSourceIssueProjection"
+      },
+      "title": "Source Issues",
+      "type": "array"
+    },
+    "source_events": {
+      "items": {
+        "$ref": "#/$defs/RiskSourceEventProjection"
+      },
+      "title": "Source Events",
+      "type": "array"
+    },
+    "source_evidence": {
+      "items": {
+        "$ref": "#/$defs/ProjectEvidenceSituation"
+      },
+      "title": "Source Evidence",
+      "type": "array"
+    },
+    "cross_project_sources": {
+      "items": {
+        "$ref": "#/$defs/RiskCrossProjectSourceProjection"
+      },
+      "title": "Cross Project Sources",
+      "type": "array"
+    },
+    "affected_objects": {
+      "items": {
+        "$ref": "#/$defs/RiskAffectedObjectProjection"
+      },
+      "title": "Affected Objects",
+      "type": "array"
+    },
+    "decisions": {
+      "items": {
+        "$ref": "#/$defs/ProjectDecisionReferenceProjection"
+      },
+      "title": "Decisions",
+      "type": "array"
+    },
+    "treatment_actions": {
+      "items": {
+        "$ref": "#/$defs/RiskTreatmentActionProjection"
+      },
+      "title": "Treatment Actions",
+      "type": "array"
+    }
+  },
+  "required": [
+    "project_id",
+    "reconstructed_at_step",
+    "risk",
+    "epistemic_status",
+    "inference_basis",
+    "downside",
+    "blast_radius",
+    "urgency",
+    "reversibility",
+    "source_issues",
+    "source_events",
+    "source_evidence",
+    "cross_project_sources",
+    "affected_objects",
+    "decisions",
+    "treatment_actions"
+  ],
+  "title": "ProjectRiskDetailProjection",
+  "type": "object"
+}

@@ -1,7 +1,7 @@
 import json
 import time
 from collections.abc import Iterator
-from typing import Annotated
+from typing import Annotated, NoReturn
 
 from fastapi import Depends, FastAPI, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -31,6 +31,24 @@ from soc_ot.application.outcome_advances import (
 from soc_ot.application.outcomes import OutcomeSnapshot
 from soc_ot.application.packets import build_observable_case_packet
 from soc_ot.application.ports import EvaluationRepository, HiddenCaseReader
+from soc_ot.application.project_operations import (
+    ProjectListItemProjection,
+    ProjectRiskDetailProjection,
+    ProjectRiskSummary,
+    ProjectSituationProjection,
+    ProjectTimelineProjection,
+    build_project_list_item,
+    build_project_risk_detail,
+    build_project_risks,
+    build_project_situation,
+    build_project_timeline,
+    sort_project_list_items,
+)
+from soc_ot.application.project_repositories import (
+    InMemoryProjectRepository,
+    ProjectRepository,
+    StoredProject,
+)
 from soc_ot.application.projections import (
     DecisionListItemProjection,
     build_decision_list_item,
@@ -66,8 +84,9 @@ from soc_ot.infrastructure.hidden_repository import (
     FixtureHiddenCaseReader,
     PostgresHiddenCaseRepository,
 )
+from soc_ot.infrastructure.project_repository import PostgresProjectRepository
 
-EXPECTED_DB_REVISION = "0019_agent_run_topology"
+EXPECTED_DB_REVISION = "0020_development_projects"
 
 
 def _default_repository() -> CaseRepository:
@@ -81,6 +100,7 @@ def create_app(
     hidden_reader: HiddenCaseReader | None = None,
     evaluation_repository: EvaluationRepository | None = None,
     decision_repository: SimulatedDecisionRepository | None = None,
+    project_repository: ProjectRepository | None = None,
 ) -> FastAPI:
     settings = get_settings()
     app = FastAPI(title="SoC Operational Decision Twin", version=__version__)
@@ -102,6 +122,18 @@ def create_app(
         return PostgresReviewRunRepository(get_runtime_engine())
 
     local_fixtures = FixtureRepository(ROOT_DIR / "fixtures")
+    if project_repository is not None:
+        local_projects = project_repository
+    elif repository is not None:
+        local_projects = InMemoryProjectRepository()
+        for project in local_fixtures.validate_project_corpus():
+            local_projects.save(project, expected_aggregate_version=None)
+    else:
+        local_projects = PostgresProjectRepository(get_runtime_engine())
+
+    def project_repository_provider() -> ProjectRepository:
+        return local_projects
+
     local_evaluations = evaluation_repository or (
         FixtureEvaluationRepository(local_fixtures)
         if repository is not None
@@ -136,6 +168,7 @@ def create_app(
         return local_evaluations
 
     Repository = Annotated[CaseRepository, Depends(repository_provider)]
+    Projects = Annotated[ProjectRepository, Depends(project_repository_provider)]
     RunRepository = Annotated[ReviewRunRepository, Depends(run_repository_provider)]
     OutcomeRepository = Annotated[
         OutcomeAdvanceRepository, Depends(stable_outcome_repository_provider)
@@ -180,6 +213,87 @@ def create_app(
         return sort_decision_list_items(
             [build_decision_list_item(item) for item in repo.list()]
         )
+
+    @app.get(
+        "/api/v1/projects",
+        response_model=list[ProjectListItemProjection],
+        tags=["projects"],
+    )
+    def list_projects(projects: Projects) -> list[ProjectListItemProjection]:
+        return sort_project_list_items(
+            [build_project_list_item(item) for item in projects.list()]
+        )
+
+    @app.get(
+        "/api/v1/projects/{project_id}/situation",
+        response_model=ProjectSituationProjection,
+        tags=["projects"],
+    )
+    def get_project_situation(
+        project_id: str,
+        projects: Projects,
+        at_step: int | None = None,
+    ) -> ProjectSituationProjection:
+        try:
+            return build_project_situation(
+                _require_project(projects, project_id), at_step=at_step
+            )
+        except ValueError as error:
+            _raise_project_value_error(error)
+
+    @app.get(
+        "/api/v1/projects/{project_id}/risks",
+        response_model=list[ProjectRiskSummary],
+        tags=["projects"],
+    )
+    def get_project_risks(
+        project_id: str,
+        projects: Projects,
+        at_step: int | None = None,
+    ) -> list[ProjectRiskSummary]:
+        try:
+            return build_project_risks(
+                _require_project(projects, project_id), at_step=at_step
+            )
+        except ValueError as error:
+            _raise_project_value_error(error)
+
+    @app.get(
+        "/api/v1/projects/{project_id}/risks/{risk_id}",
+        response_model=ProjectRiskDetailProjection,
+        tags=["projects"],
+    )
+    def get_project_risk_detail(
+        project_id: str,
+        risk_id: str,
+        projects: Projects,
+        at_step: int | None = None,
+    ) -> ProjectRiskDetailProjection:
+        try:
+            return build_project_risk_detail(
+                _require_project(projects, project_id),
+                risk_id,
+                at_step=at_step,
+            )
+        except ValueError as error:
+            _raise_project_value_error(error)
+
+    @app.get(
+        "/api/v1/projects/{project_id}/timeline",
+        response_model=ProjectTimelineProjection,
+        tags=["projects"],
+    )
+    def get_project_timeline(
+        project_id: str,
+        projects: Projects,
+        at_step: int | None = None,
+    ) -> ProjectTimelineProjection:
+        try:
+            return build_project_timeline(
+                _require_project(projects, project_id), at_step=at_step
+            )
+        except ValueError as error:
+            _raise_project_value_error(error)
 
     @app.get(
         "/api/v1/decision-cases/{case_id}/workspace",
@@ -570,6 +684,23 @@ def _require_case(repository: CaseRepository, case_id: str) -> StoredCase:
     if stored is None:
         raise HTTPException(status_code=404, detail={"code": "CASE_NOT_FOUND"})
     return stored
+
+
+def _require_project(
+    repository: ProjectRepository, project_id: str
+) -> StoredProject:
+    stored = repository.get(project_id)
+    if stored is None:
+        raise HTTPException(status_code=404, detail={"code": "PROJECT_NOT_FOUND"})
+    return stored
+
+
+def _raise_project_value_error(error: ValueError) -> NoReturn:
+    code = str(error)
+    if code in {"PROJECT_STEP_OUT_OF_RANGE", "PROJECT_RISK_NOT_FOUND"}:
+        status_code = 404 if code == "PROJECT_RISK_NOT_FOUND" else 422
+        raise HTTPException(status_code=status_code, detail={"code": code}) from error
+    raise error
 
 
 def _require_version(stored: StoredCase, if_match: str) -> None:

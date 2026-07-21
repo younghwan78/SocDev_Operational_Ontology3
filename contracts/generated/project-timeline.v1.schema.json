@@ -1,0 +1,119 @@
+{
+  "$defs": {
+    "ProjectAttention": {
+      "enum": [
+        "ON_TRACK",
+        "WATCH",
+        "AT_RISK",
+        "BLOCKED"
+      ],
+      "title": "ProjectAttention",
+      "type": "string"
+    },
+    "ProjectTimelineEventProjection": {
+      "additionalProperties": false,
+      "properties": {
+        "event_id": {
+          "title": "Event Id",
+          "type": "string"
+        },
+        "event_type": {
+          "title": "Event Type",
+          "type": "string"
+        },
+        "effective_at_step": {
+          "minimum": 0,
+          "title": "Effective At Step",
+          "type": "integer"
+        },
+        "observed_at_step": {
+          "minimum": 0,
+          "title": "Observed At Step",
+          "type": "integer"
+        },
+        "summary": {
+          "title": "Summary",
+          "type": "string"
+        },
+        "cause": {
+          "title": "Cause",
+          "type": "string"
+        },
+        "affected_entity_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Affected Entity Ids",
+          "type": "array"
+        },
+        "impacted_milestone_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Impacted Milestone Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "event_id",
+        "event_type",
+        "effective_at_step",
+        "observed_at_step",
+        "summary",
+        "cause",
+        "affected_entity_ids",
+        "impacted_milestone_ids"
+      ],
+      "title": "ProjectTimelineEventProjection",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "projection_schema_version": {
+      "const": "project-timeline.v1",
+      "default": "project-timeline.v1",
+      "title": "Projection Schema Version",
+      "type": "string"
+    },
+    "project_id": {
+      "title": "Project Id",
+      "type": "string"
+    },
+    "aggregate_version": {
+      "minimum": 1,
+      "title": "Aggregate Version",
+      "type": "integer"
+    },
+    "current_step": {
+      "minimum": 0,
+      "title": "Current Step",
+      "type": "integer"
+    },
+    "reconstructed_at_step": {
+      "minimum": 0,
+      "title": "Reconstructed At Step",
+      "type": "integer"
+    },
+    "attention": {
+      "$ref": "#/$defs/ProjectAttention"
+    },
+    "events": {
+      "items": {
+        "$ref": "#/$defs/ProjectTimelineEventProjection"
+      },
+      "title": "Events",
+      "type": "array"
+    }
+  },
+  "required": [
+    "project_id",
+    "aggregate_version",
+    "current_step",
+    "reconstructed_at_step",
+    "attention",
+    "events"
+  ],
+  "title": "ProjectTimelineProjection",
+  "type": "object"
+}

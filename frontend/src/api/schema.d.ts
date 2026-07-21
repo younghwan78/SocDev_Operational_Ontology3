@@ -174,6 +174,91 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/projects": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Projects */
+        get: operations["list_projects_api_v1_projects_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{project_id}/risks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Project Risks */
+        get: operations["get_project_risks_api_v1_projects__project_id__risks_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{project_id}/risks/{risk_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Project Risk Detail */
+        get: operations["get_project_risk_detail_api_v1_projects__project_id__risks__risk_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{project_id}/situation": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Project Situation */
+        get: operations["get_project_situation_api_v1_projects__project_id__situation_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{project_id}/timeline": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Project Timeline */
+        get: operations["get_project_timeline_api_v1_projects__project_id__timeline_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/runs/{run_id}": {
         parameters: {
             query?: never;
@@ -764,11 +849,21 @@ export interface components {
             /** Title */
             title: string;
         };
+        /**
+         * EvidenceStatus
+         * @enum {string}
+         */
+        EvidenceStatus: "REQUESTED" | "LATE" | "RECEIVED";
         /** HTTPValidationError */
         HTTPValidationError: {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
         };
+        /**
+         * MilestoneStatus
+         * @enum {string}
+         */
+        MilestoneStatus: "PLANNED" | "AT_RISK" | "ACHIEVED";
         /** OutcomeAdvanceRequest */
         OutcomeAdvanceRequest: {
             /**
@@ -875,6 +970,321 @@ export interface components {
             role_differentiation: boolean;
             /** Unresolved Uncertainty Visible */
             unresolved_uncertainty_visible: boolean;
+        };
+        /**
+         * ProjectAttention
+         * @enum {string}
+         */
+        ProjectAttention: "ON_TRACK" | "WATCH" | "AT_RISK" | "BLOCKED";
+        /** ProjectAttentionReason */
+        ProjectAttentionReason: {
+            /**
+             * Code
+             * @enum {string}
+             */
+            code: "WORK_ITEM_BLOCKED" | "CRITICAL_RISK" | "HIGH_RISK" | "MILESTONE_AT_RISK" | "EVIDENCE_LATE" | "ACTIVE_RISK" | "NO_ACTIVE_ALERT";
+            /** Source Refs */
+            source_refs: string[];
+            /** Summary Ko */
+            summary_ko: string;
+        };
+        /** ProjectDecisionReferenceProjection */
+        ProjectDecisionReferenceProjection: {
+            /** Case Id */
+            case_id: string;
+            /** Href */
+            href: string;
+            /** Status */
+            status: string;
+            /** Title */
+            title: string;
+            /** Treated Risk Ids */
+            treated_risk_ids: string[];
+        };
+        /** ProjectEvidenceSituation */
+        ProjectEvidenceSituation: {
+            /** Available At Step */
+            available_at_step: number | null;
+            /** Evidence Id */
+            evidence_id: string;
+            /** Evidence Type */
+            evidence_type: string;
+            /** Expected At Step */
+            expected_at_step: number;
+            /** Limitations */
+            limitations: string[];
+            /** Source Ref */
+            source_ref: string | null;
+            status: components["schemas"]["EvidenceStatus"];
+            /** Title */
+            title: string;
+        };
+        /** ProjectIssueSituation */
+        ProjectIssueSituation: {
+            /** Affected Milestone Ids */
+            affected_milestone_ids: string[];
+            /** Affected Work Item Ids */
+            affected_work_item_ids: string[];
+            /** Issue Id */
+            issue_id: string;
+            /** Observed At Step */
+            observed_at_step: number;
+            /** Source Refs */
+            source_refs: string[];
+            /** Status */
+            status: string;
+            /** Title */
+            title: string;
+        };
+        /** ProjectListItemProjection */
+        ProjectListItemProjection: {
+            /** Active Issue Count */
+            active_issue_count: number;
+            /** Active Risk Count */
+            active_risk_count: number;
+            /** Aggregate Version */
+            aggregate_version: number;
+            attention: components["schemas"]["ProjectAttention"];
+            /**
+             * Attention Policy Version
+             * @default project-attention.v1
+             * @constant
+             */
+            attention_policy_version: "project-attention.v1";
+            /** Attention Reasons */
+            attention_reasons: components["schemas"]["ProjectAttentionReason"][];
+            /** Blocked Work Item Count */
+            blocked_work_item_count: number;
+            /** Current Step */
+            current_step: number;
+            /** Lifecycle Stage */
+            lifecycle_stage: string;
+            /** Nearest Milestone Id */
+            nearest_milestone_id: string;
+            /** Nearest Milestone Step */
+            nearest_milestone_step: number;
+            /** Project Id */
+            project_id: string;
+            /**
+             * Projection Schema Version
+             * @default project-list-item.v1
+             * @constant
+             */
+            projection_schema_version: "project-list-item.v1";
+            /** Title Ko */
+            title_ko: string;
+            /** Top Risks */
+            top_risks: components["schemas"]["ProjectRiskSummary"][];
+        };
+        /** ProjectMilestoneSituation */
+        ProjectMilestoneSituation: {
+            /** Commitment At Step */
+            commitment_at_step: number | null;
+            /** Kind */
+            kind: string;
+            /** Milestone Id */
+            milestone_id: string;
+            /** Planned At Step */
+            planned_at_step: number;
+            /** Remaining Steps */
+            remaining_steps: number;
+            status: components["schemas"]["MilestoneStatus"];
+            /** Title */
+            title: string;
+        };
+        /** ProjectRiskDetailProjection */
+        ProjectRiskDetailProjection: {
+            /** Affected Objects */
+            affected_objects: components["schemas"]["RiskAffectedObjectProjection"][];
+            /** Blast Radius */
+            blast_radius: string;
+            /** Cross Project Sources */
+            cross_project_sources: components["schemas"]["RiskCrossProjectSourceProjection"][];
+            /** Decisions */
+            decisions: components["schemas"]["ProjectDecisionReferenceProjection"][];
+            /** Downside */
+            downside: string;
+            /** Epistemic Status */
+            epistemic_status: string;
+            /** Inference Basis */
+            inference_basis: string[];
+            /** Project Id */
+            project_id: string;
+            /**
+             * Projection Schema Version
+             * @default project-risk-detail.v1
+             * @constant
+             */
+            projection_schema_version: "project-risk-detail.v1";
+            /** Reconstructed At Step */
+            reconstructed_at_step: number;
+            /** Reversibility */
+            reversibility: string;
+            risk: components["schemas"]["ProjectRiskSummary"];
+            /** Source Events */
+            source_events: components["schemas"]["RiskSourceEventProjection"][];
+            /** Source Evidence */
+            source_evidence: components["schemas"]["ProjectEvidenceSituation"][];
+            /** Source Issues */
+            source_issues: components["schemas"]["RiskSourceIssueProjection"][];
+            /** Treatment Actions */
+            treatment_actions: components["schemas"]["RiskTreatmentActionProjection"][];
+            /** Urgency */
+            urgency: string;
+        };
+        /** ProjectRiskSummary */
+        ProjectRiskSummary: {
+            /** Affected Milestone Ids */
+            affected_milestone_ids: string[];
+            /** Affected Work Item Ids */
+            affected_work_item_ids: string[];
+            /** Missing Evidence Ids */
+            missing_evidence_ids: string[];
+            /**
+             * Policy Version
+             * @default project-risk-order.v1
+             * @constant
+             */
+            policy_version: "project-risk-order.v1";
+            /** Project Id */
+            project_id: string;
+            /**
+             * Projection Schema Version
+             * @default project-risk-summary.v1
+             * @constant
+             */
+            projection_schema_version: "project-risk-summary.v1";
+            /** Rank */
+            rank: number;
+            /** Ranking Reasons */
+            ranking_reasons: string[];
+            /** Risk Id */
+            risk_id: string;
+            risk_level: components["schemas"]["RiskLevel"];
+            /** Source Refs */
+            source_refs: string[];
+            /** Statement */
+            statement: string;
+            status: components["schemas"]["RiskStatus"];
+            /** Treatment Action Ids */
+            treatment_action_ids: string[];
+            /** Treatment Decision Case Ids */
+            treatment_decision_case_ids: string[];
+        };
+        /** ProjectSituationProjection */
+        ProjectSituationProjection: {
+            /** Aggregate Version */
+            aggregate_version: number;
+            attention: components["schemas"]["ProjectAttention"];
+            /**
+             * Attention Policy Version
+             * @default project-attention.v1
+             * @constant
+             */
+            attention_policy_version: "project-attention.v1";
+            /** Attention Reasons */
+            attention_reasons: components["schemas"]["ProjectAttentionReason"][];
+            /** Current Step */
+            current_step: number;
+            /** Decision Case Refs */
+            decision_case_refs: components["schemas"]["ProjectDecisionReferenceProjection"][];
+            /** Evidence */
+            evidence: components["schemas"]["ProjectEvidenceSituation"][];
+            /** Fixture Version */
+            fixture_version: number;
+            /** Issues */
+            issues: components["schemas"]["ProjectIssueSituation"][];
+            /** Lifecycle Stage */
+            lifecycle_stage: string;
+            /** Milestones */
+            milestones: components["schemas"]["ProjectMilestoneSituation"][];
+            /** Project Id */
+            project_id: string;
+            /**
+             * Projection Schema Version
+             * @default project-situation.v1
+             * @constant
+             */
+            projection_schema_version: "project-situation.v1";
+            /** Reconstructed At Step */
+            reconstructed_at_step: number;
+            /** Risks */
+            risks: components["schemas"]["ProjectRiskSummary"][];
+            /** Title Ko */
+            title_ko: string;
+            /** Tracks */
+            tracks: components["schemas"]["ProjectTrackSituation"][];
+            /** Work Items */
+            work_items: components["schemas"]["ProjectWorkItemSituation"][];
+        };
+        /** ProjectTimelineEventProjection */
+        ProjectTimelineEventProjection: {
+            /** Affected Entity Ids */
+            affected_entity_ids: string[];
+            /** Cause */
+            cause: string;
+            /** Effective At Step */
+            effective_at_step: number;
+            /** Event Id */
+            event_id: string;
+            /** Event Type */
+            event_type: string;
+            /** Impacted Milestone Ids */
+            impacted_milestone_ids: string[];
+            /** Observed At Step */
+            observed_at_step: number;
+            /** Summary */
+            summary: string;
+        };
+        /** ProjectTimelineProjection */
+        ProjectTimelineProjection: {
+            /** Aggregate Version */
+            aggregate_version: number;
+            attention: components["schemas"]["ProjectAttention"];
+            /** Current Step */
+            current_step: number;
+            /** Events */
+            events: components["schemas"]["ProjectTimelineEventProjection"][];
+            /** Project Id */
+            project_id: string;
+            /**
+             * Projection Schema Version
+             * @default project-timeline.v1
+             * @constant
+             */
+            projection_schema_version: "project-timeline.v1";
+            /** Reconstructed At Step */
+            reconstructed_at_step: number;
+        };
+        /** ProjectTrackSituation */
+        ProjectTrackSituation: {
+            /** Blocked Work Item Count */
+            blocked_work_item_count: number;
+            /** Name */
+            name: string;
+            /** Next Milestone Id */
+            next_milestone_id: string | null;
+            /** Status */
+            status: string;
+            /** Track Id */
+            track_id: string;
+        };
+        /** ProjectWorkItemSituation */
+        ProjectWorkItemSituation: {
+            /** Blocker */
+            blocker: string | null;
+            /** Dependency Ids */
+            dependency_ids: string[];
+            /** Planned At Step */
+            planned_at_step: number;
+            /** Status */
+            status: string;
+            /** Title */
+            title: string;
+            /** Track Id */
+            track_id: string;
+            /** Work Item Id */
+            work_item_id: string;
         };
         /** ProviderReviewResult */
         ProviderReviewResult: {
@@ -1018,6 +1428,20 @@ export interface components {
             /** Updated At */
             updated_at?: string | null;
         };
+        /** RiskAffectedObjectProjection */
+        RiskAffectedObjectProjection: {
+            /** Object Id */
+            object_id: string;
+            /**
+             * Object Type
+             * @enum {string}
+             */
+            object_type: "WORK_ITEM" | "MILESTONE";
+            /** State */
+            state: string;
+            /** Title */
+            title: string;
+        };
         /** RiskAssessment */
         RiskAssessment: {
             /** Claim Ids */
@@ -1033,6 +1457,64 @@ export interface components {
             severity: "low" | "medium" | "high" | "critical";
             /** Statement */
             statement: string;
+        };
+        /** RiskCrossProjectSourceProjection */
+        RiskCrossProjectSourceProjection: {
+            /** Available At Step */
+            available_at_step: number;
+            /** Lesson */
+            lesson: string;
+            /** Source Event Id */
+            source_event_id: string;
+            /** Source Id */
+            source_id: string;
+            /** Source Project Id */
+            source_project_id: string;
+        };
+        /**
+         * RiskLevel
+         * @enum {string}
+         */
+        RiskLevel: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+        /** RiskSourceEventProjection */
+        RiskSourceEventProjection: {
+            /** Event Id */
+            event_id: string;
+            /** Observed At Step */
+            observed_at_step: number;
+            /** Summary */
+            summary: string;
+        };
+        /** RiskSourceIssueProjection */
+        RiskSourceIssueProjection: {
+            /** Issue Id */
+            issue_id: string;
+            /** Source Refs */
+            source_refs: string[];
+            /** Status */
+            status: string;
+            /** Title */
+            title: string;
+        };
+        /**
+         * RiskStatus
+         * @enum {string}
+         */
+        RiskStatus: "OPEN" | "TREATING" | "ACCEPTED" | "REALIZED" | "CLOSED";
+        /** RiskTreatmentActionProjection */
+        RiskTreatmentActionProjection: {
+            /** Action Id */
+            action_id: string;
+            /** Due At Step */
+            due_at_step: number;
+            /** Rollback Condition */
+            rollback_condition: string | null;
+            /** Status */
+            status: string;
+            /** Title */
+            title: string;
+            /** Verification Evidence Ids */
+            verification_evidence_ids: string[];
         };
         /** RoleFailure */
         RoleFailure: {
@@ -2129,6 +2611,159 @@ export interface operations {
                     "application/json": {
                         [key: string]: unknown;
                     };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_projects_api_v1_projects_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProjectListItemProjection"][];
+                };
+            };
+        };
+    };
+    get_project_risks_api_v1_projects__project_id__risks_get: {
+        parameters: {
+            query?: {
+                at_step?: number | null;
+            };
+            header?: never;
+            path: {
+                project_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProjectRiskSummary"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_project_risk_detail_api_v1_projects__project_id__risks__risk_id__get: {
+        parameters: {
+            query?: {
+                at_step?: number | null;
+            };
+            header?: never;
+            path: {
+                project_id: string;
+                risk_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProjectRiskDetailProjection"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_project_situation_api_v1_projects__project_id__situation_get: {
+        parameters: {
+            query?: {
+                at_step?: number | null;
+            };
+            header?: never;
+            path: {
+                project_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProjectSituationProjection"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_project_timeline_api_v1_projects__project_id__timeline_get: {
+        parameters: {
+            query?: {
+                at_step?: number | null;
+            };
+            header?: never;
+            path: {
+                project_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProjectTimelineProjection"];
                 };
             };
             /** @description Validation Error */

@@ -1,7 +1,7 @@
 # Implementation status
 
-> Updated: 2026-07-19
-> Current stage: Post-I7 UX-H study tooling is session-ready; independent human observations are pending and UX-I is blocked
+> Updated: 2026-07-21
+> Current stage: OPS-C Project runtime/API passed; OPS-D Portfolio/Situation UX is next, human observations remain paused until OPS-F
 
 ## Stage evidence
 
@@ -25,6 +25,9 @@
 |Post-I7 UX-F|Passed (local agent substitute)|390/768/desktop and 200%-equivalent reflow, skip-link and section focus, semantic landmarks/table/live states, 44px targets, reduced motion, Korean partial recovery, stale/conflict refresh, 9 Frontend unit tests, 7 Playwright E2E tests, and frozen CASE-VR-001 13/13 task answers with zero raw-detail opens for questions 1–6. Human usability and business-value evidence remain unmeasured.|
 |Post-I7 UX-G|Passed (fixture-only)|API-boundary network error normalization, Korean reason/impact/recovery UI, unavailable historical-Step recovery, URL-backed `at_step` and ordinal mobile alternative, reload/Back/Forward restoration without raw option ID, Korean-first supporting copy, explicit interaction states, 12 Frontend unit tests and 8 Playwright E2E tests. Human baseline remains unmeasured.|
 |Post-I7 UX-H tooling|Implemented; human Gate not ready|Hash-pinned observable baseline selectors and rendered Jira/Confluence-shaped fixture, frozen 13-task two-condition protocol, builder/proxy/domain separation, session event/result and summary contracts, validation/preparation/summary CLI, 10 focused Backend tests. Actual human observations: 0; dry-run status: `not_ready`, `not_evaluable`, `no_business_claim`.|
+|OPS-A|Passed|ADR-0010 fixes Project/Issue/Risk/Gate semantics, provenance, deterministic truth ownership and OPS-B~OPS-F order.|
+|OPS-B|Passed|Three lifecycle-distinct Project fixtures, 17 typed events, hash manifest, cross-project lineage and historical leakage tests.|
+|OPS-C|Passed|Migration 0020, durable Project repositories, deterministic attention/risk policies, five read APIs, historical parity, generated contracts and Replay smoke. No Project UI yet.|
 
 Post-I7 UX-H implementation record (2026-07-19):
 
