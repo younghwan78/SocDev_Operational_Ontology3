@@ -1,0 +1,238 @@
+schema_version: development-project.v1
+fixture_version: 1
+project_id: PROJECT-V
+title_ko: 차기 Multimedia SoC Pre-silicon HW Closure
+current_step: 22
+lifecycle_stage: PRE_SILICON_CLOSURE
+tracks:
+  - track_id: TRACK-V-HW
+    name: Power Architecture
+    status: REWORK
+    next_milestone_id: M-V-ARCH-FREEZE
+  - track_id: TRACK-V-VERIF
+    name: Pre-silicon Verification
+    status: BLOCKED
+    next_milestone_id: M-V-ARCH-FREEZE
+  - track_id: TRACK-V-MEASURE
+    name: Silicon Correlation
+    status: PLANNED
+    next_milestone_id: M-V-FIRST-SILICON
+work_items:
+  - work_item_id: WORK-V-HW-PATH
+    track_id: TRACK-V-HW
+    title: 고부하 전력 경로 변경안 closure
+    status: IN_PROGRESS
+    owner: ROLE-HW
+    planned_at_step: 23
+  - work_item_id: WORK-V-PRESI-VERIFY
+    track_id: TRACK-V-VERIF
+    title: 변경안 pre-silicon workload 검증
+    status: BLOCKED
+    owner: ROLE-VERIF
+    dependency_ids: [WORK-V-HW-PATH]
+    blocker: 공유 emulator 예약 충돌
+    planned_at_step: 24
+  - work_item_id: WORK-V-SILICON-CORR
+    track_id: TRACK-V-MEASURE
+    title: first silicon 상관 측정
+    status: PLANNED
+    owner: ROLE-MEASUREMENT
+    dependency_ids: [WORK-V-PRESI-VERIFY]
+    planned_at_step: 28
+milestones:
+  - milestone_id: M-V-ARCH-FREEZE
+    title: HW Architecture Freeze
+    kind: GATE
+    status: AT_RISK
+    planned_at_step: 24
+    commitment_at_step: 23
+  - milestone_id: M-V-FIRST-SILICON
+    title: First Silicon Checkpoint
+    kind: CHECKPOINT
+    status: PLANNED
+    planned_at_step: 28
+    commitment_at_step: 24
+evidence:
+  - evidence_id: EVD-V-PRESI-MODEL
+    title: 전력 경로 변경 pre-silicon model 결과
+    evidence_type: presilicon_model
+    status: RECEIVED
+    requested_at_step: 15
+    expected_at_step: 18
+    available_at_step: 18
+    source_ref: FIXTURE:PROJECT-V:PRESI-MODEL-R2
+    limitations: [field_correlation_not_available, model_error_band_wide]
+  - evidence_id: EVD-V-INTERFACE-SIGNOFF
+    title: HW/firmware 전력 상태 interface sign-off
+    evidence_type: interface_review
+    status: LATE
+    requested_at_step: 17
+    expected_at_step: 20
+    limitations: [firmware_owner_review_pending]
+  - evidence_id: EVD-V-SILICON-CORR
+    title: first silicon 전력 상관 측정
+    evidence_type: silicon_measurement
+    status: REQUESTED
+    requested_at_step: 20
+    expected_at_step: 28
+    limitations: [silicon_not_available]
+claims:
+  - claim_id: CLM-V-DIRECTION
+    statement: 변경안은 pre-silicon model에서 고부하 전력 여유를 개선하는 방향을 보인다.
+    epistemic_status: inference
+    asserted_at_step: 18
+    source_refs: [EVD-V-PRESI-MODEL]
+    inference_basis: [MODEL-V-POWER-R2]
+    confidence_level: medium
+  - claim_id: CLM-V-CORRELATION-GAP
+    statement: silicon 상관 결과 전에는 개선 폭과 부작용을 확정할 수 없다.
+    epistemic_status: inference
+    asserted_at_step: 18
+    source_refs: [EVD-V-PRESI-MODEL]
+    inference_basis: [RULE-PRESI-CORRELATION-GAP]
+    confidence_level: high
+issues:
+  - issue_id: ISSUE-V-INTERFACE
+    title: 변경 전력 상태의 HW/firmware interface 불일치
+    status: MITIGATING
+    observed_at_step: 18
+    source_refs: [EVD-V-PRESI-MODEL]
+    affected_work_item_ids: [WORK-V-HW-PATH, WORK-V-PRESI-VERIFY]
+    affected_milestone_ids: [M-V-ARCH-FREEZE]
+risks:
+  - risk_id: RISK-V-WRONG-COMMIT
+    statement: field lesson을 잘못 해석한 HW 변경을 freeze하면 silicon 이후 복구 비용이 커질 수 있다.
+    status: TREATING
+    epistemic_status: inference
+    identified_at_step: 18
+    source_issue_ids: [ISSUE-V-INTERFACE]
+    source_event_ids: [EVENT-V-018-MODEL-ARRIVED]
+    source_refs: [EVD-V-PRESI-MODEL]
+    cross_project_source_ids: [CROSS-U-FIELD-LESSON]
+    inference_basis: [RULE-COMMITMENT-WINDOW, RULE-FIELD-LESSON-PROPAGATION]
+    downside: SEVERE
+    blast_radius: PROJECT
+    urgency: BEFORE_MILESTONE
+    reversibility: IRREVERSIBLE
+    affected_work_item_ids: [WORK-V-HW-PATH, WORK-V-PRESI-VERIFY]
+    affected_milestone_ids: [M-V-ARCH-FREEZE, M-V-FIRST-SILICON]
+    treatment_decision_case_ids: [CASE-HO-002]
+    treatment_action_ids: [ACTION-V-BOUNDED-CHANGE]
+  - risk_id: RISK-V-RESOURCE-CONFLICT
+    statement: 공유 emulator 충돌이 pre-silicon 검증을 commitment window 뒤로 밀 수 있다.
+    status: OPEN
+    epistemic_status: inference
+    identified_at_step: 21
+    source_event_ids: [EVENT-V-021-RESOURCE-CONFLICT]
+    source_refs: [EVD-V-PRESI-MODEL]
+    inference_basis: [RULE-SHARED-RESOURCE-CRITICAL-PATH]
+    downside: MATERIAL
+    blast_radius: TRACK
+    urgency: IMMEDIATE
+    reversibility: COSTLY
+    affected_work_item_ids: [WORK-V-PRESI-VERIFY]
+    affected_milestone_ids: [M-V-ARCH-FREEZE]
+    treatment_decision_case_ids: [CASE-DT-004]
+development_actions:
+  - action_id: ACTION-V-BOUNDED-CHANGE
+    title: rollback 가능한 범위로 HW 변경을 제한
+    owner: ROLE-HW
+    status: IN_PROGRESS
+    created_at_step: 20
+    due_at_step: 23
+    verification_evidence_ids: [EVD-V-PRESI-MODEL, EVD-V-SILICON-CORR]
+    rollback_condition: interface sign-off 또는 model guardrail 미충족 시 변경 제외
+decision_case_refs:
+  - case_id: CASE-HO-002
+    title: Silicon 이후 측정 가능한 비가역 변경 검토
+    status: DECISION_REQUIRED
+    opened_at_step: 18
+    decision_deadline_milestone_id: M-V-ARCH-FREEZE
+    source_issue_ids: [ISSUE-V-INTERFACE]
+    treated_risk_ids: [RISK-V-WRONG-COMMIT]
+    affected_work_item_ids: [WORK-V-HW-PATH]
+  - case_id: CASE-DT-004
+    title: 복수 과제의 공유 측정 자원 충돌
+    status: CONTEXT_BUILDING
+    opened_at_step: 21
+    decision_deadline_milestone_id: M-V-ARCH-FREEZE
+    treated_risk_ids: [RISK-V-RESOURCE-CONFLICT]
+    affected_work_item_ids: [WORK-V-PRESI-VERIFY]
+cross_project_sources:
+  - source_id: CROSS-U-FIELD-LESSON
+    source_project_id: PROJECT-U
+    source_event_id: EVENT-U-035-EVIDENCE-ARRIVED
+    available_at_step: 18
+    lesson: 양산 장시간 결과는 차기 silicon 전력 경로 검토의 입력이지만 동일 조건을 보장하지 않는다.
+    target_risk_ids: [RISK-V-WRONG-COMMIT]
+development_events:
+  - event_id: EVENT-V-018-MODEL-ARRIVED
+    event_type: EVIDENCE_CHANGE
+    effective_at_step: 18
+    observed_at_step: 18
+    summary: 전력 경로 변경안의 pre-silicon model 결과가 도착했다.
+    cause: 후보 변경안에 대한 model sweep이 완료되었다.
+    work_item_changes:
+      - work_item_id: WORK-V-HW-PATH
+        before: {status: READY, planned_at_step: 23, dependency_ids: []}
+        after: {status: IN_PROGRESS, planned_at_step: 23, dependency_ids: []}
+    evidence_changes:
+      - evidence_id: EVD-V-PRESI-MODEL
+        before: {status: REQUESTED, expected_at_step: 18}
+        after: {status: RECEIVED, expected_at_step: 18, available_at_step: 18}
+  - event_id: EVENT-V-019-INTERFACE-REWORK
+    event_type: REWORK
+    effective_at_step: 19
+    observed_at_step: 19
+    summary: 전력 상태 interface 불일치로 HW 변경 작업이 재작업 상태가 되었다.
+    cause: firmware와 RTL이 서로 다른 상태 전이 정의를 사용했다.
+    work_item_changes:
+      - work_item_id: WORK-V-HW-PATH
+        before: {status: IN_PROGRESS, planned_at_step: 23, dependency_ids: []}
+        after: {status: DONE, planned_at_step: 23, dependency_ids: []}
+      - work_item_id: WORK-V-HW-PATH
+        before: {status: DONE, planned_at_step: 23, dependency_ids: []}
+        after: {status: REWORK, blocker: HW/firmware interface 재합의 필요, planned_at_step: 23, dependency_ids: []}
+    impacted_milestone_ids: [M-V-ARCH-FREEZE]
+  - event_id: EVENT-V-020-BOUNDED-CHANGE
+    event_type: DECISION_ACTION_PROGRESS
+    effective_at_step: 20
+    observed_at_step: 20
+    summary: interface 영향 범위를 제한한 변경안으로 closure를 재개했다.
+    cause: silicon 상관 전에도 commitment window를 지키는 bounded option이 필요했다.
+    work_item_changes:
+      - work_item_id: WORK-V-HW-PATH
+        before: {status: REWORK, blocker: HW/firmware interface 재합의 필요, planned_at_step: 23, dependency_ids: []}
+        after: {status: IN_PROGRESS, planned_at_step: 23, dependency_ids: []}
+    milestone_changes:
+      - milestone_id: M-V-ARCH-FREEZE
+        before: {status: PLANNED, planned_at_step: 24}
+        after: {status: AT_RISK, planned_at_step: 24}
+    issue_changes:
+      - issue_id: ISSUE-V-INTERFACE
+        before: {status: OPEN}
+        after: {status: MITIGATING}
+    risk_changes:
+      - risk_id: RISK-V-WRONG-COMMIT
+        before: {status: OPEN}
+        after: {status: TREATING}
+    action_changes:
+      - action_id: ACTION-V-BOUNDED-CHANGE
+        before: {status: PLANNED, due_at_step: 23}
+        after: {status: IN_PROGRESS, due_at_step: 23}
+    impacted_milestone_ids: [M-V-ARCH-FREEZE]
+  - event_id: EVENT-V-021-RESOURCE-CONFLICT
+    event_type: RESOURCE_CONFLICT
+    effective_at_step: 21
+    observed_at_step: 21
+    summary: 공유 emulator 예약 충돌로 pre-silicon workload 검증이 막혔다.
+    cause: 두 과제가 같은 고대역폭 emulator slot을 요구했다.
+    work_item_changes:
+      - work_item_id: WORK-V-PRESI-VERIFY
+        before: {status: READY, planned_at_step: 24, dependency_ids: [WORK-V-HW-PATH]}
+        after: {status: BLOCKED, blocker: 공유 emulator 예약 충돌, planned_at_step: 24, dependency_ids: [WORK-V-HW-PATH]}
+    evidence_changes:
+      - evidence_id: EVD-V-INTERFACE-SIGNOFF
+        before: {status: REQUESTED, expected_at_step: 20}
+        after: {status: LATE, expected_at_step: 20}
+    impacted_milestone_ids: [M-V-ARCH-FREEZE]

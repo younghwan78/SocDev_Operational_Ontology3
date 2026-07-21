@@ -10,6 +10,7 @@ from soc_ot.application.evaluation import CaseEvaluation, EvaluationSummary
 from soc_ot.application.evaluation_manifest import EvaluationManifest
 from soc_ot.application.outcomes import OutcomeSnapshot
 from soc_ot.application.packets import ObservableCasePacket
+from soc_ot.application.project_fixture_contracts import DevelopmentProject
 from soc_ot.application.projections import DecisionListItemProjection
 from soc_ot.application.usability_study import (
     UsabilityBaselinePack,
@@ -26,6 +27,7 @@ from soc_ot.domain.models import DevelopmentEvent, ExpectedResult, HiddenCase, O
 CONTRACT_MODELS: dict[str, type[BaseModel]] = {
     "observable-case.v1": ObservableCase,
     "development-event.v1": DevelopmentEvent,
+    "development-project.v1": DevelopmentProject,
     "development-timeline.v1": DevelopmentTimelineProjection,
     "evaluation-manifest.v2": EvaluationManifest,
     "case-evaluation.v2": CaseEvaluation,

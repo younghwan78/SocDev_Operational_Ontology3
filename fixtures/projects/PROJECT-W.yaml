@@ -1,0 +1,246 @@
+schema_version: development-project.v1
+fixture_version: 1
+project_id: PROJECT-W
+title_ko: 차세대 AI Camera SoC Spec 및 Architecture 정의
+current_step: 10
+lifecycle_stage: SPEC_DEFINITION
+tracks:
+  - track_id: TRACK-W-SPEC
+    name: Product Specification
+    status: BLOCKED
+    next_milestone_id: M-W-SPEC-FREEZE
+  - track_id: TRACK-W-ARCH
+    name: Architecture Modeling
+    status: REWORK
+    next_milestone_id: M-W-SPEC-FREEZE
+work_items:
+  - work_item_id: WORK-W-CUSTOMER-SCOPE
+    track_id: TRACK-W-SPEC
+    title: AI camera 고객 workload 범위 확정
+    status: BLOCKED
+    owner: ROLE-PRODUCT
+    blocker: 상세 workload와 우선 KPI 미도착
+    planned_at_step: 9
+  - work_item_id: WORK-W-AREA-MODEL
+    track_id: TRACK-W-ARCH
+    title: NN/SRAM 구성별 area와 성능 model 보정
+    status: REWORK
+    owner: ROLE-ARCH
+    dependency_ids: [WORK-W-CUSTOMER-SCOPE]
+    blocker: 고객 workload 범위 미확정
+    planned_at_step: 11
+milestones:
+  - milestone_id: M-W-SPEC-FREEZE
+    title: Product Spec Freeze
+    kind: GATE
+    status: AT_RISK
+    planned_at_step: 12
+    commitment_at_step: 11
+  - milestone_id: M-W-ARCH-CHECK
+    title: Architecture Model Checkpoint
+    kind: CHECKPOINT
+    status: PLANNED
+    planned_at_step: 14
+    commitment_at_step: 12
+evidence:
+  - evidence_id: EVD-W-LESSON
+    title: 이전 세대 field workload lesson
+    evidence_type: historical_lesson
+    status: RECEIVED
+    requested_at_step: 2
+    expected_at_step: 4
+    available_at_step: 4
+    source_ref: FIXTURE:PROJECT-W:LESSON-R1
+    limitations: [previous_generation, workload_mix_changed]
+  - evidence_id: EVD-W-AREA-MODEL
+    title: NN/SRAM 후보별 area 및 성능 model
+    evidence_type: architecture_model
+    status: RECEIVED
+    requested_at_step: 3
+    expected_at_step: 5
+    available_at_step: 5
+    source_ref: FIXTURE:PROJECT-W:AREA-MODEL-R1
+    limitations: [early_model, memory_traffic_assumption]
+  - evidence_id: EVD-W-REQUEST-LOG
+    title: 고객 요구 확인 기록
+    evidence_type: requirement_review
+    status: RECEIVED
+    requested_at_step: 3
+    expected_at_step: 6
+    available_at_step: 7
+    source_ref: FIXTURE:PROJECT-W:REQUEST-LOG-R1
+    limitations: [detailed_workload_missing]
+  - evidence_id: EVD-W-CUSTOMER-DETAIL
+    title: 고객 상세 workload와 KPI 우선순위
+    evidence_type: customer_requirement
+    status: LATE
+    requested_at_step: 3
+    expected_at_step: 6
+    limitations: [not_yet_available]
+claims:
+  - claim_id: CLM-W-AREA-TRADEOFF
+    statement: 후보 구성은 목표 성능을 높이지만 초기 model에서 area 부담이 증가한다.
+    epistemic_status: inference
+    asserted_at_step: 5
+    source_refs: [EVD-W-AREA-MODEL]
+    inference_basis: [MODEL-W-AREA-PERF-R1]
+    confidence_level: low
+  - claim_id: CLM-W-WORKLOAD-GAP
+    statement: 고객 상세 workload가 없어 최적 구성을 확정할 수 없다.
+    epistemic_status: fact
+    asserted_at_step: 7
+    source_refs: [EVD-W-REQUEST-LOG]
+    confidence_level: high
+  - claim_id: CLM-W-LESSON
+    statement: 이전 세대 field lesson은 방향을 제공하지만 현재 workload를 대표한다고 볼 수 없다.
+    epistemic_status: inference
+    asserted_at_step: 5
+    source_refs: [EVD-W-LESSON]
+    inference_basis: [RULE-LESSON-CONTEXT-TRANSFER]
+    confidence_level: low
+issues:
+  - issue_id: ISSUE-W-REQUIREMENT-GAP
+    title: 상세 고객 workload와 KPI 우선순위 미확정
+    status: OPEN
+    observed_at_step: 7
+    source_refs: [EVD-W-REQUEST-LOG]
+    affected_work_item_ids: [WORK-W-CUSTOMER-SCOPE, WORK-W-AREA-MODEL]
+    affected_milestone_ids: [M-W-SPEC-FREEZE]
+risks:
+  - risk_id: RISK-W-OVER-SPEC
+    statement: 불확실한 workload를 기준으로 spec을 고정하면 불필요한 area를 commitment할 수 있다.
+    status: ACCEPTED
+    epistemic_status: inference
+    identified_at_step: 5
+    source_refs: [EVD-W-AREA-MODEL, EVD-W-LESSON]
+    inference_basis: [RULE-SPEC-ROBUSTNESS, RULE-LESSON-CONTEXT-TRANSFER]
+    downside: MATERIAL
+    blast_radius: PROJECT
+    urgency: BEFORE_MILESTONE
+    reversibility: COSTLY
+    affected_work_item_ids: [WORK-W-AREA-MODEL]
+    affected_milestone_ids: [M-W-SPEC-FREEZE, M-W-ARCH-CHECK]
+    treatment_decision_case_ids: [CASE-VR-005]
+    treatment_action_ids: [ACTION-W-MINIMUM-SPEC]
+  - risk_id: RISK-W-LATE-REQUIREMENT
+    statement: 고객 상세 요구가 Spec Freeze 이후 도착하면 architecture 재작업이 발생할 수 있다.
+    status: REALIZED
+    epistemic_status: inference
+    identified_at_step: 5
+    source_refs: [EVD-W-LESSON, EVD-W-AREA-MODEL]
+    inference_basis: [RULE-LATE-REQUIREMENT-REWORK]
+    downside: SEVERE
+    blast_radius: PROJECT
+    urgency: IMMEDIATE
+    reversibility: COSTLY
+    affected_work_item_ids: [WORK-W-CUSTOMER-SCOPE, WORK-W-AREA-MODEL]
+    affected_milestone_ids: [M-W-SPEC-FREEZE]
+    treatment_decision_case_ids: [CASE-VR-005]
+    treatment_action_ids: [ACTION-W-MINIMUM-SPEC]
+    realized_issue_id: ISSUE-W-REQUIREMENT-GAP
+development_actions:
+  - action_id: ACTION-W-MINIMUM-SPEC
+    title: 확정 가능한 최소 spec과 확인 필요 조건을 분리
+    owner: ROLE-ARCH
+    status: BLOCKED
+    created_at_step: 7
+    due_at_step: 11
+    verification_evidence_ids: [EVD-W-CUSTOMER-DETAIL, EVD-W-AREA-MODEL]
+    rollback_condition: 상세 workload가 model 가정 범위를 벗어나면 Spec Gate 재검토
+decision_case_refs:
+  - case_id: CASE-VR-005
+    title: AI camera 고객 요구 불확실성 검토
+    status: CONTEXT_BUILDING
+    opened_at_step: 7
+    decision_deadline_milestone_id: M-W-SPEC-FREEZE
+    source_issue_ids: [ISSUE-W-REQUIREMENT-GAP]
+    treated_risk_ids: [RISK-W-OVER-SPEC, RISK-W-LATE-REQUIREMENT]
+    affected_work_item_ids: [WORK-W-CUSTOMER-SCOPE, WORK-W-AREA-MODEL]
+development_events:
+  - event_id: EVENT-W-004-LESSON-ARRIVED
+    event_type: EVIDENCE_CHANGE
+    effective_at_step: 4
+    observed_at_step: 4
+    summary: 이전 세대 field workload lesson을 수신했다.
+    cause: 양산 회고 자료가 architecture team에 전달되었다.
+    evidence_changes:
+      - evidence_id: EVD-W-LESSON
+        before: {status: REQUESTED, expected_at_step: 4}
+        after: {status: RECEIVED, expected_at_step: 4, available_at_step: 4}
+  - event_id: EVENT-W-005-MODEL-ARRIVED
+    event_type: EVIDENCE_CHANGE
+    effective_at_step: 5
+    observed_at_step: 5
+    summary: NN/SRAM 후보별 초기 area 및 성능 model이 도착했다.
+    cause: architecture sweep의 첫 revision이 완료되었다.
+    evidence_changes:
+      - evidence_id: EVD-W-AREA-MODEL
+        before: {status: REQUESTED, expected_at_step: 5}
+        after: {status: RECEIVED, expected_at_step: 5, available_at_step: 5}
+  - event_id: EVENT-W-006-REQUEST-LOG-LATE
+    event_type: EVIDENCE_CHANGE
+    effective_at_step: 6
+    observed_at_step: 6
+    summary: 고객 요구 확인 기록이 예정 시점까지 도착하지 않았다.
+    cause: 고객 측 검토 일정이 늦어졌다.
+    evidence_changes:
+      - evidence_id: EVD-W-REQUEST-LOG
+        before: {status: REQUESTED, expected_at_step: 6}
+        after: {status: LATE, expected_at_step: 6}
+  - event_id: EVENT-W-007-REQUIREMENT-LATE
+    event_type: RISK_CHANGE
+    effective_at_step: 7
+    observed_at_step: 7
+    summary: 상세 고객 요구가 도착하지 않아 spec 재작업 위험이 현실화되었다.
+    cause: 확인 기록에는 workload와 KPI 우선순위가 포함되지 않았다.
+    work_item_changes:
+      - work_item_id: WORK-W-CUSTOMER-SCOPE
+        before: {status: IN_PROGRESS, planned_at_step: 9, dependency_ids: []}
+        after: {status: BLOCKED, blocker: 상세 workload와 우선 KPI 미도착, planned_at_step: 9, dependency_ids: []}
+    milestone_changes:
+      - milestone_id: M-W-SPEC-FREEZE
+        before: {status: PLANNED, planned_at_step: 12}
+        after: {status: AT_RISK, planned_at_step: 12}
+    evidence_changes:
+      - evidence_id: EVD-W-REQUEST-LOG
+        before: {status: LATE, expected_at_step: 6}
+        after: {status: RECEIVED, expected_at_step: 6, available_at_step: 7}
+      - evidence_id: EVD-W-CUSTOMER-DETAIL
+        before: {status: REQUESTED, expected_at_step: 6}
+        after: {status: LATE, expected_at_step: 6}
+    risk_changes:
+      - risk_id: RISK-W-LATE-REQUIREMENT
+        before: {status: OPEN}
+        after: {status: REALIZED, realized_issue_id: ISSUE-W-REQUIREMENT-GAP}
+    action_changes:
+      - action_id: ACTION-W-MINIMUM-SPEC
+        before: {status: PLANNED, due_at_step: 11}
+        after: {status: IN_PROGRESS, due_at_step: 11}
+    impacted_milestone_ids: [M-W-SPEC-FREEZE]
+  - event_id: EVENT-W-008-MODEL-REWORK
+    event_type: REWORK
+    effective_at_step: 8
+    observed_at_step: 8
+    summary: 고객 workload 범위 부재로 area model 보정이 재작업 상태가 되었다.
+    cause: 초기 traffic 가정이 target use case를 대표하는지 확인할 수 없었다.
+    work_item_changes:
+      - work_item_id: WORK-W-AREA-MODEL
+        before: {status: IN_PROGRESS, planned_at_step: 11, dependency_ids: [WORK-W-CUSTOMER-SCOPE]}
+        after: {status: DONE, planned_at_step: 11, dependency_ids: [WORK-W-CUSTOMER-SCOPE]}
+      - work_item_id: WORK-W-AREA-MODEL
+        before: {status: DONE, planned_at_step: 11, dependency_ids: [WORK-W-CUSTOMER-SCOPE]}
+        after: {status: REWORK, blocker: 고객 workload 범위 미확정, planned_at_step: 11, dependency_ids: [WORK-W-CUSTOMER-SCOPE]}
+  - event_id: EVENT-W-009-BOUNDED-POSTURE
+    event_type: DECISION_ACTION_PROGRESS
+    effective_at_step: 9
+    observed_at_step: 9
+    summary: 최소 spec만 commitment하고 나머지는 다음 Gate 조건으로 남겼다.
+    cause: data 부족 상태에서 비가역 area commitment를 줄여야 했다.
+    risk_changes:
+      - risk_id: RISK-W-OVER-SPEC
+        before: {status: OPEN}
+        after: {status: ACCEPTED}
+    action_changes:
+      - action_id: ACTION-W-MINIMUM-SPEC
+        before: {status: IN_PROGRESS, due_at_step: 11}
+        after: {status: BLOCKED, due_at_step: 11}

@@ -3,7 +3,7 @@
 > 문서 상태: Product Plan v0.3, 로컬 PoC 구현 승인
 > 갱신일: 2026-07-21
 > 문서 역할: 제품 목표, 범위, 가치 가설, 중단 기준을 정의  
-> 현재 판단: **GO: I0–I7 Replay, Step 5 B2 runtime, UX-A~UX-H 도구와 OPS-A Scope/ADR 완료**, **NEXT: OPS-B Project 중심 fixture**, **NO-GO: OPS-F 전 human session, UX-I·최종 UX 주장, 사내 연동 및 실제 업무 적용**
+> 현재 판단: **GO: I0–I7 Replay, Step 5 B2 runtime, UX-A~UX-H 도구와 OPS-A/OPS-B 완료**, **NEXT: OPS-C Project domain/projection/API**, **NO-GO: OPS-F 전 human session, UX-I·최종 UX 주장, 사내 연동 및 실제 업무 적용**
 
 이 계획은 SoC 개발 진행과 불확실성을 재현하고 제한된 정보에서도 저후회 결정을 돕는 제품을 정의한다. 집에서는 synthetic fixture로 의사결정 메커니즘만 검증하며, 실제 비즈니스 가치는 사내 read-only 파일럿에서 별도로 측정한다.
 
@@ -398,8 +398,8 @@ Post-I7 후속은 다음 순서로만 진행한다.
 |UX-G|복구 가능한 오류, URL 문맥 보존, 한국어 우선 표현과 기본 interaction|완료|
 |UX-H|공정한 fixture baseline, human task protocol과 측정 event 계약|도구 구현 완료; 실제 관측 0건, OPS-F 전 session 보류|
 |OPS-A|Project/Issue/Risk/Gate 경계, provenance, Agent 책임과 전환 ADR|완료; ADR-0010 Accepted|
-|OPS-B|lifecycle과 risk provenance가 구별되는 Project fixture|다음 단계; `world.yaml` event는 UX 다양성에 도움이 되는 경우만 선택 참조|
-|OPS-C|Project domain, projection, API와 historical boundary|OPS-B Gate 전 시작하지 않음|
+|OPS-B|lifecycle과 risk provenance가 구별되는 Project fixture|완료; 3 Project, 17 typed event, hash manifest와 future-leakage test|
+|OPS-C|Project domain, projection, API와 historical boundary|다음 단계; OPS-B authoring fixture를 runtime source로 승격하는 범위|
 |OPS-D|Project Portfolio와 Situation UX|OPS-C Gate 전 시작하지 않음|
 |OPS-E|Risk Detail과 기존 Decision Workspace 연결|OPS-D Gate 전 시작하지 않음|
 |OPS-F|Project 중심 UX-H protocol v2와 독립 human observation|OPS-E Gate 전 시작하지 않음|
@@ -503,7 +503,7 @@ C1에서 가치와 보안 gate를 통과한 뒤에만 연다.
 - 데이터: synthetic fixture only
 - 로컬 승인: simulated Chair, 실제 권한 없음
 - 구현 단계: I0~I7
-- 현재 단계: OPS-A Scope/ADR 완료, OPS-B Project 중심 fixture가 다음 단계; human session은 OPS-F까지 보류
+- 현재 단계: OPS-A Scope/ADR와 OPS-B Project 중심 fixture 완료, OPS-C가 다음 단계; human session은 OPS-F까지 보류
 - release topology: B2 independent routed Role Agents, deterministic core decision
 - CI provider: ReplayProvider
 - live provider: 구성 가능한 OpenAI Responses API adapter

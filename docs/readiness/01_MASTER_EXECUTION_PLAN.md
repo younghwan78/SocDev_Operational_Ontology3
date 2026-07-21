@@ -1,6 +1,6 @@
 # Master execution plan
 
-> Status: IMPLEMENTED THROUGH I7 REPLAY + STEP 5 B2 RUNTIME + POST-I7 UX-H TOOLING + OPS-A; OPS-B PROJECT FIXTURE NEXT, HUMAN OBSERVATION PAUSED UNTIL OPS-F
+> Status: IMPLEMENTED THROUGH I7 REPLAY + STEP 5 B2 RUNTIME + POST-I7 UX-H TOOLING + OPS-B; OPS-C PROJECT RUNTIME NEXT, HUMAN OBSERVATION PAUSED UNTIL OPS-F
 > Date: 2026-07-21
 > Scope: local fixture-only PoC
 
@@ -413,14 +413,26 @@ Post-I7 Project Operations stages run in this order:
 |Stage|Deliverable|Gate|
 |---|---|---|
 |OPS-A|Scope, semantic boundaries, reserved vocabulary and ADR|Complete: ADR-0010 Accepted|
-|OPS-B|Lifecycle-distinct Project fixtures and event/risk provenance|Smallest non-duplicative event set covering Project, Risk and historical UX tasks|
-|OPS-C|Project domain, projection, API and compatibility path|Generated contracts, migration/parity where applicable, no future leakage|
+|OPS-B|Lifecycle-distinct Project fixtures and event/risk provenance|Complete: 3 projects, 17 typed events, hash manifest and future-leakage tests|
+|OPS-C|Project domain, projection, API and compatibility path|Next: generated API contracts, migration/parity where applicable, no future leakage|
 |OPS-D|Portfolio and Project Situation UX|30-second overall status/top-risk/source task passes|
 |OPS-E|Risk Detail and Decision linkage|Two-minute source-to-impact-to-decision trace task passes|
 |OPS-F|UX-H protocol v2 and independent observations|Minimum independent observations before UX-I or business claim|
 
 No later OPS stage starts before the previous Gate. Company connectors, authentication and write-back
 remain C0/C2 scope.
+
+OPS-B implementation record (2026-07-21):
+
+- `development-project.v1` is executable only as an authoring/validation contract; it is not yet a
+  runtime aggregate or Project API
+- PROJECT-U, PROJECT-V and PROJECT-W distinguish mass-production field evidence, pre-silicon
+  commitment uncertainty and model/lesson-led specification work
+- typed Issue/Risk/Evidence/WorkItem/Milestone/Action event chains validate current state and support
+  a fixture-only historical reconstruction that hides future observations and evidence sources
+- selected `world.yaml` top-level event patterns were rewritten as synthetic fixtures; the external
+  file is not imported at runtime or during tests
+- existing 12-case evaluation and UX-H baseline remain unchanged
 
 ## 7. Crosswalk to supporting plans
 

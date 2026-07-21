@@ -1,0 +1,17 @@
+schema_version: development-project-manifest.v1
+fixture_version: 1
+reference:
+  path: E:/57_Claude_SoC_DigitalTwin/OperationalOntology/data/world.yaml
+  sha256: 108e5bfc2311b90e0264ed470d081920f4f414cbe3072f663dec47abeba72759
+  usage: top-level events idea catalog only
+  runtime_dependency: false
+projects:
+  - project_id: PROJECT-U
+    path: PROJECT-U.yaml
+    sha256: 6ef8d635867cdb05be9d24d690a27f67f2383655a70a2863978cac6f1e901253
+  - project_id: PROJECT-V
+    path: PROJECT-V.yaml
+    sha256: bc4808ef150ac1ee6b728fdbf99839bb90265095506e983f2deeba4db94172b1
+  - project_id: PROJECT-W
+    path: PROJECT-W.yaml
+    sha256: 7bc26bc4328cad90c8b62e39e3d4c1a3d385931c25c7e04a0a8f9626ff658493

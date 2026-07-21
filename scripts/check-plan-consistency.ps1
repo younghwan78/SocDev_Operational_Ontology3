@@ -32,6 +32,7 @@ $requiredLayout = @(
     "contracts/generated",
     "contracts/snapshots",
     "fixtures/world",
+    "fixtures/projects",
     "fixtures/cases/observable",
     "fixtures/cases/development",
     "fixtures/cases/hidden",
@@ -102,6 +103,20 @@ $developmentCases = @(Get-ChildItem -LiteralPath (
 if ($developmentCases.Count -ne 4) {
     throw "Step 2 development corpus must contain exactly 4 cases; found $($developmentCases.Count)."
 }
+$projectFixtures = @(Get-ChildItem -LiteralPath (
+    Join-Path $root "fixtures/projects"
+) -Filter "PROJECT-*.yaml" -File)
+if ($projectFixtures.Count -ne 3) {
+    throw "OPS-B project corpus must contain exactly 3 projects; found $($projectFixtures.Count)."
+}
+@(
+    "fixtures/projects/manifest.yaml",
+    "contracts/generated/development-project.v1.schema.json"
+) | ForEach-Object {
+    if (-not (Test-Path -LiteralPath (Join-Path $root $_) -PathType Leaf)) {
+        throw "Missing OPS-B artifact: $_"
+    }
+}
 if ($projectPlan -notmatch "corpus v2: development regression 8, validation 2, sealed unseen 2") {
     throw "PROJECT_PLAN.md does not describe the canonical 8/2/2 evaluation partition."
 }
@@ -140,4 +155,4 @@ if ($actualPaths | Where-Object { $_ -match "hidden" }) {
     throw "OpenAPI exposes a forbidden hidden resource."
 }
 
-Write-Output "Plan consistency check passed: I0-I7, 12-case v2, 8-case historical release, terms, and canonical API agree."
+Write-Output "Plan consistency check passed: I0-I7, OPS-B projects, corpora, terms, and canonical API agree."

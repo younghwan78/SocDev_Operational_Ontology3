@@ -79,7 +79,7 @@ def build_parser() -> argparse.ArgumentParser:
     validate.add_argument("--include-hidden", action="store_true")
     validate.add_argument(
         "--corpus",
-        choices=["evaluation", "development", "all"],
+        choices=["evaluation", "development", "projects", "all"],
         default="evaluation",
     )
     fixture_import = fixtures_sub.add_parser("import")
@@ -201,6 +201,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         print(
             "I7 Replay + Step 5 B2 stability gates complete; "
             "B2 durable dossier runtime active; UX-H session tooling ready, "
+            "OPS-B project authoring fixtures ready, OPS-C runtime next; "
             "human gate pending"
         )
         return 0
@@ -229,6 +230,14 @@ def main(argv: Sequence[str] | None = None) -> int:
         return 0
     if args.command == "fixtures" and args.fixtures_command == "validate":
         fixture_repository = FixtureRepository(args.root)
+        if args.corpus == "projects":
+            projects = fixture_repository.validate_project_corpus()
+            if args.case_id:
+                projects = [item for item in projects if item.project_id == args.case_id]
+                if not projects:
+                    raise ValueError(f"unknown project fixture: {args.case_id}")
+            print(f"Validated {len(projects)} project fixture(s).")
+            return 0
         if args.case_id:
             case_ids = [args.case_id]
         elif args.corpus == "development":
@@ -242,7 +251,12 @@ def main(argv: Sequence[str] | None = None) -> int:
             case_ids = fixture_repository.case_ids()
         for case_id in case_ids:
             fixture_repository.validate_case(case_id, include_hidden=args.include_hidden)
-        print(f"Validated {len(case_ids)} fixture case(s).")
+        project_count = 0
+        if args.corpus == "all":
+            project_count = len(fixture_repository.validate_project_corpus())
+        print(
+            f"Validated {len(case_ids)} fixture case(s) and {project_count} project fixture(s)."
+        )
         return 0
     if args.command == "fixtures" and args.fixtures_command == "import":
         fixture_repository = FixtureRepository(args.root)

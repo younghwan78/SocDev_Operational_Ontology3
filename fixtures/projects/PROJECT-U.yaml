@@ -1,0 +1,287 @@
+schema_version: development-project.v1
+fixture_version: 1
+project_id: PROJECT-U
+title_ko: 양산 Multimedia SoC 현장 품질 대응
+current_step: 38
+lifecycle_stage: MASS_PRODUCTION
+tracks:
+  - track_id: TRACK-U-FIELD
+    name: Field Quality
+    status: IN_PROGRESS
+    next_milestone_id: M-U-FIELD-FIX
+  - track_id: TRACK-U-SW
+    name: Runtime Mitigation
+    status: IN_PROGRESS
+    next_milestone_id: M-U-FIELD-FIX
+  - track_id: TRACK-U-HW
+    name: Next Silicon Lesson
+    status: PLANNED
+    next_milestone_id: M-U-MAINTENANCE
+work_items:
+  - work_item_id: WORK-U-FIELD-REPRO
+    track_id: TRACK-U-FIELD
+    title: 장시간 고부하 촬영 조건 재현
+    status: VERIFIED
+    owner: ROLE-FIELD-QUALITY
+    planned_at_step: 31
+  - work_item_id: WORK-U-SW-MITIGATION
+    track_id: TRACK-U-SW
+    title: thermal guardrail 기반 SW 완화
+    status: IN_PROGRESS
+    owner: ROLE-SW
+    dependency_ids: [WORK-U-FIELD-REPRO]
+    planned_at_step: 39
+  - work_item_id: WORK-U-NEXT-HW
+    track_id: TRACK-U-HW
+    title: 차기 silicon 전력 경로 개선 요구 반영
+    status: PLANNED
+    owner: ROLE-HW
+    dependency_ids: [WORK-U-FIELD-REPRO]
+    planned_at_step: 43
+milestones:
+  - milestone_id: M-U-FIELD-FIX
+    title: Field Fix 승인 Gate
+    kind: GATE
+    status: AT_RISK
+    planned_at_step: 40
+    commitment_at_step: 39
+  - milestone_id: M-U-MAINTENANCE
+    title: Maintenance Release
+    kind: RELEASE
+    status: PLANNED
+    planned_at_step: 44
+    commitment_at_step: 42
+evidence:
+  - evidence_id: EVD-U-FIELD-POWER
+    title: 고부하 촬영 전력 및 온도 계측
+    evidence_type: field_measurement
+    status: RECEIVED
+    requested_at_step: 29
+    expected_at_step: 30
+    available_at_step: 30
+    source_ref: FIXTURE:PROJECT-U:FIELD-POWER-R1
+    limitations: [limited_device_sample]
+  - evidence_id: EVD-U-LONG-RUN
+    title: SW 완화 적용 장시간 안정성 결과
+    evidence_type: field_reproduction
+    status: RECEIVED
+    requested_at_step: 30
+    expected_at_step: 33
+    available_at_step: 35
+    source_ref: FIXTURE:PROJECT-U:LONG-RUN-R1
+    limitations: [single_ambient_condition]
+  - evidence_id: EVD-U-COMPETITOR
+    title: 동급 제품 KPI 비교
+    evidence_type: benchmark
+    status: LATE
+    requested_at_step: 32
+    expected_at_step: 36
+    limitations: [not_yet_available]
+claims:
+  - claim_id: CLM-U-POWER-OVER
+    statement: 고부하 촬영에서 현재 전력 및 온도 여유가 목표보다 작다.
+    epistemic_status: fact
+    asserted_at_step: 30
+    source_refs: [EVD-U-FIELD-POWER]
+    confidence_level: high
+  - claim_id: CLM-U-MITIGATION
+    statement: 제한된 thermal guardrail은 재현 조건에서 throttle 반복을 줄였다.
+    epistemic_status: fact
+    asserted_at_step: 35
+    source_refs: [EVD-U-LONG-RUN]
+    confidence_level: high
+  - claim_id: CLM-U-NEXT-HW
+    statement: 같은 workload가 차기 silicon에서도 유지되면 HW 전력 경로 개선이 필요할 수 있다.
+    epistemic_status: inference
+    asserted_at_step: 35
+    source_refs: [EVD-U-FIELD-POWER, EVD-U-LONG-RUN]
+    inference_basis: [RULE-FIELD-LESSON-PROPAGATION]
+    confidence_level: medium
+issues:
+  - issue_id: ISSUE-U-POWER
+    title: 현장 workload의 전력 여유 부족
+    status: MITIGATING
+    observed_at_step: 30
+    source_refs: [EVD-U-FIELD-POWER]
+    affected_work_item_ids: [WORK-U-SW-MITIGATION]
+    affected_milestone_ids: [M-U-FIELD-FIX]
+  - issue_id: ISSUE-U-THROTTLE
+    title: 장시간 촬영 throttle 반복
+    status: RESOLVED
+    observed_at_step: 31
+    source_refs: [EVD-U-FIELD-POWER]
+    affected_work_item_ids: [WORK-U-FIELD-REPRO]
+    affected_milestone_ids: [M-U-FIELD-FIX]
+risks:
+  - risk_id: RISK-U-KPI
+    statement: 보수적인 SW 완화가 현장 품질 KPI를 훼손할 수 있다.
+    status: TREATING
+    epistemic_status: inference
+    identified_at_step: 31
+    source_issue_ids: [ISSUE-U-POWER]
+    source_event_ids: [EVENT-U-031-FIELD-REPRO]
+    source_refs: [EVD-U-FIELD-POWER]
+    inference_basis: [RULE-GUARDRAIL-KPI-TRADEOFF]
+    downside: MATERIAL
+    blast_radius: PROJECT
+    urgency: IMMEDIATE
+    reversibility: REVERSIBLE
+    affected_work_item_ids: [WORK-U-SW-MITIGATION]
+    affected_milestone_ids: [M-U-FIELD-FIX]
+    treatment_decision_case_ids: [CASE-VR-004]
+    treatment_action_ids: [ACTION-U-GUARDED-FIX]
+  - risk_id: RISK-U-REPEAT
+    statement: 완화가 부족하면 장시간 촬영 throttle이 다시 발생할 수 있다.
+    status: CLOSED
+    epistemic_status: inference
+    identified_at_step: 31
+    source_issue_ids: [ISSUE-U-THROTTLE]
+    source_refs: [EVD-U-FIELD-POWER]
+    inference_basis: [RULE-FIELD-RECURRENCE]
+    downside: MATERIAL
+    blast_radius: PROJECT
+    urgency: IMMEDIATE
+    reversibility: REVERSIBLE
+    affected_work_item_ids: [WORK-U-FIELD-REPRO, WORK-U-SW-MITIGATION]
+    affected_milestone_ids: [M-U-FIELD-FIX]
+    treatment_action_ids: [ACTION-U-LONG-RUN]
+  - risk_id: RISK-U-NEXT-SILICON
+    statement: 현장 lesson을 차기 silicon에 반영하지 않으면 동일 전력 제약이 반복될 수 있다.
+    status: OPEN
+    epistemic_status: inference
+    identified_at_step: 35
+    source_issue_ids: [ISSUE-U-POWER]
+    source_event_ids: [EVENT-U-035-EVIDENCE-ARRIVED]
+    source_refs: [EVD-U-FIELD-POWER, EVD-U-LONG-RUN]
+    inference_basis: [RULE-FIELD-LESSON-PROPAGATION]
+    downside: SEVERE
+    blast_radius: CROSS_PROJECT
+    urgency: BEFORE_MILESTONE
+    reversibility: COSTLY
+    affected_work_item_ids: [WORK-U-NEXT-HW]
+    affected_milestone_ids: [M-U-MAINTENANCE]
+development_actions:
+  - action_id: ACTION-U-GUARDED-FIX
+    title: KPI guardrail을 둔 SW 완화 적용
+    owner: ROLE-SW
+    status: IN_PROGRESS
+    created_at_step: 32
+    due_at_step: 39
+    verification_evidence_ids: [EVD-U-LONG-RUN]
+    rollback_condition: field KPI가 승인 guardrail을 벗어나면 이전 설정으로 복귀
+  - action_id: ACTION-U-LONG-RUN
+    title: 장시간 안정성 재현 완료
+    owner: ROLE-FIELD-QUALITY
+    status: COMPLETED
+    created_at_step: 32
+    due_at_step: 35
+    verification_evidence_ids: [EVD-U-LONG-RUN]
+decision_case_refs:
+  - case_id: CASE-VR-004
+    title: Heavy recording thermal evidence 충돌 검토
+    status: DECISION_REQUIRED
+    opened_at_step: 31
+    decision_deadline_milestone_id: M-U-FIELD-FIX
+    source_issue_ids: [ISSUE-U-POWER, ISSUE-U-THROTTLE]
+    treated_risk_ids: [RISK-U-KPI]
+    affected_work_item_ids: [WORK-U-SW-MITIGATION]
+development_events:
+  - event_id: EVENT-U-030-FIELD-EVIDENCE
+    event_type: EVIDENCE_CHANGE
+    effective_at_step: 30
+    observed_at_step: 30
+    summary: 현장 전력과 온도 계측 결과를 수신했다.
+    cause: 고부하 촬영 재현 측정이 완료되었다.
+    evidence_changes:
+      - evidence_id: EVD-U-FIELD-POWER
+        before: {status: REQUESTED, expected_at_step: 30}
+        after: {status: RECEIVED, expected_at_step: 30, available_at_step: 30}
+  - event_id: EVENT-U-031-FIELD-REPRO
+    event_type: ISSUE_CHANGE
+    effective_at_step: 31
+    observed_at_step: 31
+    summary: 장시간 촬영에서 throttle 반복을 재현했다.
+    cause: field workload를 동일한 온도 조건에서 반복 실행했다.
+    work_item_changes:
+      - work_item_id: WORK-U-FIELD-REPRO
+        before: {status: DONE, planned_at_step: 31, dependency_ids: []}
+        after: {status: VERIFIED, planned_at_step: 31, dependency_ids: []}
+    impacted_milestone_ids: [M-U-FIELD-FIX]
+  - event_id: EVENT-U-032-MITIGATION-START
+    event_type: DECISION_ACTION_PROGRESS
+    effective_at_step: 32
+    observed_at_step: 32
+    summary: KPI guardrail을 둔 SW 완화를 시작했다.
+    cause: field issue는 확인됐지만 상품성 손실 범위는 확정되지 않았다.
+    work_item_changes:
+      - work_item_id: WORK-U-SW-MITIGATION
+        before: {status: READY, planned_at_step: 39, dependency_ids: [WORK-U-FIELD-REPRO]}
+        after: {status: IN_PROGRESS, planned_at_step: 39, dependency_ids: [WORK-U-FIELD-REPRO]}
+    milestone_changes:
+      - milestone_id: M-U-FIELD-FIX
+        before: {status: PLANNED, planned_at_step: 40}
+        after: {status: AT_RISK, planned_at_step: 40}
+    issue_changes:
+      - issue_id: ISSUE-U-POWER
+        before: {status: OPEN}
+        after: {status: MITIGATING}
+    risk_changes:
+      - risk_id: RISK-U-KPI
+        before: {status: OPEN}
+        after: {status: TREATING}
+    action_changes:
+      - action_id: ACTION-U-GUARDED-FIX
+        before: {status: PLANNED, due_at_step: 39}
+        after: {status: IN_PROGRESS, due_at_step: 39}
+      - action_id: ACTION-U-LONG-RUN
+        before: {status: PLANNED, due_at_step: 35}
+        after: {status: IN_PROGRESS, due_at_step: 35}
+    impacted_milestone_ids: [M-U-FIELD-FIX]
+  - event_id: EVENT-U-034-EVIDENCE-LATE
+    event_type: EVIDENCE_CHANGE
+    effective_at_step: 34
+    observed_at_step: 34
+    summary: 장시간 안정성 결과가 계획보다 늦어졌다.
+    cause: 추가 ambient 조건 재현이 필요했다.
+    evidence_changes:
+      - evidence_id: EVD-U-LONG-RUN
+        before: {status: REQUESTED, expected_at_step: 33}
+        after: {status: LATE, expected_at_step: 33}
+  - event_id: EVENT-U-035-EVIDENCE-ARRIVED
+    event_type: EVIDENCE_CHANGE
+    effective_at_step: 35
+    observed_at_step: 35
+    summary: 지연됐던 장시간 안정성 결과가 도착했다.
+    cause: 추가 재현과 결과 검토가 완료되었다.
+    evidence_changes:
+      - evidence_id: EVD-U-LONG-RUN
+        before: {status: LATE, expected_at_step: 33}
+        after: {status: RECEIVED, expected_at_step: 33, available_at_step: 35}
+  - event_id: EVENT-U-036-REPEAT-CLOSED
+    event_type: RISK_CHANGE
+    effective_at_step: 36
+    observed_at_step: 36
+    summary: 재현 조건에서 throttle 반복이 사라져 관련 위험을 종료했다.
+    cause: guardrail 적용 장시간 결과가 승인 기준을 만족했다.
+    issue_changes:
+      - issue_id: ISSUE-U-THROTTLE
+        before: {status: OPEN}
+        after: {status: RESOLVED}
+    risk_changes:
+      - risk_id: RISK-U-REPEAT
+        before: {status: OPEN}
+        after: {status: CLOSED}
+    action_changes:
+      - action_id: ACTION-U-LONG-RUN
+        before: {status: IN_PROGRESS, due_at_step: 35}
+        after: {status: COMPLETED, due_at_step: 35}
+  - event_id: EVENT-U-037-BENCHMARK-LATE
+    event_type: EVIDENCE_CHANGE
+    effective_at_step: 37
+    observed_at_step: 37
+    summary: 동급 제품 KPI 비교 자료가 Gate 검토 시점까지 도착하지 않았다.
+    cause: 비교 가능한 동일 조건 결과 확보가 지연되었다.
+    evidence_changes:
+      - evidence_id: EVD-U-COMPETITOR
+        before: {status: REQUESTED, expected_at_step: 36}
+        after: {status: LATE, expected_at_step: 36}

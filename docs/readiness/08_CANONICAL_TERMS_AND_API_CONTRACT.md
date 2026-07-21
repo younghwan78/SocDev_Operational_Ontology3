@@ -366,7 +366,19 @@ epistemically labelled candidate and cannot mutate Project truth.
 
 The target authoring fixture version is `development-project.v1`. It separates observed
 `DevelopmentIssue`, future `ProjectRisk`, missing `Evidence`, `DecisionCase` and treatment Action.
-Current `observable-case.v1` remains executable and unchanged during OPS-A.
+OPS-B made this authoring/validation contract executable while leaving current
+`observable-case.v1`, runtime repositories and Project HTTP resources unchanged.
+
+OPS-B authoring terms are:
+
+```text
+ProjectLifecycleStage = SPEC_DEFINITION | PRE_SILICON_CLOSURE | MASS_PRODUCTION
+EvidenceStatus        = REQUESTED | LATE | RECEIVED
+MilestoneStatus       = PLANNED | AT_RISK | ACHIEVED
+```
+
+Source fixtures record ordinal downside, blast radius, urgency and reversibility inputs, but never
+assign `ProjectAttention`, `RiskLevel` or a composite risk score.
 
 The following routes and resources are reserved but are **not executable until their OPS-C Gate
 passes**:

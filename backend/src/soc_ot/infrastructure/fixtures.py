@@ -4,6 +4,7 @@ from typing import Any, TypeVar
 import yaml
 from pydantic import BaseModel
 
+from soc_ot.application.project_fixture_contracts import DevelopmentProject
 from soc_ot.application.workspace_contracts import WorkspaceUxFixture
 from soc_ot.domain.models import ExpectedResult, HiddenCase, ObservableCase
 
@@ -56,6 +57,38 @@ class FixtureRepository:
         if not path.exists():
             return None
         return self._load(f"ux/{case_id}.workspace.v1.yaml", WorkspaceUxFixture)
+
+    def load_project(self, project_id: str) -> DevelopmentProject:
+        return self._load(f"projects/{project_id}.yaml", DevelopmentProject)
+
+    def project_ids(self) -> list[str]:
+        return sorted(path.stem for path in (self.root / "projects").glob("PROJECT-*.yaml"))
+
+    def validate_project_corpus(self) -> list[DevelopmentProject]:
+        fixture_ids = self.project_ids()
+        projects = [self.load_project(project_id) for project_id in fixture_ids]
+        if [project.project_id for project in projects] != fixture_ids:
+            raise ValueError("project fixture filename and project_id differ")
+        project_by_id = {project.project_id: project for project in projects}
+        known_case_ids = set(self.case_ids()) | set(self.development_case_ids())
+        for project in projects:
+            for decision in project.decision_case_refs:
+                if decision.case_id not in known_case_ids:
+                    raise ValueError(f"unknown DecisionCase fixture: {decision.case_id}")
+            for source in project.cross_project_sources:
+                if source.source_project_id == project.project_id:
+                    raise ValueError("cross-project source cannot reference the same project")
+                source_project = project_by_id.get(source.source_project_id)
+                if source_project is None:
+                    raise ValueError(
+                        f"unknown cross-project source project: {source.source_project_id}"
+                    )
+                source_event_ids = {item.event_id for item in source_project.development_events}
+                if source.source_event_id not in source_event_ids:
+                    raise ValueError(
+                        f"unknown cross-project source event: {source.source_event_id}"
+                    )
+        return projects
 
     def validate_evaluation_case(
         self,
