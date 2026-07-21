@@ -1,9 +1,9 @@
 # SoC 개발 의사결정 디지털 트윈을 어떻게 구현하고 검증할 것인가
 
-> 문서 상태: Product Plan v0.2, 로컬 PoC 구현 승인  
-> 갱신일: 2026-07-19
+> 문서 상태: Product Plan v0.3, 로컬 PoC 구현 승인
+> 갱신일: 2026-07-21
 > 문서 역할: 제품 목표, 범위, 가치 가설, 중단 기준을 정의  
-> 현재 판단: **GO: I0–I7 Replay, Step 5 B2 runtime 및 post-I7 UX-H human-study 실행 도구 준비 완료**, **NO-GO: 독립 human 관측 전 UX-I·최종 UX 주장, 사내 연동 및 실제 업무 적용**
+> 현재 판단: **GO: I0–I7 Replay, Step 5 B2 runtime, UX-A~UX-H 도구와 OPS-A Scope/ADR 완료**, **NEXT: OPS-B Project 중심 fixture**, **NO-GO: OPS-F 전 human session, UX-I·최종 UX 주장, 사내 연동 및 실제 업무 적용**
 
 이 계획은 SoC 개발 진행과 불확실성을 재현하고 제한된 정보에서도 저후회 결정을 돕는 제품을 정의한다. 집에서는 synthetic fixture로 의사결정 메커니즘만 검증하며, 실제 비즈니스 가치는 사내 read-only 파일럿에서 별도로 측정한다.
 
@@ -387,20 +387,31 @@ task를 통과했다. 이는 local agent-substitute Gate이며 human usability �
 과거 Step과 모바일 선택지 문맥을 URL에 보존하며, canonical action을 유지한 상태에서 설명용
 용어와 hover/active/disabled 상태를 정리했다.
 
-Post-I7 후속 UX는 다음 순서로만 진행한다.
+Project 전체 상황과 Risk provenance가 DecisionCase보다 먼저 필요하다는 검토 결과에 따라
+ADR-0010이 post-I7 실행 순서를 보강한다. 기존 UX-H 도구와 hash-pinned baseline은 보존하지만,
+실제 human session은 Project Operations 정보 구조를 반영한 OPS-F protocol v2까지 실행하지 않는다.
+
+Post-I7 후속은 다음 순서로만 진행한다.
 
 |단계|목표|상태·Gate|
 |---|---|---|
 |UX-G|복구 가능한 오류, URL 문맥 보존, 한국어 우선 표현과 기본 interaction|완료|
-|UX-H|공정한 fixture baseline, human task protocol과 측정 event 계약|구현 완료·session-ready; condition별 독립 human 관측 5개 전 Gate 판정 금지|
-|UX-I|측정 결과로 Inbox·Workspace·Development Twin 정보 구조 축소·개선|UX-H 결과 없이는 시작하지 않음|
+|UX-H|공정한 fixture baseline, human task protocol과 측정 event 계약|도구 구현 완료; 실제 관측 0건, OPS-F 전 session 보류|
+|OPS-A|Project/Issue/Risk/Gate 경계, provenance, Agent 책임과 전환 ADR|완료; ADR-0010 Accepted|
+|OPS-B|lifecycle과 risk provenance가 구별되는 Project fixture|다음 단계; `world.yaml` event는 UX 다양성에 도움이 되는 경우만 선택 참조|
+|OPS-C|Project domain, projection, API와 historical boundary|OPS-B Gate 전 시작하지 않음|
+|OPS-D|Project Portfolio와 Situation UX|OPS-C Gate 전 시작하지 않음|
+|OPS-E|Risk Detail과 기존 Decision Workspace 연결|OPS-D Gate 전 시작하지 않음|
+|OPS-F|Project 중심 UX-H protocol v2와 독립 human observation|OPS-E Gate 전 시작하지 않음|
+|UX-I|측정 결과로 Portfolio·Situation·Workspace 정보 구조 축소·개선|OPS-F human 결과 없이는 시작하지 않음|
 |UX-J|사용자 판단과 simulated Chair를 분리해 accept/modify/reject와 anchoring 측정|새 ADR과 evaluation-only contract 필요|
 
 UX-H는 observable fixture hash와 source selector로 고정한 Jira/Confluence형 baseline pack,
 canonical 8개와 Development Twin 5개 task, `usability-session.v1` event/result 계약과
 검증·요약 CLI까지 구현했다. 실제 사람의 답변·시간은 만들지 않았으며 dry-run summary는
 `not_ready`와 `no_business_claim`을 반환한다. condition별 proxy/domain reviewer 5개 이상을
-확보하기 전에는 UX-I를 시작하지 않는다. 사내 source·권한·승인은 C0에서 별도로 연다.
+확보하기 전에는 UX-I를 시작하지 않는다. 기존 protocol의 실제 관측은 OPS-F까지 시작하지
+않으며, 사내 source·권한·승인은 C0에서 별도로 연다.
 
 ```text
 B2 validation 10/10 + sealed-unseen 6/6 PASS
@@ -492,7 +503,7 @@ C1에서 가치와 보안 gate를 통과한 뒤에만 연다.
 - 데이터: synthetic fixture only
 - 로컬 승인: simulated Chair, 실제 권한 없음
 - 구현 단계: I0~I7
-- 현재 단계: Post-I7 UX-H baseline/protocol/measurement tooling 완료, 독립 human session 대기
+- 현재 단계: OPS-A Scope/ADR 완료, OPS-B Project 중심 fixture가 다음 단계; human session은 OPS-F까지 보류
 - release topology: B2 independent routed Role Agents, deterministic core decision
 - CI provider: ReplayProvider
 - live provider: 구성 가능한 OpenAI Responses API adapter
@@ -527,6 +538,8 @@ Active planning documents:
 - `internal_docs/26.07.17 UX-F Responsive 접근성 및 사용성 Gate 보고서.md`
 - `internal_docs/26.07.19 UX-G 복구 및 검토 문맥 유지 구현 보고서.md`
 - `internal_docs/26.07.19 UX-H Human baseline 및 측정 계약 구현 보고서.md`
+- `internal_docs/26.07.21 OPS-A Project Operations Scope 및 Fixture 전환 계획.md`
+- `docs/decisions/ADR-0010-project-operations-and-risk-provenance.md`
 
 Review and historical context:
 

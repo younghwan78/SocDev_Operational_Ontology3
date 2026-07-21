@@ -1,8 +1,8 @@
 # 전체 계획 문서 안내
 
 > 상태: Active  
-> 갱신일: 2026-07-19
-> 현재 단계: Post-I7 UX-H human-study 도구 준비 완료, 독립 human session 및 C0/I7 Responses API 외부 입력 대기
+> 갱신일: 2026-07-21
+> 현재 단계: OPS-A Project Operations Scope/ADR 완료, OPS-B Project 중심 fixture가 다음 단계; human session은 OPS-F까지 보류
 
 이 문서는 제품 계획부터 구현 계약까지 어떤 문서를 어떤 순서로 읽고 수정해야 하는지 안내한다. 문서 간 충돌은 전체 순위가 아니라 각 문서가 소유한 결정 영역으로 해결한다.
 
@@ -46,6 +46,8 @@
 - `internal_docs/26.07.17 UX-F Responsive 접근성 및 사용성 Gate 보고서.md`
 - `internal_docs/26.07.19 UX-G 복구 및 검토 문맥 유지 구현 보고서.md`
 - `internal_docs/26.07.19 UX-H Human baseline 및 측정 계약 구현 보고서.md`
+- `internal_docs/26.07.21 OPS-A Project Operations Scope 및 Fixture 전환 계획.md`
+- `docs/decisions/ADR-0010-project-operations-and-risk-provenance.md`
 
 다음 문서는 과거 판단의 근거다. 새 구현 기준으로 직접 사용하지 않는다.
 
@@ -71,7 +73,7 @@
 ## 5. 현재 실행 지점
 
 I0~I7 Replay와 post-I7 UX-A/UX-B/UX-C/UX-D/UX-E/UX-F/UX-G 로컬 Gate,
-UX-H human-study 실행 도구 구현이 완료됐다.
+UX-H human-study 실행 도구 및 OPS-A Scope/ADR 구현이 완료됐다. 다음 실행 단계는 OPS-B다.
 
 ```text
 UX-F Responsive·접근성·사용성 Gate
@@ -87,11 +89,16 @@ UX-H Human baseline·측정 계약
   → observable hash-pinned Jira/Confluence형 baseline fixture PASS
   → frozen 13-task protocol + session/event/summary schema PASS
   → builder dry-run은 not_ready/no_business_claim, 실제 human 결과는 0건
+OPS-A Project Operations Scope/ADR
+  → Project/Issue/Risk/Gate 의미와 provenance 경계 확정
+  → world.yaml의 event 항목은 UX fixture 다양성에 도움이 되는 경우만 선택 참조
+  → OPS-B~OPS-F 순서와 stage Gate 확정, human session은 OPS-F까지 보류
 ```
 
 UX-F/UX-G 완료는 local Codex evaluator와 deterministic browser automation의 공학적 Gate다.
 실제 사용자 시간, 의사결정 속도, 조언 품질, 승인이나 사내 연동 완료를 의미하지 않는다.
 UX-H는 공정한 비교 fixture와 측정 도구가 준비됐다는 뜻이며 human usability 또는 business
-value 결과가 아니다. 각 condition에서 proxy/domain reviewer 5개 이상을 기록하기 전에는
+value 결과가 아니다. 새 Project Operations 정보 구조를 반영한 OPS-F protocol v2 전에는
+human session을 실행하지 않고, condition별 proxy/domain reviewer 5개 이상을 기록하기 전에는
 UX-I와 business claim을 시작하지 않는다. C0와 I7 Responses API gate는 필요한 사용자·회사
 입력과 key·가격·비용 승인 전에는 시작하지 않는다.

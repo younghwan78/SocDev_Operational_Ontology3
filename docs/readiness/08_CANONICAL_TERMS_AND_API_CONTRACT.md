@@ -1,7 +1,7 @@
 # Canonical terms and API contract
 
 > Status: APPROVED  
-> Date: 2026-07-17
+> Date: 2026-07-21
 > Scope: local fixture-only PoC
 
 This contract removes ambiguous names shared by domain state, Agent runs, UI phases, fixture versions, and HTTP resources. Backend, Frontend, fixtures, tests, and documentation must reuse these names.
@@ -346,6 +346,46 @@ Required failure tests:
 - cancellation during an in-flight call
 - late response after cancellation
 
-## 10. Compatibility gate
+## 10. Accepted OPS-A reservation
+
+ADR-0010 accepts Project Operations and Risk Provenance as the post-I7 product direction. The
+following names are reserved for OPS-B/OPS-C and must not be replaced by synonyms:
+
+```text
+ProjectAttention = ON_TRACK | WATCH | AT_RISK | BLOCKED
+IssueStatus       = OPEN | MITIGATING | RESOLVED
+RiskStatus        = OPEN | TREATING | ACCEPTED | REALIZED | CLOSED
+RiskLevel         = LOW | MEDIUM | HIGH | CRITICAL
+MilestoneKind     = CHECKPOINT | GATE | RELEASE
+```
+
+`ProjectAttention` and `RiskLevel` are Backend-owned deterministic projection fields. Source
+fixtures and Frontend code do not assign them from an uncalibrated impact-times-likelihood score.
+Every projected value includes reason and source references. Role Agent output remains an
+epistemically labelled candidate and cannot mutate Project truth.
+
+The target authoring fixture version is `development-project.v1`. It separates observed
+`DevelopmentIssue`, future `ProjectRisk`, missing `Evidence`, `DecisionCase` and treatment Action.
+Current `observable-case.v1` remains executable and unchanged during OPS-A.
+
+The following routes and resources are reserved but are **not executable until their OPS-C Gate
+passes**:
+
+```text
+/projects
+/projects/:projectId
+/projects/:projectId/risks/:riskId
+
+GET /api/v1/projects
+GET /api/v1/projects/{project_id}/situation
+GET /api/v1/projects/{project_id}/risks
+GET /api/v1/projects/{project_id}/risks/{risk_id}
+GET /api/v1/projects/{project_id}/timeline
+```
+
+Historical Project resources use `at_step` and the existing effective/observed/available boundary.
+ADR-0010 owns the full semantic boundary and transition sequence.
+
+## 11. Compatibility gate
 
 Any change to a state code, DecisionType, endpoint, time field, or version name updates this contract first. CI then checks generated schemas, OpenAPI, Frontend client, fixture manifests, runbook examples, and documentation references.

@@ -1,7 +1,7 @@
 # P0/P1 Implementation Readiness 결과
 
 > 원 판정: **READY FOR I0 SCAFFOLD**  
-> 현재 상태: **I0–I7 Replay·Codex CLI B2 runtime 및 post-I7 UX-H human-study 도구 준비 완료; 독립 human 관측 대기**
+> 현재 상태: **I0–I7 Replay·Codex CLI B2 runtime·UX-H 도구 및 OPS-A 완료; OPS-B Project fixture가 다음 단계, human 관측은 OPS-F까지 보류**
 > 작성일: 2026-07-11  
 > 범위: 집에서 synthetic fixture로 구현하는 SoC Operational Decision Twin  
 > 주의: 본문은 구현 전 P0/P1 판정 기록이다. 현재 구현 증거는 `docs/implementation/`을 따른다.
@@ -125,4 +125,4 @@ I0 완료 판정:
 
 ## 9. 최종 판단
 
-**P0/P1 설계 결정은 완료되었고 그 판정에 따라 I0–I7 Replay 구현과 gate 검증까지 완료했다.** 외부 key·가격·비용 승인에 의존하는 I7 Responses API gate는 실행하지 않았다. 별도 post-I7 UX roadmap은 UX-A부터 UX-G까지의 화면 Gate와 UX-H의 hash-pinned baseline, frozen 13-task protocol, session/event/summary 계약 및 CLI 준비까지 완료했다. UX-H에는 실제 human 결과를 넣지 않았으며 현재 판정은 `not_ready`/`no_business_claim`이다. 각 condition에서 proxy/domain reviewer 5개 이상을 기록하기 전에는 UX-I나 business value 주장을 시작하지 않는다. 사내 연동과 실제 업무 적용은 여전히 별도 C0 승인 범위다.
+**P0/P1 설계 결정은 완료되었고 그 판정에 따라 I0–I7 Replay 구현과 gate 검증까지 완료했다.** 외부 key·가격·비용 승인에 의존하는 I7 Responses API gate는 실행하지 않았다. UX-A부터 UX-G 화면 Gate와 UX-H의 hash-pinned baseline, frozen 13-task protocol, session/event/summary 도구도 완료했다. 이후 Project 전체 상황과 Risk provenance가 먼저 필요하다는 검토에 따라 ADR-0010의 OPS-A를 완료했고 OPS-B Project 중심 fixture를 다음 단계로 승인했다. UX-H의 실제 human 결과는 0건이며 기존 protocol 실행은 OPS-F v2까지 보류한다. OPS-F에서 condition별 proxy/domain reviewer 5개 이상을 기록하기 전에는 UX-I나 business value 주장을 시작하지 않는다. 사내 연동과 실제 업무 적용은 여전히 별도 C0 승인 범위다.

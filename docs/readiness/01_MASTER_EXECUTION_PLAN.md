@@ -1,7 +1,7 @@
 # Master execution plan
 
-> Status: IMPLEMENTED THROUGH I7 REPLAY + STEP 5 B2 RUNTIME + POST-I7 UX-H SESSION TOOLING; INDEPENDENT HUMAN OBSERVATIONS AND I7 RESPONSES API GATE PENDING INPUT
-> Date: 2026-07-19
+> Status: IMPLEMENTED THROUGH I7 REPLAY + STEP 5 B2 RUNTIME + POST-I7 UX-H TOOLING + OPS-A; OPS-B PROJECT FIXTURE NEXT, HUMAN OBSERVATION PAUSED UNTIL OPS-F
+> Date: 2026-07-21
 > Scope: local fixture-only PoC
 
 ## 1. Purpose
@@ -390,7 +390,37 @@ Post-I7 UX-H implementation record (2026-07-19):
 - the baseline pack, protocol, session preparation/validation and summary are authoring/evaluation
   CLI surfaces only; no product API, database, company connector, authentication or write-back changed
 - implementation and synthetic dry-run validation are complete, but actual human observations remain
-  zero; UX-I stays blocked until the frozen minimum is collected
+  zero; session execution is paused until OPS-F protocol v2 and UX-I remains blocked until its frozen
+  minimum is collected
+
+Post-I7 OPS-A decision record (2026-07-21):
+
+- ADR-0010 accepts Project Portfolio → Project Situation → Issue/Risk Detail → existing Decision
+  Workspace as the product flow; the current Workspace is preserved rather than replaced
+- `DevelopmentProject`, observed `DevelopmentIssue`, future `ProjectRisk`, Milestone/Gate and
+  provenance boundaries are fixed before fixture or API implementation
+- Backend owns Project attention, Risk level, ordering and reason/source projection; Frontend and
+  unvalidated Role output do not calculate or mutate Project truth
+- `development-project.v1` and Project routes/resources are reserved names but remain non-executable
+  until their OPS-B/OPS-C Gates pass
+- the external `world.yaml` SHA-256 is recorded for traceability; only selected event ideas that improve
+  OPS-B UX coverage may be adapted, with no fixed event count, runtime dependency, verbatim import,
+  risk score, dice or long Role LLM prose
+- existing UX-H observations remain zero and human session execution is paused until OPS-F protocol v2
+
+Post-I7 Project Operations stages run in this order:
+
+|Stage|Deliverable|Gate|
+|---|---|---|
+|OPS-A|Scope, semantic boundaries, reserved vocabulary and ADR|Complete: ADR-0010 Accepted|
+|OPS-B|Lifecycle-distinct Project fixtures and event/risk provenance|Smallest non-duplicative event set covering Project, Risk and historical UX tasks|
+|OPS-C|Project domain, projection, API and compatibility path|Generated contracts, migration/parity where applicable, no future leakage|
+|OPS-D|Portfolio and Project Situation UX|30-second overall status/top-risk/source task passes|
+|OPS-E|Risk Detail and Decision linkage|Two-minute source-to-impact-to-decision trace task passes|
+|OPS-F|UX-H protocol v2 and independent observations|Minimum independent observations before UX-I or business claim|
+
+No later OPS stage starts before the previous Gate. Company connectors, authentication and write-back
+remain C0/C2 scope.
 
 ## 7. Crosswalk to supporting plans
 
