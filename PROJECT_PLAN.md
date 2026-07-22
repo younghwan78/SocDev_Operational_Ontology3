@@ -1,9 +1,9 @@
 # SoC 개발 의사결정 디지털 트윈을 어떻게 구현하고 검증할 것인가
 
 > 문서 상태: Product Plan v0.3, 로컬 PoC 구현 승인
-> 갱신일: 2026-07-22
+> 갱신일: 2026-07-23
 > 문서 역할: 제품 목표, 범위, 가치 가설, 중단 기준을 정의  
-> 현재 판단: **GO: I0–I7 Replay, Step 5 B2 runtime, UX-A~UX-H 도구와 OPS-F Project protocol v2 구현 완료**, **CURRENT: OPS-F 독립 관측 baseline 0/5·product 0/5**, **NO-GO: UX-I·최종 UX 주장, 사내 연동 및 실제 업무 적용**
+> 현재 판단: **GO: I0–I7 Replay, Step 5 B2 runtime, UX-A~UX-H 도구와 OPS-F study release 구현 완료**, **CURRENT: OPS-F 독립 관측 baseline 0/5·product 0/5**, **NO-GO: UX-I·최종 UX 주장, live 사내 연동 및 실제 업무 적용**
 
 이 계획은 SoC 개발 진행과 불확실성을 재현하고 제한된 정보에서도 저후회 결정을 돕는 제품을 정의한다. 집에서는 synthetic fixture로 의사결정 메커니즘만 검증하며, 실제 비즈니스 가치는 사내 read-only 파일럿에서 별도로 측정한다.
 
@@ -403,7 +403,7 @@ Post-I7 후속은 다음 순서로만 진행한다.
 |OPS-C|Project domain, projection, API와 historical boundary|완료; PostgreSQL aggregate, reason/source policy, 5개 read API와 `at_step` parity|
 |OPS-D|Project Portfolio와 Situation UX|완료; Backend 정렬 Portfolio, Situation provenance와 historical URL, 390px/desktop local task proxy PASS|
 |OPS-E|Risk Detail과 기존 Decision Workspace 연결|완료; source→inference→impact→Decision/Action과 Decision 왕복 local proxy PASS|
-|OPS-F|Project 중심 UX-H protocol v2와 독립 human observation|protocol v2 완료; 독립 관측 baseline 0/5·product 0/5로 Gate 진행 중|
+|OPS-F|Project 중심 UX-H protocol v2, 제품 release 고정과 독립 human observation|release/rubric/E2E 도구 완료; 독립 관측 baseline 0/5·product 0/5로 Gate 진행 중|
 |UX-I|측정 결과로 Portfolio·Situation·Workspace 정보 구조 축소·개선|OPS-F human 결과 없이는 시작하지 않음|
 |UX-J|사용자 판단과 simulated Chair를 분리해 accept/modify/reject와 anchoring 측정|새 ADR과 evaluation-only contract 필요|
 
@@ -504,7 +504,7 @@ C1에서 가치와 보안 gate를 통과한 뒤에만 연다.
 - 데이터: synthetic fixture only
 - 로컬 승인: simulated Chair, 실제 권한 없음
 - 구현 단계: I0~I7
-- 현재 단계: OPS-F Project 중심 protocol v2 완료, 독립 관측 baseline 0/5·product 0/5; UX-I 차단
+- 현재 단계: OPS-F study release/rubric/E2E 도구 완료, 독립 관측 baseline 0/5·product 0/5; UX-I 차단
 - release topology: B2 independent routed Role Agents, deterministic core decision
 - CI provider: ReplayProvider
 - live provider: 구성 가능한 OpenAI Responses API adapter
@@ -545,6 +545,7 @@ Active planning documents:
 - `internal_docs/26.07.22 OPS-D Project Portfolio Situation UX 구현 및 검증 보고서.md`
 - `internal_docs/26.07.22 OPS-E Risk Detail Decision Linkage 구현 및 검증 보고서.md`
 - `internal_docs/26.07.22 OPS-F Project 중심 사용성 Protocol v2 구현 및 검증 보고서.md`
+- `internal_docs/26.07.23 OPS-F Study Release 보강 및 사내 데이터 연결 준비도 보고서.md`
 - `docs/decisions/ADR-0010-project-operations-and-risk-provenance.md`
 
 Review and historical context:

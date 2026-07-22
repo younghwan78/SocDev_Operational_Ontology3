@@ -315,6 +315,81 @@ class ProjectUsabilityStudyProtocol(StrictModel):
         return self
 
 
+class UsabilityArtifactPin(StrictModel):
+    path: str
+    sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    purpose: Literal["product_ui", "product_api", "study_material"]
+
+    @field_validator("path")
+    @classmethod
+    def require_safe_path(cls, value: str) -> str:
+        path = PurePosixPath(value)
+        if path.is_absolute() or ".." in path.parts or "\\" in value:
+            raise ValueError("study artifact path must be a safe POSIX relative path")
+        return value
+
+
+class UsabilityStudyEnvironment(StrictModel):
+    browser_family: Literal["chromium"] = "chromium"
+    browser_version_policy: Literal["installed_at_session"] = "installed_at_session"
+    locale: Literal["ko-KR"] = "ko-KR"
+    viewport_width: int = Field(ge=320)
+    viewport_height: int = Field(ge=568)
+    network_mode: Literal["local"] = "local"
+
+
+class UsabilityStudyRelease(StrictModel):
+    schema_version: Literal["usability-study-release.v1"] = (
+        "usability-study-release.v1"
+    )
+    release_id: str
+    study_id: str
+    frozen_at: datetime
+    product_revision: str = Field(pattern=r"^[0-9a-f]{40}$")
+    product_entry_path: Literal["/projects"] = "/projects"
+    environment: UsabilityStudyEnvironment
+    artifact_pins: list[UsabilityArtifactPin] = Field(min_length=1)
+
+    @field_validator("frozen_at")
+    @classmethod
+    def require_timezone(cls, value: datetime) -> datetime:
+        if value.tzinfo is None or value.utcoffset() is None:
+            raise ValueError("study release frozen_at must include a timezone")
+        return value
+
+    @model_validator(mode="after")
+    def validate_artifact_pins(self) -> "UsabilityStudyRelease":
+        paths = [item.path for item in self.artifact_pins]
+        if len(paths) != len(set(paths)):
+            raise ValueError("study release has duplicate artifact paths")
+        purposes = {item.purpose for item in self.artifact_pins}
+        if purposes != {"product_ui", "product_api", "study_material"}:
+            raise ValueError("study release must pin UI, API, and study material")
+        return self
+
+
+class UsabilityReviewerTaskRubric(StrictModel):
+    task_id: str
+    required_findings_ko: list[str] = Field(min_length=1)
+    failure_conditions_ko: list[str] = Field(min_length=1)
+
+
+class UsabilityReviewerRubric(StrictModel):
+    schema_version: Literal["usability-reviewer-rubric.v1"] = (
+        "usability-reviewer-rubric.v1"
+    )
+    study_id: str
+    general_rules_ko: list[str] = Field(min_length=1)
+    tasks: list[UsabilityReviewerTaskRubric] = Field(min_length=1)
+
+    @model_validator(mode="after")
+    def validate_task_ids(self) -> "UsabilityReviewerRubric":
+        task_ids = [item.task_id for item in self.tasks]
+        if len(task_ids) != len(set(task_ids)):
+            raise ValueError("reviewer rubric has duplicate task ids")
+        return self
+
+
 class UsabilityEvent(StrictModel):
     event_id: str
     event_type: UsabilityEventType
@@ -370,6 +445,9 @@ class ConditionSummary(StrictModel):
     completed_sessions: int
     independent_sessions: int
     builder_sessions: int
+    draft_sessions: int = 0
+    excluded_sessions: int = 0
+    exclusion_reasons: dict[str, int] = Field(default_factory=dict)
     median_elapsed_seconds: float | None
     question_accuracy: float | None
     boundary_accuracy: float | None
@@ -429,6 +507,18 @@ def load_baseline_pack(path: Path) -> StudyBaselinePack:
     return UsabilityBaselinePack.model_validate(payload)
 
 
+def load_study_release(path: Path) -> UsabilityStudyRelease:
+    return UsabilityStudyRelease.model_validate(
+        yaml.safe_load(path.read_text(encoding="utf-8"))
+    )
+
+
+def load_reviewer_rubric(path: Path) -> UsabilityReviewerRubric:
+    return UsabilityReviewerRubric.model_validate(
+        yaml.safe_load(path.read_text(encoding="utf-8"))
+    )
+
+
 def load_session(path: Path) -> UsabilitySession:
     return UsabilitySession.model_validate(
         yaml.safe_load(path.read_text(encoding="utf-8"))
@@ -453,6 +543,10 @@ def _model_sha256(model: StrictModel) -> str:
     return hashlib.sha256(encoded.encode("utf-8")).hexdigest()
 
 
+def file_sha256(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
 def validate_study_materials(
     fixtures_root: Path,
     protocol_path: Path,
@@ -467,6 +561,57 @@ def validate_study_materials(
     if not isinstance(pack, UsabilityBaselinePack):
         raise ValueError("v1 protocol requires an observable-case baseline pack")
     return _validate_case_study_materials(fixtures_root, protocol, pack)
+
+
+def validate_project_study_bundle(
+    repo_root: Path,
+    fixtures_root: Path,
+    protocol_path: Path,
+    baseline_pack_path: Path,
+    release_path: Path,
+    reviewer_rubric_path: Path,
+) -> tuple[
+    ProjectUsabilityStudyProtocol,
+    ProjectUsabilityBaselinePack,
+    dict[str, DevelopmentProject],
+    UsabilityStudyRelease,
+    UsabilityReviewerRubric,
+]:
+    protocol, pack, projects = validate_study_materials(
+        fixtures_root, protocol_path, baseline_pack_path
+    )
+    if not isinstance(protocol, ProjectUsabilityStudyProtocol):
+        raise ValueError("project study bundle requires a v2 protocol")
+    if not isinstance(pack, ProjectUsabilityBaselinePack) or not isinstance(projects, dict):
+        raise ValueError("project study bundle requires validated Project sources")
+
+    release = load_study_release(release_path)
+    rubric = load_reviewer_rubric(reviewer_rubric_path)
+    if release.study_id != protocol.study_id or rubric.study_id != protocol.study_id:
+        raise ValueError("study bundle identity mismatch")
+    if release.product_entry_path != protocol.product_entry_path:
+        raise ValueError("study release product entry does not match protocol")
+    if [item.task_id for item in rubric.tasks] != [item.task_id for item in protocol.tasks]:
+        raise ValueError("reviewer rubric task order does not match protocol")
+
+    root = repo_root.resolve()
+    pinned_paths: set[str] = set()
+    for artifact in release.artifact_pins:
+        artifact_path = (root / PurePosixPath(artifact.path)).resolve()
+        if root not in artifact_path.parents or not artifact_path.is_file():
+            raise ValueError("study release artifact is missing or escapes repository root")
+        if file_sha256(artifact_path) != artifact.sha256:
+            raise ValueError(f"study release artifact hash is stale: {artifact.path}")
+        pinned_paths.add(artifact.path)
+
+    required_materials = {
+        _relative_posix_path(root, protocol_path),
+        _relative_posix_path(root, baseline_pack_path),
+        _relative_posix_path(root, reviewer_rubric_path),
+    }
+    if not required_materials.issubset(pinned_paths):
+        raise ValueError("study release does not pin every study material")
+    return protocol, pack, projects, release, rubric
 
 
 def _validate_case_study_materials(
@@ -676,6 +821,43 @@ def render_session_guide(protocol: StudyProtocol, condition: StudyCondition) -> 
     return "\n".join(lines) + "\n"
 
 
+def render_reviewer_guide(
+    protocol: ProjectUsabilityStudyProtocol,
+    rubric: UsabilityReviewerRubric,
+) -> str:
+    if [item.task_id for item in rubric.tasks] != [item.task_id for item in protocol.tasks]:
+        raise ValueError("reviewer rubric task order does not match protocol")
+    task_by_id = {task.task_id: task for task in protocol.tasks}
+    lines = [
+        f"# OPS-F Reviewer Guide — {protocol.study_id}",
+        "",
+        "> 참가자에게 사전 공개하지 않습니다. 답변 제출 후 동일 기준으로 채점합니다.",
+        "",
+        "## 공통 판정 규칙",
+        "",
+        *(f"- {rule}" for rule in rubric.general_rules_ko),
+    ]
+    for index, item in enumerate(rubric.tasks, start=1):
+        task = task_by_id[item.task_id]
+        lines.extend(
+            [
+                "",
+                f"## {index}. {item.task_id}",
+                "",
+                f"**질문:** {task.prompt_ko}",
+                "",
+                "### PASS에 필요한 관측",
+                "",
+                *(f"- {finding}" for finding in item.required_findings_ko),
+                "",
+                "### FAIL 조건",
+                "",
+                *(f"- {condition}" for condition in item.failure_conditions_ko),
+            ]
+        )
+    return "\n".join(lines) + "\n"
+
+
 def create_session_template(
     protocol: StudyProtocol,
     *,
@@ -713,6 +895,11 @@ def validate_session(
         raise ValueError("session task order does not match frozen protocol")
     if any(event.task_id not in task_ids for event in session.events):
         raise ValueError("session event references an unknown task")
+    if (
+        session.status is SessionStatus.EXCLUDED
+        and session.exclusion_reason not in protocol.exclusion_reasons
+    ):
+        raise ValueError("session exclusion reason is not frozen in protocol")
 
     complete = session.status is SessionStatus.COMPLETED
     if require_complete and not complete:
@@ -736,9 +923,10 @@ def summarize_sessions(
     *,
     generated_at: datetime,
 ) -> UsabilityStudySummary:
+    validated = [validate_session(protocol, session) for session in sessions]
     completed = [
         validate_session(protocol, session, require_complete=True)
-        for session in sessions
+        for session in validated
         if session.status is SessionStatus.COMPLETED
     ]
     identities = [
@@ -751,7 +939,7 @@ def summarize_sessions(
         if len(participant_codes) != len(set(participant_codes)):
             raise ValueError("v2 participant may complete only one study condition")
     condition_summaries = [
-        _condition_summary(protocol, completed, condition)
+        _condition_summary(protocol, validated, condition)
         for condition in (StudyCondition.BASELINE, StudyCondition.PRODUCT)
     ]
     requirement = all(
@@ -798,9 +986,9 @@ def render_study_report(summary: UsabilityStudySummary) -> str:
         "",
         "이 보고서는 측정 산출물 요약이며 사람의 최종 승인이나 business value 증명이 아닙니다.",
         "",
-        "|Condition|Completed|Independent|Builder|Median seconds|Accuracy|Boundary|"
-        "Safeguard|Wrong action|Detail open|Recovery|",
-        "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
+        "|Condition|Completed|Independent|Builder|Draft|Excluded|Median seconds|Accuracy|"
+        "Boundary|Safeguard|Wrong action|Detail open|Recovery|",
+        "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
     ]
     for item in summary.condition_summaries:
         lines.append(
@@ -811,6 +999,8 @@ def render_study_report(summary: UsabilityStudySummary) -> str:
                     str(item.completed_sessions),
                     str(item.independent_sessions),
                     str(item.builder_sessions),
+                    str(item.draft_sessions),
+                    str(item.excluded_sessions),
                     _display_metric(item.median_elapsed_seconds),
                     _display_metric(item.question_accuracy),
                     _display_metric(item.boundary_accuracy),
@@ -822,6 +1012,20 @@ def render_study_report(summary: UsabilityStudySummary) -> str:
             )
             + "|"
         )
+    lines.extend(["", "## 제외 관측", ""])
+    exclusion_rows = [
+        (item.condition, reason, count)
+        for item in summary.condition_summaries
+        for reason, count in item.exclusion_reasons.items()
+    ]
+    if exclusion_rows:
+        lines.extend(["|Condition|Reason|Count|", "|---|---|---:|"])
+        lines.extend(
+            f"|{condition}|{reason}|{count}|"
+            for condition, reason, count in exclusion_rows
+        )
+    else:
+        lines.append("- 제외된 관측 없음")
     lines.extend(["", "## 판정 이유", ""])
     if summary.reasons:
         lines.extend(f"- {reason}" for reason in summary.reasons)
@@ -905,9 +1109,12 @@ def _condition_summary(
     condition: StudyCondition,
 ) -> ConditionSummary:
     selected = [session for session in sessions if session.condition is condition]
+    completed = [
+        session for session in selected if session.status is SessionStatus.COMPLETED
+    ]
     independent = [
         session
-        for session in selected
+        for session in completed
         if session.participant_kind in protocol.independent_participant_kinds
     ]
     elapsed = [_session_elapsed_seconds(session) for session in independent]
@@ -925,11 +1132,18 @@ def _condition_summary(
     ]
     return ConditionSummary(
         condition=condition,
-        completed_sessions=len(selected),
+        completed_sessions=len(completed),
         independent_sessions=len(independent),
         builder_sessions=sum(
-            session.participant_kind is ParticipantKind.BUILDER for session in selected
+            session.participant_kind is ParticipantKind.BUILDER for session in completed
         ),
+        draft_sessions=sum(
+            session.status is SessionStatus.DRAFT for session in selected
+        ),
+        excluded_sessions=sum(
+            session.status is SessionStatus.EXCLUDED for session in selected
+        ),
+        exclusion_reasons=_exclusion_reason_counts(selected),
         median_elapsed_seconds=_median(elapsed),
         question_accuracy=(
             sum(result.score is TaskScore.PASS for result in results) / len(results)
@@ -1026,6 +1240,22 @@ def _event_count(
         for session in sessions
         for event in session.events
     )
+
+
+def _exclusion_reason_counts(sessions: list[UsabilitySession]) -> dict[str, int]:
+    counts: dict[str, int] = {}
+    for session in sessions:
+        if session.status is not SessionStatus.EXCLUDED or session.exclusion_reason is None:
+            continue
+        counts[session.exclusion_reason] = counts.get(session.exclusion_reason, 0) + 1
+    return dict(sorted(counts.items()))
+
+
+def _relative_posix_path(root: Path, path: Path) -> str:
+    resolved = path.resolve()
+    if root not in resolved.parents:
+        raise ValueError("study material path escapes repository root")
+    return resolved.relative_to(root).as_posix()
 
 
 def _session_elapsed_seconds(session: UsabilitySession) -> float:

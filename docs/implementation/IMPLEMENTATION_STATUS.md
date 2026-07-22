@@ -1,7 +1,7 @@
 # Implementation status
 
-> Updated: 2026-07-22
-> Current stage: OPS-F Project-centered protocol v2 implemented; independent observation Gate remains open at baseline 0/5 and product 0/5, UX-I blocked
+> Updated: 2026-07-23
+> Current stage: OPS-F product release/rubric/E2E tooling implemented; independent observation Gate remains open at baseline 0/5 and product 0/5, UX-I blocked
 
 ## Stage evidence
 
@@ -30,9 +30,9 @@
 |OPS-C|Passed|Migration 0020, durable Project repositories, deterministic attention/risk policies, five read APIs, historical parity, generated contracts and Replay smoke; this established the runtime boundary consumed by OPS-D.|
 |OPS-D|Passed (local agent substitute)|Backend-ordered Project Portfolio, progressive Situation view, human-readable source-to-Issue/Evidence/Event joins, affected work and milestones, URL-backed historical Step, Korean recovery, responsive 390px/desktop UI, 4 focused/16 total unit tests, 8 regression E2E, Axe and overflow checks. Human task time remains unmeasured.|
 |OPS-E|Passed (local agent substitute)|One source→epistemic/inference→impact→Decision/Action trace, Korean-first rule/limitation labels, all-Risk Situation navigation, historical Project boundary, Decision round trip without cross-timeline Step injection, 4 focused/19 total unit tests, 8 regression E2E, 390px/desktop Axe, overflow and console checks. Human task time remains unmeasured.|
-|OPS-F|Protocol v2 implemented; observation Gate pending|PROJECT-U/V/W hash-pinned source pack, 6 baseline surfaces, 11 frozen Project Operations tasks, v2 protocol/baseline schemas, v1 compatibility, condition guides, CLI defaults and 8 focused tests. Completed independent observations: baseline 0/5, product 0/5; `not_ready/not_evaluable/no_business_claim`.|
+|OPS-F|Study execution tooling complete; observation Gate pending|PROJECT-U/V/W source pack, 6 baseline surfaces, 11 tasks, product release hash pins, participant-hidden reviewer rubric, draft/exclusion attrition reporting, condition guides and Project path E2E. Completed independent observations: baseline 0/5, product 0/5; `not_ready/not_evaluable/no_business_claim`.|
 
-OPS-F implementation record (2026-07-22):
+OPS-F implementation record (2026-07-23):
 
 - new v2 material measures the actual Portfolio → Situation → Risk → Decision information architecture;
   the previous DecisionCase-centered v1 protocol remains valid and unchanged
@@ -47,10 +47,19 @@ OPS-F implementation record (2026-07-22):
   participant from completing both conditions and keeps builder drafts outside independent counts
 - two CLI-generated builder drafts contain no completed observation; summary remains
   `not_ready/not_evaluable/no_business_claim`, with baseline/product independent counts 0/5 and 0/5
-- full regression passes: Ruff, Mypy (51 source files), 161 non-PostgreSQL tests, 11 PostgreSQL tests,
-  all boundary/contract/plan/migration checks, 19 Frontend unit tests, production build and 8 E2E tests
+- one release manifest pins the OPS-E product revision, `/projects` entry, execution environment and
+  study-critical UI/API/material hashes; stale artifacts fail before a session is prepared
+- one reviewer-only rubric freezes exact required findings and failure conditions without leaking them
+  into participant guides; draft/excluded/complete counts and fixed exclusion reasons remain visible
+- Project E2E now verifies the live Portfolio → Situation → Risk → Decision round trip and the mobile
+  Step 20 no-future-leakage boundary in addition to existing Decision-flow regression
+- full regression passes: Ruff, Mypy (51 source files), 164 non-PostgreSQL tests, 11 PostgreSQL tests,
+  all boundary/contract/plan/migration checks, 19 Frontend unit tests, production build and 10 E2E tests
 - OPS-F software preparation is complete but its human Gate is not. UX-I and business claims remain
   blocked until both conditions have at least five valid independent observations and responsible review
+- direct company connection is not ready: canonical storage/projection/UI are reusable, but Jira/
+  Confluence adapter, enterprise identity/time, ACL, sync and retention contracts remain C0 work;
+  the next allowed integration activity is approved sanitized-export schema-fit, not a live connector
 
 OPS-E implementation record (2026-07-22):
 

@@ -174,12 +174,21 @@ if ($master -notmatch 'OPS-E implementation record') {
 @(
     "fixtures/usability/OPS-F-20260722.protocol.v2.yaml",
     "fixtures/usability/PROJECT-OPERATIONS.baseline-pack.v2.yaml",
+    "fixtures/usability/OPS-F-20260722.release.v1.yaml",
+    "fixtures/usability/OPS-F-20260722.reviewer-rubric.v1.yaml",
     "contracts/generated/usability-study-protocol.v2.schema.json",
-    "contracts/generated/usability-project-baseline-pack.v2.schema.json"
+    "contracts/generated/usability-project-baseline-pack.v2.schema.json",
+    "contracts/generated/usability-study-release.v1.schema.json",
+    "contracts/generated/usability-reviewer-rubric.v1.schema.json",
+    "frontend/tests/project-operations.spec.ts"
 ) | ForEach-Object {
     if (-not (Test-Path -LiteralPath (Join-Path $root $_) -PathType Leaf)) {
         throw "Missing OPS-F protocol v2 artifact: $_"
     }
+}
+if (-not (Get-ChildItem -LiteralPath (Join-Path $root "internal_docs") -File |
+    Where-Object { $_.Name -like "26.07.23 OPS-F Study Release*.md" })) {
+    throw "Missing OPS-F study release and company-readiness report."
 }
 if ($master -notmatch 'OPS-F implementation record') {
     throw "Master plan does not record the OPS-F implementation state."

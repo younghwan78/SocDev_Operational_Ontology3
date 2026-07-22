@@ -1,0 +1,50 @@
+schema_version: usability-study-release.v1
+release_id: OPS-F-PRODUCT-EC2DB27
+study_id: OPS-F-20260722-PROJECT-OPERATIONS
+frozen_at: 2026-07-23T01:00:00+09:00
+product_revision: ec2db27e663607d19e0a8cd3b26f06a0c54bd537
+product_entry_path: /projects
+environment:
+  browser_family: chromium
+  browser_version_policy: installed_at_session
+  locale: ko-KR
+  viewport_width: 1440
+  viewport_height: 1000
+  network_mode: local
+artifact_pins:
+  - path: frontend/src/app/App.tsx
+    sha256: 9025ea7bf5916f11f93a8b631e764d3259e192897f0587ec727b09a811a66bc0
+    purpose: product_ui
+  - path: frontend/src/features/projects/ProjectPortfolioPage.tsx
+    sha256: eb02d700c40d6c01f5337d60ea6fb03441b761ec1be25b0f2376c17333553be8
+    purpose: product_ui
+  - path: frontend/src/features/projects/ProjectSituationPage.tsx
+    sha256: 0908d954419cd8a16ae38f65d7805869ccc273f73e72c050c30ec884d3af45b0
+    purpose: product_ui
+  - path: frontend/src/features/projects/ProjectRiskDetailPage.tsx
+    sha256: 4005f7e5a5a9bbb179bc86fbaa80fee5bb2f4a204315085631c75b32af67f6f0
+    purpose: product_ui
+  - path: frontend/src/features/decisions/DecisionWorkspacePage.tsx
+    sha256: b002b80215cb8a5eb8b5f9914b81a92eea26c7c83f8ec441d9c94b458022f438
+    purpose: product_ui
+  - path: frontend/src/design/global.css
+    sha256: ffa4a2b38c17d3dc7b00df3906f0259157fd5131fedb9c2406428875c46c2764
+    purpose: product_ui
+  - path: backend/src/soc_ot/api/main.py
+    sha256: 871de81ae490256c6c7d4635051126bf1d894dc368a5b4b2188f9127645d0b23
+    purpose: product_api
+  - path: backend/src/soc_ot/application/project_operations.py
+    sha256: d75009d18c5b6e2fa34eaa6bcdc77ea2a842a880b9bdaa809a384f684fd82a94
+    purpose: product_api
+  - path: contracts/generated/openapi.json
+    sha256: f1e0b8a8e2144e5b7361d56fe670b6d98a4351926d21e7ffd8514b80032fa96f
+    purpose: product_api
+  - path: fixtures/usability/OPS-F-20260722.protocol.v2.yaml
+    sha256: 821d8e349d59f2cac5a4758c486471a961bf30ce52280d11303d12d398918196
+    purpose: study_material
+  - path: fixtures/usability/PROJECT-OPERATIONS.baseline-pack.v2.yaml
+    sha256: 3f9cd73090f8524508ddcbb7584d963bf6baed42a6b7eeb0d767effce14cb6fd
+    purpose: study_material
+  - path: fixtures/usability/OPS-F-20260722.reviewer-rubric.v1.yaml
+    sha256: 6d034ccefff91b99555254d23f04f2d3ef054695506e3ce41549b65a6457e0c1
+    purpose: study_material

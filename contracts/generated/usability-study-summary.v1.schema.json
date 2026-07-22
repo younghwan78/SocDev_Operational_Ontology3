@@ -18,6 +18,23 @@
           "title": "Builder Sessions",
           "type": "integer"
         },
+        "draft_sessions": {
+          "default": 0,
+          "title": "Draft Sessions",
+          "type": "integer"
+        },
+        "excluded_sessions": {
+          "default": 0,
+          "title": "Excluded Sessions",
+          "type": "integer"
+        },
+        "exclusion_reasons": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "Exclusion Reasons",
+          "type": "object"
+        },
         "median_elapsed_seconds": {
           "anyOf": [
             {

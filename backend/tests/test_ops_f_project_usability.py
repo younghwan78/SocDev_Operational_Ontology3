@@ -16,14 +16,19 @@ from soc_ot.application.usability_study import (
     TaskScore,
     UsabilityEvent,
     UsabilityEventType,
+    UsabilityReviewerRubric,
     UsabilitySession,
     UsabilityStudyProtocol,
+    UsabilityStudyRelease,
     UsabilityTaskResult,
     create_session_template,
     project_sha256,
     render_baseline_markdown,
     render_session_guide,
+    render_study_report,
     summarize_sessions,
+    validate_project_study_bundle,
+    validate_session,
     validate_study_materials,
 )
 from soc_ot.cli.main import main
@@ -32,6 +37,8 @@ from soc_ot.domain.models import ObservableCase
 ROOT = Path(__file__).resolve().parents[2]
 PROTOCOL_V2 = ROOT / "fixtures/usability/OPS-F-20260722.protocol.v2.yaml"
 BASELINE_V2 = ROOT / "fixtures/usability/PROJECT-OPERATIONS.baseline-pack.v2.yaml"
+RELEASE_V2 = ROOT / "fixtures/usability/OPS-F-20260722.release.v1.yaml"
+RUBRIC_V2 = ROOT / "fixtures/usability/OPS-F-20260722.reviewer-rubric.v1.yaml"
 PROTOCOL_V1 = ROOT / "fixtures/usability/UX-H-20260719.protocol.yaml"
 BASELINE_V1 = ROOT / "fixtures/usability/CASE-VR-001.baseline-pack.v1.yaml"
 
@@ -126,6 +133,46 @@ def test_v2_protocol_is_hash_pinned_to_three_project_sources() -> None:
         assert project_sha256(projects[source.project_id]) == source.project_sha256
 
 
+def test_v2_release_pins_product_and_reviewer_material() -> None:
+    protocol, _, _, release, rubric = validate_project_study_bundle(
+        ROOT,
+        ROOT / "fixtures",
+        PROTOCOL_V2,
+        BASELINE_V2,
+        RELEASE_V2,
+        RUBRIC_V2,
+    )
+
+    assert release.release_id == "OPS-F-PRODUCT-EC2DB27"
+    assert release.product_revision == "ec2db27e663607d19e0a8cd3b26f06a0c54bd537"
+    assert release.environment.browser_family == "chromium"
+    assert {item.purpose for item in release.artifact_pins} == {
+        "product_ui",
+        "product_api",
+        "study_material",
+    }
+    assert [item.task_id for item in rubric.tasks] == [
+        item.task_id for item in protocol.tasks
+    ]
+
+
+def test_v2_release_rejects_a_stale_product_surface(tmp_path: Path) -> None:
+    payload = yaml.safe_load(RELEASE_V2.read_text(encoding="utf-8"))
+    payload["artifact_pins"][0]["sha256"] = "0" * 64
+    stale = tmp_path / "stale-release.yaml"
+    stale.write_text(yaml.safe_dump(payload, sort_keys=False), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="artifact hash is stale"):
+        validate_project_study_bundle(
+            ROOT,
+            ROOT / "fixtures",
+            PROTOCOL_V2,
+            BASELINE_V2,
+            stale,
+            RUBRIC_V2,
+        )
+
+
 def test_v2_baseline_rejects_a_stale_project_hash(tmp_path: Path) -> None:
     payload = yaml.safe_load(BASELINE_V2.read_text(encoding="utf-8"))
     payload["project_sources"][1]["project_sha256"] = "0" * 64
@@ -205,6 +252,20 @@ def test_cli_prepares_v2_baseline_and_product_session_materials(tmp_path: Path) 
             condition == "baseline"
         )
 
+    reviewer_guide = tmp_path / "reviewer-only.md"
+    assert main(
+        [
+            "usability",
+            "reviewer-guide",
+            "--output",
+            str(reviewer_guide),
+        ]
+    ) == 0
+    rendered = reviewer_guide.read_text(encoding="utf-8")
+    assert "참가자에게 사전 공개하지 않습니다" in rendered
+    assert "PROJECT-V를 먼저 확인할 과제로 선택" in rendered
+    assert "Step 21 emulator 충돌" in rendered
+
 
 def test_v2_dry_run_keeps_human_gate_closed_and_is_between_subjects() -> None:
     protocol, _, _ = _v2_materials()
@@ -231,6 +292,47 @@ def test_v2_dry_run_keeps_human_gate_closed_and_is_between_subjects() -> None:
         )
 
 
+def test_v2_exclusions_are_frozen_and_visible_in_report() -> None:
+    protocol, _, _ = _v2_materials()
+    draft = create_session_template(
+        protocol,
+        session_id="DRAFT-BASELINE",
+        condition=StudyCondition.BASELINE,
+        participant_code="P-DRAFT",
+        participant_kind=ParticipantKind.PROXY,
+    )
+    excluded = UsabilitySession.model_validate(
+        {
+            **draft.model_dump(mode="json"),
+            "session_id": "EXCLUDED-BASELINE",
+            "participant_code": "P-EXCLUDED",
+            "status": "excluded",
+            "exclusion_reason": "study_environment_failure",
+        }
+    )
+    summary = summarize_sessions(
+        protocol,
+        [draft, excluded],
+        generated_at=datetime(2026, 7, 22, 7, 0, tzinfo=UTC),
+    )
+    baseline = summary.condition_summaries[0]
+    assert baseline.draft_sessions == 1
+    assert baseline.excluded_sessions == 1
+    assert baseline.exclusion_reasons == {"study_environment_failure": 1}
+    report = render_study_report(summary)
+    assert "study_environment_failure" in report
+    assert "|baseline|study_environment_failure|1|" in report
+
+    invalid = UsabilitySession.model_validate(
+        {
+            **excluded.model_dump(mode="json"),
+            "exclusion_reason": "result_was_inconvenient",
+        }
+    )
+    with pytest.raises(ValueError, match="not frozen in protocol"):
+        validate_session(protocol, invalid)
+
+
 def test_v2_contracts_are_registered_without_replacing_v1() -> None:
     assert (
         CONTRACT_MODELS["usability-project-baseline-pack.v2"]
@@ -241,3 +343,5 @@ def test_v2_contracts_are_registered_without_replacing_v1() -> None:
         is ProjectUsabilityStudyProtocol
     )
     assert CONTRACT_MODELS["usability-study-protocol.v1"] is UsabilityStudyProtocol
+    assert CONTRACT_MODELS["usability-study-release.v1"] is UsabilityStudyRelease
+    assert CONTRACT_MODELS["usability-reviewer-rubric.v1"] is UsabilityReviewerRubric

@@ -23,8 +23,10 @@ from soc_ot.application.usability_study import (
     ProjectUsabilityBaselinePack,
     ProjectUsabilityStudyProtocol,
     UsabilityBaselinePack,
+    UsabilityReviewerRubric,
     UsabilitySession,
     UsabilityStudyProtocol,
+    UsabilityStudyRelease,
     UsabilityStudySummary,
 )
 from soc_ot.application.workspace_contracts import (
@@ -61,6 +63,8 @@ CONTRACT_MODELS: dict[str, type[BaseModel]] = {
     "usability-study-protocol.v1": UsabilityStudyProtocol,
     "usability-project-baseline-pack.v2": ProjectUsabilityBaselinePack,
     "usability-study-protocol.v2": ProjectUsabilityStudyProtocol,
+    "usability-study-release.v1": UsabilityStudyRelease,
+    "usability-reviewer-rubric.v1": UsabilityReviewerRubric,
     "usability-session.v1": UsabilitySession,
     "usability-study-summary.v1": UsabilityStudySummary,
 }

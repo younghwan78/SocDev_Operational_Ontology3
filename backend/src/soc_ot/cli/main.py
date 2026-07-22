@@ -29,14 +29,21 @@ from soc_ot.application.live_evaluation import (
 from soc_ot.application.repositories import PostgresCaseRepository
 from soc_ot.application.usability_study import (
     ParticipantKind,
+    ProjectUsabilityStudyProtocol,
+    StudyBaselinePack,
     StudyCondition,
+    StudyProtocol,
+    StudySource,
     create_session_template,
     load_protocol,
+    load_reviewer_rubric,
     load_session,
     render_baseline_markdown,
+    render_reviewer_guide,
     render_session_guide,
     render_study_report,
     summarize_sessions,
+    validate_project_study_bundle,
     validate_session,
     validate_study_materials,
     write_session_template,
@@ -57,6 +64,12 @@ DEFAULT_USABILITY_PROTOCOL = (
 )
 DEFAULT_BASELINE_PACK = (
     ROOT_DIR / "fixtures/usability/PROJECT-OPERATIONS.baseline-pack.v2.yaml"
+)
+DEFAULT_USABILITY_RELEASE = (
+    ROOT_DIR / "fixtures/usability/OPS-F-20260722.release.v1.yaml"
+)
+DEFAULT_REVIEWER_RUBRIC = (
+    ROOT_DIR / "fixtures/usability/OPS-F-20260722.reviewer-rubric.v1.yaml"
 )
 
 
@@ -176,6 +189,9 @@ def build_parser() -> argparse.ArgumentParser:
     usability_sub = usability.add_subparsers(dest="usability_command")
     usability_validate = usability_sub.add_parser("validate")
     _add_usability_material_arguments(usability_validate)
+    reviewer_guide = usability_sub.add_parser("reviewer-guide")
+    _add_usability_material_arguments(reviewer_guide)
+    reviewer_guide.add_argument("--output", type=Path, required=True)
     prepare = usability_sub.add_parser("prepare-session")
     _add_usability_material_arguments(prepare)
     prepare.add_argument(
@@ -356,18 +372,29 @@ def main(argv: Sequence[str] | None = None) -> int:
         print(json.dumps(hidden.model_dump(mode="json"), ensure_ascii=False, indent=2))
         return 0
     if args.command == "usability" and args.usability_command == "validate":
-        protocol, pack, _ = validate_study_materials(
-            args.root, args.protocol, args.baseline_pack
-        )
+        protocol, pack, _, release_id = _validate_usability_materials(args)
         print(
             f"Validated study={protocol.study_id}, tasks={len(protocol.tasks)}, "
-            f"baseline_surfaces={len(pack.surfaces)}; human results not evaluated."
+            f"baseline_surfaces={len(pack.surfaces)}, release={release_id}; "
+            "human results not evaluated."
+        )
+        return 0
+    if args.command == "usability" and args.usability_command == "reviewer-guide":
+        protocol, _, _, _ = _validate_usability_materials(args)
+        if not isinstance(protocol, ProjectUsabilityStudyProtocol):
+            raise ValueError("reviewer guide is available for the Project protocol v2")
+        rubric = load_reviewer_rubric(args.reviewer_rubric)
+        args.output.parent.mkdir(parents=True, exist_ok=True)
+        args.output.write_text(
+            render_reviewer_guide(protocol, rubric), encoding="utf-8"
+        )
+        print(
+            f"Rendered reviewer-only guide for study={protocol.study_id}; "
+            f"artifact={args.output}."
         )
         return 0
     if args.command == "usability" and args.usability_command == "prepare-session":
-        protocol, pack, source = validate_study_materials(
-            args.root, args.protocol, args.baseline_pack
-        )
+        protocol, pack, source, release_id = _validate_usability_materials(args)
         session_id = args.session_id or f"{protocol.study_id}-{uuid4()}"
         session_dir = args.output_root / session_id
         baseline_path = session_dir / "baseline-pack.md"
@@ -396,7 +423,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         write_session_template(session, session_path)
         print(
             f"Prepared draft session={session_id}; condition={session.condition}; "
-            f"artifacts={session_dir}; no human observation recorded."
+            f"release={release_id}; artifacts={session_dir}; "
+            "no human observation recorded."
         )
         return 0
     if args.command == "usability" and args.usability_command == "validate-session":
@@ -688,6 +716,35 @@ def _add_usability_material_arguments(parser: argparse.ArgumentParser) -> None:
         type=Path,
         default=DEFAULT_BASELINE_PACK,
     )
+    parser.add_argument(
+        "--study-release",
+        type=Path,
+        default=DEFAULT_USABILITY_RELEASE,
+    )
+    parser.add_argument(
+        "--reviewer-rubric",
+        type=Path,
+        default=DEFAULT_REVIEWER_RUBRIC,
+    )
+
+
+def _validate_usability_materials(
+    args: argparse.Namespace,
+) -> tuple[StudyProtocol, StudyBaselinePack, StudySource, str]:
+    protocol, pack, source = validate_study_materials(
+        args.root, args.protocol, args.baseline_pack
+    )
+    if not isinstance(protocol, ProjectUsabilityStudyProtocol):
+        return protocol, pack, source, "legacy-v1"
+    validated = validate_project_study_bundle(
+        ROOT_DIR,
+        args.root,
+        args.protocol,
+        args.baseline_pack,
+        args.study_release,
+        args.reviewer_rubric,
+    )
+    return validated[0], validated[1], validated[2], validated[3].release_id
 
 
 def _write_legacy_summary(path: Path, payload: object) -> None:

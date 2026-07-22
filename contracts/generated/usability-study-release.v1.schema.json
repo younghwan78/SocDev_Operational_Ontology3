@@ -1,0 +1,133 @@
+{
+  "$defs": {
+    "UsabilityArtifactPin": {
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "title": "Path",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "purpose": {
+          "enum": [
+            "product_ui",
+            "product_api",
+            "study_material"
+          ],
+          "title": "Purpose",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "sha256",
+        "purpose"
+      ],
+      "title": "UsabilityArtifactPin",
+      "type": "object"
+    },
+    "UsabilityStudyEnvironment": {
+      "additionalProperties": false,
+      "properties": {
+        "browser_family": {
+          "const": "chromium",
+          "default": "chromium",
+          "title": "Browser Family",
+          "type": "string"
+        },
+        "browser_version_policy": {
+          "const": "installed_at_session",
+          "default": "installed_at_session",
+          "title": "Browser Version Policy",
+          "type": "string"
+        },
+        "locale": {
+          "const": "ko-KR",
+          "default": "ko-KR",
+          "title": "Locale",
+          "type": "string"
+        },
+        "viewport_width": {
+          "minimum": 320,
+          "title": "Viewport Width",
+          "type": "integer"
+        },
+        "viewport_height": {
+          "minimum": 568,
+          "title": "Viewport Height",
+          "type": "integer"
+        },
+        "network_mode": {
+          "const": "local",
+          "default": "local",
+          "title": "Network Mode",
+          "type": "string"
+        }
+      },
+      "required": [
+        "viewport_width",
+        "viewport_height"
+      ],
+      "title": "UsabilityStudyEnvironment",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "usability-study-release.v1",
+      "default": "usability-study-release.v1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "release_id": {
+      "title": "Release Id",
+      "type": "string"
+    },
+    "study_id": {
+      "title": "Study Id",
+      "type": "string"
+    },
+    "frozen_at": {
+      "format": "date-time",
+      "title": "Frozen At",
+      "type": "string"
+    },
+    "product_revision": {
+      "pattern": "^[0-9a-f]{40}$",
+      "title": "Product Revision",
+      "type": "string"
+    },
+    "product_entry_path": {
+      "const": "/projects",
+      "default": "/projects",
+      "title": "Product Entry Path",
+      "type": "string"
+    },
+    "environment": {
+      "$ref": "#/$defs/UsabilityStudyEnvironment"
+    },
+    "artifact_pins": {
+      "items": {
+        "$ref": "#/$defs/UsabilityArtifactPin"
+      },
+      "minItems": 1,
+      "title": "Artifact Pins",
+      "type": "array"
+    }
+  },
+  "required": [
+    "release_id",
+    "study_id",
+    "frozen_at",
+    "product_revision",
+    "environment",
+    "artifact_pins"
+  ],
+  "title": "UsabilityStudyRelease",
+  "type": "object"
+}

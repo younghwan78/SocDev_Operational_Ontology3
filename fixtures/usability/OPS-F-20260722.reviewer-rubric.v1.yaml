@@ -1,0 +1,95 @@
+schema_version: usability-reviewer-rubric.v1
+study_id: OPS-F-20260722-PROJECT-OPERATIONS
+general_rules_ko:
+  - 참가자가 답변을 제출한 뒤에만 이 rubric을 연다.
+  - 표현이 달라도 required finding의 의미와 source 경계를 모두 포함하면 PASS로 판정한다.
+  - source에 없는 내용을 확정하거나 Issue, Risk, 예상, 관측을 혼동하면 FAIL로 판정한다.
+  - ID 암기는 요구하지 않으며 제목, 상태와 관계를 올바르게 설명했는지를 평가한다.
+  - reviewer note에는 충족하거나 누락한 finding을 구체적으로 기록한다.
+tasks:
+  - task_id: P01_PORTFOLIO_PRIORITY
+    required_findings_ko:
+      - PROJECT-V를 먼저 확인할 과제로 선택한다.
+      - 막힌 pre-silicon 검증, Architecture Freeze 위험 또는 비가역 변경 Risk 중 하나 이상을 근거로 설명한다.
+    failure_conditions_ko:
+      - 과제 순서를 임의 점수나 제목만으로 판단한다.
+      - PROJECT-V가 아닌 과제를 우선하면서 observable source 근거를 제시하지 못한다.
+  - task_id: P02_PROJECT_SITUATION
+    required_findings_ko:
+      - 변경안 pre-silicon workload 검증이 공유 emulator 예약 충돌로 BLOCKED임을 찾는다.
+      - 가장 가까운 위험 기준점이 HW Architecture Freeze이며 계획 Step 24, commitment Step 23임을 설명한다.
+    failure_conditions_ko:
+      - 막힌 작업과 Risk 또는 Milestone을 구분하지 못한다.
+      - 현재 Step 이후 상태를 현재 사실처럼 사용한다.
+  - task_id: P03_ISSUE_RISK_EVIDENCE_GAP
+    required_findings_ko:
+      - HW/firmware interface 불일치는 Step 18에 관측된 Issue로 분류한다.
+      - 잘못된 HW 변경 freeze의 복구 비용은 아직 발생 결과가 아닌 Risk/inference로 분류한다.
+      - first silicon 상관 측정은 REQUESTED 상태이고 silicon 미확보로 아직 확인되지 않았음을 설명한다.
+    failure_conditions_ko:
+      - Risk를 이미 발생한 Issue나 관측 결과로 단정한다.
+      - pre-silicon model을 field 또는 silicon 측정으로 표현한다.
+  - task_id: P04_RISK_PROVENANCE
+    required_findings_ko:
+      - source Issue로 HW/firmware interface 불일치를 찾는다.
+      - source Event로 pre-silicon model 도착 Event를 찾는다.
+      - source Evidence로 pre-silicon model 결과를 찾는다.
+      - PROJECT-U field lesson은 입력이지만 동일 조건을 보장하지 않는다는 한계를 설명한다.
+    failure_conditions_ko:
+      - source 없이 Risk 원인을 Agent 판단이나 추측으로 설명한다.
+      - 다른 과제의 field lesson을 PROJECT-V에 그대로 적용 가능한 사실로 취급한다.
+  - task_id: P05_EPISTEMIC_DIFFERENCE
+    required_findings_ko:
+      - PROJECT-U의 field measurement 기반 주장은 fact임을 설명한다.
+      - PROJECT-V의 개선 방향은 pre-silicon model 기반 inference임을 설명한다.
+      - PROJECT-W의 model 또는 cross-project lesson은 확인이 필요한 가정/추론 경계가 있음을 설명한다.
+    failure_conditions_ko:
+      - 세 과제의 Evidence 수준을 동일하게 취급한다.
+      - model 또는 lesson을 실제 silicon 관측으로 표현한다.
+  - task_id: P06_RISK_IMPACT
+    required_findings_ko:
+      - 영향 작업으로 HW 변경안 closure와 pre-silicon workload 검증을 찾는다.
+      - 영향 기준점으로 HW Architecture Freeze와 First Silicon Checkpoint를 찾는다.
+      - 현재 작업 상태가 각각 IN_PROGRESS와 BLOCKED임을 구분한다.
+    failure_conditions_ko:
+      - Risk statement만 반복하고 영향 객체를 찾지 못한다.
+      - 계획 상태와 현재 상태를 혼동한다.
+  - task_id: P07_TREATMENT_AND_ROLLBACK
+    required_findings_ko:
+      - 연결 Decision으로 Silicon 이후 측정 가능한 비가역 변경 검토를 찾는다.
+      - Action으로 rollback 가능한 범위로 HW 변경을 제한하는 조치를 찾는다.
+      - 검증 Evidence에 pre-silicon model과 first silicon 상관 측정이 포함됨을 설명한다.
+      - interface sign-off 또는 model guardrail 미충족 시 변경 제외라는 rollback 조건을 설명한다.
+    failure_conditions_ko:
+      - Decision과 Action을 동일 객체로 취급한다.
+      - 검증 또는 rollback 조건 없이 단순 진행으로 답한다.
+  - task_id: P08_STATE_AT_STEP_20
+    required_findings_ko:
+      - bounded change Action이 Step 20에 IN_PROGRESS가 되었음을 설명한다.
+      - HW 변경 작업이 IN_PROGRESS로 복귀하고 Architecture Freeze가 AT_RISK가 되었음을 관측 변화로 설명한다.
+      - Step 20까지 관측된 정보만 사용한다.
+    failure_conditions_ko:
+      - Step 21 emulator 충돌을 Step 20의 관측 사실로 포함한다.
+      - Action 계획과 실제 관측 상태 변화를 구분하지 못한다.
+  - task_id: P09_NO_FUTURE_LEAKAGE
+    required_findings_ko:
+      - 공유 emulator 충돌 Event와 Resource Conflict Risk는 Step 21 정보라 Step 20에는 알 수 없다고 답한다.
+      - 정보 없음 또는 아직 미확인 경계를 명시한다.
+    failure_conditions_ko:
+      - Step 21 이후 정보를 Step 20 답변에 사용한다.
+      - 이후 정보를 추정해 확정한다.
+  - task_id: P10_CROSS_PROJECT_LESSON
+    required_findings_ko:
+      - PROJECT-U의 Step 35 장시간 안정성 Evidence 도착 Event가 lesson 원천임을 찾는다.
+      - 양산 장시간 결과는 PROJECT-V 검토 입력이지만 동일 조건을 보장하지 않는다고 설명한다.
+    failure_conditions_ko:
+      - source Project/Event를 찾지 못한다.
+      - 양산 결과를 PROJECT-V silicon 결과로 대체한다.
+  - task_id: P11_DECISION_ROUND_TRIP
+    required_findings_ko:
+      - Decision 제목이 Silicon 이후 측정 가능한 비가역 변경 검토이고 상태가 DECISION_REQUIRED임을 확인한다.
+      - Decision 검토 후 RISK-V-WRONG-COMMIT 상세로 돌아온다.
+      - 역사 condition이면 원래 Project Step 문맥을 보존한다.
+    failure_conditions_ko:
+      - 다른 Decision을 연다.
+      - Decision 검토 후 원래 Risk 문맥으로 돌아오지 못한다.

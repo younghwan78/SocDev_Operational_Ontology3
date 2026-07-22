@@ -1,0 +1,72 @@
+{
+  "$defs": {
+    "UsabilityReviewerTaskRubric": {
+      "additionalProperties": false,
+      "properties": {
+        "task_id": {
+          "title": "Task Id",
+          "type": "string"
+        },
+        "required_findings_ko": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Required Findings Ko",
+          "type": "array"
+        },
+        "failure_conditions_ko": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Failure Conditions Ko",
+          "type": "array"
+        }
+      },
+      "required": [
+        "task_id",
+        "required_findings_ko",
+        "failure_conditions_ko"
+      ],
+      "title": "UsabilityReviewerTaskRubric",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "usability-reviewer-rubric.v1",
+      "default": "usability-reviewer-rubric.v1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "study_id": {
+      "title": "Study Id",
+      "type": "string"
+    },
+    "general_rules_ko": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "General Rules Ko",
+      "type": "array"
+    },
+    "tasks": {
+      "items": {
+        "$ref": "#/$defs/UsabilityReviewerTaskRubric"
+      },
+      "minItems": 1,
+      "title": "Tasks",
+      "type": "array"
+    }
+  },
+  "required": [
+    "study_id",
+    "general_rules_ko",
+    "tasks"
+  ],
+  "title": "UsabilityReviewerRubric",
+  "type": "object"
+}

@@ -22,6 +22,30 @@ export function resetReplayCase(root: string, caseId: string) {
   });
 }
 
+export function resetProjectFixtures(root: string) {
+  const projectIds = ["PROJECT-U", "PROJECT-V", "PROJECT-W"];
+  const quotedIds = projectIds.map((projectId) => `'${projectId}'`).join(", ");
+  run(
+    "docker",
+    [
+      "compose", "-f", "deploy/local/compose.yaml", "exec", "-T", "postgres",
+      "psql", "-v", "ON_ERROR_STOP=1", "-U", "soc_ot_admin", "-d", "soc_ot", "-c",
+      `DELETE FROM observable.development_projects WHERE project_id IN (${quotedIds})`,
+    ],
+    root,
+  );
+  for (const projectId of projectIds) {
+    run(
+      "uv",
+      [
+        "run", "soc-ot", "fixtures", "import-project",
+        "--project-id", projectId, "--replace-current",
+      ],
+      root,
+    );
+  }
+}
+
 function resetCaseExecutionState(root: string, caseId: string) {
   const quotedCaseId = `'${caseId.replaceAll("'", "''")}'`;
   const sql = [

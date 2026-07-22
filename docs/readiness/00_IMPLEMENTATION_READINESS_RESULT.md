@@ -1,7 +1,7 @@
 # P0/P1 Implementation Readiness 결과
 
 > 원 판정: **READY FOR I0 SCAFFOLD**  
-> 현재 상태: **I0–I7 Replay·Codex CLI B2 runtime·OPS-F Project 중심 protocol v2 구현 완료; 독립 관측 baseline 0/5·product 0/5로 OPS-F Gate 진행 중, UX-I 차단**
+> 현재 상태: **I0–I7 Replay·Codex CLI B2 runtime·OPS-F study release/rubric/E2E 도구 구현 완료; 독립 관측 baseline 0/5·product 0/5로 OPS-F Gate 진행 중, UX-I 차단**
 > 작성일: 2026-07-11  
 > 범위: 집에서 synthetic fixture로 구현하는 SoC Operational Decision Twin  
 > 주의: 본문은 구현 전 P0/P1 판정 기록이다. 현재 구현 증거는 `docs/implementation/`을 따른다.

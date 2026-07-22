@@ -1,7 +1,7 @@
 # Master execution plan
 
-> Status: IMPLEMENTED THROUGH I7 REPLAY + STEP 5 B2 RUNTIME + OPS-F PROJECT PROTOCOL V2; OPS-F INDEPENDENT OBSERVATION GATE OPEN AT 0/5 PER CONDITION, UX-I BLOCKED
-> Date: 2026-07-22
+> Status: IMPLEMENTED THROUGH I7 REPLAY + STEP 5 B2 RUNTIME + OPS-F STUDY RELEASE; OPS-F INDEPENDENT OBSERVATION GATE OPEN AT 0/5 PER CONDITION, UX-I BLOCKED
+> Date: 2026-07-23
 > Scope: local fixture-only PoC
 
 ## 1. Purpose
@@ -418,7 +418,7 @@ Post-I7 Project Operations stages run in this order:
 |OPS-C|Project domain, projection, API and compatibility path|Complete: migration/repository parity, five read APIs, generated contracts and no-future-leakage parity|
 |OPS-D|Portfolio and Project Situation UX|Complete (local proxy): overall status/top-risk/source task, responsive and accessibility checks pass|
 |OPS-E|Risk Detail and Decision linkage|Complete (local proxy): source-to-inference-to-impact-to-treatment trace and Decision round trip pass|
-|OPS-F|UX-H protocol v2 and independent observations|Protocol v2 complete; observation Gate pending at baseline 0/5 and product 0/5|
+|OPS-F|UX-H protocol v2, frozen product release and independent observations|Release/rubric/E2E tooling complete; observation Gate pending at baseline 0/5 and product 0/5|
 
 No later OPS stage starts before the previous Gate. Company connectors, authentication and write-back
 remain C0/C2 scope.
@@ -486,7 +486,7 @@ OPS-E implementation record (2026-07-22):
   business value is claimed; OPS-F protocol v2 is now implemented and independent observations remain
   pending
 
-OPS-F implementation record (2026-07-22):
+OPS-F implementation record (2026-07-23):
 
 - the Decision-centered `UX-H-20260719` protocol and baseline remain valid as v1; OPS-F adds separate
   `usability-study-protocol.v2` and `usability-project-baseline-pack.v2` contracts without rewriting
@@ -504,8 +504,20 @@ OPS-F implementation record (2026-07-22):
   and safeguard fields did not change; v2 additionally rejects one participant completing both conditions
 - CLI defaults now prepare OPS-F v2 sessions. A builder dry-run creates baseline/product drafts and
   reports `not_ready`, `not_evaluable`, `no_business_claim` with zero completed observations
+- `usability-study-release.v1` pins the OPS-E product revision, `/projects` entry, Korean Chromium
+  environment and every study-critical UI/API/material file by SHA-256; a changed or missing artifact
+  blocks study validation and session preparation
+- the participant-hidden `usability-reviewer-rubric.v1` freezes required findings and failure conditions
+  in exact protocol task order; the CLI renders it separately from either participant condition
+- summaries preserve draft and excluded counts plus frozen exclusion-reason attrition while only valid
+  completed independent sessions contribute to timing and accuracy
+- Project browser E2E covers Portfolio → Situation → Risk → Decision → Risk at desktop and Step 20
+  no-future-leakage at 390px, including Axe and overflow checks
 - protocol tooling is complete, but the OPS-F human Gate is not. Independent baseline/product counts
   remain 0/5 each; UX-I and any decision-speed, advice-quality or business-value claim remain blocked
+- company data remains outside OPS-F. Current canonical repositories/projections can be reused after
+  ingestion, but a live connector is NO-GO until C0 defines enterprise identity/time, ACL, sync,
+  deletion/retention and candidate-extraction review; sanitized export schema-fit is the first allowed step
 
 ## 7. Crosswalk to supporting plans
 

@@ -1,8 +1,8 @@
 # 전체 계획 문서 안내
 
 > 상태: Active  
-> 갱신일: 2026-07-22
-> 현재 단계: OPS-F Project 중심 protocol v2 구현 완료, 독립 관측 baseline 0/5·product 0/5로 Gate 진행 중; UX-I 차단
+> 갱신일: 2026-07-23
+> 현재 단계: OPS-F study release/rubric/E2E 도구 구현 완료, 독립 관측 baseline 0/5·product 0/5로 Gate 진행 중; UX-I 차단
 
 이 문서는 제품 계획부터 구현 계약까지 어떤 문서를 어떤 순서로 읽고 수정해야 하는지 안내한다. 문서 간 충돌은 전체 순위가 아니라 각 문서가 소유한 결정 영역으로 해결한다.
 
@@ -52,6 +52,7 @@
 - `internal_docs/26.07.22 OPS-D Project Portfolio Situation UX 구현 및 검증 보고서.md`
 - `internal_docs/26.07.22 OPS-E Risk Detail Decision Linkage 구현 및 검증 보고서.md`
 - `internal_docs/26.07.22 OPS-F Project 중심 사용성 Protocol v2 구현 및 검증 보고서.md`
+- `internal_docs/26.07.23 OPS-F Study Release 보강 및 사내 데이터 연결 준비도 보고서.md`
 - `docs/decisions/ADR-0010-project-operations-and-risk-provenance.md`
 
 다음 문서는 과거 판단의 근거다. 새 구현 기준으로 직접 사용하지 않는다.
@@ -78,7 +79,7 @@
 ## 5. 현재 실행 지점
 
 I0~I7 Replay와 post-I7 UX-A/UX-B/UX-C/UX-D/UX-E/UX-F/UX-G 로컬 Gate,
-OPS-F Project protocol v2까지 구현됐다. 현재 실행 지점은 OPS-F 독립 관측 수집이며 UX-I는 차단 상태다.
+OPS-F Project protocol v2와 study release/rubric/E2E 도구까지 구현됐다. 현재 실행 지점은 OPS-F 독립 관측 수집이며 UX-I는 차단 상태다.
 
 ```text
 UX-F Responsive·접근성·사용성 Gate
@@ -116,7 +117,8 @@ OPS-E Risk Detail·Decision linkage
   → 390px/desktop, Axe, overflow, console 및 기존 Decision E2E 회귀 PASS
 OPS-F Project 중심 protocol v2
   → PROJECT-U/V/W hash-pinned baseline 6개 surface + 고정 task 11개 PASS
-  → baseline/product 동일 task guide, v1 호환, v2 계약·CLI dry-run PASS
+  → baseline/product 동일 task guide, 제품 release hash와 reviewer-only rubric PASS
+  → draft/excluded attrition 보고와 Project current/historical E2E PASS
   → 완료 독립 관측 baseline 0/5·product 0/5, not_ready/no_business_claim
 ```
 
