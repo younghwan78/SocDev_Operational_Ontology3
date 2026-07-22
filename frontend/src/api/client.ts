@@ -1,4 +1,4 @@
-import type { AblationResult, CaseEvaluation, DecisionListItem, DecisionWorkspace, DevelopmentTimeline, OutcomeSnapshot, ProjectListItem, ProjectSituation, ProjectTimeline, ReviewRun } from "./generated";
+import type { AblationResult, CaseEvaluation, DecisionListItem, DecisionWorkspace, DevelopmentTimeline, OutcomeSnapshot, ProjectListItem, ProjectRiskDetail, ProjectSituation, ProjectTimeline, ReviewRun } from "./generated";
 
 const API_BASE = import.meta.env.VITE_SOC_OT_API_BASE_URL ?? "http://127.0.0.1:18080";
 
@@ -57,6 +57,11 @@ export function getProjectSituation(projectId: string, atStep?: number): Promise
 export function getProjectTimeline(projectId: string, atStep?: number): Promise<ProjectTimeline> {
   const query = atStep === undefined ? "" : `?${new URLSearchParams({ at_step: String(atStep) })}`;
   return getJson(`/api/v1/projects/${encodeURIComponent(projectId)}/timeline${query}`);
+}
+
+export function getProjectRiskDetail(projectId: string, riskId: string, atStep?: number): Promise<ProjectRiskDetail> {
+  const query = atStep === undefined ? "" : `?${new URLSearchParams({ at_step: String(atStep) })}`;
+  return getJson(`/api/v1/projects/${encodeURIComponent(projectId)}/risks/${encodeURIComponent(riskId)}${query}`);
 }
 
 export function getDecisionWorkspace(caseId: string, atStep?: number): Promise<DecisionWorkspace> {

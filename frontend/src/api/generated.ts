@@ -13,4 +13,5 @@ export type OutcomeSnapshot = components["schemas"]["OutcomeSnapshot"];
 export type ProjectListItem = components["schemas"]["ProjectListItemProjection"];
 export type ProjectSituation = components["schemas"]["ProjectSituationProjection"];
 export type ProjectRiskSummary = components["schemas"]["ProjectRiskSummary"];
+export type ProjectRiskDetail = components["schemas"]["ProjectRiskDetailProjection"];
 export type ProjectTimeline = components["schemas"]["ProjectTimelineProjection"];

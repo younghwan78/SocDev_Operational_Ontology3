@@ -157,6 +157,20 @@ $frontendRoutes = Get-Content -Raw (Join-Path $root "frontend/src/app/App.tsx")
 if ($master -notmatch 'OPS-D implementation record') {
     throw "Master plan does not record the OPS-D implementation Gate."
 }
+@(
+    "frontend/src/features/projects/ProjectRiskDetailPage.tsx",
+    "frontend/src/features/decisions/DecisionWorkspacePage.tsx"
+) | ForEach-Object {
+    if (-not (Test-Path -LiteralPath (Join-Path $root $_) -PathType Leaf)) {
+        throw "Missing OPS-E Frontend artifact: $_"
+    }
+}
+if (-not $frontendRoutes.Contains('/projects/:projectId/risks/:riskId')) {
+    throw "Frontend is missing the canonical OPS-E Risk Detail route."
+}
+if ($master -notmatch 'OPS-E implementation record') {
+    throw "Master plan does not record the OPS-E implementation Gate."
+}
 
 $requiredPaths = @(
     "/api/v1/decision-cases",
@@ -186,4 +200,4 @@ if ($actualPaths | Where-Object { $_ -match "hidden" }) {
     throw "OpenAPI exposes a forbidden hidden resource."
 }
 
-Write-Output "Plan consistency check passed: I0-I7, OPS-D Project UX, corpora, terms, and canonical API agree."
+Write-Output "Plan consistency check passed: I0-I7, OPS-E risk-to-decision UX, corpora, terms, and canonical API agree."

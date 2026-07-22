@@ -1,6 +1,6 @@
 # Master execution plan
 
-> Status: IMPLEMENTED THROUGH I7 REPLAY + STEP 5 B2 RUNTIME + POST-I7 UX-H TOOLING + OPS-D; OPS-E RISK/DECISION UX NEXT, HUMAN OBSERVATION PAUSED UNTIL OPS-F
+> Status: IMPLEMENTED THROUGH I7 REPLAY + STEP 5 B2 RUNTIME + POST-I7 UX-H TOOLING + OPS-E; OPS-F PROTOCOL V2 NEXT, HUMAN OBSERVATION STILL PAUSED
 > Date: 2026-07-22
 > Scope: local fixture-only PoC
 
@@ -416,8 +416,8 @@ Post-I7 Project Operations stages run in this order:
 |OPS-B|Lifecycle-distinct Project fixtures and event/risk provenance|Complete: 3 projects, 17 typed events, hash manifest and future-leakage tests|
 |OPS-C|Project domain, projection, API and compatibility path|Complete: migration/repository parity, five read APIs, generated contracts and no-future-leakage parity|
 |OPS-D|Portfolio and Project Situation UX|Complete (local proxy): overall status/top-risk/source task, responsive and accessibility checks pass|
-|OPS-E|Risk Detail and Decision linkage|Next: two-minute source-to-impact-to-decision trace task passes|
-|OPS-F|UX-H protocol v2 and independent observations|Minimum independent observations before UX-I or business claim|
+|OPS-E|Risk Detail and Decision linkage|Complete (local proxy): source-to-inference-to-impact-to-treatment trace and Decision round trip pass|
+|OPS-F|UX-H protocol v2 and independent observations|Next: minimum independent observations before UX-I or business claim|
 
 No later OPS stage starts before the previous Gate. Company connectors, authentication and write-back
 remain C0/C2 scope.
@@ -463,7 +463,26 @@ OPS-D implementation record (2026-07-22):
 - existing 8 Decision-flow E2E tests pass; Playwright CLI inspection and Axe checks pass at 390px and
   desktop with zero overflow, accessibility violations, console errors or warnings
 - this is a local agent-substitute task proxy, not measured human completion time or business value;
-  Risk Detail and Decision navigation remain deferred to OPS-E
+  Risk Detail and Decision navigation were deferred to and are now implemented by OPS-E
+
+OPS-E implementation record (2026-07-22):
+
+- `/projects/:projectId/risks/:riskId` presents one explicit trace in the order source Issue/Event/
+  Evidence/cross-project lesson → epistemic status and inference basis → Backend ranking reasons and
+  risk posture → affected WorkItem/Milestone → treatment Decision and Action
+- the Frontend translates known rule and Evidence limitation codes for Korean-first reading while
+  retaining canonical IDs as secondary provenance; it does not calculate Risk truth, rank or score
+- Situation exposes every visible Risk and preserves historical `at_step` when opening Risk Detail;
+  Risk Detail and Situation query the same selected Project Step and fail closed on unavailable history
+- Decision navigation appends only validated origin context. Project Step is not forced onto a Decision
+  Case whose timeline may differ; the existing Workspace preserves the context through its own URL
+  interactions and returns to the exact current or historical Risk view
+- 4 focused OPS-E unit tests cover the source/inference/impact/treatment trace, current and historical
+  Decision links, and Workspace return context; total Frontend unit count is 19
+- existing 8 Decision-flow E2E tests pass. A real fixture browser round trip passes at desktop and
+  390px with zero horizontal overflow, Axe violations, console warnings or errors
+- the two-minute trace Gate is an engineering agent-substitute proxy only. No human completion time or
+  business value is claimed; OPS-F protocol v2 and independent observations remain the next stage
 
 ## 7. Crosswalk to supporting plans
 

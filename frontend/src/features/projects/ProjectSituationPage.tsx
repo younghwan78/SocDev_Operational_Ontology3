@@ -135,6 +135,37 @@ export function ProjectSituationPage() {
         sourceViews={topRisk ? sourceViews.get(topRisk.risk_id) ?? [] : []}
       />
 
+      {situation.risks.length > 1 ? (
+        <section className="project-section" aria-labelledby="other-risks-heading">
+          <header className="project-section-header">
+            <div>
+              <p className="section-kicker">나머지 위험</p>
+              <h2 id="other-risks-heading">함께 추적할 Risk</h2>
+            </div>
+            <p>우선순위는 Backend의 동일한 Risk ordering policy를 따릅니다.</p>
+          </header>
+          <div className="other-risk-list">
+            {situation.risks.slice(1).map((risk) => (
+              <article key={risk.risk_id}>
+                <div>
+                  <span className="risk-level-chip" data-level={risk.risk_level}>
+                    우선순위 {risk.rank} · {riskLevelLabel(risk.risk_level)}
+                  </span>
+                  <h3>{risk.statement}</h3>
+                  <p>{risk.ranking_reasons.map(rankingReasonLabel).join(" · ")}</p>
+                </div>
+                <Link
+                  className="secondary-button recovery-link"
+                  to={riskDetailPath(situation.project_id, risk.risk_id, isHistorical ? situation.reconstructed_at_step : undefined)}
+                >
+                  Risk 상세 추적
+                </Link>
+              </article>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
       <section className="project-section" aria-labelledby="development-flow-heading">
         <header className="project-section-header">
           <div>
@@ -300,8 +331,19 @@ function TopRiskSection({
           </aside>
         ) : null}
       </div>
-
-      <p className="next-stage-notice">Risk 상세 인과 경로와 Decision 연결은 다음 단계 OPS-E에서 제공합니다.</p>
+      <div className="risk-detail-cta">
+        <p>근거가 어떤 추론을 거쳐 개발 영향과 대응 Decision·Action으로 이어지는지 한 흐름으로 확인합니다.</p>
+        <Link
+          className="primary-button recovery-link"
+          to={riskDetailPath(
+            situation.project_id,
+            risk.risk_id,
+            situation.reconstructed_at_step === situation.current_step ? undefined : situation.reconstructed_at_step,
+          )}
+        >
+          근거·영향·대응 상세 추적
+        </Link>
+      </div>
     </section>
   );
 }
@@ -407,4 +449,9 @@ function parseStep(value: string | null) {
   if (value === null) return undefined;
   const parsed = Number(value);
   return Number.isInteger(parsed) && parsed >= 0 ? parsed : undefined;
+}
+
+function riskDetailPath(projectId: string, riskId: string, atStep?: number) {
+  const query = atStep === undefined ? "" : `?${new URLSearchParams({ at_step: String(atStep) })}`;
+  return `/projects/${encodeURIComponent(projectId)}/risks/${encodeURIComponent(riskId)}${query}`;
 }

@@ -1,7 +1,7 @@
 # Implementation status
 
 > Updated: 2026-07-22
-> Current stage: OPS-D Portfolio/Situation UX passed as a local proxy; OPS-E Risk Detail/Decision linkage is next, human observations remain paused until OPS-F
+> Current stage: OPS-E Risk Detail/Decision linkage passed as a local proxy; OPS-F Project-centered protocol v2 and independent observations are next
 
 ## Stage evidence
 
@@ -29,6 +29,25 @@
 |OPS-B|Passed|Three lifecycle-distinct Project fixtures, 17 typed events, hash manifest, cross-project lineage and historical leakage tests.|
 |OPS-C|Passed|Migration 0020, durable Project repositories, deterministic attention/risk policies, five read APIs, historical parity, generated contracts and Replay smoke; this established the runtime boundary consumed by OPS-D.|
 |OPS-D|Passed (local agent substitute)|Backend-ordered Project Portfolio, progressive Situation view, human-readable source-to-Issue/Evidence/Event joins, affected work and milestones, URL-backed historical Step, Korean recovery, responsive 390px/desktop UI, 4 focused/16 total unit tests, 8 regression E2E, Axe and overflow checks. Human task time remains unmeasured.|
+|OPS-E|Passed (local agent substitute)|One source→epistemic/inference→impact→Decision/Action trace, Korean-first rule/limitation labels, all-Risk Situation navigation, historical Project boundary, Decision round trip without cross-timeline Step injection, 4 focused/19 total unit tests, 8 regression E2E, 390px/desktop Axe, overflow and console checks. Human task time remains unmeasured.|
+
+OPS-E implementation record (2026-07-22):
+
+- Situation links its top and remaining Backend-ordered Risks to the new canonical Risk Detail route;
+  historical links preserve `at_step`
+- Risk Detail renders source Issue/Event/Evidence/cross-project lesson, epistemic status, inference basis,
+  Risk posture and priority reasons, affected WorkItem/Milestone, Decision, Action, verification Evidence
+  and rollback condition in one numbered reading flow
+- known inference-rule and Evidence-limitation codes receive Korean-first labels while IDs remain visible
+  only as provenance; no Frontend score, rank or truth inference was introduced
+- Decision links preserve `from_project`, `from_risk` and optional `from_project_step`. They deliberately
+  do not send Project `at_step` into a DecisionCase with a different timeline; Workspace interactions
+  retain the origin query and its back link restores the exact Risk view
+- live fixture round trip Project V → Risk → CASE-HO-002 → Risk passes for current and historical Step
+- local browser checks at 1440px and 390px report no horizontal overflow, Axe violation, console warning
+  or error; screenshots are under `output/playwright/opse-risk-detail-*.png`
+- this satisfies the two-minute Gate only as an engineering agent-substitute proxy. OPS-F must freeze a
+  Project-centered protocol v2 before any independent session or business-value claim
 
 OPS-D implementation record (2026-07-22):
 

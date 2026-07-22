@@ -207,8 +207,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         print(
             "I7 Replay + Step 5 B2 stability gates complete; "
             "B2 durable dossier runtime active; UX-H session tooling ready, "
-            "OPS-C project runtime/API ready, OPS-D product UX next; "
-            "human gate pending"
+            "OPS-E risk-to-decision UX ready, OPS-F protocol v2 next; "
+            "human observations pending"
         )
         return 0
     if args.command == "contracts" and args.contracts_command == "export":

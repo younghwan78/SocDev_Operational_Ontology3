@@ -25,6 +25,7 @@ export function DecisionWorkspacePage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const selectedStep = parseSearchStep(searchParams.get("at_step"));
   const selectedOptionPosition = parseSearchPosition(searchParams.get("option"));
+  const riskReturn = parseRiskReturn(searchParams);
   const [dossierRunId, setDossierRunId] = useState<string | null>(null);
   const query = useQuery({
     queryKey: ["decision-workspace", caseId, selectedStep ?? "current"],
@@ -154,7 +155,9 @@ export function DecisionWorkspacePage() {
                 {query.isFetching ? "다시 불러오는 중…" : "다시 시도"}
               </button>
             ) : null}
-            <Link className="secondary-button recovery-link" to="/decisions">결정 목록으로 돌아가기</Link>
+            <Link className="secondary-button recovery-link" to={riskReturn?.to ?? "/decisions"}>
+              {riskReturn ? "Risk 상세로 돌아가기" : "결정 목록으로 돌아가기"}
+            </Link>
           </div>
         </section>
       </main>
@@ -223,7 +226,7 @@ export function DecisionWorkspacePage() {
 
   return (
     <main className="app-shell workspace-shell" id="main-content" tabIndex={-1}>
-      <ContextBar item={item} />
+      <ContextBar item={item} riskReturn={riskReturn} />
 
       <DecisionBrief
         item={item}
@@ -298,11 +301,13 @@ export function DecisionWorkspacePage() {
   );
 }
 
-function ContextBar({ item }: { item: DecisionWorkspace }) {
+function ContextBar({ item, riskReturn }: { item: DecisionWorkspace; riskReturn: RiskReturn | null }) {
   const isHistorical = item.time_context.mode === "historical";
   return (
     <nav className="decision-context-bar" aria-label="결정 검토 문맥">
-      <Link className="back-link" to="/decisions">← 결정 목록</Link>
+      <Link className="back-link" to={riskReturn?.to ?? "/decisions"}>
+        ← {riskReturn ? "Risk 상세" : "결정 목록"}
+      </Link>
       <div className="context-facts">
         <span>가상 판단</span>
         <span>{isHistorical ? `과거 Step ${item.time_context.selected_step}` : `현재 Step ${item.time_context.current_step}`}</span>
@@ -544,6 +549,18 @@ function parseSearchStep(value: string | null): number | undefined {
 function parseSearchPosition(value: string | null): number | undefined {
   const position = parseSearchStep(value);
   return position !== undefined && position >= 1 ? position : undefined;
+}
+
+type RiskReturn = { to: string };
+
+function parseRiskReturn(searchParams: URLSearchParams): RiskReturn | null {
+  const projectId = searchParams.get("from_project");
+  const riskId = searchParams.get("from_risk");
+  const safeId = /^[A-Z0-9]+(?:-[A-Z0-9]+)*$/;
+  if (!projectId || !riskId || !safeId.test(projectId) || !safeId.test(riskId)) return null;
+  const projectStep = parseSearchStep(searchParams.get("from_project_step"));
+  const query = projectStep === undefined ? "" : `?${new URLSearchParams({ at_step: String(projectStep) })}`;
+  return { to: `/projects/${encodeURIComponent(projectId)}/risks/${encodeURIComponent(riskId)}${query}` };
 }
 
 function workspaceLoadErrorCopy(error: unknown, selectedStep: number | undefined) {

@@ -4,7 +4,7 @@ import userEvent from "@testing-library/user-event";
 import { MemoryRouter, useLocation } from "react-router";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import type { ProjectListItem, ProjectRiskSummary, ProjectSituation, ProjectTimeline } from "../api/generated";
+import type { ProjectListItem, ProjectRiskDetail, ProjectRiskSummary, ProjectSituation, ProjectTimeline } from "../api/generated";
 import { App } from "./App";
 
 const topRisk = {
@@ -92,8 +92,56 @@ const projectTimeline = {
   }],
 } satisfies ProjectTimeline;
 
+const projectRiskDetail = {
+  projection_schema_version: "project-risk-detail.v1",
+  project_id: "PROJECT-V",
+  reconstructed_at_step: 22,
+  risk: topRisk,
+  epistemic_status: "INFERENCE",
+  inference_basis: ["대표 workload model과 interface Issue가 같은 전력 경로를 가리킵니다."],
+  downside: "SEVERE",
+  blast_radius: "PROJECT",
+  urgency: "BEFORE_MILESTONE",
+  reversibility: "IRREVERSIBLE",
+  source_issues: [{
+    issue_id: "ISSUE-V-INTERFACE",
+    title: "전력 제어 경로의 HW/firmware interface 불일치",
+    status: "MITIGATING",
+    source_refs: ["EVD-V-PRESI-MODEL"],
+  }],
+  source_events: [{
+    event_id: "EVENT-V-018-MODEL-ARRIVED",
+    summary: "Pre-silicon model 결과가 도착했습니다.",
+    observed_at_step: 18,
+  }],
+  source_evidence: [projectSituation.evidence[0]],
+  cross_project_sources: [{
+    source_id: "CROSS-V-PREVIOUS-POWER",
+    source_project_id: "PROJECT-U",
+    source_event_id: "EVENT-U-POWER-ESCAPE",
+    available_at_step: 19,
+    lesson: "유사한 확정 이후 power model 오차가 silicon re-spin 위험으로 이어졌습니다.",
+  }],
+  affected_objects: [
+    { object_id: "WORK-V-HW-PATH", title: "전력 경로 설계 closure", object_type: "WORK_ITEM", state: "IN_PROGRESS" },
+    { object_id: "M-V-ARCH-FREEZE", title: "HW Architecture Freeze", object_type: "MILESTONE", state: "AT_RISK" },
+  ],
+  decisions: projectSituation.decision_case_refs,
+  treatment_actions: [{
+    action_id: "ACTION-V-BOUNDED-CHANGE",
+    title: "가역 범위로 변경을 제한하고 model을 재검증",
+    status: "IN_PROGRESS",
+    due_at_step: 23,
+    verification_evidence_ids: ["EVD-V-PRESI-MODEL"],
+    rollback_condition: "model margin이 기준 미달이면 Architecture Freeze를 보류",
+  }],
+} satisfies ProjectRiskDetail;
+
 function projectResponse(input: RequestInfo | URL) {
   const url = String(input);
+  if (url.includes("/risks/RISK-V-WRONG-COMMIT")) {
+    return response({ ...projectRiskDetail, reconstructed_at_step: url.includes("at_step=20") ? 20 : 22 });
+  }
   if (url.includes("/timeline")) return response(projectTimeline);
   if (url.includes("/situation")) {
     const historical = url.includes("at_step=20");
@@ -152,6 +200,43 @@ describe("Project Operations pages", () => {
     expect(screen.getAllByText("Pre-silicon model 결과가 도착했습니다.")).toHaveLength(2);
     expect(screen.getByText("전력 경로 설계 closure · 대표 workload 사전 검증")).toBeInTheDocument();
     expect(screen.queryByRole("link", { name: /Decision|결정 검토/ })).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "근거·영향·대응 상세 추적" })).toHaveAttribute(
+      "href",
+      "/projects/PROJECT-V/risks/RISK-V-WRONG-COMMIT",
+    );
+  });
+
+  it("traces a risk from source through inference and impact to Decision and Action", async () => {
+    vi.spyOn(globalThis, "fetch").mockImplementation(projectResponse);
+    renderApp("/projects/PROJECT-V/risks/RISK-V-WRONG-COMMIT");
+
+    expect(await screen.findByRole("heading", { name: "이 Risk는 어디에서 나왔는가" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "근거에서 무엇을 추론했고 왜 먼저 보는가" })).toBeInTheDocument();
+    expect(screen.getByText(projectRiskDetail.inference_basis[0])).toBeInTheDocument();
+    expect(screen.queryByText("다른 과제까지 영향")).not.toBeInTheDocument();
+    expect(screen.getByText("과제 전체 영향")).toBeInTheDocument();
+    expect(screen.getByText(projectRiskDetail.cross_project_sources[0].lesson)).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "어떤 작업과 기준점이 영향을 받는가" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "어떤 Decision과 Action으로 위험을 제한하는가" })).toBeInTheDocument();
+    expect(screen.getByText("model margin이 기준 미달이면 Architecture Freeze를 보류")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Decision 검토 열기" })).toHaveAttribute(
+      "href",
+      "/decisions/CASE-HO-002?from_project=PROJECT-V&from_risk=RISK-V-WRONG-COMMIT",
+    );
+  });
+
+  it("keeps the project historical Step only as Decision return context", async () => {
+    vi.spyOn(globalThis, "fetch").mockImplementation(projectResponse);
+    renderApp("/projects/PROJECT-V/risks/RISK-V-WRONG-COMMIT?at_step=20");
+
+    expect(await screen.findByText("선택한 Step 당시 Risk")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "과제 상황" })).toHaveAttribute("href", "/projects/PROJECT-V?at_step=20");
+    const decisionLink = screen.getByRole("link", { name: "Decision 검토 열기" });
+    expect(decisionLink).toHaveAttribute(
+      "href",
+      "/decisions/CASE-HO-002?from_project=PROJECT-V&from_risk=RISK-V-WRONG-COMMIT&from_project_step=20",
+    );
+    expect(decisionLink.getAttribute("href")).not.toContain("at_step");
   });
 
   it("keeps a historical project Step in the URL and returns to current state", async () => {

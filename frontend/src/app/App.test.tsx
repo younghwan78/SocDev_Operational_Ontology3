@@ -368,6 +368,20 @@ describe("App", () => {
     expect(screen.queryByRole("button", { name: "역할 검토 시작" })).not.toBeInTheDocument();
   });
 
+  it("returns from a linked Decision to the originating historical Risk", async () => {
+    vi.spyOn(globalThis, "fetch").mockImplementation(workspaceResponse);
+    renderApp("/decisions/CASE-VR-001?from_project=PROJECT-V&from_risk=RISK-V-WRONG-COMMIT&from_project_step=20");
+
+    expect(await screen.findByRole("heading", { name: caseItem.header.decision_question })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "← Risk 상세" })).toHaveAttribute(
+      "href",
+      "/projects/PROJECT-V/risks/RISK-V-WRONG-COMMIT?at_step=20",
+    );
+    expect(screen.getByTestId("test-location")).toHaveTextContent(
+      "?from_project=PROJECT-V&from_risk=RISK-V-WRONG-COMMIT&from_project_step=20",
+    );
+  });
+
   it("shows one linked action, safeguard, rollback, and observed-progress flow after decision", async () => {
     vi.spyOn(globalThis, "fetch").mockImplementation((input) => workspaceFixtureResponse(actioningCaseItem, input));
     const { container } = renderApp("/decisions/CASE-VR-001");
