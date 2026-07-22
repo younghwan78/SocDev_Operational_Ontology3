@@ -2,6 +2,7 @@
 
 > Updated: 2026-07-23
 > Current stage: OPS-F product release/rubric/E2E tooling implemented; independent observation Gate remains open at baseline 0/5 and product 0/5, UX-I blocked
+> Planned sequence: OPS-F observations → UX-I/J/K Local UX Release 1 → ENT-A~F external fixture-only preparation → internal C0/C1
 
 ## Stage evidence
 

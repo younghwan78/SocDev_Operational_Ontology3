@@ -4,6 +4,11 @@
 > Date: 2026-07-23
 > Scope: local fixture-only PoC
 
+Frozen follow-up order: `OPS-F observations → UX-I → UX-J → UX-K Local UX Release 1 →
+ENT-A~F fixture-only enterprise preparation → internal C0/C1`. No enterprise preparation implementation
+starts before UX-K, and no actual company source, vendor API, credential, authentication or write-back
+enters the local repository.
+
 ## 1. Purpose
 
 This document is the implementation authority for repository layout, execution order, technology choices, and I0–I7 stage gates. `PROJECT_PLAN.md` owns product scope and value hypotheses. The subject-specific readiness contract owns its domain details.
@@ -422,6 +427,19 @@ Post-I7 Project Operations stages run in this order:
 
 No later OPS stage starts before the previous Gate. Company connectors, authentication and write-back
 remain C0/C2 scope.
+
+After OPS-F, the only allowed order is:
+
+|Stage|Deliverable|Gate|
+|---|---|---|
+|UX-I|Measurement-led information architecture simplification|OPS-F has at least 5 valid independent observations per condition and a reviewed problem ranking|
+|UX-J|Separate immutable human initial/final response from simulated advice|Advice cannot overwrite human response; accept/modify/reject and anchoring are measurable|
+|UX-K|Freeze Local UX Release 1 across the full Project-to-Decision journey|Responsive/accessibility/recovery/history/full-regression Gate and release pins pass|
+|ENT-A~F|Source-neutral contracts, dirty fixtures, sync/dry-run/quarantine and internal handoff kit|New ADR accepted; fixture-only tests pass with no vendor API, company data, credential or real ACL|
+|C0/C1|Internal configuration, sanitized schema-fit, one-project read-only smoke and pilot|Company security, data owner and human authority approvals|
+
+The detailed work packages and transition criteria are owned by
+`internal_docs/26.07.23 UX 마무리 및 사내 데이터 전환 실행 계획.md`.
 
 OPS-B implementation record (2026-07-21):
 

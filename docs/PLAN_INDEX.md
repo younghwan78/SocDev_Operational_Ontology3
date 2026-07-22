@@ -4,6 +4,8 @@
 > 갱신일: 2026-07-23
 > 현재 단계: OPS-F study release/rubric/E2E 도구 구현 완료, 독립 관측 baseline 0/5·product 0/5로 Gate 진행 중; UX-I 차단
 
+> 고정 후속 순서: OPS-F 관측 → UX-I/J/K Local UX Release 1 → ENT-A~F 사외 준비 → 사내 C0/C1
+
 이 문서는 제품 계획부터 구현 계약까지 어떤 문서를 어떤 순서로 읽고 수정해야 하는지 안내한다. 문서 간 충돌은 전체 순위가 아니라 각 문서가 소유한 결정 영역으로 해결한다.
 
 ## 1. 처음 읽을 문서
@@ -53,6 +55,7 @@
 - `internal_docs/26.07.22 OPS-E Risk Detail Decision Linkage 구현 및 검증 보고서.md`
 - `internal_docs/26.07.22 OPS-F Project 중심 사용성 Protocol v2 구현 및 검증 보고서.md`
 - `internal_docs/26.07.23 OPS-F Study Release 보강 및 사내 데이터 연결 준비도 보고서.md`
+- `internal_docs/26.07.23 UX 마무리 및 사내 데이터 전환 실행 계획.md`
 - `docs/decisions/ADR-0010-project-operations-and-risk-provenance.md`
 
 다음 문서는 과거 판단의 근거다. 새 구현 기준으로 직접 사용하지 않는다.
@@ -80,6 +83,8 @@
 
 I0~I7 Replay와 post-I7 UX-A/UX-B/UX-C/UX-D/UX-E/UX-F/UX-G 로컬 Gate,
 OPS-F Project protocol v2와 study release/rubric/E2E 도구까지 구현됐다. 현재 실행 지점은 OPS-F 독립 관측 수집이며 UX-I는 차단 상태다.
+UX-I/J/K로 Local UX Release 1을 먼저 닫은 뒤 ENT-A~F의 fixture-only enterprise preparation을
+진행하고, 그 결과를 가지고 사내 C0/C1에 들어간다. UX와 connector는 동시에 변경하지 않는다.
 
 ```text
 UX-F Responsive·접근성·사용성 Gate
@@ -120,6 +125,14 @@ OPS-F Project 중심 protocol v2
   → baseline/product 동일 task guide, 제품 release hash와 reviewer-only rubric PASS
   → draft/excluded attrition 보고와 Project current/historical E2E PASS
   → 완료 독립 관측 baseline 0/5·product 0/5, not_ready/no_business_claim
+UX-I/J/K Local UX Release 1
+  → OPS-F 상위 문제만 축소·개선
+  → human initial response와 Agent advice 이후 accept/modify/reject 분리
+  → 전체 Project→Decision→Outcome 여정과 복구·접근성·역사 경계 재동결
+ENT-A~F 사외 준비
+  → source-neutral ingestion + dirty fixture mapping + idempotent sync
+  → dry-run/quarantine + ACL/classification emulator + 사내 handoff kit
+  → 실제 company data, vendor API, credential, auth와 write-back 없음
 ```
 
 UX-F/UX-G 완료는 local Codex evaluator와 deterministic browser automation의 공학적 Gate다.

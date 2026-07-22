@@ -190,6 +190,10 @@ if (-not (Get-ChildItem -LiteralPath (Join-Path $root "internal_docs") -File |
     Where-Object { $_.Name -like "26.07.23 OPS-F Study Release*.md" })) {
     throw "Missing OPS-F study release and company-readiness report."
 }
+if (-not (Get-ChildItem -LiteralPath (Join-Path $root "internal_docs") -File |
+    Where-Object { $_.Name -like "26.07.23 UX*.md" })) {
+    throw "Missing UX completion and enterprise transition plan."
+}
 if ($master -notmatch 'OPS-F implementation record') {
     throw "Master plan does not record the OPS-F implementation state."
 }

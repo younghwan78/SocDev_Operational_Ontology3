@@ -5,6 +5,9 @@
 > 문서 역할: 제품 목표, 범위, 가치 가설, 중단 기준을 정의  
 > 현재 판단: **GO: I0–I7 Replay, Step 5 B2 runtime, UX-A~UX-H 도구와 OPS-F study release 구현 완료**, **CURRENT: OPS-F 독립 관측 baseline 0/5·product 0/5**, **NO-GO: UX-I·최종 UX 주장, live 사내 연동 및 실제 업무 적용**
 
+후속 실행 순서는 `OPS-F 관측 → UX-I → UX-J → UX-K Local UX Release 1 → ENT-A~F
+사외 준비 → 사내 C0/C1`로 고정한다. UX와 connector를 동시에 변경하지 않는다.
+
 이 계획은 SoC 개발 진행과 불확실성을 재현하고 제한된 정보에서도 저후회 결정을 돕는 제품을 정의한다. 집에서는 synthetic fixture로 의사결정 메커니즘만 검증하며, 실제 비즈니스 가치는 사내 read-only 파일럿에서 별도로 측정한다.
 
 ## 1. 이 문서가 결정하는 것
@@ -406,6 +409,8 @@ Post-I7 후속은 다음 순서로만 진행한다.
 |OPS-F|Project 중심 UX-H protocol v2, 제품 release 고정과 독립 human observation|release/rubric/E2E 도구 완료; 독립 관측 baseline 0/5·product 0/5로 Gate 진행 중|
 |UX-I|측정 결과로 Portfolio·Situation·Workspace 정보 구조 축소·개선|OPS-F human 결과 없이는 시작하지 않음|
 |UX-J|사용자 판단과 simulated Chair를 분리해 accept/modify/reject와 anchoring 측정|새 ADR과 evaluation-only contract 필요|
+|UX-K|전체 사용자 여정, 복구·접근성·역사 경계를 재검증하고 Local UX Release 1 동결|UX-I/J Gate 뒤 시작; fixture UX 완료만 주장|
+|ENT-A~F|사외에서 source-neutral ingestion, dirty fixture, sync/dry-run/quarantine와 handoff kit 구현|UX-K 뒤 새 ADR로 시작; 실제 company data/vendor API/auth 없음|
 
 UX-H는 observable fixture hash와 source selector로 고정한 Jira/Confluence형 baseline pack,
 canonical 8개와 Development Twin 5개 task, `usability-session.v1` event/result 계약과
@@ -413,6 +418,11 @@ canonical 8개와 Development Twin 5개 task, `usability-session.v1` event/resul
 `not_ready`와 `no_business_claim`을 반환한다. condition별 proxy/domain reviewer 5개 이상을
 확보하기 전에는 UX-I를 시작하지 않는다. 새 Project 중심 관측은 OPS-F v2로만 수집하며,
 사내 source·권한·승인은 C0에서 별도로 연다.
+
+UX-I는 OPS-F에서 가장 느리거나 자주 오해한 task만 개선한다. UX-J는 advice 공개 전 사람의
+초기 판단과 공개 후 `accept/modify/reject`를 별도 record로 보존한다. UX-K는 이 전체 흐름을
+responsive, accessibility, partial/stale/conflict, current/historical E2E와 함께 재동결한다. 이
+세 Gate를 통과하기 전에는 enterprise ingestion 구현을 시작하지 않는다.
 
 ```text
 B2 validation 10/10 + sealed-unseen 6/6 PASS
@@ -433,9 +443,24 @@ B2 validation 10/10 + sealed-unseen 6/6 PASS
 - Graph/vector DB와 agent framework는 측정 근거가 생기기 전 도입하지 않는다
 - 기존 `E:\56_Codex_SoC_Operational_Ontology` 코드는 새 test와 ADR 없이 port하지 않는다
 
-## 11. 사내 전환
+## 11. 사외 준비와 사내 전환
 
-사내 전환은 로컬 계획의 연장이 아니라 별도 승인 범위다.
+사내 전환은 로컬 UX 구현의 연장이 아니라 별도 승인 범위다. 다만 사내에서 connector를 처음부터
+개발하지 않도록 UX-K 뒤 실제 data 없이 가능한 `ENT-A~F`를 사외에서 먼저 완료한다.
+
+### ENT-A~F. 사외 Enterprise Preparation
+
+- source-neutral record, stable external identity와 enterprise time 계약
+- vendor SDK와 분리된 read-only source port
+- synthetic dirty export fixture와 mapping registry
+- cursor, content hash, idempotency, retry, tombstone와 reconciliation
+- no-write dry-run, canonical diff, quality report와 quarantine
+- opaque ACL/classification policy emulator와 restricted-source leakage test
+- Jira/Confluence mapping template, 환경 worksheet와 사내 cutover runbook
+
+사외 단계에는 실제 Jira/Confluence API 호출, credential, 회사 field ID, 실제 user/group ACL과
+write-back을 넣지 않는다. 상세 순서와 Gate는
+`internal_docs/26.07.23 UX 마무리 및 사내 데이터 전환 실행 계획.md`가 소유한다.
 
 ### C0. 환경과 데이터 경계 확인
 
@@ -443,7 +468,8 @@ B2 validation 10/10 + sealed-unseen 6/6 PASS
 - 배포 network, secret, model provider와 audit 정책 승인
 - source ACL, 삭제, retention과 export 규칙 확정
 - pilot owner, human decision authority와 대상 workflow 지정
-- connector 없이 sanitized export로 schema 적합성 먼저 확인
+- ENT dry-run에 승인된 sanitized export를 넣어 schema와 mapping 적합성 먼저 확인
+- allowlist 한 Project/Space에서만 read-only connector smoke와 sync/reconciliation 검증
 
 ### C1. Read-only pilot
 
@@ -505,6 +531,7 @@ C1에서 가치와 보안 gate를 통과한 뒤에만 연다.
 - 로컬 승인: simulated Chair, 실제 권한 없음
 - 구현 단계: I0~I7
 - 현재 단계: OPS-F study release/rubric/E2E 도구 완료, 독립 관측 baseline 0/5·product 0/5; UX-I 차단
+- 후속 순서: UX-I/J/K 완료 뒤 ENT-A~F 사외 준비, 그 뒤 사내 C0/C1
 - release topology: B2 independent routed Role Agents, deterministic core decision
 - CI provider: ReplayProvider
 - live provider: 구성 가능한 OpenAI Responses API adapter
@@ -546,6 +573,7 @@ Active planning documents:
 - `internal_docs/26.07.22 OPS-E Risk Detail Decision Linkage 구현 및 검증 보고서.md`
 - `internal_docs/26.07.22 OPS-F Project 중심 사용성 Protocol v2 구현 및 검증 보고서.md`
 - `internal_docs/26.07.23 OPS-F Study Release 보강 및 사내 데이터 연결 준비도 보고서.md`
+- `internal_docs/26.07.23 UX 마무리 및 사내 데이터 전환 실행 계획.md`
 - `docs/decisions/ADR-0010-project-operations-and-risk-provenance.md`
 
 Review and historical context:
