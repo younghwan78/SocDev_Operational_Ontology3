@@ -105,6 +105,22 @@ def test_historical_project_resources_share_one_future_leakage_boundary() -> Non
         build_project_risk_detail(stored, "RISK-U-NEXT-SILICON", at_step=34)
 
 
+def test_historical_track_status_does_not_reuse_current_blocker_state() -> None:
+    situation = build_project_situation(_stored("PROJECT-V"), at_step=20)
+
+    verification = next(
+        item for item in situation.tracks if item.track_id == "TRACK-V-VERIF"
+    )
+    work_item = next(
+        item
+        for item in situation.work_items
+        if item.work_item_id == "WORK-V-PRESI-VERIFY"
+    )
+    assert work_item.status == "READY"
+    assert verification.status == "READY"
+    assert verification.blocked_work_item_count == 0
+
+
 def test_project_read_api_exposes_situation_risk_detail_and_timeline() -> None:
     client = TestClient(create_app(InMemoryCaseRepository()))
 

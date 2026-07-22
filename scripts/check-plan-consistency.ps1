@@ -140,6 +140,24 @@ if ($master -notmatch 'PostgreSQL migration head is `0020_development_projects`'
     }
 }
 
+@(
+    "frontend/src/features/projects/ProjectPortfolioPage.tsx",
+    "frontend/src/features/projects/ProjectSituationPage.tsx"
+) | ForEach-Object {
+    if (-not (Test-Path -LiteralPath (Join-Path $root $_) -PathType Leaf)) {
+        throw "Missing OPS-D Frontend artifact: $_"
+    }
+}
+$frontendRoutes = Get-Content -Raw (Join-Path $root "frontend/src/app/App.tsx")
+@('/projects', '/projects/:projectId') | ForEach-Object {
+    if (-not $frontendRoutes.Contains($_)) {
+        throw "Frontend is missing canonical OPS-D route: $_"
+    }
+}
+if ($master -notmatch 'OPS-D implementation record') {
+    throw "Master plan does not record the OPS-D implementation Gate."
+}
+
 $requiredPaths = @(
     "/api/v1/decision-cases",
     "/api/v1/decision-cases/{case_id}/workspace",
@@ -168,4 +186,4 @@ if ($actualPaths | Where-Object { $_ -match "hidden" }) {
     throw "OpenAPI exposes a forbidden hidden resource."
 }
 
-Write-Output "Plan consistency check passed: I0-I7, OPS-C Project runtime, corpora, terms, and canonical API agree."
+Write-Output "Plan consistency check passed: I0-I7, OPS-D Project UX, corpora, terms, and canonical API agree."

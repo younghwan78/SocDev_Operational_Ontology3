@@ -763,6 +763,10 @@ def _track_situation(
         item in {WorkItemStatus.DONE, WorkItemStatus.VERIFIED} for item in work_states
     ):
         track_status = WorkItemStatus.VERIFIED
+    elif WorkItemStatus.READY in work_states:
+        track_status = WorkItemStatus.READY
+    elif WorkItemStatus.PLANNED in work_states:
+        track_status = WorkItemStatus.PLANNED
     else:
         track_status = track.status
     return ProjectTrackSituation(

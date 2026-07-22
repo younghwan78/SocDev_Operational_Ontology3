@@ -17,6 +17,7 @@ export function DecisionListPage() {
   return (
     <main className="app-shell decision-list-shell" id="main-content" tabIndex={-1}>
       <header className="decision-list-header">
+        <Link className="back-link" to="/projects">← 과제 포트폴리오</Link>
         <p className="eyebrow">합성 데이터 · 가상 판단</p>
         <h1>결정 목록</h1>
         <p className="page-lead">

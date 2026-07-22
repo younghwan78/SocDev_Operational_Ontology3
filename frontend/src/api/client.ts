@@ -1,4 +1,4 @@
-import type { AblationResult, CaseEvaluation, DecisionListItem, DecisionWorkspace, DevelopmentTimeline, OutcomeSnapshot, ReviewRun } from "./generated";
+import type { AblationResult, CaseEvaluation, DecisionListItem, DecisionWorkspace, DevelopmentTimeline, OutcomeSnapshot, ProjectListItem, ProjectSituation, ProjectTimeline, ReviewRun } from "./generated";
 
 const API_BASE = import.meta.env.VITE_SOC_OT_API_BASE_URL ?? "http://127.0.0.1:18080";
 
@@ -43,6 +43,20 @@ async function fetchApi(path: string, init?: RequestInit): Promise<Response> {
 
 export function getDecisionCases(): Promise<DecisionListItem[]> {
   return getJson("/api/v1/decision-cases");
+}
+
+export function getProjects(): Promise<ProjectListItem[]> {
+  return getJson("/api/v1/projects");
+}
+
+export function getProjectSituation(projectId: string, atStep?: number): Promise<ProjectSituation> {
+  const query = atStep === undefined ? "" : `?${new URLSearchParams({ at_step: String(atStep) })}`;
+  return getJson(`/api/v1/projects/${encodeURIComponent(projectId)}/situation${query}`);
+}
+
+export function getProjectTimeline(projectId: string, atStep?: number): Promise<ProjectTimeline> {
+  const query = atStep === undefined ? "" : `?${new URLSearchParams({ at_step: String(atStep) })}`;
+  return getJson(`/api/v1/projects/${encodeURIComponent(projectId)}/timeline${query}`);
 }
 
 export function getDecisionWorkspace(caseId: string, atStep?: number): Promise<DecisionWorkspace> {

@@ -10,3 +10,7 @@ export type AblationResult = components["schemas"]["AblationResult"];
 export type CaseEvaluation = components["schemas"]["CaseEvaluation"];
 export type RunTelemetry = components["schemas"]["RunTelemetryView"];
 export type OutcomeSnapshot = components["schemas"]["OutcomeSnapshot"];
+export type ProjectListItem = components["schemas"]["ProjectListItemProjection"];
+export type ProjectSituation = components["schemas"]["ProjectSituationProjection"];
+export type ProjectRiskSummary = components["schemas"]["ProjectRiskSummary"];
+export type ProjectTimeline = components["schemas"]["ProjectTimelineProjection"];

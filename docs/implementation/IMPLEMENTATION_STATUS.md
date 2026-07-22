@@ -1,7 +1,7 @@
 # Implementation status
 
-> Updated: 2026-07-21
-> Current stage: OPS-C Project runtime/API passed; OPS-D Portfolio/Situation UX is next, human observations remain paused until OPS-F
+> Updated: 2026-07-22
+> Current stage: OPS-D Portfolio/Situation UX passed as a local proxy; OPS-E Risk Detail/Decision linkage is next, human observations remain paused until OPS-F
 
 ## Stage evidence
 
@@ -27,7 +27,23 @@
 |Post-I7 UX-H tooling|Implemented; human Gate not ready|Hash-pinned observable baseline selectors and rendered Jira/Confluence-shaped fixture, frozen 13-task two-condition protocol, builder/proxy/domain separation, session event/result and summary contracts, validation/preparation/summary CLI, 10 focused Backend tests. Actual human observations: 0; dry-run status: `not_ready`, `not_evaluable`, `no_business_claim`.|
 |OPS-A|Passed|ADR-0010 fixes Project/Issue/Risk/Gate semantics, provenance, deterministic truth ownership and OPS-B~OPS-F order.|
 |OPS-B|Passed|Three lifecycle-distinct Project fixtures, 17 typed events, hash manifest, cross-project lineage and historical leakage tests.|
-|OPS-C|Passed|Migration 0020, durable Project repositories, deterministic attention/risk policies, five read APIs, historical parity, generated contracts and Replay smoke. No Project UI yet.|
+|OPS-C|Passed|Migration 0020, durable Project repositories, deterministic attention/risk policies, five read APIs, historical parity, generated contracts and Replay smoke; this established the runtime boundary consumed by OPS-D.|
+|OPS-D|Passed (local agent substitute)|Backend-ordered Project Portfolio, progressive Situation view, human-readable source-to-Issue/Evidence/Event joins, affected work and milestones, URL-backed historical Step, Korean recovery, responsive 390px/desktop UI, 4 focused/16 total unit tests, 8 regression E2E, Axe and overflow checks. Human task time remains unmeasured.|
+
+OPS-D implementation record (2026-07-22):
+
+- `/` now enters `/projects`; Portfolio exposes each Project's Backend-owned attention reason, top Risk,
+  nearest milestone and operational counts without a Frontend score
+- Situation makes the top Risk readable as reason → visible source → affected WorkItem/Milestone, then
+  separates blocked work, Track progress, Gate/Checkpoint, observed Issue, Evidence gaps and recent Event
+- Project `at_step` lives in the URL and fail-closed recovery returns to the current state; Situation and
+  Timeline query the same selected Step and never request Risk Detail or Decision data in OPS-D
+- source display uses the source IDs supplied by OPS-C and joins only titles already visible at the same
+  Step; it does not infer, rank or mutate Project truth
+- 390px and 1440px browser checks report no horizontal overflow, Axe violations or console problems;
+  screenshots are under `output/playwright/opsd-*.png`
+- the 30-second question set is an engineering proxy only. Independent task-time observation remains
+  deliberately paused until OPS-F protocol v2
 
 Post-I7 UX-H implementation record (2026-07-19):
 

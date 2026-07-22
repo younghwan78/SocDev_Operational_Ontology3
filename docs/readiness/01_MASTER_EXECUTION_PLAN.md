@@ -1,7 +1,7 @@
 # Master execution plan
 
-> Status: IMPLEMENTED THROUGH I7 REPLAY + STEP 5 B2 RUNTIME + POST-I7 UX-H TOOLING + OPS-C; OPS-D PROJECT UX NEXT, HUMAN OBSERVATION PAUSED UNTIL OPS-F
-> Date: 2026-07-21
+> Status: IMPLEMENTED THROUGH I7 REPLAY + STEP 5 B2 RUNTIME + POST-I7 UX-H TOOLING + OPS-D; OPS-E RISK/DECISION UX NEXT, HUMAN OBSERVATION PAUSED UNTIL OPS-F
+> Date: 2026-07-22
 > Scope: local fixture-only PoC
 
 ## 1. Purpose
@@ -415,8 +415,8 @@ Post-I7 Project Operations stages run in this order:
 |OPS-A|Scope, semantic boundaries, reserved vocabulary and ADR|Complete: ADR-0010 Accepted|
 |OPS-B|Lifecycle-distinct Project fixtures and event/risk provenance|Complete: 3 projects, 17 typed events, hash manifest and future-leakage tests|
 |OPS-C|Project domain, projection, API and compatibility path|Complete: migration/repository parity, five read APIs, generated contracts and no-future-leakage parity|
-|OPS-D|Portfolio and Project Situation UX|Next: 30-second overall status/top-risk/source task passes|
-|OPS-E|Risk Detail and Decision linkage|Two-minute source-to-impact-to-decision trace task passes|
+|OPS-D|Portfolio and Project Situation UX|Complete (local proxy): overall status/top-risk/source task, responsive and accessibility checks pass|
+|OPS-E|Risk Detail and Decision linkage|Next: two-minute source-to-impact-to-decision trace task passes|
 |OPS-F|UX-H protocol v2 and independent observations|Minimum independent observations before UX-I or business claim|
 
 No later OPS stage starts before the previous Gate. Company connectors, authentication and write-back
@@ -446,6 +446,24 @@ OPS-C implementation record (2026-07-21):
   one-way bridge until a future major DecisionCase contract is justified
 - generated JSON Schema, OpenAPI and TypeScript contracts are synchronized; OPS-D is the first stage
   allowed to consume them in the product UI
+
+OPS-D implementation record (2026-07-22):
+
+- `/projects` is now the default product entry and preserves Backend attention/risk ordering rather
+  than calculating a Frontend score; `/decisions` remains available as the existing bounded workflow
+- Portfolio cards expose ProjectAttention, the Backend reason, top Risk, nearest milestone and counts;
+  `/projects/:projectId` progressively discloses top-risk reasons, source provenance, affected work,
+  blockers, tracks, milestones, Issue/Evidence state and recent Project events
+- source references are presentation-joined only to currently visible Issue, Evidence and Timeline
+  titles; canonical Risk, level, ordering and provenance remain Backend-owned
+- `at_step` is URL-backed, all Situation and Timeline requests share the OPS-C historical boundary,
+  and an unavailable Step returns to the current Project without rendering future state
+- 4 focused unit tests cover Portfolio priority/reason, source-to-impact comprehension, historical URL
+  restoration and fail-closed recovery; total Frontend unit count is 16
+- existing 8 Decision-flow E2E tests pass; Playwright CLI inspection and Axe checks pass at 390px and
+  desktop with zero overflow, accessibility violations, console errors or warnings
+- this is a local agent-substitute task proxy, not measured human completion time or business value;
+  Risk Detail and Decision navigation remain deferred to OPS-E
 
 ## 7. Crosswalk to supporting plans
 

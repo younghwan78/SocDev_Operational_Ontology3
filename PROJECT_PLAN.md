@@ -1,9 +1,9 @@
 # SoC 개발 의사결정 디지털 트윈을 어떻게 구현하고 검증할 것인가
 
 > 문서 상태: Product Plan v0.3, 로컬 PoC 구현 승인
-> 갱신일: 2026-07-21
+> 갱신일: 2026-07-22
 > 문서 역할: 제품 목표, 범위, 가치 가설, 중단 기준을 정의  
-> 현재 판단: **GO: I0–I7 Replay, Step 5 B2 runtime, UX-A~UX-H 도구와 OPS-A~OPS-C 완료**, **NEXT: OPS-D Project Portfolio/Situation UX**, **NO-GO: OPS-F 전 human session, UX-I·최종 UX 주장, 사내 연동 및 실제 업무 적용**
+> 현재 판단: **GO: I0–I7 Replay, Step 5 B2 runtime, UX-A~UX-H 도구와 OPS-A~OPS-D 완료**, **NEXT: OPS-E Risk Detail/Decision linkage**, **NO-GO: OPS-F 전 human session, UX-I·최종 UX 주장, 사내 연동 및 실제 업무 적용**
 
 이 계획은 SoC 개발 진행과 불확실성을 재현하고 제한된 정보에서도 저후회 결정을 돕는 제품을 정의한다. 집에서는 synthetic fixture로 의사결정 메커니즘만 검증하며, 실제 비즈니스 가치는 사내 read-only 파일럿에서 별도로 측정한다.
 
@@ -400,8 +400,8 @@ Post-I7 후속은 다음 순서로만 진행한다.
 |OPS-A|Project/Issue/Risk/Gate 경계, provenance, Agent 책임과 전환 ADR|완료; ADR-0010 Accepted|
 |OPS-B|lifecycle과 risk provenance가 구별되는 Project fixture|완료; 3 Project, 17 typed event, hash manifest와 future-leakage test|
 |OPS-C|Project domain, projection, API와 historical boundary|완료; PostgreSQL aggregate, reason/source policy, 5개 read API와 `at_step` parity|
-|OPS-D|Project Portfolio와 Situation UX|다음 단계; 30초 overall status/top-risk/source task Gate|
-|OPS-E|Risk Detail과 기존 Decision Workspace 연결|OPS-D Gate 전 시작하지 않음|
+|OPS-D|Project Portfolio와 Situation UX|완료; Backend 정렬 Portfolio, Situation provenance와 historical URL, 390px/desktop local task proxy PASS|
+|OPS-E|Risk Detail과 기존 Decision Workspace 연결|다음 단계; 2분 source→impact→decision trace task Gate|
 |OPS-F|Project 중심 UX-H protocol v2와 독립 human observation|OPS-E Gate 전 시작하지 않음|
 |UX-I|측정 결과로 Portfolio·Situation·Workspace 정보 구조 축소·개선|OPS-F human 결과 없이는 시작하지 않음|
 |UX-J|사용자 판단과 simulated Chair를 분리해 accept/modify/reject와 anchoring 측정|새 ADR과 evaluation-only contract 필요|
@@ -503,7 +503,7 @@ C1에서 가치와 보안 gate를 통과한 뒤에만 연다.
 - 데이터: synthetic fixture only
 - 로컬 승인: simulated Chair, 실제 권한 없음
 - 구현 단계: I0~I7
-- 현재 단계: OPS-A~OPS-C 완료, OPS-D Project Portfolio/Situation UX가 다음 단계; human session은 OPS-F까지 보류
+- 현재 단계: OPS-A~OPS-D 완료, OPS-E Risk Detail/Decision linkage가 다음 단계; human session은 OPS-F까지 보류
 - release topology: B2 independent routed Role Agents, deterministic core decision
 - CI provider: ReplayProvider
 - live provider: 구성 가능한 OpenAI Responses API adapter
@@ -539,6 +539,9 @@ Active planning documents:
 - `internal_docs/26.07.19 UX-G 복구 및 검토 문맥 유지 구현 보고서.md`
 - `internal_docs/26.07.19 UX-H Human baseline 및 측정 계약 구현 보고서.md`
 - `internal_docs/26.07.21 OPS-A Project Operations Scope 및 Fixture 전환 계획.md`
+- `internal_docs/26.07.21 OPS-B Project 중심 Fixture 구현 및 검증 보고서.md`
+- `internal_docs/26.07.21 OPS-C Project Runtime Projection API 구현 및 검증 보고서.md`
+- `internal_docs/26.07.22 OPS-D Project Portfolio Situation UX 구현 및 검증 보고서.md`
 - `docs/decisions/ADR-0010-project-operations-and-risk-provenance.md`
 
 Review and historical context:
