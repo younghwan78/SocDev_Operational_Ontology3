@@ -1,7 +1,7 @@
 # Implementation status
 
 > Updated: 2026-07-22
-> Current stage: OPS-E Risk Detail/Decision linkage passed as a local proxy; OPS-F Project-centered protocol v2 and independent observations are next
+> Current stage: OPS-F Project-centered protocol v2 implemented; independent observation Gate remains open at baseline 0/5 and product 0/5, UX-I blocked
 
 ## Stage evidence
 
@@ -30,6 +30,27 @@
 |OPS-C|Passed|Migration 0020, durable Project repositories, deterministic attention/risk policies, five read APIs, historical parity, generated contracts and Replay smoke; this established the runtime boundary consumed by OPS-D.|
 |OPS-D|Passed (local agent substitute)|Backend-ordered Project Portfolio, progressive Situation view, human-readable source-to-Issue/Evidence/Event joins, affected work and milestones, URL-backed historical Step, Korean recovery, responsive 390px/desktop UI, 4 focused/16 total unit tests, 8 regression E2E, Axe and overflow checks. Human task time remains unmeasured.|
 |OPS-E|Passed (local agent substitute)|One source→epistemic/inference→impact→Decision/Action trace, Korean-first rule/limitation labels, all-Risk Situation navigation, historical Project boundary, Decision round trip without cross-timeline Step injection, 4 focused/19 total unit tests, 8 regression E2E, 390px/desktop Axe, overflow and console checks. Human task time remains unmeasured.|
+|OPS-F|Protocol v2 implemented; observation Gate pending|PROJECT-U/V/W hash-pinned source pack, 6 baseline surfaces, 11 frozen Project Operations tasks, v2 protocol/baseline schemas, v1 compatibility, condition guides, CLI defaults and 8 focused tests. Completed independent observations: baseline 0/5, product 0/5; `not_ready/not_evaluable/no_business_claim`.|
+
+OPS-F implementation record (2026-07-22):
+
+- new v2 material measures the actual Portfolio → Situation → Risk → Decision information architecture;
+  the previous DecisionCase-centered v1 protocol remains valid and unchanged
+- canonical validation pins all three Project fixtures and verifies every task answer source is both
+  present and exposed to the baseline condition; stale, hidden, duplicate and mismatched material fails
+- baseline and product receive the same 11-task `study-guide.md`; baseline additionally receives six
+  rendered Jira/Confluence-shaped source surfaces, while product starts at `/projects`
+- task coverage includes priority, blocked work/Gate, Issue-Risk-Evidence classification, epistemic
+  differences, provenance, affected objects, treatment/rollback, Step 20 replay, future-leak prevention,
+  cross-project lesson and Decision round trip
+- session/event/result/summary measurement remains v1-compatible; Project protocol v2 prevents the same
+  participant from completing both conditions and keeps builder drafts outside independent counts
+- two CLI-generated builder drafts contain no completed observation; summary remains
+  `not_ready/not_evaluable/no_business_claim`, with baseline/product independent counts 0/5 and 0/5
+- full regression passes: Ruff, Mypy (51 source files), 161 non-PostgreSQL tests, 11 PostgreSQL tests,
+  all boundary/contract/plan/migration checks, 19 Frontend unit tests, production build and 8 E2E tests
+- OPS-F software preparation is complete but its human Gate is not. UX-I and business claims remain
+  blocked until both conditions have at least five valid independent observations and responsible review
 
 OPS-E implementation record (2026-07-22):
 

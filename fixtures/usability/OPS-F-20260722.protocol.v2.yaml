@@ -1,0 +1,115 @@
+schema_version: usability-study-protocol.v2
+study_id: OPS-F-20260722-PROJECT-OPERATIONS
+frozen_at: 2026-07-22T15:00:00+09:00
+project_ids: [PROJECT-U, PROJECT-V, PROJECT-W]
+product_entry_path: /projects
+conditions:
+  - baseline
+  - product
+tasks:
+  - task_id: P01_PORTFOLIO_PRIORITY
+    category: portfolio
+    prompt_ko: 지금 가장 먼저 확인할 과제는 무엇이며, 그렇게 판단한 근거는 무엇인가?
+    answer_sources:
+      - project_id: PROJECT-U
+        source_paths: [/current_step, /tracks, /work_items, /milestones, /risks]
+      - project_id: PROJECT-V
+        source_paths: [/current_step, /tracks, /work_items, /milestones, /risks]
+      - project_id: PROJECT-W
+        source_paths: [/current_step, /tracks, /work_items, /milestones, /risks]
+  - task_id: P02_PROJECT_SITUATION
+    category: project_situation
+    prompt_ko: PROJECT-V에서 현재 막힌 작업과 가장 가까운 위험 기준점은 무엇인가?
+    answer_sources:
+      - project_id: PROJECT-V
+        source_paths: [/tracks, /work_items, /milestones]
+  - task_id: P03_ISSUE_RISK_EVIDENCE_GAP
+    category: project_situation
+    prompt_ko: PROJECT-V에서 이미 관측된 Issue, 아직 미래 가능성인 Risk, 확보되지 않은 Evidence를 구분하라.
+    answer_sources:
+      - project_id: PROJECT-V
+        source_paths: [/issues, /risks, /evidence]
+    boundary_classification_required: true
+    expected_boundary_classification: observed
+  - task_id: P04_RISK_PROVENANCE
+    category: risk_trace
+    prompt_ko: RISK-V-WRONG-COMMIT은 어떤 Issue, Event, Evidence와 다른 과제의 학습에서 나왔는가?
+    answer_sources:
+      - project_id: PROJECT-V
+        source_paths: [/issues, /development_events, /evidence, /cross_project_sources, /risks]
+  - task_id: P05_EPISTEMIC_DIFFERENCE
+    category: portfolio
+    prompt_ko: PROJECT-U의 field fact, PROJECT-V의 pre-silicon inference, PROJECT-W의 model 또는 lesson 가정은 어떻게 다른가?
+    answer_sources:
+      - project_id: PROJECT-U
+        source_paths: [/claims, /evidence]
+      - project_id: PROJECT-V
+        source_paths: [/claims, /evidence]
+      - project_id: PROJECT-W
+        source_paths: [/claims, /evidence]
+    boundary_classification_required: true
+    expected_boundary_classification: observed
+  - task_id: P06_RISK_IMPACT
+    category: risk_trace
+    prompt_ko: RISK-V-WRONG-COMMIT이 영향을 주는 WorkItem과 Milestone은 무엇이며 현재 상태는 무엇인가?
+    answer_sources:
+      - project_id: PROJECT-V
+        source_paths: [/risks, /work_items, /milestones]
+  - task_id: P07_TREATMENT_AND_ROLLBACK
+    category: decision_linkage
+    prompt_ko: 이 Risk를 다루는 Decision과 Action, 검증 Evidence, rollback 조건은 무엇인가?
+    answer_sources:
+      - project_id: PROJECT-V
+        source_paths: [/risks, /decision_case_refs, /development_actions, /evidence]
+  - task_id: P08_STATE_AT_STEP_20
+    category: historical_boundary
+    prompt_ko: PROJECT-V Step 20에서 RISK-V-WRONG-COMMIT의 대응 상태와 실제로 관측된 변화는 무엇인가?
+    answer_sources:
+      - project_id: PROJECT-V
+        source_paths: [/risks, /development_actions, /development_events]
+    boundary_classification_required: true
+    expected_boundary_classification: observed
+  - task_id: P09_NO_FUTURE_LEAKAGE
+    category: historical_boundary
+    prompt_ko: PROJECT-V Step 20에서 공유 emulator 충돌과 그 Risk를 알 수 있는가? 이후 정보를 추정하지 말라.
+    answer_sources:
+      - project_id: PROJECT-V
+        source_paths: [/risks, /development_events]
+    boundary_classification_required: true
+    expected_boundary_classification: unconfirmed
+  - task_id: P10_CROSS_PROJECT_LESSON
+    category: risk_trace
+    prompt_ko: PROJECT-V에 사용된 cross-project lesson의 원천과 현재 과제에 그대로 적용할 수 없는 한계는 무엇인가?
+    answer_sources:
+      - project_id: PROJECT-U
+        source_paths: [/development_events, /evidence]
+      - project_id: PROJECT-V
+        source_paths: [/cross_project_sources, /risks]
+  - task_id: P11_DECISION_ROUND_TRIP
+    category: decision_linkage
+    prompt_ko: RISK-V-WRONG-COMMIT을 다루는 Decision의 제목과 상태를 확인하고 원래 Risk로 돌아오라.
+    answer_sources:
+      - project_id: PROJECT-V
+        source_paths: [/risks, /decision_case_refs]
+targets:
+  minimum_independent_observations_per_condition: 5
+  question_accuracy_minimum: 1.0
+  boundary_accuracy_minimum: 1.0
+  safeguard_completeness_minimum: 1.0
+  product_median_time_ratio_to_baseline_maximum: 0.8
+  interpretation: directional_only
+independent_participant_kinds:
+  - proxy
+  - domain
+exclusion_reasons:
+  - session_incomplete
+  - study_environment_failure
+  - participant_saw_other_condition_results
+  - protocol_deviation
+result_policy:
+  - 제작자(builder) session은 공학 dry-run이며 독립 관측 수에 포함하지 않는다.
+  - 동일 participant는 baseline과 product 중 하나의 condition만 수행한다.
+  - 각 condition에서 proxy/domain 관측 5개 이상을 확보하기 전에는 human gate를 판정하지 않는다.
+  - 작은 표본의 차이는 directional signal로만 해석하고 business value를 주장하지 않는다.
+  - 결과를 본 뒤 task, target, source selector 또는 exclusion rule을 변경하지 않는다.
+  - 실제 최종 승인과 회사 system write-back은 이 study 범위 밖이다.

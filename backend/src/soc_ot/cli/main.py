@@ -34,6 +34,7 @@ from soc_ot.application.usability_study import (
     load_protocol,
     load_session,
     render_baseline_markdown,
+    render_session_guide,
     render_study_report,
     summarize_sessions,
     validate_session,
@@ -51,9 +52,11 @@ ROOT_DIR = Path(__file__).resolve().parents[4]
 DEFAULT_EVALUATION_MANIFEST = (
     ROOT_DIR / f"fixtures/manifests/{DEFAULT_EVALUATION_RELEASE}.yaml"
 )
-DEFAULT_USABILITY_PROTOCOL = ROOT_DIR / "fixtures/usability/UX-H-20260719.protocol.yaml"
+DEFAULT_USABILITY_PROTOCOL = (
+    ROOT_DIR / "fixtures/usability/OPS-F-20260722.protocol.v2.yaml"
+)
 DEFAULT_BASELINE_PACK = (
-    ROOT_DIR / "fixtures/usability/CASE-VR-001.baseline-pack.v1.yaml"
+    ROOT_DIR / "fixtures/usability/PROJECT-OPERATIONS.baseline-pack.v2.yaml"
 )
 
 
@@ -207,8 +210,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         print(
             "I7 Replay + Step 5 B2 stability gates complete; "
             "B2 durable dossier runtime active; UX-H session tooling ready, "
-            "OPS-E risk-to-decision UX ready, OPS-F protocol v2 next; "
-            "human observations pending"
+            "OPS-F project protocol v2 ready; independent human observations pending, "
+            "UX-I blocked"
         )
         return 0
     if args.command == "contracts" and args.contracts_command == "export":
@@ -362,14 +365,17 @@ def main(argv: Sequence[str] | None = None) -> int:
         )
         return 0
     if args.command == "usability" and args.usability_command == "prepare-session":
-        protocol, pack, case = validate_study_materials(
+        protocol, pack, source = validate_study_materials(
             args.root, args.protocol, args.baseline_pack
         )
-        session_id = args.session_id or f"UXH-{uuid4()}"
+        session_id = args.session_id or f"{protocol.study_id}-{uuid4()}"
         session_dir = args.output_root / session_id
         baseline_path = session_dir / "baseline-pack.md"
+        guide_path = session_dir / "study-guide.md"
         session_path = session_dir / "session.yaml"
-        if not args.force and (baseline_path.exists() or session_path.exists()):
+        if not args.force and any(
+            path.exists() for path in (baseline_path, guide_path, session_path)
+        ):
             print("Session artifacts already exist; use --force to replace them.")
             return 2
         session = create_session_template(
@@ -382,8 +388,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         session_dir.mkdir(parents=True, exist_ok=True)
         if session.condition is StudyCondition.BASELINE:
             baseline_path.write_text(
-                render_baseline_markdown(protocol, pack, case), encoding="utf-8"
+                render_baseline_markdown(protocol, pack, source), encoding="utf-8"
             )
+        guide_path.write_text(
+            render_session_guide(protocol, session.condition), encoding="utf-8"
+        )
         write_session_template(session, session_path)
         print(
             f"Prepared draft session={session_id}; condition={session.condition}; "

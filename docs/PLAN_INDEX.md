@@ -2,7 +2,7 @@
 
 > 상태: Active  
 > 갱신일: 2026-07-22
-> 현재 단계: OPS-A~OPS-E 완료, OPS-F Project 중심 protocol v2와 독립 관측이 다음 단계
+> 현재 단계: OPS-F Project 중심 protocol v2 구현 완료, 독립 관측 baseline 0/5·product 0/5로 Gate 진행 중; UX-I 차단
 
 이 문서는 제품 계획부터 구현 계약까지 어떤 문서를 어떤 순서로 읽고 수정해야 하는지 안내한다. 문서 간 충돌은 전체 순위가 아니라 각 문서가 소유한 결정 영역으로 해결한다.
 
@@ -51,6 +51,7 @@
 - `internal_docs/26.07.21 OPS-C Project Runtime Projection API 구현 및 검증 보고서.md`
 - `internal_docs/26.07.22 OPS-D Project Portfolio Situation UX 구현 및 검증 보고서.md`
 - `internal_docs/26.07.22 OPS-E Risk Detail Decision Linkage 구현 및 검증 보고서.md`
+- `internal_docs/26.07.22 OPS-F Project 중심 사용성 Protocol v2 구현 및 검증 보고서.md`
 - `docs/decisions/ADR-0010-project-operations-and-risk-provenance.md`
 
 다음 문서는 과거 판단의 근거다. 새 구현 기준으로 직접 사용하지 않는다.
@@ -77,7 +78,7 @@
 ## 5. 현재 실행 지점
 
 I0~I7 Replay와 post-I7 UX-A/UX-B/UX-C/UX-D/UX-E/UX-F/UX-G 로컬 Gate,
-UX-H human-study 실행 도구 및 OPS-A~OPS-E 구현이 완료됐다. 다음 실행 단계는 OPS-F다.
+OPS-F Project protocol v2까지 구현됐다. 현재 실행 지점은 OPS-F 독립 관측 수집이며 UX-I는 차단 상태다.
 
 ```text
 UX-F Responsive·접근성·사용성 Gate
@@ -113,12 +114,16 @@ OPS-E Risk Detail·Decision linkage
   → source → epistemic/inference → 영향 → Decision/Action 단일 추적 경로 PASS
   → Project 역사 시점과 Decision 시점을 섞지 않는 왕복 URL 문맥 PASS
   → 390px/desktop, Axe, overflow, console 및 기존 Decision E2E 회귀 PASS
+OPS-F Project 중심 protocol v2
+  → PROJECT-U/V/W hash-pinned baseline 6개 surface + 고정 task 11개 PASS
+  → baseline/product 동일 task guide, v1 호환, v2 계약·CLI dry-run PASS
+  → 완료 독립 관측 baseline 0/5·product 0/5, not_ready/no_business_claim
 ```
 
 UX-F/UX-G 완료는 local Codex evaluator와 deterministic browser automation의 공학적 Gate다.
 실제 사용자 시간, 의사결정 속도, 조언 품질, 승인이나 사내 연동 완료를 의미하지 않는다.
 UX-H는 공정한 비교 fixture와 측정 도구가 준비됐다는 뜻이며 human usability 또는 business
-value 결과가 아니다. 새 Project Operations 정보 구조를 반영한 OPS-F protocol v2 전에는
-human session을 실행하지 않고, condition별 proxy/domain reviewer 5개 이상을 기록하기 전에는
-UX-I와 business claim을 시작하지 않는다. C0와 I7 Responses API gate는 필요한 사용자·회사
+value 결과가 아니다. 새 Project Operations 정보 구조를 반영한 OPS-F protocol v2는 준비됐지만,
+condition별 proxy/domain reviewer 5개 이상을 기록하기 전에는 UX-I와 business claim을 시작하지
+않는다. C0와 I7 Responses API gate는 필요한 사용자·회사
 입력과 key·가격·비용 승인 전에는 시작하지 않는다.

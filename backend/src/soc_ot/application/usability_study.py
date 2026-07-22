@@ -8,6 +8,7 @@ from typing import Literal
 import yaml
 from pydantic import Field, field_validator, model_validator
 
+from soc_ot.application.project_fixture_contracts import DevelopmentProject
 from soc_ot.domain.models import ObservableCase, StrictModel
 
 
@@ -117,6 +118,111 @@ class UsabilityTask(StrictModel):
         return self
 
 
+class ProjectBaselineSource(StrictModel):
+    project_id: str
+    source_project_path: str
+    project_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+
+    @field_validator("source_project_path")
+    @classmethod
+    def require_safe_source_path(cls, value: str) -> str:
+        path = PurePosixPath(value)
+        if path.is_absolute() or ".." in path.parts or "\\" in value:
+            raise ValueError("project source path must be a safe POSIX relative path")
+        return value
+
+
+class ProjectSourceSelection(StrictModel):
+    project_id: str
+    source_paths: list[str] = Field(min_length=1)
+
+    @field_validator("source_paths")
+    @classmethod
+    def validate_source_paths(cls, values: list[str]) -> list[str]:
+        if len(values) != len(set(values)):
+            raise ValueError("project source selection has duplicate paths")
+        for value in values:
+            parts = PurePosixPath(value).parts
+            if not value.startswith("/") or ".." in parts or "\\" in value:
+                raise ValueError("project source path must be an absolute JSON pointer")
+        return values
+
+
+class ProjectBaselineSurface(StrictModel):
+    surface_id: str
+    surface_kind: Literal[
+        "portfolio_review_note",
+        "issue_tracker_export",
+        "risk_register",
+        "evidence_note",
+    ]
+    title_ko: str = Field(min_length=1)
+    source_selections: list[ProjectSourceSelection] = Field(min_length=1)
+
+
+class ProjectUsabilityBaselinePack(StrictModel):
+    schema_version: Literal["usability-project-baseline-pack.v2"] = (
+        "usability-project-baseline-pack.v2"
+    )
+    study_id: str
+    project_sources: list[ProjectBaselineSource] = Field(min_length=1)
+    surfaces: list[ProjectBaselineSurface] = Field(min_length=1)
+    prohibited_content: list[str] = Field(min_length=1)
+
+    @model_validator(mode="after")
+    def validate_sources_and_surfaces(self) -> "ProjectUsabilityBaselinePack":
+        project_ids = [item.project_id for item in self.project_sources]
+        if len(project_ids) != len(set(project_ids)):
+            raise ValueError("project baseline pack has duplicate project ids")
+        source_paths = [item.source_project_path for item in self.project_sources]
+        if len(source_paths) != len(set(source_paths)):
+            raise ValueError("project baseline pack has duplicate source paths")
+        surface_ids = [item.surface_id for item in self.surfaces]
+        if len(surface_ids) != len(set(surface_ids)):
+            raise ValueError("project baseline pack has duplicate surface ids")
+        selections = [
+            (selection.project_id, path)
+            for surface in self.surfaces
+            for selection in surface.source_selections
+            for path in selection.source_paths
+        ]
+        if len(selections) != len(set(selections)):
+            raise ValueError("project baseline pack exposes a source path more than once")
+        unknown = {
+            selection.project_id
+            for surface in self.surfaces
+            for selection in surface.source_selections
+            if selection.project_id not in project_ids
+        }
+        if unknown:
+            raise ValueError("project baseline surface references an unknown project")
+        return self
+
+
+class ProjectUsabilityTask(StrictModel):
+    task_id: str
+    category: Literal[
+        "portfolio",
+        "project_situation",
+        "risk_trace",
+        "decision_linkage",
+        "historical_boundary",
+    ]
+    prompt_ko: str = Field(min_length=1)
+    answer_sources: list[ProjectSourceSelection] = Field(default_factory=list)
+    boundary_classification_required: bool = False
+    expected_boundary_classification: BoundaryClassification | None = None
+
+    @model_validator(mode="after")
+    def validate_boundary_rubric(self) -> "ProjectUsabilityTask":
+        has_expected = self.expected_boundary_classification is not None
+        if self.boundary_classification_required != has_expected:
+            raise ValueError("boundary task requires an expected classification")
+        if self.expected_boundary_classification is BoundaryClassification.NOT_APPLICABLE:
+            raise ValueError("boundary task expected classification cannot be not_applicable")
+        return self
+
+
 class UsabilityTargets(StrictModel):
     minimum_independent_observations_per_condition: int = Field(ge=5)
     question_accuracy_minimum: float = Field(ge=0, le=1)
@@ -159,6 +265,53 @@ class UsabilityStudyProtocol(StrictModel):
         task_ids = [item.task_id for item in self.tasks]
         if len(task_ids) != len(set(task_ids)):
             raise ValueError("protocol has duplicate task ids")
+        return self
+
+
+class ProjectUsabilityStudyProtocol(StrictModel):
+    schema_version: Literal["usability-study-protocol.v2"] = (
+        "usability-study-protocol.v2"
+    )
+    study_id: str
+    frozen_at: datetime
+    project_ids: list[str] = Field(min_length=1)
+    product_entry_path: Literal["/projects"] = "/projects"
+    conditions: list[StudyCondition]
+    tasks: list[ProjectUsabilityTask] = Field(min_length=1)
+    targets: UsabilityTargets
+    independent_participant_kinds: list[ParticipantKind]
+    exclusion_reasons: list[str] = Field(min_length=1)
+    result_policy: list[str] = Field(min_length=1)
+
+    @field_validator("frozen_at")
+    @classmethod
+    def require_timezone(cls, value: datetime) -> datetime:
+        if value.tzinfo is None or value.utcoffset() is None:
+            raise ValueError("protocol frozen_at must include a timezone")
+        return value
+
+    @model_validator(mode="after")
+    def validate_protocol(self) -> "ProjectUsabilityStudyProtocol":
+        if set(self.conditions) != {StudyCondition.BASELINE, StudyCondition.PRODUCT}:
+            raise ValueError("protocol requires baseline and product conditions")
+        if set(self.independent_participant_kinds) != {
+            ParticipantKind.PROXY,
+            ParticipantKind.DOMAIN,
+        }:
+            raise ValueError("independent participants must be proxy and domain reviewers")
+        if len(self.project_ids) != len(set(self.project_ids)):
+            raise ValueError("project protocol has duplicate project ids")
+        task_ids = [item.task_id for item in self.tasks]
+        if len(task_ids) != len(set(task_ids)):
+            raise ValueError("protocol has duplicate task ids")
+        unknown = {
+            selection.project_id
+            for task in self.tasks
+            for selection in task.answer_sources
+            if selection.project_id not in self.project_ids
+        }
+        if unknown:
+            raise ValueError("project task references an unknown project")
         return self
 
 
@@ -250,16 +403,30 @@ class UsabilityStudySummary(StrictModel):
     reasons: list[str]
 
 
-def load_protocol(path: Path) -> UsabilityStudyProtocol:
-    return UsabilityStudyProtocol.model_validate(
-        yaml.safe_load(path.read_text(encoding="utf-8"))
-    )
+StudyProtocol = UsabilityStudyProtocol | ProjectUsabilityStudyProtocol
+StudyBaselinePack = UsabilityBaselinePack | ProjectUsabilityBaselinePack
+StudySource = ObservableCase | dict[str, DevelopmentProject]
+StudyTask = UsabilityTask | ProjectUsabilityTask
 
 
-def load_baseline_pack(path: Path) -> UsabilityBaselinePack:
-    return UsabilityBaselinePack.model_validate(
-        yaml.safe_load(path.read_text(encoding="utf-8"))
-    )
+def _study_tasks(protocol: StudyProtocol) -> list[StudyTask]:
+    if isinstance(protocol, ProjectUsabilityStudyProtocol):
+        return list(protocol.tasks)
+    return list(protocol.tasks)
+
+
+def load_protocol(path: Path) -> StudyProtocol:
+    payload = yaml.safe_load(path.read_text(encoding="utf-8"))
+    if payload.get("schema_version") == "usability-study-protocol.v2":
+        return ProjectUsabilityStudyProtocol.model_validate(payload)
+    return UsabilityStudyProtocol.model_validate(payload)
+
+
+def load_baseline_pack(path: Path) -> StudyBaselinePack:
+    payload = yaml.safe_load(path.read_text(encoding="utf-8"))
+    if payload.get("schema_version") == "usability-project-baseline-pack.v2":
+        return ProjectUsabilityBaselinePack.model_validate(payload)
+    return UsabilityBaselinePack.model_validate(payload)
 
 
 def load_session(path: Path) -> UsabilitySession:
@@ -269,8 +436,16 @@ def load_session(path: Path) -> UsabilitySession:
 
 
 def observable_sha256(case: ObservableCase) -> str:
+    return _model_sha256(case)
+
+
+def project_sha256(project: DevelopmentProject) -> str:
+    return _model_sha256(project)
+
+
+def _model_sha256(model: StrictModel) -> str:
     encoded = json.dumps(
-        case.model_dump(mode="json"),
+        model.model_dump(mode="json"),
         ensure_ascii=False,
         sort_keys=True,
         separators=(",", ":"),
@@ -282,9 +457,23 @@ def validate_study_materials(
     fixtures_root: Path,
     protocol_path: Path,
     baseline_pack_path: Path,
-) -> tuple[UsabilityStudyProtocol, UsabilityBaselinePack, ObservableCase]:
+) -> tuple[StudyProtocol, StudyBaselinePack, StudySource]:
     protocol = load_protocol(protocol_path)
     pack = load_baseline_pack(baseline_pack_path)
+    if isinstance(protocol, ProjectUsabilityStudyProtocol):
+        if not isinstance(pack, ProjectUsabilityBaselinePack):
+            raise ValueError("v2 protocol requires a project baseline pack")
+        return _validate_project_study_materials(fixtures_root, protocol, pack)
+    if not isinstance(pack, UsabilityBaselinePack):
+        raise ValueError("v1 protocol requires an observable-case baseline pack")
+    return _validate_case_study_materials(fixtures_root, protocol, pack)
+
+
+def _validate_case_study_materials(
+    fixtures_root: Path,
+    protocol: UsabilityStudyProtocol,
+    pack: UsabilityBaselinePack,
+) -> tuple[UsabilityStudyProtocol, UsabilityBaselinePack, ObservableCase]:
     if protocol.study_id != pack.study_id or protocol.case_id != pack.case_id:
         raise ValueError("protocol and baseline pack identity mismatch")
 
@@ -318,7 +507,72 @@ def validate_study_materials(
     return protocol, pack, case
 
 
+def _validate_project_study_materials(
+    fixtures_root: Path,
+    protocol: ProjectUsabilityStudyProtocol,
+    pack: ProjectUsabilityBaselinePack,
+) -> tuple[
+    ProjectUsabilityStudyProtocol,
+    ProjectUsabilityBaselinePack,
+    dict[str, DevelopmentProject],
+]:
+    if protocol.study_id != pack.study_id:
+        raise ValueError("protocol and baseline pack identity mismatch")
+    if set(protocol.project_ids) != {item.project_id for item in pack.project_sources}:
+        raise ValueError("protocol and baseline pack project ids differ")
+    root = fixtures_root.resolve()
+    projects: dict[str, DevelopmentProject] = {}
+    for source in pack.project_sources:
+        source_path = (fixtures_root / PurePosixPath(source.source_project_path)).resolve()
+        if root not in source_path.parents:
+            raise ValueError("project baseline source escapes fixtures root")
+        project = DevelopmentProject.model_validate(
+            yaml.safe_load(source_path.read_text(encoding="utf-8"))
+        )
+        if project.project_id != source.project_id:
+            raise ValueError("project baseline id does not match source")
+        if project_sha256(project) != source.project_sha256:
+            raise ValueError("project baseline source hash is stale")
+        projects[project.project_id] = project
+
+    selected_values: list[object] = []
+    exposed_sources: set[tuple[str, str]] = set()
+    for surface in pack.surfaces:
+        for selection in surface.source_selections:
+            payload = projects[selection.project_id].model_dump(mode="json")
+            for source_pointer in selection.source_paths:
+                exposed_sources.add((selection.project_id, source_pointer))
+                selected_values.append(_resolve_pointer(payload, source_pointer))
+    for task in protocol.tasks:
+        for selection in task.answer_sources:
+            payload = projects[selection.project_id].model_dump(mode="json")
+            for source_pointer in selection.source_paths:
+                if (selection.project_id, source_pointer) not in exposed_sources:
+                    raise ValueError("project task source is not exposed in baseline")
+                _resolve_pointer(payload, source_pointer)
+
+    visible_text = json.dumps(selected_values, ensure_ascii=False).lower()
+    leaked = [term for term in pack.prohibited_content if term.lower() in visible_text]
+    if leaked:
+        raise ValueError("project baseline contains prohibited content: " + ", ".join(leaked))
+    return protocol, pack, projects
+
+
 def render_baseline_markdown(
+    protocol: StudyProtocol,
+    pack: StudyBaselinePack,
+    source: StudySource,
+) -> str:
+    if isinstance(protocol, ProjectUsabilityStudyProtocol):
+        if not isinstance(pack, ProjectUsabilityBaselinePack) or not isinstance(source, dict):
+            raise ValueError("v2 baseline rendering requires validated project sources")
+        return _render_project_baseline_markdown(protocol, pack, source)
+    if not isinstance(pack, UsabilityBaselinePack) or not isinstance(source, ObservableCase):
+        raise ValueError("v1 baseline rendering requires a validated observable case")
+    return _render_case_baseline_markdown(protocol, pack, source)
+
+
+def _render_case_baseline_markdown(
     protocol: UsabilityStudyProtocol,
     pack: UsabilityBaselinePack,
     case: ObservableCase,
@@ -351,8 +605,79 @@ def render_baseline_markdown(
     return "\n".join(lines) + "\n"
 
 
+def _render_project_baseline_markdown(
+    protocol: ProjectUsabilityStudyProtocol,
+    pack: ProjectUsabilityBaselinePack,
+    projects: dict[str, DevelopmentProject],
+) -> str:
+    lines = [
+        "# SoC 개발 과제 운영 검토 — 업무 도구형 baseline",
+        "",
+        f"> Study: `{protocol.study_id}` / Projects: `{' · '.join(protocol.project_ids)}`",
+        "> 이 문서는 합성 Project fixture의 선택된 source만 보여주며 Agent 조언, "
+        "제품 projection과 hidden outcome을 포함하지 않습니다.",
+    ]
+    for surface in pack.surfaces:
+        lines.extend(["", f"## {surface.title_ko}", ""])
+        for selection in surface.source_selections:
+            payload = projects[selection.project_id].model_dump(mode="json")
+            lines.extend([f"### `{selection.project_id}`", ""])
+            for pointer in selection.source_paths:
+                value = _resolve_pointer(payload, pointer)
+                lines.extend([f"#### `{pointer}`", "", "```yaml"])
+                lines.append(
+                    yaml.safe_dump(value, allow_unicode=True, sort_keys=False).rstrip()
+                )
+                lines.append("```")
+    lines.extend(
+        [
+            "",
+            "---",
+            "",
+            "이 baseline은 Jira·Confluence를 모사한 human-study fixture이며 "
+            "실제 회사 data가 아닙니다.",
+        ]
+    )
+    return "\n".join(lines) + "\n"
+
+
+def render_session_guide(protocol: StudyProtocol, condition: StudyCondition) -> str:
+    if isinstance(protocol, ProjectUsabilityStudyProtocol):
+        start = (
+            "`baseline-pack.md`"
+            if condition is StudyCondition.BASELINE
+            else f"제품 `{protocol.product_entry_path}`"
+        )
+    else:
+        start = (
+            "`baseline-pack.md`"
+            if condition is StudyCondition.BASELINE
+            else f"제품 `/decisions/{protocol.case_id}`"
+        )
+    lines = [
+        f"# 사용성 관측 안내 — {protocol.study_id}",
+        "",
+        f"> Condition: `{condition}` / 시작 위치: {start}",
+        "> 답변, 시간과 reviewer 판정은 session.yaml에 실제 관측한 내용만 기록합니다.",
+        "",
+        "## 고정 Task",
+        "",
+    ]
+    lines.extend(
+        f"{index}. **{task.task_id}** — {task.prompt_ko}"
+        for index, task in enumerate(_study_tasks(protocol), start=1)
+    )
+    lines.extend(
+        [
+            "",
+            "다른 condition의 결과나 reviewer rubric을 참가자에게 미리 보여주지 않습니다.",
+        ]
+    )
+    return "\n".join(lines) + "\n"
+
+
 def create_session_template(
-    protocol: UsabilityStudyProtocol,
+    protocol: StudyProtocol,
     *,
     session_id: str,
     condition: StudyCondition,
@@ -365,12 +690,15 @@ def create_session_template(
         condition=condition,
         participant_code=participant_code,
         participant_kind=participant_kind,
-        task_results=[UsabilityTaskResult(task_id=task.task_id) for task in protocol.tasks],
+        task_results=[
+            UsabilityTaskResult(task_id=task.task_id)
+            for task in _study_tasks(protocol)
+        ],
     )
 
 
 def validate_session(
-    protocol: UsabilityStudyProtocol,
+    protocol: StudyProtocol,
     session: UsabilitySession,
     *,
     require_complete: bool = False,
@@ -379,7 +707,7 @@ def validate_session(
         raise ValueError("session study id does not match protocol")
     if session.condition not in protocol.conditions:
         raise ValueError("session condition is not in protocol")
-    task_ids = [task.task_id for task in protocol.tasks]
+    task_ids = [task.task_id for task in _study_tasks(protocol)]
     result_ids = [result.task_id for result in session.task_results]
     if result_ids != task_ids:
         raise ValueError("session task order does not match frozen protocol")
@@ -403,7 +731,7 @@ def write_session_template(session: UsabilitySession, output_path: Path) -> None
 
 
 def summarize_sessions(
-    protocol: UsabilityStudyProtocol,
+    protocol: StudyProtocol,
     sessions: list[UsabilitySession],
     *,
     generated_at: datetime,
@@ -418,6 +746,10 @@ def summarize_sessions(
     ]
     if len(identities) != len(set(identities)):
         raise ValueError("participant has duplicate completed sessions in one condition")
+    if isinstance(protocol, ProjectUsabilityStudyProtocol):
+        participant_codes = [session.participant_code for session in completed]
+        if len(participant_codes) != len(set(participant_codes)):
+            raise ValueError("v2 participant may complete only one study condition")
     condition_summaries = [
         _condition_summary(protocol, completed, condition)
         for condition in (StudyCondition.BASELINE, StudyCondition.PRODUCT)
@@ -458,7 +790,7 @@ def summarize_sessions(
 
 def render_study_report(summary: UsabilityStudySummary) -> str:
     lines = [
-        f"# UX-H human-study summary — {summary.study_id}",
+        f"# SoC Operational Twin 사용성 관측 요약 — {summary.study_id}",
         "",
         f"> Human gate: `{summary.human_gate_status}`",
         f"> Directional targets: `{summary.directional_target_status}`",
@@ -525,13 +857,13 @@ def _resolve_pointer(payload: object, pointer: str) -> object:
 
 
 def _validate_completed_session(
-    protocol: UsabilityStudyProtocol, session: UsabilitySession
+    protocol: StudyProtocol, session: UsabilitySession
 ) -> None:
     if any(result.score is TaskScore.NOT_REVIEWED for result in session.task_results):
         raise ValueError("completed session has an unreviewed task")
     events_by_task = {
         task.task_id: [event for event in session.events if event.task_id == task.task_id]
-        for task in protocol.tasks
+        for task in _study_tasks(protocol)
     }
     required = {
         UsabilityEventType.TASK_STARTED,
@@ -539,7 +871,7 @@ def _validate_completed_session(
         UsabilityEventType.ANSWER_SUBMITTED,
         UsabilityEventType.REVIEWER_RESPONSE_RECORDED,
     }
-    for task, result in zip(protocol.tasks, session.task_results, strict=True):
+    for task, result in zip(_study_tasks(protocol), session.task_results, strict=True):
         events = events_by_task[task.task_id]
         event_types = {event.event_type for event in events}
         missing = required - event_types
@@ -568,7 +900,7 @@ def _validate_completed_session(
 
 
 def _condition_summary(
-    protocol: UsabilityStudyProtocol,
+    protocol: StudyProtocol,
     sessions: list[UsabilitySession],
     condition: StudyCondition,
 ) -> ConditionSummary:
@@ -580,7 +912,7 @@ def _condition_summary(
     ]
     elapsed = [_session_elapsed_seconds(session) for session in independent]
     results = [result for session in independent for result in session.task_results]
-    task_by_id = {task.task_id: task for task in protocol.tasks}
+    task_by_id = {task.task_id: task for task in _study_tasks(protocol)}
     boundary_results = [
         result
         for result in results
@@ -630,7 +962,7 @@ def _condition_summary(
 
 
 def _assess_targets(
-    protocol: UsabilityStudyProtocol,
+    protocol: StudyProtocol,
     summaries: list[ConditionSummary],
     *,
     requirement_met: bool,

@@ -171,6 +171,19 @@ if (-not $frontendRoutes.Contains('/projects/:projectId/risks/:riskId')) {
 if ($master -notmatch 'OPS-E implementation record') {
     throw "Master plan does not record the OPS-E implementation Gate."
 }
+@(
+    "fixtures/usability/OPS-F-20260722.protocol.v2.yaml",
+    "fixtures/usability/PROJECT-OPERATIONS.baseline-pack.v2.yaml",
+    "contracts/generated/usability-study-protocol.v2.schema.json",
+    "contracts/generated/usability-project-baseline-pack.v2.schema.json"
+) | ForEach-Object {
+    if (-not (Test-Path -LiteralPath (Join-Path $root $_) -PathType Leaf)) {
+        throw "Missing OPS-F protocol v2 artifact: $_"
+    }
+}
+if ($master -notmatch 'OPS-F implementation record') {
+    throw "Master plan does not record the OPS-F implementation state."
+}
 
 $requiredPaths = @(
     "/api/v1/decision-cases",
@@ -200,4 +213,4 @@ if ($actualPaths | Where-Object { $_ -match "hidden" }) {
     throw "OpenAPI exposes a forbidden hidden resource."
 }
 
-Write-Output "Plan consistency check passed: I0-I7, OPS-E risk-to-decision UX, corpora, terms, and canonical API agree."
+Write-Output "Plan consistency check passed: I0-I7, OPS-F protocol v2, corpora, terms, and canonical API agree."

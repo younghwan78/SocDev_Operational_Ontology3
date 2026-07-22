@@ -1,0 +1,61 @@
+schema_version: usability-project-baseline-pack.v2
+study_id: OPS-F-20260722-PROJECT-OPERATIONS
+project_sources:
+  - project_id: PROJECT-U
+    source_project_path: projects/PROJECT-U.yaml
+    project_sha256: 5ed4cf56c362165c71d86986e4ef201035a7da0ff6671c235a410711472b120b
+  - project_id: PROJECT-V
+    source_project_path: projects/PROJECT-V.yaml
+    project_sha256: d74b5933c3ba6dabe8a9a6d2d4a186d50635f06c2d66f632bf8507a2693880be
+  - project_id: PROJECT-W
+    source_project_path: projects/PROJECT-W.yaml
+    project_sha256: 415803216965af5d7383aeaac4714aefa2478ac23013268e43369f8a64bf4098
+surfaces:
+  - surface_id: BASE-PORTFOLIO-REVIEW
+    surface_kind: portfolio_review_note
+    title_ko: 개발 과제 포트폴리오 검토 문서 (Confluence형 fixture)
+    source_selections:
+      - project_id: PROJECT-U
+        source_paths: [/project_id, /title_ko, /current_step, /lifecycle_stage]
+      - project_id: PROJECT-V
+        source_paths: [/project_id, /title_ko, /current_step, /lifecycle_stage]
+      - project_id: PROJECT-W
+        source_paths: [/project_id, /title_ko, /current_step, /lifecycle_stage]
+  - surface_id: BASE-PROJECT-V-BOARD
+    surface_kind: issue_tracker_export
+    title_ko: PROJECT-V 개발 진행 현황 (Jira형 fixture)
+    source_selections:
+      - project_id: PROJECT-V
+        source_paths: [/tracks, /work_items, /milestones, /issues, /development_events]
+  - surface_id: BASE-PROJECT-V-RISK
+    surface_kind: risk_register
+    title_ko: PROJECT-V Risk·Decision·Action 등록부
+    source_selections:
+      - project_id: PROJECT-V
+        source_paths: [/risks, /decision_case_refs, /development_actions, /cross_project_sources]
+  - surface_id: BASE-PROJECT-V-EVIDENCE
+    surface_kind: evidence_note
+    title_ko: PROJECT-V Evidence와 claim 메모
+    source_selections:
+      - project_id: PROJECT-V
+        source_paths: [/evidence, /claims]
+  - surface_id: BASE-PROJECT-U-EVIDENCE
+    surface_kind: evidence_note
+    title_ko: PROJECT-U 양산 관측과 cross-project lesson 원천
+    source_selections:
+      - project_id: PROJECT-U
+        source_paths: [/tracks, /work_items, /milestones, /issues, /risks, /evidence, /claims, /development_actions, /decision_case_refs, /development_events]
+  - surface_id: BASE-PROJECT-W-EVIDENCE
+    surface_kind: evidence_note
+    title_ko: PROJECT-W Spec 단계 model·lesson과 불확실성
+    source_selections:
+      - project_id: PROJECT-W
+        source_paths: [/tracks, /work_items, /milestones, /issues, /risks, /evidence, /claims, /development_actions, /decision_case_refs, /development_events]
+prohibited_content:
+  - hidden_case
+  - expected_result
+  - decision_dossier
+  - simulated_decision
+  - outcome_snapshot
+  - role_review
+  - agent_output

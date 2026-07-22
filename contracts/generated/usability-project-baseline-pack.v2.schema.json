@@ -1,0 +1,137 @@
+{
+  "$defs": {
+    "ProjectBaselineSource": {
+      "additionalProperties": false,
+      "properties": {
+        "project_id": {
+          "title": "Project Id",
+          "type": "string"
+        },
+        "source_project_path": {
+          "title": "Source Project Path",
+          "type": "string"
+        },
+        "project_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Project Sha256",
+          "type": "string"
+        }
+      },
+      "required": [
+        "project_id",
+        "source_project_path",
+        "project_sha256"
+      ],
+      "title": "ProjectBaselineSource",
+      "type": "object"
+    },
+    "ProjectBaselineSurface": {
+      "additionalProperties": false,
+      "properties": {
+        "surface_id": {
+          "title": "Surface Id",
+          "type": "string"
+        },
+        "surface_kind": {
+          "enum": [
+            "portfolio_review_note",
+            "issue_tracker_export",
+            "risk_register",
+            "evidence_note"
+          ],
+          "title": "Surface Kind",
+          "type": "string"
+        },
+        "title_ko": {
+          "minLength": 1,
+          "title": "Title Ko",
+          "type": "string"
+        },
+        "source_selections": {
+          "items": {
+            "$ref": "#/$defs/ProjectSourceSelection"
+          },
+          "minItems": 1,
+          "title": "Source Selections",
+          "type": "array"
+        }
+      },
+      "required": [
+        "surface_id",
+        "surface_kind",
+        "title_ko",
+        "source_selections"
+      ],
+      "title": "ProjectBaselineSurface",
+      "type": "object"
+    },
+    "ProjectSourceSelection": {
+      "additionalProperties": false,
+      "properties": {
+        "project_id": {
+          "title": "Project Id",
+          "type": "string"
+        },
+        "source_paths": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Source Paths",
+          "type": "array"
+        }
+      },
+      "required": [
+        "project_id",
+        "source_paths"
+      ],
+      "title": "ProjectSourceSelection",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "usability-project-baseline-pack.v2",
+      "default": "usability-project-baseline-pack.v2",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "study_id": {
+      "title": "Study Id",
+      "type": "string"
+    },
+    "project_sources": {
+      "items": {
+        "$ref": "#/$defs/ProjectBaselineSource"
+      },
+      "minItems": 1,
+      "title": "Project Sources",
+      "type": "array"
+    },
+    "surfaces": {
+      "items": {
+        "$ref": "#/$defs/ProjectBaselineSurface"
+      },
+      "minItems": 1,
+      "title": "Surfaces",
+      "type": "array"
+    },
+    "prohibited_content": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Prohibited Content",
+      "type": "array"
+    }
+  },
+  "required": [
+    "study_id",
+    "project_sources",
+    "surfaces",
+    "prohibited_content"
+  ],
+  "title": "ProjectUsabilityBaselinePack",
+  "type": "object"
+}

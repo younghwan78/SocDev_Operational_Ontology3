@@ -1,7 +1,7 @@
 # P0/P1 Implementation Readiness 결과
 
 > 원 판정: **READY FOR I0 SCAFFOLD**  
-> 현재 상태: **I0–I7 Replay·Codex CLI B2 runtime·UX-H 도구 및 OPS-A~OPS-E 완료; OPS-F Project 중심 protocol v2와 독립 관측이 다음 단계**
+> 현재 상태: **I0–I7 Replay·Codex CLI B2 runtime·OPS-F Project 중심 protocol v2 구현 완료; 독립 관측 baseline 0/5·product 0/5로 OPS-F Gate 진행 중, UX-I 차단**
 > 작성일: 2026-07-11  
 > 범위: 집에서 synthetic fixture로 구현하는 SoC Operational Decision Twin  
 > 주의: 본문은 구현 전 P0/P1 판정 기록이다. 현재 구현 증거는 `docs/implementation/`을 따른다.
@@ -125,4 +125,4 @@ I0 완료 판정:
 
 ## 9. 최종 판단
 
-**P0/P1 설계 결정은 완료되었고 그 판정에 따라 I0–I7 Replay 구현과 gate 검증까지 완료했다.** 외부 key·가격·비용 승인에 의존하는 I7 Responses API gate는 실행하지 않았다. UX-A부터 UX-G 화면 Gate와 UX-H 도구도 완료했다. 이후 ADR-0010의 OPS-A, Project fixture의 OPS-B, durable aggregate·deterministic policy·5개 read API·historical parity의 OPS-C, Backend 정렬 Portfolio와 provenance 중심 Situation UX의 OPS-D, source→inference→impact→Decision/Action 추적과 Workspace 왕복의 OPS-E까지 완료했다. OPS-D의 30초 task와 OPS-E의 2분 trace task는 local agent-substitute proxy만 통과했으며 실제 human 시간 측정은 아니다. 다음 단계는 OPS-F에서 Project 중심 protocol v2를 동결하고 독립 관측을 수행하는 것이다. UX-H의 실제 human 결과는 여전히 0건이며 protocol v2 확정 전 session을 시작하지 않는다. OPS-F에서 condition별 proxy/domain reviewer 5개 이상을 기록하기 전에는 UX-I나 business value 주장을 시작하지 않는다. 사내 연동과 실제 업무 적용은 여전히 별도 C0 승인 범위다.
+**P0/P1 설계 결정은 완료되었고 그 판정에 따라 I0–I7 Replay 구현과 gate 검증까지 완료했다.** 외부 key·가격·비용 승인에 의존하는 I7 Responses API gate는 실행하지 않았다. UX-A부터 UX-G 화면 Gate와 UX-H 도구도 완료했다. 이후 ADR-0010의 OPS-A, Project fixture의 OPS-B, durable aggregate·deterministic policy·5개 read API·historical parity의 OPS-C, Backend 정렬 Portfolio와 provenance 중심 Situation UX의 OPS-D, source→inference→impact→Decision/Action 추적과 Workspace 왕복의 OPS-E까지 완료했다. OPS-F는 PROJECT-U/V/W hash-pinned baseline, 11개 고정 task, v2 schema, condition별 guide와 CLI dry-run까지 구현되어 실제 독립 관측을 시작할 수 있다. 그러나 완료 관측은 baseline 0/5·product 0/5이고 dry-run 판정은 `not_ready/not_evaluable/no_business_claim`이다. 따라서 OPS-F Gate는 진행 중이며 UX-I나 의사결정 속도·조언 품질·business value 주장은 계속 차단한다. 사내 연동과 실제 업무 적용도 여전히 별도 C0 승인 범위다.

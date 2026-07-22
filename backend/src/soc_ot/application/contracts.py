@@ -20,6 +20,8 @@ from soc_ot.application.project_operations import (
 )
 from soc_ot.application.projections import DecisionListItemProjection
 from soc_ot.application.usability_study import (
+    ProjectUsabilityBaselinePack,
+    ProjectUsabilityStudyProtocol,
     UsabilityBaselinePack,
     UsabilitySession,
     UsabilityStudyProtocol,
@@ -57,6 +59,8 @@ CONTRACT_MODELS: dict[str, type[BaseModel]] = {
     "decision-list-item.v1": DecisionListItemProjection,
     "usability-baseline-pack.v1": UsabilityBaselinePack,
     "usability-study-protocol.v1": UsabilityStudyProtocol,
+    "usability-project-baseline-pack.v2": ProjectUsabilityBaselinePack,
+    "usability-study-protocol.v2": ProjectUsabilityStudyProtocol,
     "usability-session.v1": UsabilitySession,
     "usability-study-summary.v1": UsabilityStudySummary,
 }

@@ -1,6 +1,6 @@
 # Master execution plan
 
-> Status: IMPLEMENTED THROUGH I7 REPLAY + STEP 5 B2 RUNTIME + POST-I7 UX-H TOOLING + OPS-E; OPS-F PROTOCOL V2 NEXT, HUMAN OBSERVATION STILL PAUSED
+> Status: IMPLEMENTED THROUGH I7 REPLAY + STEP 5 B2 RUNTIME + OPS-F PROJECT PROTOCOL V2; OPS-F INDEPENDENT OBSERVATION GATE OPEN AT 0/5 PER CONDITION, UX-I BLOCKED
 > Date: 2026-07-22
 > Scope: local fixture-only PoC
 
@@ -390,8 +390,8 @@ Post-I7 UX-H implementation record (2026-07-19):
 - the baseline pack, protocol, session preparation/validation and summary are authoring/evaluation
   CLI surfaces only; no product API, database, company connector, authentication or write-back changed
 - implementation and synthetic dry-run validation are complete, but actual human observations remain
-  zero; session execution is paused until OPS-F protocol v2 and UX-I remains blocked until its frozen
-  minimum is collected
+  zero; OPS-F protocol v2 is now the frozen Project-centered study material and UX-I remains blocked
+  until its independent minimum is collected
 
 Post-I7 OPS-A decision record (2026-07-21):
 
@@ -406,7 +406,8 @@ Post-I7 OPS-A decision record (2026-07-21):
 - the external `world.yaml` SHA-256 is recorded for traceability; only selected event ideas that improve
   OPS-B UX coverage may be adapted, with no fixed event count, runtime dependency, verbatim import,
   risk score, dice or long Role LLM prose
-- existing UX-H observations remain zero and human session execution is paused until OPS-F protocol v2
+- existing UX-H observations remain zero; human session execution was paused until OPS-F protocol v2
+  was frozen, and new Project-centered observations must now use that v2 material
 
 Post-I7 Project Operations stages run in this order:
 
@@ -417,7 +418,7 @@ Post-I7 Project Operations stages run in this order:
 |OPS-C|Project domain, projection, API and compatibility path|Complete: migration/repository parity, five read APIs, generated contracts and no-future-leakage parity|
 |OPS-D|Portfolio and Project Situation UX|Complete (local proxy): overall status/top-risk/source task, responsive and accessibility checks pass|
 |OPS-E|Risk Detail and Decision linkage|Complete (local proxy): source-to-inference-to-impact-to-treatment trace and Decision round trip pass|
-|OPS-F|UX-H protocol v2 and independent observations|Next: minimum independent observations before UX-I or business claim|
+|OPS-F|UX-H protocol v2 and independent observations|Protocol v2 complete; observation Gate pending at baseline 0/5 and product 0/5|
 
 No later OPS stage starts before the previous Gate. Company connectors, authentication and write-back
 remain C0/C2 scope.
@@ -482,7 +483,29 @@ OPS-E implementation record (2026-07-22):
 - existing 8 Decision-flow E2E tests pass. A real fixture browser round trip passes at desktop and
   390px with zero horizontal overflow, Axe violations, console warnings or errors
 - the two-minute trace Gate is an engineering agent-substitute proxy only. No human completion time or
-  business value is claimed; OPS-F protocol v2 and independent observations remain the next stage
+  business value is claimed; OPS-F protocol v2 is now implemented and independent observations remain
+  pending
+
+OPS-F implementation record (2026-07-22):
+
+- the Decision-centered `UX-H-20260719` protocol and baseline remain valid as v1; OPS-F adds separate
+  `usability-study-protocol.v2` and `usability-project-baseline-pack.v2` contracts without rewriting
+  prior study material or inventing participant results
+- PROJECT-U/V/W are individually SHA-256 pinned after canonical `development-project.v1` validation;
+  six Jira/Confluence-shaped surfaces expose only selected Project source paths and reject a stale hash,
+  unknown Project, duplicate source or task answer source not exposed to the baseline condition
+- 11 frozen tasks cover Portfolio priority, Project situation, observed Issue versus Risk/Evidence gap,
+  epistemic differences, source provenance, affected objects, Decision/Action/rollback, Step 20 replay,
+  future-information rejection and cross-project lesson context
+- the product condition starts at `/projects`; both conditions receive the same frozen task guide,
+  while only baseline receives the rendered raw-source pack. No expected answer, hidden outcome, Agent
+  output, Dossier, simulated decision or company data is included
+- session/event/summary v1 measurement semantics are reused because timing, answer, boundary, reviewer
+  and safeguard fields did not change; v2 additionally rejects one participant completing both conditions
+- CLI defaults now prepare OPS-F v2 sessions. A builder dry-run creates baseline/product drafts and
+  reports `not_ready`, `not_evaluable`, `no_business_claim` with zero completed observations
+- protocol tooling is complete, but the OPS-F human Gate is not. Independent baseline/product counts
+  remain 0/5 each; UX-I and any decision-speed, advice-quality or business-value claim remain blocked
 
 ## 7. Crosswalk to supporting plans
 

@@ -3,7 +3,7 @@
 > 문서 상태: Product Plan v0.3, 로컬 PoC 구현 승인
 > 갱신일: 2026-07-22
 > 문서 역할: 제품 목표, 범위, 가치 가설, 중단 기준을 정의  
-> 현재 판단: **GO: I0–I7 Replay, Step 5 B2 runtime, UX-A~UX-H 도구와 OPS-A~OPS-E 완료**, **NEXT: OPS-F Project 중심 protocol v2와 독립 관측**, **NO-GO: protocol v2 확정 전 human session, UX-I·최종 UX 주장, 사내 연동 및 실제 업무 적용**
+> 현재 판단: **GO: I0–I7 Replay, Step 5 B2 runtime, UX-A~UX-H 도구와 OPS-F Project protocol v2 구현 완료**, **CURRENT: OPS-F 독립 관측 baseline 0/5·product 0/5**, **NO-GO: UX-I·최종 UX 주장, 사내 연동 및 실제 업무 적용**
 
 이 계획은 SoC 개발 진행과 불확실성을 재현하고 제한된 정보에서도 저후회 결정을 돕는 제품을 정의한다. 집에서는 synthetic fixture로 의사결정 메커니즘만 검증하며, 실제 비즈니스 가치는 사내 read-only 파일럿에서 별도로 측정한다.
 
@@ -389,20 +389,21 @@ task를 통과했다. 이는 local agent-substitute Gate이며 human usability �
 
 Project 전체 상황과 Risk provenance가 DecisionCase보다 먼저 필요하다는 검토 결과에 따라
 ADR-0010이 post-I7 실행 순서를 보강한다. 기존 UX-H 도구와 hash-pinned baseline은 보존하지만,
-실제 human session은 Project Operations 정보 구조를 반영한 OPS-F protocol v2까지 실행하지 않는다.
+실제 human session은 Project Operations 정보 구조를 반영한 OPS-F protocol v2 동결까지 보류했다.
+현재 v2가 준비됐으므로 새 독립 관측은 이 protocol로만 수집한다.
 
 Post-I7 후속은 다음 순서로만 진행한다.
 
 |단계|목표|상태·Gate|
 |---|---|---|
 |UX-G|복구 가능한 오류, URL 문맥 보존, 한국어 우선 표현과 기본 interaction|완료|
-|UX-H|공정한 fixture baseline, human task protocol과 측정 event 계약|도구 구현 완료; 실제 관측 0건, OPS-F 전 session 보류|
+|UX-H|공정한 fixture baseline, human task protocol과 측정 event 계약|Decision 중심 v1 도구 보존; 실제 관측 0건, OPS-F v2가 Project 중심 후속 연구를 소유|
 |OPS-A|Project/Issue/Risk/Gate 경계, provenance, Agent 책임과 전환 ADR|완료; ADR-0010 Accepted|
 |OPS-B|lifecycle과 risk provenance가 구별되는 Project fixture|완료; 3 Project, 17 typed event, hash manifest와 future-leakage test|
 |OPS-C|Project domain, projection, API와 historical boundary|완료; PostgreSQL aggregate, reason/source policy, 5개 read API와 `at_step` parity|
 |OPS-D|Project Portfolio와 Situation UX|완료; Backend 정렬 Portfolio, Situation provenance와 historical URL, 390px/desktop local task proxy PASS|
 |OPS-E|Risk Detail과 기존 Decision Workspace 연결|완료; source→inference→impact→Decision/Action과 Decision 왕복 local proxy PASS|
-|OPS-F|Project 중심 UX-H protocol v2와 독립 human observation|다음 단계; protocol 동결 전 실제 session은 시작하지 않음|
+|OPS-F|Project 중심 UX-H protocol v2와 독립 human observation|protocol v2 완료; 독립 관측 baseline 0/5·product 0/5로 Gate 진행 중|
 |UX-I|측정 결과로 Portfolio·Situation·Workspace 정보 구조 축소·개선|OPS-F human 결과 없이는 시작하지 않음|
 |UX-J|사용자 판단과 simulated Chair를 분리해 accept/modify/reject와 anchoring 측정|새 ADR과 evaluation-only contract 필요|
 
@@ -410,8 +411,8 @@ UX-H는 observable fixture hash와 source selector로 고정한 Jira/Confluence�
 canonical 8개와 Development Twin 5개 task, `usability-session.v1` event/result 계약과
 검증·요약 CLI까지 구현했다. 실제 사람의 답변·시간은 만들지 않았으며 dry-run summary는
 `not_ready`와 `no_business_claim`을 반환한다. condition별 proxy/domain reviewer 5개 이상을
-확보하기 전에는 UX-I를 시작하지 않는다. 기존 protocol의 실제 관측은 OPS-F까지 시작하지
-않으며, 사내 source·권한·승인은 C0에서 별도로 연다.
+확보하기 전에는 UX-I를 시작하지 않는다. 새 Project 중심 관측은 OPS-F v2로만 수집하며,
+사내 source·권한·승인은 C0에서 별도로 연다.
 
 ```text
 B2 validation 10/10 + sealed-unseen 6/6 PASS
@@ -503,7 +504,7 @@ C1에서 가치와 보안 gate를 통과한 뒤에만 연다.
 - 데이터: synthetic fixture only
 - 로컬 승인: simulated Chair, 실제 권한 없음
 - 구현 단계: I0~I7
-- 현재 단계: OPS-A~OPS-E 완료, OPS-F Project 중심 protocol v2와 독립 관측이 다음 단계
+- 현재 단계: OPS-F Project 중심 protocol v2 완료, 독립 관측 baseline 0/5·product 0/5; UX-I 차단
 - release topology: B2 independent routed Role Agents, deterministic core decision
 - CI provider: ReplayProvider
 - live provider: 구성 가능한 OpenAI Responses API adapter
@@ -543,6 +544,7 @@ Active planning documents:
 - `internal_docs/26.07.21 OPS-C Project Runtime Projection API 구현 및 검증 보고서.md`
 - `internal_docs/26.07.22 OPS-D Project Portfolio Situation UX 구현 및 검증 보고서.md`
 - `internal_docs/26.07.22 OPS-E Risk Detail Decision Linkage 구현 및 검증 보고서.md`
+- `internal_docs/26.07.22 OPS-F Project 중심 사용성 Protocol v2 구현 및 검증 보고서.md`
 - `docs/decisions/ADR-0010-project-operations-and-risk-provenance.md`
 
 Review and historical context:
