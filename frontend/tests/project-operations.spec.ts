@@ -33,10 +33,14 @@ test("Project Operations traces portfolio priority through Risk and Decision", a
     .first();
   await expect(projectCard.getByText("진행 막힘", { exact: true })).toBeVisible();
   await expect(projectCard.getByText("최상위 Risk")).toBeVisible();
+  await expect(projectCard.getByText("HW Architecture Freeze", { exact: true })).toBeVisible();
+  await expect(projectCard.getByText("M-V-ARCH-FREEZE", { exact: true })).toHaveCount(0);
   await projectCard.getByRole("link", { name: /과제 상황 보기/ }).click();
 
   await expect(page).toHaveURL(/\/projects\/PROJECT-V$/);
   await expect(page.getByRole("heading", { name: "지금 가장 먼저 확인할 이유" })).toBeVisible();
+  await expect(page.getByRole("list", { name: "주의 판정 근거" })).toContainText("변경안 pre-silicon workload 검증");
+  await expect(page.getByRole("list", { name: "주의 판정 근거" })).not.toContainText("WORK-V-PRESI-VERIFY");
   await expect(page.getByText("공유 emulator 예약 충돌", { exact: true }).first()).toBeVisible();
   await expect(page.getByRole("heading", { name: "가장 먼저 볼 Risk와 그 근거" })).toBeVisible();
   await page.getByRole("link", { name: "근거·영향·대응 상세 추적" }).click();

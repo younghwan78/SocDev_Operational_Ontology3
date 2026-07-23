@@ -21,7 +21,7 @@ export function ProjectPortfolioPage() {
           <p className="eyebrow">합성 데이터 · 개발 운영 트윈</p>
           <h1>개발 과제 현황</h1>
           <p className="page-lead">
-            Backend가 계산한 주의 순서대로 과제 전체 상태와 가장 먼저 볼 위험을 보여줍니다.
+            막힌 작업, 활성 Risk와 가까운 기준점을 바탕으로 먼저 확인할 과제를 보여줍니다.
           </p>
         </div>
         <Link className="secondary-button recovery-link" to="/decisions">결정 검토 목록</Link>
@@ -122,7 +122,7 @@ function ProjectCard({ project }: { project: ProjectListItem }) {
         <div><dt>막힌 작업</dt><dd>{project.blocked_work_item_count}</dd></div>
         <div>
           <dt>가장 가까운 기준점</dt>
-          <dd><span translate="no">{project.nearest_milestone_id}</span><small>{stepDistance(project.nearest_milestone_step, project.current_step)}</small></dd>
+          <dd><span>{project.nearest_milestone_title}</span><small>{stepDistance(project.nearest_milestone_step, project.current_step)}</small></dd>
         </div>
       </dl>
     </article>

@@ -69,6 +69,8 @@ def test_portfolio_attention_is_backend_derived_and_explained() -> None:
     ]
     assert items[0].attention_reasons[0].code == "WORK_ITEM_BLOCKED"
     assert items[0].attention_reasons[0].source_refs == ["WORK-V-PRESI-VERIFY"]
+    assert items[0].nearest_milestone_id == "M-V-ARCH-FREEZE"
+    assert items[0].nearest_milestone_title == "HW Architecture Freeze"
     assert items[2].attention_policy_version == "project-attention.v1"
     assert all(item.attention_reasons for item in items)
 

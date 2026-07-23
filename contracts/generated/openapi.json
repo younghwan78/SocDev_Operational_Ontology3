@@ -1753,6 +1753,10 @@
             "title": "Nearest Milestone Step",
             "type": "integer"
           },
+          "nearest_milestone_title": {
+            "title": "Nearest Milestone Title",
+            "type": "string"
+          },
           "project_id": {
             "title": "Project Id",
             "type": "string"
@@ -1787,6 +1791,7 @@
           "active_risk_count",
           "blocked_work_item_count",
           "nearest_milestone_id",
+          "nearest_milestone_title",
           "nearest_milestone_step",
           "top_risks"
         ],

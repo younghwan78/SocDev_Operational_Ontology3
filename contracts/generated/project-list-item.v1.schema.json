@@ -243,6 +243,10 @@
       "title": "Nearest Milestone Id",
       "type": "string"
     },
+    "nearest_milestone_title": {
+      "title": "Nearest Milestone Title",
+      "type": "string"
+    },
     "nearest_milestone_step": {
       "minimum": 0,
       "title": "Nearest Milestone Step",
@@ -268,6 +272,7 @@
     "active_risk_count",
     "blocked_work_item_count",
     "nearest_milestone_id",
+    "nearest_milestone_title",
     "nearest_milestone_step",
     "top_risks"
   ],

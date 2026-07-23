@@ -116,6 +116,7 @@ class ProjectListItemProjection(StrictModel):
     active_risk_count: int = Field(ge=0)
     blocked_work_item_count: int = Field(ge=0)
     nearest_milestone_id: str
+    nearest_milestone_title: str
     nearest_milestone_step: int = Field(ge=0)
     top_risks: list[ProjectRiskSummary]
 
@@ -299,6 +300,7 @@ def build_project_list_item(stored: StoredProject) -> ProjectListItemProjection:
             [item for item in situation.work_items if item.status == WorkItemStatus.BLOCKED]
         ),
         nearest_milestone_id=nearest.milestone_id,
+        nearest_milestone_title=nearest.title,
         nearest_milestone_step=nearest.planned_at_step,
         top_risks=situation.risks[:2],
     )

@@ -39,6 +39,7 @@ const projectList = [{
   active_risk_count: 2,
   blocked_work_item_count: 1,
   nearest_milestone_id: "M-V-ARCH-FREEZE",
+  nearest_milestone_title: "HW Architecture Freeze",
   nearest_milestone_step: 24,
   top_risks: [topRisk],
 }] satisfies ProjectListItem[];
@@ -185,6 +186,8 @@ describe("Project Operations pages", () => {
     expect(await screen.findByText("현재 진행을 막는 작업이 1개 있습니다.")).toBeInTheDocument();
     expect(screen.getByText(topRisk.statement)).toBeInTheDocument();
     expect(screen.getByText("근거 3개 · 영향 작업 2개")).toBeInTheDocument();
+    expect(screen.getByText("HW Architecture Freeze")).toBeInTheDocument();
+    expect(screen.queryByText("M-V-ARCH-FREEZE")).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: /과제 상황 보기/ })).toHaveAttribute("href", "/projects/PROJECT-V");
     expect(screen.getByTestId("test-location")).toHaveTextContent("/projects");
   });
@@ -199,6 +202,8 @@ describe("Project Operations pages", () => {
     expect(screen.getAllByText("대표 경로 전력 pre-silicon model 결과")).toHaveLength(2);
     expect(screen.getAllByText("Pre-silicon model 결과가 도착했습니다.")).toHaveLength(2);
     expect(screen.getByText("전력 경로 설계 closure · 대표 workload 사전 검증")).toBeInTheDocument();
+    expect(screen.getByRole("list", { name: "주의 판정 근거" })).toHaveTextContent("대표 workload 사전 검증");
+    expect(screen.getByRole("list", { name: "주의 판정 근거" })).not.toHaveTextContent("WORK-V-PRESI-VERIFY");
     expect(screen.queryByRole("link", { name: /Decision|결정 검토/ })).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: "근거·영향·대응 상세 추적" })).toHaveAttribute(
       "href",

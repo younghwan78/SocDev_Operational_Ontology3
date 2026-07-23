@@ -32,6 +32,10 @@ export function ProjectSituationPage() {
     () => buildSourceViews(situationQuery.data, timelineQuery.data),
     [situationQuery.data, timelineQuery.data],
   );
+  const referenceTitles = useMemo(
+    () => buildReferenceTitles(situationQuery.data, timelineQuery.data),
+    [situationQuery.data, timelineQuery.data],
+  );
 
   function selectStep(step: number | undefined) {
     const next = new URLSearchParams(searchParams);
@@ -112,11 +116,11 @@ export function ProjectSituationPage() {
         <div className="situation-priority">
           <p className="section-kicker">전체 상황</p>
           <h2 id="situation-overview-heading">지금 가장 먼저 확인할 이유</h2>
-          <ul className="attention-reason-list">
+          <ul className="attention-reason-list" aria-label="주의 판정 근거">
             {situation.attention_reasons.map((reason) => (
               <li key={reason.code}>
                 <strong>{reason.summary_ko}</strong>
-                <span>판정 근거 <b translate="no">{reason.source_refs.join(" · ")}</b></span>
+                <span>판정 근거 <b>{reason.source_refs.map((reference) => referenceTitles.get(reference) ?? reference).join(" · ")}</b></span>
               </li>
             ))}
           </ul>
@@ -142,7 +146,7 @@ export function ProjectSituationPage() {
               <p className="section-kicker">나머지 위험</p>
               <h2 id="other-risks-heading">함께 추적할 Risk</h2>
             </div>
-            <p>우선순위는 Backend의 동일한 Risk ordering policy를 따릅니다.</p>
+            <p>실패 영향, 긴급성, 비가역성과 기준점까지 남은 순서로 정렬합니다.</p>
           </header>
           <div className="other-risk-list">
             {situation.risks.slice(1).map((risk) => (
@@ -196,7 +200,7 @@ export function ProjectSituationPage() {
                 <span className="state-chip" data-state={track.status}>{stateLabel(track.status)}</span>
               </div>
               <p>막힌 작업 {track.blocked_work_item_count}개</p>
-              <p>다음 기준점 <strong translate="no">{track.next_milestone_id ?? "미정"}</strong></p>
+              <p>다음 기준점 <strong>{milestoneTitle(situation, track.next_milestone_id)}</strong></p>
               <ul>
                 {situation.work_items.filter((item) => item.track_id === track.track_id).map((item) => (
                   <li key={item.work_item_id}>
@@ -314,7 +318,7 @@ function TopRiskSection({
 
       <div className="risk-source-panel">
         <h3>이 Risk는 어디에서 나왔는가</h3>
-        <p>Backend가 반환한 source reference를 현재 Step에서 볼 수 있는 Issue, Evidence와 Event에 연결했습니다.</p>
+        <p>현재 Step에서 확인할 수 있는 Issue, Evidence와 Event를 Risk의 근거로 연결했습니다.</p>
         <ol className="risk-source-list">
           {sourceViews.map((source) => (
             <li key={source.reference}>
@@ -441,8 +445,27 @@ function buildSourceViews(situation?: ProjectSituation, timeline?: ProjectTimeli
   return result;
 }
 
+function buildReferenceTitles(situation?: ProjectSituation, timeline?: ProjectTimeline) {
+  const result = new Map<string, string>();
+  if (!situation) return result;
+  situation.tracks.forEach((item) => result.set(item.track_id, item.name));
+  situation.work_items.forEach((item) => result.set(item.work_item_id, item.title));
+  situation.milestones.forEach((item) => result.set(item.milestone_id, item.title));
+  situation.issues.forEach((item) => result.set(item.issue_id, item.title));
+  situation.risks.forEach((item) => result.set(item.risk_id, item.statement));
+  situation.evidence.forEach((item) => result.set(item.evidence_id, item.title));
+  situation.decision_case_refs.forEach((item) => result.set(item.case_id, item.title));
+  timeline?.events.forEach((item) => result.set(item.event_id, item.summary));
+  return result;
+}
+
 function trackTitle(situation: ProjectSituation, trackId: string) {
   return situation.tracks.find((track) => track.track_id === trackId)?.name ?? trackId;
+}
+
+function milestoneTitle(situation: ProjectSituation, milestoneId: string | null) {
+  if (milestoneId === null) return "미정";
+  return situation.milestones.find((milestone) => milestone.milestone_id === milestoneId)?.title ?? milestoneId;
 }
 
 function parseStep(value: string | null) {

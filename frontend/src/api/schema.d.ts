@@ -1063,6 +1063,8 @@ export interface components {
             nearest_milestone_id: string;
             /** Nearest Milestone Step */
             nearest_milestone_step: number;
+            /** Nearest Milestone Title */
+            nearest_milestone_title: string;
             /** Project Id */
             project_id: string;
             /**
