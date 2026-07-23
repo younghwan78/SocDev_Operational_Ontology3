@@ -1,10 +1,10 @@
 # 전체 계획 문서 안내
 
 > 상태: Active  
-> 갱신일: 2026-07-23
-> 현재 단계: OPS-F human observation은 baseline 0/5·product 0/5에서 보류; UX-I engineering-proxy 진행
+> 갱신일: 2026-07-24
+> 현재 단계: UX-I engineering-proxy 완료; OPS-F human observation은 baseline 0/5·product 0/5에서 보류; 다음 단계 UX-J
 
-> 고정 후속 순서: OPS-F human observation 보류 → UX-I/J/K Local UX Release 1 → ENT-A~F 사외 준비 → 사내 C0/C1
+> 고정 후속 순서: OPS-F human observation 보류 → UX-I 완료 → UX-J/K Local UX Release 1 → ENT-A~F 사외 준비 → 사내 C0/C1
 
 이 문서는 제품 계획부터 구현 계약까지 어떤 문서를 어떤 순서로 읽고 수정해야 하는지 안내한다. 문서 간 충돌은 전체 순위가 아니라 각 문서가 소유한 결정 영역으로 해결한다.
 
@@ -84,8 +84,9 @@
 
 I0~I7 Replay와 post-I7 UX-A/UX-B/UX-C/UX-D/UX-E/UX-F/UX-G 로컬 Gate,
 OPS-F Project protocol v2와 study release/rubric/E2E 도구까지 구현됐다. 독립 human 관측은 0/5씩인
-상태에서 보류했으며 현재 실행 지점은 UX-I engineering-proxy다. 이는 human Gate를 통과시킨 것이 아니다.
-UX-I/J/K로 Local UX Release 1을 먼저 닫은 뒤 ENT-A~F의 fixture-only enterprise preparation을
+상태에서 보류했다. UX-I는 title-first projection, source ref 해석과 도메인 중심 copy를
+engineering-proxy로 구현하고 새 release를 동결했으며, 이는 human Gate를 통과시킨 것이 아니다.
+다음 UX-J/K로 Local UX Release 1을 먼저 닫은 뒤 ENT-A~F의 fixture-only enterprise preparation을
 진행하고, 그 결과를 가지고 사내 C0/C1에 들어간다. UX와 connector는 동시에 변경하지 않는다.
 
 ```text

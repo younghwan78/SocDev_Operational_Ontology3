@@ -1,10 +1,10 @@
 # Master execution plan
 
-> Status: IMPLEMENTED THROUGH I7 REPLAY + STEP 5 B2 RUNTIME + OPS-F STUDY RELEASE; OPS-F HUMAN OBSERVATION DEFERRED AT 0/5 PER CONDITION, UX-I ENGINEERING-PROXY ACTIVE
-> Date: 2026-07-23
+> Status: IMPLEMENTED THROUGH I7 REPLAY + STEP 5 B2 RUNTIME + UX-I ENGINEERING-PROXY; OPS-F HUMAN OBSERVATION DEFERRED AT 0/5 PER CONDITION, UX-J NEXT
+> Date: 2026-07-24
 > Scope: local fixture-only PoC
 
-Frozen follow-up order: `OPS-F human observations deferred → UX-I → UX-J → UX-K Local UX Release 1 →
+Frozen follow-up order: `OPS-F human observations deferred → UX-I complete → UX-J → UX-K Local UX Release 1 →
 ENT-A~F fixture-only enterprise preparation → internal C0/C1`. No enterprise preparation implementation
 starts before UX-K, and no actual company source, vendor API, credential, authentication or write-back
 enters the local repository.
@@ -432,7 +432,7 @@ After OPS-F, the only allowed order is:
 
 |Stage|Deliverable|Gate|
 |---|---|---|
-|UX-I|Information architecture simplification|Normally requires OPS-F 5/condition; current owner waiver permits engineering-proxy work without human/time/value claims|
+|UX-I|Information architecture simplification|Complete as engineering-proxy: title-first projection, source interpretation, domain copy and full local regression; no human/time/value claims|
 |UX-J|Separate immutable human initial/final response from simulated advice|Advice cannot overwrite human response; accept/modify/reject and anchoring are measurable|
 |UX-K|Freeze Local UX Release 1 across the full Project-to-Decision journey|Responsive/accessibility/recovery/history/full-regression Gate and release pins pass|
 |ENT-A~F|Source-neutral contracts, dirty fixtures, sync/dry-run/quarantine and internal handoff kit|New ADR accepted; fixture-only tests pass with no vendor API, company data, credential or real ACL|
@@ -532,11 +532,25 @@ OPS-F implementation record (2026-07-23):
 - Project browser E2E covers Portfolio → Situation → Risk → Decision → Risk at desktop and Step 20
   no-future-leakage at 390px, including Axe and overflow checks
 - protocol tooling is complete, but the OPS-F human Gate is not. Independent baseline/product counts
-  remain 0/5 each; only UX-I engineering-proxy work is allowed, while human UX and any decision-speed,
+  remain 0/5 each; UX-I/J/K engineering-proxy work may proceed, while human UX and any decision-speed,
   advice-quality or business-value claim remain blocked
 - company data remains outside OPS-F. Current canonical repositories/projections can be reused after
   ingestion, but a live connector is NO-GO until C0 defines enterprise identity/time, ACL, sync,
   deletion/retention and candidate-extraction review; sanitized export schema-fit is the first allowed step
+
+UX-I implementation record (2026-07-24):
+
+- the three predeclared engineering-proxy problems were raw nearest/next milestone IDs, raw attention
+  source refs and implementation-centered `Backend/source reference/ordering policy` copy
+- `project-list-item.v1` adds the consumer-shaped `nearest_milestone_title` while preserving the
+  canonical ID; Situation resolves visible work, milestone, Issue, Risk, Evidence, Decision and Event
+  refs to titles with an ID fallback for unknown refs
+- Project attention, Risk ordering, historical `at_step`, source identity and Decision round trip did
+  not change
+- `UX-I-PRODUCT-87D49D7` pins product revision `87d49d7`, the changed UI/API artifacts and the
+  unchanged OPS-F task/source/rubric material
+- desktop and 390px browser checks passed with Axe, keyboard skip-link, overflow, console and full
+  Project-to-Decision regression; these are local engineering results, not human usability evidence
 
 ## 7. Crosswalk to supporting plans
 

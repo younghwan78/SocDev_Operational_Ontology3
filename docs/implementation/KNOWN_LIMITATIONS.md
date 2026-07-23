@@ -21,5 +21,6 @@
   protocol with three hash-pinned Projects, six baseline surfaces and eleven frozen tasks. Both study
   conditions still contain zero completed independent observations. Reviewer comprehension, task-time
   improvement and business value remain unproven. The owner deferred human observation on 2026-07-23,
-  so UX-I/J/K may proceed only as engineering-proxy work. This exception does not pass the human Gate
+  and UX-I completed only as engineering-proxy work; UX-J/K remain limited to the same evidence class.
+  This exception does not pass the human Gate
   or support any human usability, decision-speed, advice-quality or business-value claim.

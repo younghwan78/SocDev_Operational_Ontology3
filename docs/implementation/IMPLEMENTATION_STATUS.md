@@ -1,8 +1,8 @@
 # Implementation status
 
-> Updated: 2026-07-23
-> Current stage: OPS-F human observation deferred at baseline 0/5 and product 0/5; UX-I engineering-proxy active
-> Planned sequence: UX-I/J/K Local UX Release 1 → ENT-A~F external fixture-only preparation → internal C0/C1; human/value claims remain blocked
+> Updated: 2026-07-24
+> Current stage: UX-I engineering-proxy complete; OPS-F human observation deferred at baseline 0/5 and product 0/5; UX-J next
+> Planned sequence: UX-J/K Local UX Release 1 → ENT-A~F external fixture-only preparation → internal C0/C1; human/value claims remain blocked
 
 ## Stage evidence
 
@@ -32,6 +32,7 @@
 |OPS-D|Passed (local agent substitute)|Backend-ordered Project Portfolio, progressive Situation view, human-readable source-to-Issue/Evidence/Event joins, affected work and milestones, URL-backed historical Step, Korean recovery, responsive 390px/desktop UI, 4 focused/16 total unit tests, 8 regression E2E, Axe and overflow checks. Human task time remains unmeasured.|
 |OPS-E|Passed (local agent substitute)|One source→epistemic/inference→impact→Decision/Action trace, Korean-first rule/limitation labels, all-Risk Situation navigation, historical Project boundary, Decision round trip without cross-timeline Step injection, 4 focused/19 total unit tests, 8 regression E2E, 390px/desktop Axe, overflow and console checks. Human task time remains unmeasured.|
 |OPS-F|Study execution tooling complete; human observation deferred|PROJECT-U/V/W source pack, 6 baseline surfaces, 11 tasks, product release hash pins, participant-hidden reviewer rubric, draft/exclusion attrition reporting, condition guides and Project path E2E. Completed independent observations: baseline 0/5, product 0/5; `not_ready/not_evaluable/no_business_claim`.|
+|UX-I|Passed (engineering-proxy only)|Portfolio `nearest_milestone_title` projection, title-first attention and Track references, domain-centered Korean copy, unknown-ref fallback, `UX-I-PRODUCT-87D49D7` release pins, 19 Frontend unit tests, 10 Playwright E2E, PostgreSQL/non-PostgreSQL regression, 390px/desktop Axe, keyboard, overflow and console checks. No human/time/value claim.|
 
 OPS-F implementation record (2026-07-23):
 

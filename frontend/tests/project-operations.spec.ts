@@ -26,6 +26,10 @@ test("Project Operations traces portfolio priority through Risk and Decision", a
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto("/projects");
 
+  await page.keyboard.press("Tab");
+  await expect(page.getByRole("link", { name: "본문으로 건너뛰기" })).toBeFocused();
+  await page.keyboard.press("Enter");
+  await expect(page.locator("#main-content")).toBeFocused();
   await expect(page.getByRole("heading", { name: "지금 먼저 확인할 순서" })).toBeVisible();
   const projectCard = page
     .getByRole("article")

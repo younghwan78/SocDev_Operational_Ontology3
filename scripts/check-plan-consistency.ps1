@@ -175,6 +175,7 @@ if ($master -notmatch 'OPS-E implementation record') {
     "fixtures/usability/OPS-F-20260722.protocol.v2.yaml",
     "fixtures/usability/PROJECT-OPERATIONS.baseline-pack.v2.yaml",
     "fixtures/usability/OPS-F-20260722.release.v1.yaml",
+    "fixtures/usability/UX-I-20260724.release.v1.yaml",
     "fixtures/usability/OPS-F-20260722.reviewer-rubric.v1.yaml",
     "contracts/generated/usability-study-protocol.v2.schema.json",
     "contracts/generated/usability-project-baseline-pack.v2.schema.json",
@@ -197,6 +198,11 @@ if (-not (Get-ChildItem -LiteralPath (Join-Path $root "internal_docs") -File |
 if (-not (Get-ChildItem -LiteralPath (Join-Path $root "internal_docs") -File |
     Where-Object { $_.Name -like "26.07.23 OPS-F Human Observation*.md" })) {
     throw "Missing OPS-F human observation deferral decision."
+}
+$uxiDocs = @(Get-ChildItem -LiteralPath (Join-Path $root "internal_docs") -File |
+    Where-Object { $_.Name -like "26.07.24 UX-I Engineering Proxy *.md" })
+if ($uxiDocs.Count -lt 2) {
+    throw "Missing UX-I engineering-proxy backlog or implementation report."
 }
 if ($master -notmatch 'OPS-F implementation record') {
     throw "Master plan does not record the OPS-F implementation state."
