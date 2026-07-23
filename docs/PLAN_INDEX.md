@@ -2,9 +2,9 @@
 
 > 상태: Active  
 > 갱신일: 2026-07-23
-> 현재 단계: OPS-F study release/rubric/E2E 도구 구현 완료, 독립 관측 baseline 0/5·product 0/5로 Gate 진행 중; UX-I 차단
+> 현재 단계: OPS-F human observation은 baseline 0/5·product 0/5에서 보류; UX-I engineering-proxy 진행
 
-> 고정 후속 순서: OPS-F 관측 → UX-I/J/K Local UX Release 1 → ENT-A~F 사외 준비 → 사내 C0/C1
+> 고정 후속 순서: OPS-F human observation 보류 → UX-I/J/K Local UX Release 1 → ENT-A~F 사외 준비 → 사내 C0/C1
 
 이 문서는 제품 계획부터 구현 계약까지 어떤 문서를 어떤 순서로 읽고 수정해야 하는지 안내한다. 문서 간 충돌은 전체 순위가 아니라 각 문서가 소유한 결정 영역으로 해결한다.
 
@@ -56,6 +56,7 @@
 - `internal_docs/26.07.22 OPS-F Project 중심 사용성 Protocol v2 구현 및 검증 보고서.md`
 - `internal_docs/26.07.23 OPS-F Study Release 보강 및 사내 데이터 연결 준비도 보고서.md`
 - `internal_docs/26.07.23 UX 마무리 및 사내 데이터 전환 실행 계획.md`
+- `internal_docs/26.07.23 OPS-F Human Observation 보류 결정.md`
 - `docs/decisions/ADR-0010-project-operations-and-risk-provenance.md`
 
 다음 문서는 과거 판단의 근거다. 새 구현 기준으로 직접 사용하지 않는다.
@@ -82,7 +83,8 @@
 ## 5. 현재 실행 지점
 
 I0~I7 Replay와 post-I7 UX-A/UX-B/UX-C/UX-D/UX-E/UX-F/UX-G 로컬 Gate,
-OPS-F Project protocol v2와 study release/rubric/E2E 도구까지 구현됐다. 현재 실행 지점은 OPS-F 독립 관측 수집이며 UX-I는 차단 상태다.
+OPS-F Project protocol v2와 study release/rubric/E2E 도구까지 구현됐다. 독립 human 관측은 0/5씩인
+상태에서 보류했으며 현재 실행 지점은 UX-I engineering-proxy다. 이는 human Gate를 통과시킨 것이 아니다.
 UX-I/J/K로 Local UX Release 1을 먼저 닫은 뒤 ENT-A~F의 fixture-only enterprise preparation을
 진행하고, 그 결과를 가지고 사내 C0/C1에 들어간다. UX와 connector는 동시에 변경하지 않는다.
 
@@ -139,6 +141,7 @@ UX-F/UX-G 완료는 local Codex evaluator와 deterministic browser automation의
 실제 사용자 시간, 의사결정 속도, 조언 품질, 승인이나 사내 연동 완료를 의미하지 않는다.
 UX-H는 공정한 비교 fixture와 측정 도구가 준비됐다는 뜻이며 human usability 또는 business
 value 결과가 아니다. 새 Project Operations 정보 구조를 반영한 OPS-F protocol v2는 준비됐지만,
-condition별 proxy/domain reviewer 5개 이상을 기록하기 전에는 UX-I와 business claim을 시작하지
-않는다. C0와 I7 Responses API gate는 필요한 사용자·회사
+condition별 proxy/domain reviewer 5개 이상을 기록하기 전에는 원칙적으로 UX-I와 business claim을
+시작하지 않는다. 현재 owner 예외는 UX-I engineering-proxy만 허용하며 human/value claim은 계속
+차단한다. C0와 I7 Responses API gate는 필요한 사용자·회사
 입력과 key·가격·비용 승인 전에는 시작하지 않는다.

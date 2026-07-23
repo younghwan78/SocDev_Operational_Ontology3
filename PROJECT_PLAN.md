@@ -3,9 +3,9 @@
 > 문서 상태: Product Plan v0.3, 로컬 PoC 구현 승인
 > 갱신일: 2026-07-23
 > 문서 역할: 제품 목표, 범위, 가치 가설, 중단 기준을 정의  
-> 현재 판단: **GO: I0–I7 Replay, Step 5 B2 runtime, UX-A~UX-H 도구와 OPS-F study release 구현 완료**, **CURRENT: OPS-F 독립 관측 baseline 0/5·product 0/5**, **NO-GO: UX-I·최종 UX 주장, live 사내 연동 및 실제 업무 적용**
+> 현재 판단: **GO: I0–I7 Replay, Step 5 B2 runtime, UX-A~UX-H 도구와 OPS-F study release 구현 완료**, **DEFERRED: OPS-F human observation baseline 0/5·product 0/5**, **CURRENT: UX-I engineering-proxy**, **NO-GO: human UX·business value 주장, live 사내 연동 및 실제 업무 적용**
 
-후속 실행 순서는 `OPS-F 관측 → UX-I → UX-J → UX-K Local UX Release 1 → ENT-A~F
+후속 실행 순서는 `OPS-F human observation 보류 → UX-I → UX-J → UX-K Local UX Release 1 → ENT-A~F
 사외 준비 → 사내 C0/C1`로 고정한다. UX와 connector를 동시에 변경하지 않는다.
 
 이 계획은 SoC 개발 진행과 불확실성을 재현하고 제한된 정보에서도 저후회 결정을 돕는 제품을 정의한다. 집에서는 synthetic fixture로 의사결정 메커니즘만 검증하며, 실제 비즈니스 가치는 사내 read-only 파일럿에서 별도로 측정한다.
@@ -406,8 +406,8 @@ Post-I7 후속은 다음 순서로만 진행한다.
 |OPS-C|Project domain, projection, API와 historical boundary|완료; PostgreSQL aggregate, reason/source policy, 5개 read API와 `at_step` parity|
 |OPS-D|Project Portfolio와 Situation UX|완료; Backend 정렬 Portfolio, Situation provenance와 historical URL, 390px/desktop local task proxy PASS|
 |OPS-E|Risk Detail과 기존 Decision Workspace 연결|완료; source→inference→impact→Decision/Action과 Decision 왕복 local proxy PASS|
-|OPS-F|Project 중심 UX-H protocol v2, 제품 release 고정과 독립 human observation|release/rubric/E2E 도구 완료; 독립 관측 baseline 0/5·product 0/5로 Gate 진행 중|
-|UX-I|측정 결과로 Portfolio·Situation·Workspace 정보 구조 축소·개선|OPS-F human 결과 없이는 시작하지 않음|
+|OPS-F|Project 중심 UX-H protocol v2, 제품 release 고정과 독립 human observation|release/rubric/E2E 도구 완료; human observation은 baseline 0/5·product 0/5에서 보류|
+|UX-I|Portfolio·Situation·Workspace 정보 구조 축소·개선|human 결과가 있으면 측정 기반, 현재는 owner가 승인한 engineering-proxy로만 진행|
 |UX-J|사용자 판단과 simulated Chair를 분리해 accept/modify/reject와 anchoring 측정|새 ADR과 evaluation-only contract 필요|
 |UX-K|전체 사용자 여정, 복구·접근성·역사 경계를 재검증하고 Local UX Release 1 동결|UX-I/J Gate 뒤 시작; fixture UX 완료만 주장|
 |ENT-A~F|사외에서 source-neutral ingestion, dirty fixture, sync/dry-run/quarantine와 handoff kit 구현|UX-K 뒤 새 ADR로 시작; 실제 company data/vendor API/auth 없음|
@@ -416,8 +416,10 @@ UX-H는 observable fixture hash와 source selector로 고정한 Jira/Confluence�
 canonical 8개와 Development Twin 5개 task, `usability-session.v1` event/result 계약과
 검증·요약 CLI까지 구현했다. 실제 사람의 답변·시간은 만들지 않았으며 dry-run summary는
 `not_ready`와 `no_business_claim`을 반환한다. condition별 proxy/domain reviewer 5개 이상을
-확보하기 전에는 UX-I를 시작하지 않는다. 새 Project 중심 관측은 OPS-F v2로만 수집하며,
-사내 source·권한·승인은 C0에서 별도로 연다.
+확보하기 전에는 원칙적으로 UX-I를 시작하지 않는다. 2026-07-23 owner 결정으로 human observation을
+0/5 상태에서 보류하고 UX-I를 engineering-proxy로 진행한다. 이 예외는 human Gate나 business claim을
+열지 않는다. 새 Project 중심 human 관측을 재개하면 OPS-F v2 또는 변경 제품용 새 frozen release를
+사용하며, 사내 source·권한·승인은 C0에서 별도로 연다.
 
 UX-I는 OPS-F에서 가장 느리거나 자주 오해한 task만 개선한다. UX-J는 advice 공개 전 사람의
 초기 판단과 공개 후 `accept/modify/reject`를 별도 record로 보존한다. UX-K는 이 전체 흐름을
@@ -530,7 +532,7 @@ C1에서 가치와 보안 gate를 통과한 뒤에만 연다.
 - 데이터: synthetic fixture only
 - 로컬 승인: simulated Chair, 실제 권한 없음
 - 구현 단계: I0~I7
-- 현재 단계: OPS-F study release/rubric/E2E 도구 완료, 독립 관측 baseline 0/5·product 0/5; UX-I 차단
+- 현재 단계: OPS-F human observation 보류, 독립 관측 baseline 0/5·product 0/5; UX-I engineering-proxy 진행
 - 후속 순서: UX-I/J/K 완료 뒤 ENT-A~F 사외 준비, 그 뒤 사내 C0/C1
 - release topology: B2 independent routed Role Agents, deterministic core decision
 - CI provider: ReplayProvider
@@ -574,6 +576,7 @@ Active planning documents:
 - `internal_docs/26.07.22 OPS-F Project 중심 사용성 Protocol v2 구현 및 검증 보고서.md`
 - `internal_docs/26.07.23 OPS-F Study Release 보강 및 사내 데이터 연결 준비도 보고서.md`
 - `internal_docs/26.07.23 UX 마무리 및 사내 데이터 전환 실행 계획.md`
+- `internal_docs/26.07.23 OPS-F Human Observation 보류 결정.md`
 - `docs/decisions/ADR-0010-project-operations-and-risk-provenance.md`
 
 Review and historical context:

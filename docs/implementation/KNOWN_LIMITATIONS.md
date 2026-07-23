@@ -20,5 +20,6 @@
 - UX-H Decision-centered v1 material remains reproducible, and OPS-F now adds a Project-centered v2
   protocol with three hash-pinned Projects, six baseline surfaces and eleven frozen tasks. Both study
   conditions still contain zero completed independent observations. Reviewer comprehension, task-time
-  improvement and business value remain unproven; UX-I is blocked until baseline and product each have
-  the frozen minimum of five valid independent observations.
+  improvement and business value remain unproven. The owner deferred human observation on 2026-07-23,
+  so UX-I/J/K may proceed only as engineering-proxy work. This exception does not pass the human Gate
+  or support any human usability, decision-speed, advice-quality or business-value claim.

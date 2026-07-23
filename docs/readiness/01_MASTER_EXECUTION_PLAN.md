@@ -1,10 +1,10 @@
 # Master execution plan
 
-> Status: IMPLEMENTED THROUGH I7 REPLAY + STEP 5 B2 RUNTIME + OPS-F STUDY RELEASE; OPS-F INDEPENDENT OBSERVATION GATE OPEN AT 0/5 PER CONDITION, UX-I BLOCKED
+> Status: IMPLEMENTED THROUGH I7 REPLAY + STEP 5 B2 RUNTIME + OPS-F STUDY RELEASE; OPS-F HUMAN OBSERVATION DEFERRED AT 0/5 PER CONDITION, UX-I ENGINEERING-PROXY ACTIVE
 > Date: 2026-07-23
 > Scope: local fixture-only PoC
 
-Frozen follow-up order: `OPS-F observations → UX-I → UX-J → UX-K Local UX Release 1 →
+Frozen follow-up order: `OPS-F human observations deferred → UX-I → UX-J → UX-K Local UX Release 1 →
 ENT-A~F fixture-only enterprise preparation → internal C0/C1`. No enterprise preparation implementation
 starts before UX-K, and no actual company source, vendor API, credential, authentication or write-back
 enters the local repository.
@@ -423,7 +423,7 @@ Post-I7 Project Operations stages run in this order:
 |OPS-C|Project domain, projection, API and compatibility path|Complete: migration/repository parity, five read APIs, generated contracts and no-future-leakage parity|
 |OPS-D|Portfolio and Project Situation UX|Complete (local proxy): overall status/top-risk/source task, responsive and accessibility checks pass|
 |OPS-E|Risk Detail and Decision linkage|Complete (local proxy): source-to-inference-to-impact-to-treatment trace and Decision round trip pass|
-|OPS-F|UX-H protocol v2, frozen product release and independent observations|Release/rubric/E2E tooling complete; observation Gate pending at baseline 0/5 and product 0/5|
+|OPS-F|UX-H protocol v2, frozen product release and independent observations|Release/rubric/E2E tooling complete; human observation deferred at baseline 0/5 and product 0/5|
 
 No later OPS stage starts before the previous Gate. Company connectors, authentication and write-back
 remain C0/C2 scope.
@@ -432,7 +432,7 @@ After OPS-F, the only allowed order is:
 
 |Stage|Deliverable|Gate|
 |---|---|---|
-|UX-I|Measurement-led information architecture simplification|OPS-F has at least 5 valid independent observations per condition and a reviewed problem ranking|
+|UX-I|Information architecture simplification|Normally requires OPS-F 5/condition; current owner waiver permits engineering-proxy work without human/time/value claims|
 |UX-J|Separate immutable human initial/final response from simulated advice|Advice cannot overwrite human response; accept/modify/reject and anchoring are measurable|
 |UX-K|Freeze Local UX Release 1 across the full Project-to-Decision journey|Responsive/accessibility/recovery/history/full-regression Gate and release pins pass|
 |ENT-A~F|Source-neutral contracts, dirty fixtures, sync/dry-run/quarantine and internal handoff kit|New ADR accepted; fixture-only tests pass with no vendor API, company data, credential or real ACL|
@@ -532,7 +532,8 @@ OPS-F implementation record (2026-07-23):
 - Project browser E2E covers Portfolio → Situation → Risk → Decision → Risk at desktop and Step 20
   no-future-leakage at 390px, including Axe and overflow checks
 - protocol tooling is complete, but the OPS-F human Gate is not. Independent baseline/product counts
-  remain 0/5 each; UX-I and any decision-speed, advice-quality or business-value claim remain blocked
+  remain 0/5 each; only UX-I engineering-proxy work is allowed, while human UX and any decision-speed,
+  advice-quality or business-value claim remain blocked
 - company data remains outside OPS-F. Current canonical repositories/projections can be reused after
   ingestion, but a live connector is NO-GO until C0 defines enterprise identity/time, ACL, sync,
   deletion/retention and candidate-extraction review; sanitized export schema-fit is the first allowed step

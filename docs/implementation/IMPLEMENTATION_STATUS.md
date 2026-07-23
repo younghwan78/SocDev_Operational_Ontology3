@@ -1,8 +1,8 @@
 # Implementation status
 
 > Updated: 2026-07-23
-> Current stage: OPS-F product release/rubric/E2E tooling implemented; independent observation Gate remains open at baseline 0/5 and product 0/5, UX-I blocked
-> Planned sequence: OPS-F observations → UX-I/J/K Local UX Release 1 → ENT-A~F external fixture-only preparation → internal C0/C1
+> Current stage: OPS-F human observation deferred at baseline 0/5 and product 0/5; UX-I engineering-proxy active
+> Planned sequence: UX-I/J/K Local UX Release 1 → ENT-A~F external fixture-only preparation → internal C0/C1; human/value claims remain blocked
 
 ## Stage evidence
 
@@ -31,7 +31,7 @@
 |OPS-C|Passed|Migration 0020, durable Project repositories, deterministic attention/risk policies, five read APIs, historical parity, generated contracts and Replay smoke; this established the runtime boundary consumed by OPS-D.|
 |OPS-D|Passed (local agent substitute)|Backend-ordered Project Portfolio, progressive Situation view, human-readable source-to-Issue/Evidence/Event joins, affected work and milestones, URL-backed historical Step, Korean recovery, responsive 390px/desktop UI, 4 focused/16 total unit tests, 8 regression E2E, Axe and overflow checks. Human task time remains unmeasured.|
 |OPS-E|Passed (local agent substitute)|One source→epistemic/inference→impact→Decision/Action trace, Korean-first rule/limitation labels, all-Risk Situation navigation, historical Project boundary, Decision round trip without cross-timeline Step injection, 4 focused/19 total unit tests, 8 regression E2E, 390px/desktop Axe, overflow and console checks. Human task time remains unmeasured.|
-|OPS-F|Study execution tooling complete; observation Gate pending|PROJECT-U/V/W source pack, 6 baseline surfaces, 11 tasks, product release hash pins, participant-hidden reviewer rubric, draft/exclusion attrition reporting, condition guides and Project path E2E. Completed independent observations: baseline 0/5, product 0/5; `not_ready/not_evaluable/no_business_claim`.|
+|OPS-F|Study execution tooling complete; human observation deferred|PROJECT-U/V/W source pack, 6 baseline surfaces, 11 tasks, product release hash pins, participant-hidden reviewer rubric, draft/exclusion attrition reporting, condition guides and Project path E2E. Completed independent observations: baseline 0/5, product 0/5; `not_ready/not_evaluable/no_business_claim`.|
 
 OPS-F implementation record (2026-07-23):
 
