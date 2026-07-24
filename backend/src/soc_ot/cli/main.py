@@ -66,7 +66,7 @@ DEFAULT_BASELINE_PACK = (
     ROOT_DIR / "fixtures/usability/PROJECT-OPERATIONS.baseline-pack.v2.yaml"
 )
 DEFAULT_USABILITY_RELEASE = (
-    ROOT_DIR / "fixtures/usability/UX-J-20260724.release.v1.yaml"
+    ROOT_DIR / "fixtures/usability/UX-K-20260724.release.v1.yaml"
 )
 DEFAULT_REVIEWER_RUBRIC = (
     ROOT_DIR / "fixtures/usability/OPS-F-20260722.reviewer-rubric.v1.yaml"

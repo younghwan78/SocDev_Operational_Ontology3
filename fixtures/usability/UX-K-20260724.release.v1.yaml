@@ -1,0 +1,71 @@
+schema_version: usability-study-release.v1
+release_id: LOCAL-UX-RELEASE-1-5227D18
+study_id: OPS-F-20260722-PROJECT-OPERATIONS
+frozen_at: 2026-07-24T22:55:28+09:00
+product_revision: 5227d18ae9ea7ed8d94dd00a8ffb57570b5dd511
+product_entry_path: /projects
+environment:
+  browser_family: chromium
+  browser_version_policy: installed_at_session
+  locale: ko-KR
+  viewport_width: 1440
+  viewport_height: 1000
+  network_mode: local
+artifact_pins:
+  - path: frontend/src/app/App.tsx
+    sha256: 9025ea7bf5916f11f93a8b631e764d3259e192897f0587ec727b09a811a66bc0
+    purpose: product_ui
+  - path: frontend/src/features/projects/ProjectPortfolioPage.tsx
+    sha256: 48323d51ca6253924c7bba96d45a57a8d6aad7daea68f819bcfd6cca6aef8937
+    purpose: product_ui
+  - path: frontend/src/features/projects/ProjectSituationPage.tsx
+    sha256: 39b9573816d603d71aae1b880fdd5890c57b7ec266cd2f91106921f24c17b94b
+    purpose: product_ui
+  - path: frontend/src/features/projects/ProjectRiskDetailPage.tsx
+    sha256: 4005f7e5a5a9bbb179bc86fbaa80fee5bb2f4a204315085631c75b32af67f6f0
+    purpose: product_ui
+  - path: frontend/src/features/decisions/DecisionWorkspacePage.tsx
+    sha256: 8ef1f312c9615f19b4fdc43fa3e86bb13abaf42555fd2a3edb4b198ff8b16baf
+    purpose: product_ui
+  - path: frontend/src/features/decisions/DecisionEvaluationResponse.tsx
+    sha256: ef4ab6747cf128d4848e63b24106b61b21a5f97119b8e469a4c7e78defac8285
+    purpose: product_ui
+  - path: frontend/src/features/decisions/DecisionExecution.tsx
+    sha256: 468398b6a4202587955748e041f1d83a42d9f99dba1d4ef0df93b3ed152ea172
+    purpose: product_ui
+  - path: frontend/src/features/decisions/AlternativeComparison.tsx
+    sha256: 5db3b6fc6eb33fa6e0fa1ecdb67a81762597043cb72d425a058563d3b662b887
+    purpose: product_ui
+  - path: frontend/src/features/decisions/DecisionDeliberation.tsx
+    sha256: bf841118146465d76f45f3b17312dad826b7aaa5d6033f1482a60fccfdec9245
+    purpose: product_ui
+  - path: frontend/src/design/global.css
+    sha256: abaece6771a355307b126ce9f8ea3c3456bb53101fd6c10b3ed1af9e5559246f
+    purpose: product_ui
+  - path: backend/src/soc_ot/api/main.py
+    sha256: ee5322dd4dae1e5b40c23bad0b6f6417375491d484b6453c19befdf6d7e39af8
+    purpose: product_api
+  - path: backend/src/soc_ot/application/project_operations.py
+    sha256: b845f448165acca1a634ffa268616a690105c085e5b1b2aae19ae66d4611a0eb
+    purpose: product_api
+  - path: backend/src/soc_ot/application/decision_evaluation_responses.py
+    sha256: 47775db2a2a720a0000047f9791a51c31e114258487abc522576d396c32b317f
+    purpose: product_api
+  - path: contracts/generated/openapi.json
+    sha256: eaf7d2ea57c4109b541a335b0d7610433ece26104b7178e60e975f654e764a15
+    purpose: product_api
+  - path: fixtures/usability/OPS-F-20260722.protocol.v2.yaml
+    sha256: 821d8e349d59f2cac5a4758c486471a961bf30ce52280d11303d12d398918196
+    purpose: study_material
+  - path: fixtures/usability/PROJECT-OPERATIONS.baseline-pack.v2.yaml
+    sha256: 3f9cd73090f8524508ddcbb7584d963bf6baed42a6b7eeb0d767effce14cb6fd
+    purpose: study_material
+  - path: fixtures/usability/OPS-F-20260722.reviewer-rubric.v1.yaml
+    sha256: 6d034ccefff91b99555254d23f04f2d3ef054695506e3ce41549b65a6457e0c1
+    purpose: study_material
+  - path: frontend/tests/project-operations.spec.ts
+    sha256: abf9c0c4a1222ffa483f19ab837af9e91e74e4dc1e742854f48a1a203021998e
+    purpose: study_material
+  - path: frontend/tests/decision-workflow.spec.ts
+    sha256: f54191c889a7bd6816ce770caf29dc697dd12a8cd4692dd7288f48a890d7a91f
+    purpose: study_material

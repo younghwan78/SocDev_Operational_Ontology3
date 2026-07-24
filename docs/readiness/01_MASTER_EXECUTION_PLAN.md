@@ -1,6 +1,6 @@
 # Master execution plan
 
-> Status: IMPLEMENTED THROUGH I7 REPLAY + STEP 5 B2 RUNTIME + UX-I ENGINEERING-PROXY; OPS-F HUMAN OBSERVATION DEFERRED AT 0/5 PER CONDITION, UX-J NEXT
+> Status: IMPLEMENTED THROUGH I7 REPLAY + STEP 5 B2 RUNTIME + UX-K LOCAL FIXTURE UX RELEASE 1; OPS-F HUMAN OBSERVATION DEFERRED AT 0/5 PER CONDITION, ENT-A NEXT
 > Date: 2026-07-24
 > Scope: local fixture-only PoC
 
@@ -433,8 +433,8 @@ After OPS-F, the only allowed order is:
 |Stage|Deliverable|Gate|
 |---|---|---|
 |UX-I|Information architecture simplification|Complete as engineering-proxy: title-first projection, source interpretation, domain copy and full local regression; no human/time/value claims|
-|UX-J|Separate immutable human initial/final response from simulated advice|Advice cannot overwrite human response; accept/modify/reject and anchoring are measurable|
-|UX-K|Freeze Local UX Release 1 across the full Project-to-Decision journey|Responsive/accessibility/recovery/history/full-regression Gate and release pins pass|
+|UX-J|Separate immutable builder initial/final response from simulated advice|Complete: advice cannot overwrite builder response; accept/modify/reject and anchoring fields are measurable|
+|UX-K|Freeze Local UX Release 1 across the full Project-to-Decision journey|Complete: responsive/accessibility/recovery/history/full-regression Gate and release pins pass|
 |ENT-A~F|Source-neutral contracts, dirty fixtures, sync/dry-run/quarantine and internal handoff kit|New ADR accepted; fixture-only tests pass with no vendor API, company data, credential or real ACL|
 |C0/C1|Internal configuration, sanitized schema-fit, one-project read-only smoke and pilot|Company security, data owner and human authority approvals|
 
@@ -569,6 +569,23 @@ UX-J implementation record (2026-07-24):
   tests passed; UX-J 390px flow passed Axe, overflow, reload and console checks
 - human observations remain baseline 0/5 and product 0/5; no human UX, decision-speed, anchoring or
   business-value claim is opened
+
+UX-K implementation record (2026-07-24):
+
+- one browser journey now covers Portfolio → Project Situation → Risk provenance and impact →
+  Decision evaluation mode → immutable initial builder response → advice reveal →
+  accept/modify/reject → Outcome/Evaluation → original Risk context
+- the closed-workspace learning action always has a focusable destination; when a fixture has no new
+  lesson, the UI states that explicitly instead of exposing an action with no target
+- 390px, 768px, desktop and 200%-equivalent reflow, keyboard/focus/landmarks, Axe, reduced motion,
+  loading/empty/partial/stale/conflict/network/unavailable-history and current/historical boundaries
+  remain covered by unit and browser regression
+- `LOCAL-UX-RELEASE-1-5227D18` pins product revision `5227d18`, the complete Project/Decision UI path,
+  API contract, OPS-F protocol/baseline/rubric and full-journey browser specifications by SHA-256
+- this is only a Local fixture UX Release 1 engineering Gate. Human observations remain 0/5 per
+  condition, so human usability, decision speed, advice quality and business value remain NO-GO
+- UX-K closes the UX stage sequence. ENT-A is next, but requires its own accepted ADR and remains
+  source-neutral and fixture-only; no company source, vendor API, credential, authentication or write-back
 
 ## 7. Crosswalk to supporting plans
 
