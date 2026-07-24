@@ -23,4 +23,15 @@ if (-not $packetImports) {
     throw "Agent code has no validated ObservableCasePacket boundary."
 }
 
+$enterpriseFiles = @(
+    (Join-Path $root "backend/src/soc_ot/application/enterprise_ingestion.py"),
+    (Join-Path $root "backend/src/soc_ot/application/ports.py")
+)
+$enterpriseForbidden = Select-String -Path $enterpriseFiles `
+    -Pattern "fastapi|sqlalchemy|(^|\s)openai(\s|\.|$)|soc_ot\.api|soc_ot\.infrastructure|atlassian|jira|confluence"
+if ($enterpriseForbidden) {
+    $enterpriseForbidden | ForEach-Object { Write-Error $_.ToString() }
+    throw "Enterprise source contracts import a framework, infrastructure, or vendor dependency."
+}
+
 Write-Output "Architecture boundary check passed."

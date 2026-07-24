@@ -139,6 +139,28 @@ if ($master -notmatch 'PostgreSQL migration head is `0021_decision_responses`') 
         throw "Canonical contract is missing OPS-C policy version: $_"
     }
 }
+@(
+    "enterprise-source-record.v1",
+    "SourceDataClassification",
+    "SourceDeletionState",
+    "effective_at",
+    "observed_at",
+    "source_updated_at",
+    "ingested_at"
+) | ForEach-Object {
+    if (-not $contract.Contains($_)) {
+        throw "Canonical contract is missing ENT-A term: $_"
+    }
+}
+@(
+    "backend/src/soc_ot/application/enterprise_ingestion.py",
+    "contracts/generated/enterprise-source-record.v1.schema.json",
+    "docs/decisions/ADR-0012-source-neutral-enterprise-ingestion-boundary.md"
+) | ForEach-Object {
+    if (-not (Test-Path -LiteralPath (Join-Path $root $_) -PathType Leaf)) {
+        throw "Missing ENT-A artifact: $_"
+    }
+}
 
 @(
     "frontend/src/features/projects/ProjectPortfolioPage.tsx",

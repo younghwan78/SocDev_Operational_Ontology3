@@ -1,8 +1,8 @@
 # Implementation status
 
 > Updated: 2026-07-24
-> Current stage: UX-K Local fixture UX Release 1 complete; OPS-F human observation deferred at baseline 0/5 and product 0/5; ENT-A next
-> Planned sequence: ENT-A~F external fixture-only preparation → internal C0/C1; human/value claims remain blocked
+> Current stage: ENT-A source-neutral ingestion contract complete; OPS-F human observation deferred at baseline 0/5 and product 0/5; ENT-B next
+> Planned sequence: ENT-B~F external fixture-only preparation → internal C0/C1; human/value claims remain blocked
 
 ## Stage evidence
 
@@ -35,6 +35,7 @@
 |UX-I|Passed (engineering-proxy only)|Portfolio `nearest_milestone_title` projection, title-first attention and Track references, domain-centered Korean copy, unknown-ref fallback, `UX-I-PRODUCT-87D49D7` release pins, 19 Frontend unit tests, 10 Playwright E2E, PostgreSQL/non-PostgreSQL regression, 390px/desktop Axe, keyboard, overflow and console checks. No human/time/value claim.|
 |UX-J|Passed (engineering-proxy only)|Immutable builder initial/advice reveal/final response sequence, accept/modify/reject classification, URL-backed evaluation mode, PostgreSQL restart persistence and `UX-J-PRODUCT-218C095` pins. No human/anchoring/value claim.|
 |UX-K|Passed (Local fixture UX Release 1)|Full Portfolio→Project→Risk→Decision→builder response→advice→Outcome/Evaluation→Risk browser journey, explicit empty-learning destination, responsive/accessibility/recovery/history regression and `LOCAL-UX-RELEASE-1-5227D18` pins. Human observations remain 0/5 per condition; no human/time/value claim.|
+|ENT-A|Passed (contract-only)|ADR-0012, strict `enterprise-source-record.v1`, stable external identity, four timezone-aware source times, opaque ACL/classification, payload-safe deletion/restriction, source-neutral `SourceReader`/`IngestionSink`, generated schema and 15 focused tests. No adapter, persistence, company data or canonical mapping.|
 
 OPS-F implementation record (2026-07-23):
 

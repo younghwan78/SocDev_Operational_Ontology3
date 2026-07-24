@@ -1,5 +1,9 @@
-from typing import Protocol
+from typing import Protocol, runtime_checkable
 
+from soc_ot.application.enterprise_ingestion import (
+    EnterpriseSourceIdentity,
+    EnterpriseSourceRecord,
+)
 from soc_ot.application.evaluation import CaseEvaluation
 from soc_ot.domain.models import HiddenCase
 
@@ -19,3 +23,13 @@ class EvaluationRepository(Protocol):
         actor_id: str,
     ) -> CaseEvaluation: ...
     def latest(self, case_id: str) -> CaseEvaluation | None: ...
+
+
+@runtime_checkable
+class SourceReader(Protocol):
+    def read(self, identity: EnterpriseSourceIdentity) -> EnterpriseSourceRecord | None: ...
+
+
+@runtime_checkable
+class IngestionSink(Protocol):
+    def write(self, record: EnterpriseSourceRecord) -> None: ...

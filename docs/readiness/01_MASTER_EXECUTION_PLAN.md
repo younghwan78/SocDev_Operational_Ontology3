@@ -1,6 +1,6 @@
 # Master execution plan
 
-> Status: IMPLEMENTED THROUGH I7 REPLAY + STEP 5 B2 RUNTIME + UX-K LOCAL FIXTURE UX RELEASE 1; OPS-F HUMAN OBSERVATION DEFERRED AT 0/5 PER CONDITION, ENT-A NEXT
+> Status: IMPLEMENTED THROUGH I7 REPLAY + STEP 5 B2 RUNTIME + UX-K LOCAL FIXTURE UX RELEASE 1 + ENT-A; OPS-F HUMAN OBSERVATION DEFERRED AT 0/5 PER CONDITION, ENT-B NEXT
 > Date: 2026-07-24
 > Scope: local fixture-only PoC
 
@@ -435,7 +435,8 @@ After OPS-F, the only allowed order is:
 |UX-I|Information architecture simplification|Complete as engineering-proxy: title-first projection, source interpretation, domain copy and full local regression; no human/time/value claims|
 |UX-J|Separate immutable builder initial/final response from simulated advice|Complete: advice cannot overwrite builder response; accept/modify/reject and anchoring fields are measurable|
 |UX-K|Freeze Local UX Release 1 across the full Project-to-Decision journey|Complete: responsive/accessibility/recovery/history/full-regression Gate and release pins pass|
-|ENT-A~F|Source-neutral contracts, dirty fixtures, sync/dry-run/quarantine and internal handoff kit|New ADR accepted; fixture-only tests pass with no vendor API, company data, credential or real ACL|
+|ENT-A|Source-neutral record, stable identity/time, access metadata and application ports|Complete: ADR-0012 accepted, strict contract/schema/boundary tests pass; no adapter or persistence|
+|ENT-B~F|Dirty fixtures, mapping, sync/dry-run/quarantine and internal handoff kit|ENT-B next; fixture-only tests, no vendor API, company data, credential or real ACL|
 |C0/C1|Internal configuration, sanitized schema-fit, one-project read-only smoke and pilot|Company security, data owner and human authority approvals|
 
 The detailed work packages and transition criteria are owned by
@@ -586,6 +587,23 @@ UX-K implementation record (2026-07-24):
   condition, so human usability, decision speed, advice quality and business value remain NO-GO
 - UX-K closes the UX stage sequence. ENT-A is next, but requires its own accepted ADR and remains
   source-neutral and fixture-only; no company source, vendor API, credential, authentication or write-back
+
+ENT-A implementation record (2026-07-24):
+
+- ADR-0012 accepts `enterprise-source-record.v1` as a staging envelope before any canonical Project
+  mapping; direct source-to-Project conversion remains forbidden
+- stable identity is `(source_system, source_tenant, source_object_type, external_id)` and remains
+  unchanged across rename, update and delete records
+- `effective_at`, `observed_at`, `source_updated_at` and `ingested_at` remain separate timezone-aware
+  fields without an invented ordering between planned and late-arriving source states
+- every record requires lowercase SHA-256 content identity, read-only source URL, opaque ACL reference
+  and `PUBLIC | INTERNAL | CONFIDENTIAL | RESTRICTED` classification
+- `DELETED` and `RESTRICTED` envelopes cannot carry payload; embedded URL credentials and unknown
+  fields fail validation
+- `SourceReader` and `IngestionSink` are application Protocols over the validated envelope only; ENT-A
+  adds no HTTP route, database migration, source adapter, mapping, sync, authentication or write-back
+- generated schema, 15 focused tests, contract/architecture/plan/hidden/secret checks and the full
+  non-PostgreSQL regression pass; ENT-B synthetic dirty fixture and mapping registry is next
 
 ## 7. Crosswalk to supporting plans
 

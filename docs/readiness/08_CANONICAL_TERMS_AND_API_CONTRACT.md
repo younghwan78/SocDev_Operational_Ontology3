@@ -442,6 +442,60 @@ boundary and transition sequence.
 UX-J migration `0021_decision_responses` separately persists evaluation-only pre-advice and
 post-advice responses. ADR-0011 owns its disclosure, immutability, and non-authority boundary.
 
-## 11. Compatibility gate
+## 11. Accepted ENT-A enterprise source boundary
+
+ADR-0012 accepts `enterprise-source-record.v1` as the only input envelope for future enterprise
+source adapters. It is an application contract, not a canonical Project aggregate and not an Agent
+packet.
+
+Stable source identity is:
+
+```text
+(source_system, source_tenant, source_object_type, external_id)
+```
+
+`external_version`, title, URL, content hash and payload never participate in identity. The record
+uses these required fields:
+
+```text
+schema_version = enterprise-source-record.v1
+source_system
+source_tenant
+source_object_type
+external_id
+external_version
+effective_at
+observed_at
+source_updated_at
+ingested_at
+content_hash
+source_url
+deletion_state
+source_acl_ref
+classification
+payload
+```
+
+Canonical enum values are:
+
+```text
+SourceDataClassification = PUBLIC | INTERNAL | CONFIDENTIAL | RESTRICTED
+SourceDeletionState       = ACTIVE | DELETED | RESTRICTED
+```
+
+All four times require a timezone. They retain separate meanings and have no implicit ordering:
+`effective_at` is business validity, `observed_at` is organizational observability,
+`source_updated_at` is source-asserted modification time, and `ingested_at` is twin capture time.
+Local simulation continues to use `at_step`; it is not converted implicitly to these timestamps.
+
+`ACTIVE` requires a JSON object payload. `DELETED` and `RESTRICTED` forbid payload. Every record
+requires an opaque ACL reference and classification; neither field grants access by itself.
+Embedded URL credentials are forbidden.
+
+The application ports are `SourceReader.read(identity)` and `IngestionSink.write(record)`. ENT-A adds
+no executable source adapter, HTTP route, persistence, mapping, sync, authentication, real ACL or
+write-back. Raw enterprise records never enter an `ObservableCasePacket` or become Project/FACT truth.
+
+## 12. Compatibility gate
 
 Any change to a state code, DecisionType, endpoint, time field, or version name updates this contract first. CI then checks generated schemas, OpenAPI, Frontend client, fixture manifests, runbook examples, and documentation references.

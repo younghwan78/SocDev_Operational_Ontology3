@@ -12,10 +12,10 @@
 - Local SSE follows persisted events with sequence resume, heartbeat, and a bounded 30-second connection; the UI uses polling as the reconnect fallback.
 - Provider token cost is an estimate based on operator-supplied rates and must be refreshed when pricing changes.
 - Company security, identity, retention, and write-back controls require a separate pilot design review.
-- The Project repository and projections are source-neutral after canonical ingestion, but there is no
-  Jira/Confluence adapter, enterprise identity/time envelope, ACL inheritance, incremental sync,
-  tombstone/retention or unstructured-extraction review path. Direct live company connection is NO-GO;
-  only an approved sanitized-export schema-fit exercise is ready to start in C0.
+- ENT-A now provides a source-neutral enterprise identity/time envelope, opaque ACL/classification
+  metadata and deletion/restriction payload boundary. There is still no Jira/Confluence adapter,
+  mapping registry, real ACL inheritance, incremental sync, tombstone reconciliation, retention or
+  unstructured-extraction review path. Direct live company connection remains NO-GO.
 - Codex CLI evaluation artifacts contain aggregate model usage and normalized results, while normal durable worker attempt telemetry remains Replay-verified unless the Responses API worker is separately authorized.
 - UX-H Decision-centered v1 material remains reproducible, and OPS-F now adds a Project-centered v2
   protocol with three hash-pinned Projects, six baseline surfaces and eleven frozen tasks. Both study

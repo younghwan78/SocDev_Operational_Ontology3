@@ -1,0 +1,140 @@
+{
+  "$defs": {
+    "JsonValue": {},
+    "SourceDataClassification": {
+      "enum": [
+        "PUBLIC",
+        "INTERNAL",
+        "CONFIDENTIAL",
+        "RESTRICTED"
+      ],
+      "title": "SourceDataClassification",
+      "type": "string"
+    },
+    "SourceDeletionState": {
+      "enum": [
+        "ACTIVE",
+        "DELETED",
+        "RESTRICTED"
+      ],
+      "title": "SourceDeletionState",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "enterprise-source-record.v1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "source_system": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "title": "Source System",
+      "type": "string"
+    },
+    "source_tenant": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "title": "Source Tenant",
+      "type": "string"
+    },
+    "source_object_type": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "title": "Source Object Type",
+      "type": "string"
+    },
+    "external_id": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "title": "External Id",
+      "type": "string"
+    },
+    "external_version": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "title": "External Version",
+      "type": "string"
+    },
+    "effective_at": {
+      "format": "date-time",
+      "title": "Effective At",
+      "type": "string"
+    },
+    "observed_at": {
+      "format": "date-time",
+      "title": "Observed At",
+      "type": "string"
+    },
+    "source_updated_at": {
+      "format": "date-time",
+      "title": "Source Updated At",
+      "type": "string"
+    },
+    "ingested_at": {
+      "format": "date-time",
+      "title": "Ingested At",
+      "type": "string"
+    },
+    "content_hash": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Content Hash",
+      "type": "string"
+    },
+    "source_url": {
+      "format": "uri",
+      "maxLength": 2083,
+      "minLength": 1,
+      "title": "Source Url",
+      "type": "string"
+    },
+    "deletion_state": {
+      "$ref": "#/$defs/SourceDeletionState"
+    },
+    "source_acl_ref": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "title": "Source Acl Ref",
+      "type": "string"
+    },
+    "classification": {
+      "$ref": "#/$defs/SourceDataClassification"
+    },
+    "payload": {
+      "anyOf": [
+        {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonValue"
+          },
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Payload"
+    }
+  },
+  "required": [
+    "schema_version",
+    "source_system",
+    "source_tenant",
+    "source_object_type",
+    "external_id",
+    "external_version",
+    "effective_at",
+    "observed_at",
+    "source_updated_at",
+    "ingested_at",
+    "content_hash",
+    "source_url",
+    "deletion_state",
+    "source_acl_ref",
+    "classification",
+    "payload"
+  ],
+  "title": "EnterpriseSourceRecord",
+  "type": "object"
+}
