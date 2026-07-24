@@ -4,3 +4,5 @@ artifacts:
     sha256: 1ac7a82fdfee9a5cce450f5ae22738a32a1eb155474dea2edabd992153d500d7
   - path: dirty-source-records.v1.yaml
     sha256: 14598f3fb8e33381d3085633e40a40a34d1b3cc383c6ec1b2186d33882eb8fcf
+  - path: sync-pages.v1.yaml
+    sha256: 13d89f89553bd9e3ac4336fee2b0d12d9822d517399ac589aae6879cd44255ef

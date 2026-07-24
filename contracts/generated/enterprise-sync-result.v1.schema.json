@@ -1,0 +1,702 @@
+{
+  "$defs": {
+    "EnterpriseMappingResult": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "enterprise-mapping-result.v1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "source_identity": {
+          "$ref": "#/$defs/EnterpriseSourceIdentity"
+        },
+        "external_version": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "External Version",
+          "type": "string"
+        },
+        "disposition": {
+          "$ref": "#/$defs/MappingDisposition"
+        },
+        "reason_codes": {
+          "items": {
+            "$ref": "#/$defs/MappingReasonCode"
+          },
+          "minItems": 1,
+          "title": "Reason Codes",
+          "type": "array"
+        },
+        "structured_candidates": {
+          "items": {
+            "$ref": "#/$defs/StructuredMappingCandidate"
+          },
+          "title": "Structured Candidates",
+          "type": "array"
+        },
+        "unstructured_candidates": {
+          "items": {
+            "$ref": "#/$defs/UnstructuredMappingCandidate"
+          },
+          "title": "Unstructured Candidates",
+          "type": "array"
+        }
+      },
+      "required": [
+        "schema_version",
+        "source_identity",
+        "external_version",
+        "disposition",
+        "reason_codes"
+      ],
+      "title": "EnterpriseMappingResult",
+      "type": "object"
+    },
+    "EnterpriseRetryAuditEntry": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "enterprise-retry-audit-entry.v1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "page_index": {
+          "minimum": 0,
+          "title": "Page Index",
+          "type": "integer"
+        },
+        "attempt": {
+          "minimum": 1,
+          "title": "Attempt",
+          "type": "integer"
+        },
+        "retry_scheduled_after_seconds": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Retry Scheduled After Seconds"
+        },
+        "exhausted": {
+          "title": "Exhausted",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "schema_version",
+        "page_index",
+        "attempt",
+        "exhausted"
+      ],
+      "title": "EnterpriseRetryAuditEntry",
+      "type": "object"
+    },
+    "EnterpriseSourceIdentity": {
+      "additionalProperties": false,
+      "properties": {
+        "source_system": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Source System",
+          "type": "string"
+        },
+        "source_tenant": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Source Tenant",
+          "type": "string"
+        },
+        "source_object_type": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Source Object Type",
+          "type": "string"
+        },
+        "external_id": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "External Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source_system",
+        "source_tenant",
+        "source_object_type",
+        "external_id"
+      ],
+      "title": "EnterpriseSourceIdentity",
+      "type": "object"
+    },
+    "EnterpriseSourceReconciliationState": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "enterprise-source-reconciliation-state.v1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "source_identity": {
+          "$ref": "#/$defs/EnterpriseSourceIdentity"
+        },
+        "current_external_version": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Current External Version",
+          "type": "string"
+        },
+        "current_content_hash": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Current Content Hash",
+          "type": "string"
+        },
+        "current_effective_at": {
+          "format": "date-time",
+          "title": "Current Effective At",
+          "type": "string"
+        },
+        "latest_source_updated_at": {
+          "format": "date-time",
+          "title": "Latest Source Updated At",
+          "type": "string"
+        },
+        "deletion_state": {
+          "$ref": "#/$defs/SourceDeletionState"
+        },
+        "mapping_revision": {
+          "minimum": 1,
+          "title": "Mapping Revision",
+          "type": "integer"
+        },
+        "current_mapping_result": {
+          "$ref": "#/$defs/EnterpriseMappingResult"
+        },
+        "seen_version_hashes": {
+          "additionalProperties": {
+            "pattern": "^[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "minProperties": 1,
+          "title": "Seen Version Hashes",
+          "type": "object"
+        }
+      },
+      "required": [
+        "schema_version",
+        "source_identity",
+        "current_external_version",
+        "current_content_hash",
+        "current_effective_at",
+        "latest_source_updated_at",
+        "deletion_state",
+        "mapping_revision",
+        "current_mapping_result",
+        "seen_version_hashes"
+      ],
+      "title": "EnterpriseSourceReconciliationState",
+      "type": "object"
+    },
+    "EnterpriseSyncAuditEntry": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "enterprise-sync-audit-entry.v1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "audit_id": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Audit Id",
+          "type": "string"
+        },
+        "page_index": {
+          "minimum": 0,
+          "title": "Page Index",
+          "type": "integer"
+        },
+        "record_index": {
+          "minimum": 0,
+          "title": "Record Index",
+          "type": "integer"
+        },
+        "source_identity": {
+          "$ref": "#/$defs/EnterpriseSourceIdentity"
+        },
+        "external_version": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "External Version",
+          "type": "string"
+        },
+        "content_hash": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Content Hash",
+          "type": "string"
+        },
+        "disposition": {
+          "$ref": "#/$defs/EnterpriseSyncDisposition"
+        },
+        "reason_code": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EnterpriseSyncReasonCode"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "mapping_reason_codes": {
+          "items": {
+            "$ref": "#/$defs/MappingReasonCode"
+          },
+          "title": "Mapping Reason Codes",
+          "type": "array"
+        },
+        "mapping_revision": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Mapping Revision"
+        }
+      },
+      "required": [
+        "schema_version",
+        "audit_id",
+        "page_index",
+        "record_index",
+        "source_identity",
+        "external_version",
+        "content_hash",
+        "disposition"
+      ],
+      "title": "EnterpriseSyncAuditEntry",
+      "type": "object"
+    },
+    "EnterpriseSyncCheckpoint": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "enterprise-sync-checkpoint.v1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "checkpoint_version": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Checkpoint Version",
+          "type": "string"
+        },
+        "mode": {
+          "$ref": "#/$defs/EnterpriseSyncMode"
+        },
+        "next_page_index": {
+          "minimum": 0,
+          "title": "Next Page Index",
+          "type": "integer"
+        },
+        "next_page_token": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Next Page Token"
+        },
+        "cursor_value": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cursor Value"
+        },
+        "source_states": {
+          "items": {
+            "$ref": "#/$defs/EnterpriseSourceReconciliationState"
+          },
+          "title": "Source States",
+          "type": "array"
+        },
+        "ordered_event_identities": {
+          "items": {
+            "$ref": "#/$defs/EnterpriseSourceIdentity"
+          },
+          "title": "Ordered Event Identities",
+          "type": "array"
+        },
+        "audit_entries": {
+          "items": {
+            "$ref": "#/$defs/EnterpriseSyncAuditEntry"
+          },
+          "title": "Audit Entries",
+          "type": "array"
+        },
+        "retry_entries": {
+          "items": {
+            "$ref": "#/$defs/EnterpriseRetryAuditEntry"
+          },
+          "title": "Retry Entries",
+          "type": "array"
+        }
+      },
+      "required": [
+        "schema_version",
+        "checkpoint_version",
+        "mode",
+        "next_page_index"
+      ],
+      "title": "EnterpriseSyncCheckpoint",
+      "type": "object"
+    },
+    "EnterpriseSyncDisposition": {
+      "enum": [
+        "APPLIED",
+        "NO_CHANGE",
+        "QUARANTINED",
+        "REJECTED"
+      ],
+      "title": "EnterpriseSyncDisposition",
+      "type": "string"
+    },
+    "EnterpriseSyncMode": {
+      "enum": [
+        "FULL",
+        "INCREMENTAL"
+      ],
+      "title": "EnterpriseSyncMode",
+      "type": "string"
+    },
+    "EnterpriseSyncReasonCode": {
+      "enum": [
+        "MAPPING_APPLIED",
+        "CONTENT_UNCHANGED",
+        "STALE_SOURCE_UPDATE",
+        "TOMBSTONE_APPLIED",
+        "ACCESS_RESTRICTION_APPLIED"
+      ],
+      "title": "EnterpriseSyncReasonCode",
+      "type": "string"
+    },
+    "EnterpriseSyncStatus": {
+      "enum": [
+        "COMPLETED",
+        "PAUSED",
+        "FAILED"
+      ],
+      "title": "EnterpriseSyncStatus",
+      "type": "string"
+    },
+    "JsonValue": {},
+    "MappingDisposition": {
+      "enum": [
+        "ACCEPT",
+        "QUARANTINE",
+        "REJECT"
+      ],
+      "title": "MappingDisposition",
+      "type": "string"
+    },
+    "MappingReasonCode": {
+      "enum": [
+        "MAPPED",
+        "PROFILE_NOT_FOUND",
+        "REQUIRED_FIELD_MISSING",
+        "STATUS_UNMAPPED",
+        "DUPLICATE_SOURCE_VERSION",
+        "SOURCE_VERSION_CONFLICT",
+        "OUT_OF_ORDER_SOURCE_UPDATE",
+        "SOURCE_URL_CHANGED",
+        "SOURCE_DELETED",
+        "SOURCE_RESTRICTED",
+        "LATE_ARRIVAL"
+      ],
+      "title": "MappingReasonCode",
+      "type": "string"
+    },
+    "SourceDeletionState": {
+      "enum": [
+        "ACTIVE",
+        "DELETED",
+        "RESTRICTED"
+      ],
+      "title": "SourceDeletionState",
+      "type": "string"
+    },
+    "SourceSpan": {
+      "additionalProperties": false,
+      "properties": {
+        "json_pointer": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Json Pointer",
+          "type": "string"
+        },
+        "start_offset": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Start Offset"
+        },
+        "end_offset": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "End Offset"
+        }
+      },
+      "required": [
+        "json_pointer"
+      ],
+      "title": "SourceSpan",
+      "type": "object"
+    },
+    "StructuredCandidateKind": {
+      "enum": [
+        "PROJECT",
+        "WORK_ITEM",
+        "ISSUE",
+        "EVIDENCE",
+        "EVENT"
+      ],
+      "title": "StructuredCandidateKind",
+      "type": "string"
+    },
+    "StructuredMappingCandidate": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "enterprise-structured-candidate.v1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "candidate_kind": {
+          "$ref": "#/$defs/StructuredCandidateKind"
+        },
+        "source_identity": {
+          "$ref": "#/$defs/EnterpriseSourceIdentity"
+        },
+        "external_version": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "External Version",
+          "type": "string"
+        },
+        "mapping_profile_id": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Mapping Profile Id",
+          "type": "string"
+        },
+        "mapping_version": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Mapping Version",
+          "type": "string"
+        },
+        "values": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonValue"
+          },
+          "minProperties": 1,
+          "title": "Values",
+          "type": "object"
+        },
+        "source_spans": {
+          "items": {
+            "$ref": "#/$defs/SourceSpan"
+          },
+          "minItems": 1,
+          "title": "Source Spans",
+          "type": "array"
+        }
+      },
+      "required": [
+        "schema_version",
+        "candidate_kind",
+        "source_identity",
+        "external_version",
+        "mapping_profile_id",
+        "mapping_version",
+        "values",
+        "source_spans"
+      ],
+      "title": "StructuredMappingCandidate",
+      "type": "object"
+    },
+    "UnstructuredCandidateKind": {
+      "enum": [
+        "CLAIM",
+        "RISK",
+        "ASSUMPTION"
+      ],
+      "title": "UnstructuredCandidateKind",
+      "type": "string"
+    },
+    "UnstructuredMappingCandidate": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "enterprise-unstructured-candidate.v1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "candidate_kind": {
+          "$ref": "#/$defs/UnstructuredCandidateKind"
+        },
+        "source_identity": {
+          "$ref": "#/$defs/EnterpriseSourceIdentity"
+        },
+        "external_version": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "External Version",
+          "type": "string"
+        },
+        "mapping_profile_id": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Mapping Profile Id",
+          "type": "string"
+        },
+        "mapping_version": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Mapping Version",
+          "type": "string"
+        },
+        "extractor_version": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Extractor Version",
+          "type": "string"
+        },
+        "review_status": {
+          "const": "UNREVIEWED",
+          "title": "Review Status",
+          "type": "string"
+        },
+        "extractor_confidence": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Extractor Confidence"
+        },
+        "text": {
+          "maxLength": 65536,
+          "minLength": 1,
+          "title": "Text",
+          "type": "string"
+        },
+        "source_span": {
+          "$ref": "#/$defs/SourceSpan"
+        }
+      },
+      "required": [
+        "schema_version",
+        "candidate_kind",
+        "source_identity",
+        "external_version",
+        "mapping_profile_id",
+        "mapping_version",
+        "extractor_version",
+        "review_status",
+        "text",
+        "source_span"
+      ],
+      "title": "UnstructuredMappingCandidate",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "enterprise-sync-result.v1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "status": {
+      "$ref": "#/$defs/EnterpriseSyncStatus"
+    },
+    "checkpoint": {
+      "$ref": "#/$defs/EnterpriseSyncCheckpoint"
+    },
+    "processed_page_count": {
+      "minimum": 0,
+      "title": "Processed Page Count",
+      "type": "integer"
+    },
+    "processed_record_count": {
+      "minimum": 0,
+      "title": "Processed Record Count",
+      "type": "integer"
+    },
+    "failed_page_index": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Failed Page Index"
+    }
+  },
+  "required": [
+    "schema_version",
+    "status",
+    "checkpoint",
+    "processed_page_count",
+    "processed_record_count"
+  ],
+  "title": "EnterpriseSyncResult",
+  "type": "object"
+}

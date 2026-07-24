@@ -147,6 +147,35 @@ if ($projectFixtures.Count -ne 3) {
         throw "Missing ENT-B artifact: $_"
     }
 }
+@(
+    "enterprise-sync-checkpoint.v1",
+    "enterprise-sync-result.v1",
+    "enterprise-sync-fixture-corpus.v1",
+    "EnterpriseSyncMode",
+    "EnterpriseSyncStatus",
+    "EnterpriseSyncDisposition",
+    "CONTENT_UNCHANGED",
+    "STALE_SOURCE_UPDATE",
+    "TOMBSTONE_APPLIED",
+    "ACCESS_RESTRICTION_APPLIED"
+) | ForEach-Object {
+    if (-not $contract.Contains($_)) {
+        throw "Canonical contract is missing ENT-C term: $_"
+    }
+}
+@(
+    "backend/src/soc_ot/application/enterprise_sync.py",
+    "backend/tests/test_ent_c_enterprise_sync.py",
+    "contracts/generated/enterprise-sync-checkpoint.v1.schema.json",
+    "contracts/generated/enterprise-sync-result.v1.schema.json",
+    "contracts/generated/enterprise-sync-fixture-corpus.v1.schema.json",
+    "fixtures/enterprise/sync-pages.v1.yaml",
+    "docs/decisions/ADR-0014-deterministic-enterprise-sync-reconciliation.md"
+) | ForEach-Object {
+    if (-not (Test-Path -LiteralPath (Join-Path $root $_) -PathType Leaf)) {
+        throw "Missing ENT-C artifact: $_"
+    }
+}
 if ($projectPlan -notmatch "corpus v2: development regression 8, validation 2, sealed unseen 2") {
     throw "PROJECT_PLAN.md does not describe the canonical 8/2/2 evaluation partition."
 }

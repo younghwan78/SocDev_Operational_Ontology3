@@ -1,6 +1,6 @@
 # Master execution plan
 
-> Status: IMPLEMENTED THROUGH I7 REPLAY + STEP 5 B2 RUNTIME + UX-K LOCAL FIXTURE UX RELEASE 1 + ENT-A/B; OPS-F HUMAN OBSERVATION DEFERRED AT 0/5 PER CONDITION, ENT-C NEXT
+> Status: IMPLEMENTED THROUGH I7 REPLAY + STEP 5 B2 RUNTIME + UX-K LOCAL FIXTURE UX RELEASE 1 + ENT-A~C; OPS-F HUMAN OBSERVATION DEFERRED AT 0/5 PER CONDITION, ENT-D NEXT
 > Date: 2026-07-25
 > Scope: local fixture-only PoC
 
@@ -437,7 +437,8 @@ After OPS-F, the only allowed order is:
 |UX-K|Freeze Local UX Release 1 across the full Project-to-Decision journey|Complete: responsive/accessibility/recovery/history/full-regression Gate and release pins pass|
 |ENT-A|Source-neutral record, stable identity/time, access metadata and application ports|Complete: ADR-0012 accepted, strict contract/schema/boundary tests pass; no adapter or persistence|
 |ENT-B|Versioned mapping registry, candidate provenance and dirty-source disposition|Complete: ADR-0013 accepted, 10 normal/dirty patterns and explicit accept/quarantine/reject pass|
-|ENT-C~F|Sync/reconciliation, dry-run/quarantine, security emulator and internal handoff kit|ENT-C next; fixture-only tests, no vendor API, company data, credential or real ACL|
+|ENT-C|Deterministic sync, idempotency, retry, tombstone and reconciliation|Complete: ADR-0014 accepted, cursor/page-token resume, bounded retry, stale protection and full/incremental parity pass|
+|ENT-D~F|Dry-run/quarantine, security emulator and internal handoff kit|ENT-D next; fixture-only tests, no vendor API, company data, credential or real ACL|
 |C0/C1|Internal configuration, sanitized schema-fit, one-project read-only smoke and pilot|Company security, data owner and human authority approvals|
 
 The detailed work packages and transition criteria are owned by
@@ -622,7 +623,23 @@ ENT-B implementation record (2026-07-25):
   tombstone application and reconciliation remain ENT-C
 - 15 focused tests plus full non-PostgreSQL regression, generated-contract, architecture, plan,
   hidden, secret and fixture-hash checks pass; no API, database, Frontend, vendor adapter or company data
-- ENT-C cursor, idempotency, retry, tombstone application and full/incremental reconciliation is next
+- ENT-C cursor, idempotency, retry, tombstone application and full/incremental reconciliation passes
+  with a persistence-independent deterministic checkpoint; ENT-D no-write dry-run and quarantine is next
+
+ENT-C implementation record (2026-07-25):
+
+- ADR-0014 accepts a persistence-independent checkpoint with next page index/token, committed cursor,
+  reconciled source state, deterministic record audit and bounded retry audit
+- exact version/hash replay and unchanged content are no-ops; version/hash conflict and stale active
+  content are quarantined without mapping-revision inflation
+- deleted/restricted metadata wins over later-arriving stale active content, and late-arrival reasons
+  remain explicit rather than rewriting enterprise time semantics
+- two Event records arriving in reverse order produce a stable effective-time order; one-shot FULL
+  and paused/resumed INCREMENTAL runs have identical reconciled state and record audit
+- the hash-pinned four-page synthetic fixture, three generated contracts and 10 focused tests pass;
+  full non-PostgreSQL regression is 206 passed with all required repository checks
+- there is no route, persistence, canonical import, dry-run CLI, vendor adapter, real ACL, credential,
+  company data or write-back; ENT-D is next
 
 ## 7. Crosswalk to supporting plans
 

@@ -1,0 +1,223 @@
+schema_version: enterprise-sync-fixture-corpus.v1
+corpus_version: synthetic-enterprise-sync.1
+policy:
+  schema_version: enterprise-sync-policy.v1
+  policy_version: enterprise-sync-policy.1
+  max_attempts_per_page: 3
+  retry_backoff_seconds: [1, 2]
+transient_failures_before_success:
+  1: 2
+pages:
+  - schema_version: enterprise-sync-page.v1
+    page_index: 0
+    page_token: synthetic-page-0
+    cursor_value: synthetic-cursor-100
+    records:
+      - schema_version: enterprise-source-record.v1
+        source_system: synthetic-work-tracker
+        source_tenant: lab-a
+        source_object_type: project
+        external_id: PROJECT-SYNC
+        external_version: "1"
+        effective_at: 2026-07-21T09:00:00+09:00
+        observed_at: 2026-07-21T09:01:00+09:00
+        source_updated_at: 2026-07-21T09:00:00+09:00
+        ingested_at: 2026-07-21T09:02:00+09:00
+        content_hash: "1111111111111111111111111111111111111111111111111111111111111111"
+        source_url: https://work.invalid/projects/PROJECT-SYNC
+        deletion_state: ACTIVE
+        source_acl_ref: acl-ref:project-sync
+        classification: INTERNAL
+        payload:
+          project_id: PROJECT-SYNC
+          title: Synthetic synchronization project
+          lifecycle: presilicon
+      - schema_version: enterprise-source-record.v1
+        source_system: synthetic-work-tracker
+        source_tenant: lab-a
+        source_object_type: work-item
+        external_id: WI-SYNC
+        external_version: "1"
+        effective_at: 2026-07-21T09:10:00+09:00
+        observed_at: 2026-07-21T09:11:00+09:00
+        source_updated_at: 2026-07-21T09:10:00+09:00
+        ingested_at: 2026-07-21T09:12:00+09:00
+        content_hash: "2222222222222222222222222222222222222222222222222222222222222222"
+        source_url: https://work.invalid/items/WI-SYNC
+        deletion_state: ACTIVE
+        source_acl_ref: acl-ref:project-sync
+        classification: INTERNAL
+        payload:
+          item_id: WI-SYNC
+          title: Synthetic interface sign-off
+          status: doing
+          owner: integration
+
+  - schema_version: enterprise-sync-page.v1
+    page_index: 1
+    page_token: synthetic-page-1
+    cursor_value: synthetic-cursor-200
+    records:
+      - schema_version: enterprise-source-record.v1
+        source_system: synthetic-work-tracker
+        source_tenant: lab-a
+        source_object_type: work-item
+        external_id: WI-SYNC
+        external_version: "1"
+        effective_at: 2026-07-21T09:10:00+09:00
+        observed_at: 2026-07-21T09:15:00+09:00
+        source_updated_at: 2026-07-21T09:10:00+09:00
+        ingested_at: 2026-07-21T09:16:00+09:00
+        content_hash: "2222222222222222222222222222222222222222222222222222222222222222"
+        source_url: https://work.invalid/items/WI-SYNC
+        deletion_state: ACTIVE
+        source_acl_ref: acl-ref:project-sync
+        classification: INTERNAL
+        payload:
+          item_id: WI-SYNC
+          title: Synthetic interface sign-off
+          status: doing
+          owner: integration
+      - schema_version: enterprise-source-record.v1
+        source_system: synthetic-work-tracker
+        source_tenant: lab-a
+        source_object_type: work-item
+        external_id: WI-SYNC
+        external_version: "2"
+        effective_at: 2026-07-21T10:00:00+09:00
+        observed_at: 2026-07-21T10:01:00+09:00
+        source_updated_at: 2026-07-21T10:00:00+09:00
+        ingested_at: 2026-07-21T10:02:00+09:00
+        content_hash: "3333333333333333333333333333333333333333333333333333333333333333"
+        source_url: https://work.invalid/items/WI-SYNC
+        deletion_state: ACTIVE
+        source_acl_ref: acl-ref:project-sync
+        classification: INTERNAL
+        payload:
+          item_id: WI-SYNC
+          title: Synthetic interface sign-off
+          status: done
+          owner: integration
+
+  - schema_version: enterprise-sync-page.v1
+    page_index: 2
+    page_token: synthetic-page-2
+    cursor_value: synthetic-cursor-300
+    records:
+      - schema_version: enterprise-source-record.v1
+        source_system: synthetic-knowledge-base
+        source_tenant: lab-a
+        source_object_type: page
+        external_id: PAGE-LATE
+        external_version: "1"
+        effective_at: 2026-07-19T08:00:00+09:00
+        observed_at: 2026-07-21T12:00:00+09:00
+        source_updated_at: 2026-07-21T11:55:00+09:00
+        ingested_at: 2026-07-21T12:01:00+09:00
+        content_hash: "4444444444444444444444444444444444444444444444444444444444444444"
+        source_url: https://knowledge.invalid/pages/PAGE-LATE
+        deletion_state: ACTIVE
+        source_acl_ref: acl-ref:project-sync
+        classification: INTERNAL
+        payload:
+          page_id: PAGE-LATE
+          title: Synthetic late evidence
+          claim_text: Synthetic measurement is pending review.
+          risk_text: Synthetic timing margin may narrow.
+          assumption_text: Synthetic workload remains unchanged.
+      - schema_version: enterprise-source-record.v1
+        source_system: synthetic-work-tracker
+        source_tenant: lab-a
+        source_object_type: work-item
+        external_id: WI-SYNC
+        external_version: "3"
+        effective_at: 2026-07-21T12:10:00+09:00
+        observed_at: 2026-07-21T12:11:00+09:00
+        source_updated_at: 2026-07-21T12:10:00+09:00
+        ingested_at: 2026-07-21T12:12:00+09:00
+        content_hash: "5555555555555555555555555555555555555555555555555555555555555555"
+        source_url: https://work.invalid/items/WI-SYNC
+        deletion_state: DELETED
+        source_acl_ref: acl-ref:project-sync
+        classification: INTERNAL
+        payload: null
+      - schema_version: enterprise-source-record.v1
+        source_system: synthetic-work-tracker
+        source_tenant: lab-a
+        source_object_type: event
+        external_id: EVENT-LATER
+        external_version: "1"
+        effective_at: 2026-07-21T11:30:00+09:00
+        observed_at: 2026-07-21T12:20:00+09:00
+        source_updated_at: 2026-07-21T11:31:00+09:00
+        ingested_at: 2026-07-21T12:21:00+09:00
+        content_hash: "8888888888888888888888888888888888888888888888888888888888888888"
+        source_url: https://work.invalid/events/EVENT-LATER
+        deletion_state: ACTIVE
+        source_acl_ref: acl-ref:project-sync
+        classification: INTERNAL
+        payload:
+          event_id: EVENT-LATER
+          event_type: evidence-change
+          summary: Synthetic later event arrived first
+      - schema_version: enterprise-source-record.v1
+        source_system: synthetic-work-tracker
+        source_tenant: lab-a
+        source_object_type: event
+        external_id: EVENT-EARLIER
+        external_version: "1"
+        effective_at: 2026-07-21T10:30:00+09:00
+        observed_at: 2026-07-21T12:22:00+09:00
+        source_updated_at: 2026-07-21T10:31:00+09:00
+        ingested_at: 2026-07-21T12:23:00+09:00
+        content_hash: "9999999999999999999999999999999999999999999999999999999999999999"
+        source_url: https://work.invalid/events/EVENT-EARLIER
+        deletion_state: ACTIVE
+        source_acl_ref: acl-ref:project-sync
+        classification: INTERNAL
+        payload:
+          event_id: EVENT-EARLIER
+          event_type: blocker-change
+          summary: Synthetic earlier event arrived second
+
+  - schema_version: enterprise-sync-page.v1
+    page_index: 3
+    page_token: synthetic-page-3
+    cursor_value: synthetic-cursor-400
+    records:
+      - schema_version: enterprise-source-record.v1
+        source_system: synthetic-work-tracker
+        source_tenant: lab-a
+        source_object_type: work-item
+        external_id: WI-SYNC
+        external_version: "2-stale"
+        effective_at: 2026-07-21T10:30:00+09:00
+        observed_at: 2026-07-21T13:00:00+09:00
+        source_updated_at: 2026-07-21T10:30:00+09:00
+        ingested_at: 2026-07-21T13:01:00+09:00
+        content_hash: "6666666666666666666666666666666666666666666666666666666666666666"
+        source_url: https://work.invalid/items/WI-SYNC
+        deletion_state: ACTIVE
+        source_acl_ref: acl-ref:project-sync
+        classification: INTERNAL
+        payload:
+          item_id: WI-SYNC
+          title: Synthetic stale active copy
+          status: doing
+          owner: integration
+      - schema_version: enterprise-source-record.v1
+        source_system: synthetic-knowledge-base
+        source_tenant: lab-a
+        source_object_type: page
+        external_id: PAGE-LATE
+        external_version: "2"
+        effective_at: 2026-07-21T13:10:00+09:00
+        observed_at: 2026-07-21T13:11:00+09:00
+        source_updated_at: 2026-07-21T13:10:00+09:00
+        ingested_at: 2026-07-21T13:12:00+09:00
+        content_hash: "7777777777777777777777777777777777777777777777777777777777777777"
+        source_url: https://knowledge.invalid/pages/PAGE-LATE
+        deletion_state: RESTRICTED
+        source_acl_ref: acl-ref:restricted
+        classification: RESTRICTED
+        payload: null

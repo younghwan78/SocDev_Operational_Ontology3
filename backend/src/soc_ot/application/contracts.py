@@ -18,6 +18,11 @@ from soc_ot.application.enterprise_mapping import (
     EnterpriseMappingRegistry,
     EnterpriseMappingResult,
 )
+from soc_ot.application.enterprise_sync import (
+    EnterpriseSyncCheckpoint,
+    EnterpriseSyncFixtureCorpus,
+    EnterpriseSyncResult,
+)
 from soc_ot.application.evaluation import CaseEvaluation, EvaluationSummary
 from soc_ot.application.evaluation_manifest import EvaluationManifest
 from soc_ot.application.outcomes import OutcomeSnapshot
@@ -55,6 +60,9 @@ CONTRACT_MODELS: dict[str, type[BaseModel]] = {
     "enterprise-mapping-registry.v1": EnterpriseMappingRegistry,
     "enterprise-mapping-result.v1": EnterpriseMappingResult,
     "enterprise-dirty-fixture-corpus.v1": EnterpriseDirtyFixtureCorpus,
+    "enterprise-sync-checkpoint.v1": EnterpriseSyncCheckpoint,
+    "enterprise-sync-result.v1": EnterpriseSyncResult,
+    "enterprise-sync-fixture-corpus.v1": EnterpriseSyncFixtureCorpus,
     "project-list-item.v1": ProjectListItemProjection,
     "project-situation.v1": ProjectSituationProjection,
     "project-risk-summary.v1": ProjectRiskSummary,

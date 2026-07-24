@@ -544,6 +544,43 @@ Deleted and restricted source records create metadata-only `EVENT` candidates. E
 route, persistence, canonical Project mutation, Agent input, authentication, real ACL, sync, durable
 quarantine or write-back.
 
-## 13. Compatibility gate
+## 13. Accepted ENT-C sync and reconciliation boundary
+
+ADR-0014 accepts:
+
+```text
+enterprise-sync-checkpoint.v1
+enterprise-sync-result.v1
+enterprise-sync-fixture-corpus.v1
+
+EnterpriseSyncMode        = FULL | INCREMENTAL
+EnterpriseSyncStatus      = COMPLETED | PAUSED | FAILED
+EnterpriseSyncDisposition = APPLIED | NO_CHANGE | QUARANTINED | REJECTED
+
+MAPPING_APPLIED
+CONTENT_UNCHANGED
+STALE_SOURCE_UPDATE
+TOMBSTONE_APPLIED
+ACCESS_RESTRICTION_APPLIED
+```
+
+The checkpoint records the next page index/token, last committed cursor, stable-identity source
+states, deterministic record audit and bounded retry audit. A checkpoint advances only after a whole
+page is reconciled. A completed checkpoint replay is an exact no-op.
+
+Identity/version/hash repetition is `NO_CHANGE`; a version/hash conflict is `QUARANTINED`. Unchanged
+content does not increment `mapping_revision`. Active content older than the maximum reconciled
+`source_updated_at` is quarantined. `DELETED` and `RESTRICTED` metadata records take precedence over
+later-arriving stale active content. Late-arrival retains ENT-B's `LATE_ARRIVAL` audit reason.
+
+`EnterpriseSyncPolicy` declares maximum page attempts and each backoff duration. The reference
+engine records schedules but does not sleep. Exhaustion returns the same page token with `FAILED`.
+`mapping_revision` is only candidate-state revision inside this checkpoint; it is not canonical
+Project/Event persistence.
+
+ENT-C adds no route, database, canonical import, durable quarantine, vendor adapter, real ACL,
+credential, company data, Agent input or write-back.
+
+## 14. Compatibility gate
 
 Any change to a state code, DecisionType, endpoint, time field, or version name updates this contract first. CI then checks generated schemas, OpenAPI, Frontend client, fixture manifests, runbook examples, and documentation references.
