@@ -13,6 +13,11 @@ from soc_ot.application.decision_evaluation_responses import (
 )
 from soc_ot.application.development_twin import DevelopmentTimelineProjection
 from soc_ot.application.enterprise_ingestion import EnterpriseSourceRecord
+from soc_ot.application.enterprise_mapping import (
+    EnterpriseDirtyFixtureCorpus,
+    EnterpriseMappingRegistry,
+    EnterpriseMappingResult,
+)
 from soc_ot.application.evaluation import CaseEvaluation, EvaluationSummary
 from soc_ot.application.evaluation_manifest import EvaluationManifest
 from soc_ot.application.outcomes import OutcomeSnapshot
@@ -47,6 +52,9 @@ CONTRACT_MODELS: dict[str, type[BaseModel]] = {
     "development-event.v1": DevelopmentEvent,
     "development-project.v1": DevelopmentProject,
     "enterprise-source-record.v1": EnterpriseSourceRecord,
+    "enterprise-mapping-registry.v1": EnterpriseMappingRegistry,
+    "enterprise-mapping-result.v1": EnterpriseMappingResult,
+    "enterprise-dirty-fixture-corpus.v1": EnterpriseDirtyFixtureCorpus,
     "project-list-item.v1": ProjectListItemProjection,
     "project-situation.v1": ProjectSituationProjection,
     "project-risk-summary.v1": ProjectRiskSummary,

@@ -25,6 +25,7 @@ if (-not $packetImports) {
 
 $enterpriseFiles = @(
     (Join-Path $root "backend/src/soc_ot/application/enterprise_ingestion.py"),
+    (Join-Path $root "backend/src/soc_ot/application/enterprise_mapping.py"),
     (Join-Path $root "backend/src/soc_ot/application/ports.py")
 )
 $enterpriseForbidden = Select-String -Path $enterpriseFiles `

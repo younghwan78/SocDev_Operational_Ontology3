@@ -1,7 +1,7 @@
 # Master execution plan
 
-> Status: IMPLEMENTED THROUGH I7 REPLAY + STEP 5 B2 RUNTIME + UX-K LOCAL FIXTURE UX RELEASE 1 + ENT-A; OPS-F HUMAN OBSERVATION DEFERRED AT 0/5 PER CONDITION, ENT-B NEXT
-> Date: 2026-07-24
+> Status: IMPLEMENTED THROUGH I7 REPLAY + STEP 5 B2 RUNTIME + UX-K LOCAL FIXTURE UX RELEASE 1 + ENT-A/B; OPS-F HUMAN OBSERVATION DEFERRED AT 0/5 PER CONDITION, ENT-C NEXT
+> Date: 2026-07-25
 > Scope: local fixture-only PoC
 
 Frozen follow-up order: `OPS-F human observations deferred → UX-I complete → UX-J → UX-K Local UX Release 1 →
@@ -436,7 +436,8 @@ After OPS-F, the only allowed order is:
 |UX-J|Separate immutable builder initial/final response from simulated advice|Complete: advice cannot overwrite builder response; accept/modify/reject and anchoring fields are measurable|
 |UX-K|Freeze Local UX Release 1 across the full Project-to-Decision journey|Complete: responsive/accessibility/recovery/history/full-regression Gate and release pins pass|
 |ENT-A|Source-neutral record, stable identity/time, access metadata and application ports|Complete: ADR-0012 accepted, strict contract/schema/boundary tests pass; no adapter or persistence|
-|ENT-B~F|Dirty fixtures, mapping, sync/dry-run/quarantine and internal handoff kit|ENT-B next; fixture-only tests, no vendor API, company data, credential or real ACL|
+|ENT-B|Versioned mapping registry, candidate provenance and dirty-source disposition|Complete: ADR-0013 accepted, 10 normal/dirty patterns and explicit accept/quarantine/reject pass|
+|ENT-C~F|Sync/reconciliation, dry-run/quarantine, security emulator and internal handoff kit|ENT-C next; fixture-only tests, no vendor API, company data, credential or real ACL|
 |C0/C1|Internal configuration, sanitized schema-fit, one-project read-only smoke and pilot|Company security, data owner and human authority approvals|
 
 The detailed work packages and transition criteria are owned by
@@ -604,6 +605,24 @@ ENT-A implementation record (2026-07-24):
   adds no HTTP route, database migration, source adapter, mapping, sync, authentication or write-back
 - generated schema, 15 focused tests, contract/architecture/plan/hidden/secret checks and the full
   non-PostgreSQL regression pass; ENT-B synthetic dirty fixture and mapping registry is next
+
+ENT-B implementation record (2026-07-25):
+
+- ADR-0013 accepts `enterprise-mapping-registry.v1`, `enterprise-mapping-result.v1` and
+  `enterprise-dirty-fixture-corpus.v1`; mapping outputs candidates and never mutates canonical truth
+- five synthetic profiles map generic project/work-item/issue/event/page records to versioned
+  PROJECT/WORK_ITEM/ISSUE/EVENT/EVIDENCE candidates; direct/status field mappings and late-arrival
+  policy are explicit and reproducible
+- structured candidates require source identity/version, mapping profile/version and JSON-pointer
+  spans; unstructured CLAIM/RISK/ASSUMPTION candidates additionally require extractor version,
+  character offsets and fixed `UNREVIEWED` status, with no invented FACT or confidence
+- the hash-pinned corpus covers normal, missing field, unknown status, duplicate, out-of-order, moved,
+  deleted, restricted, conflicting and late-evidence patterns with frozen dispositions and reasons
+- deleted/restricted inputs expose no source payload and create metadata-only EVENT candidates;
+  tombstone application and reconciliation remain ENT-C
+- 15 focused tests plus full non-PostgreSQL regression, generated-contract, architecture, plan,
+  hidden, secret and fixture-hash checks pass; no API, database, Frontend, vendor adapter or company data
+- ENT-C cursor, idempotency, retry, tombstone application and full/incremental reconciliation is next
 
 ## 7. Crosswalk to supporting plans
 

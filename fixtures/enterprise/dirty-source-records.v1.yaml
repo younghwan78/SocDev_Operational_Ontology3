@@ -1,0 +1,336 @@
+schema_version: enterprise-dirty-fixture-corpus.v1
+corpus_version: synthetic-dirty-source.1
+cases:
+  - case_id: ENT-B-NORMAL
+    pattern: NORMAL
+    records:
+      - schema_version: enterprise-source-record.v1
+        source_system: synthetic-work-tracker
+        source_tenant: lab-a
+        source_object_type: work-item
+        external_id: WI-NORMAL
+        external_version: "1"
+        effective_at: 2026-07-20T09:00:00+09:00
+        observed_at: 2026-07-20T09:05:00+09:00
+        source_updated_at: 2026-07-20T09:04:00+09:00
+        ingested_at: 2026-07-20T09:06:00+09:00
+        content_hash: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+        source_url: https://work.invalid/items/WI-NORMAL
+        deletion_state: ACTIVE
+        source_acl_ref: acl-ref:project-v
+        classification: INTERNAL
+        payload:
+          item_id: WI-NORMAL
+          title: Synthetic interface closure
+          status: doing
+          owner: architecture
+    expected_results:
+      - disposition: ACCEPT
+        required_reason_codes: [MAPPED]
+
+  - case_id: ENT-B-MISSING-FIELD
+    pattern: MISSING_FIELD
+    records:
+      - schema_version: enterprise-source-record.v1
+        source_system: synthetic-work-tracker
+        source_tenant: lab-a
+        source_object_type: work-item
+        external_id: WI-MISSING
+        external_version: "1"
+        effective_at: 2026-07-20T10:00:00+09:00
+        observed_at: 2026-07-20T10:05:00+09:00
+        source_updated_at: 2026-07-20T10:04:00+09:00
+        ingested_at: 2026-07-20T10:06:00+09:00
+        content_hash: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+        source_url: https://work.invalid/items/WI-MISSING
+        deletion_state: ACTIVE
+        source_acl_ref: acl-ref:project-v
+        classification: INTERNAL
+        payload:
+          item_id: WI-MISSING
+          title: Missing synthetic owner
+          status: doing
+    expected_results:
+      - disposition: QUARANTINE
+        required_reason_codes: [REQUIRED_FIELD_MISSING]
+
+  - case_id: ENT-B-UNKNOWN-STATUS
+    pattern: UNKNOWN_STATUS
+    records:
+      - schema_version: enterprise-source-record.v1
+        source_system: synthetic-work-tracker
+        source_tenant: lab-a
+        source_object_type: work-item
+        external_id: WI-UNKNOWN
+        external_version: "1"
+        effective_at: 2026-07-20T11:00:00+09:00
+        observed_at: 2026-07-20T11:05:00+09:00
+        source_updated_at: 2026-07-20T11:04:00+09:00
+        ingested_at: 2026-07-20T11:06:00+09:00
+        content_hash: cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+        source_url: https://work.invalid/items/WI-UNKNOWN
+        deletion_state: ACTIVE
+        source_acl_ref: acl-ref:project-v
+        classification: INTERNAL
+        payload:
+          item_id: WI-UNKNOWN
+          title: Unknown synthetic status
+          status: waiting_external
+          owner: validation
+    expected_results:
+      - disposition: QUARANTINE
+        required_reason_codes: [STATUS_UNMAPPED]
+
+  - case_id: ENT-B-DUPLICATE
+    pattern: DUPLICATE_UPDATE
+    records:
+      - &duplicate_record
+        schema_version: enterprise-source-record.v1
+        source_system: synthetic-work-tracker
+        source_tenant: lab-a
+        source_object_type: work-item
+        external_id: WI-DUPLICATE
+        external_version: "3"
+        effective_at: 2026-07-20T12:00:00+09:00
+        observed_at: 2026-07-20T12:05:00+09:00
+        source_updated_at: 2026-07-20T12:04:00+09:00
+        ingested_at: 2026-07-20T12:06:00+09:00
+        content_hash: dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+        source_url: https://work.invalid/items/WI-DUPLICATE
+        deletion_state: ACTIVE
+        source_acl_ref: acl-ref:project-v
+        classification: INTERNAL
+        payload:
+          item_id: WI-DUPLICATE
+          title: Duplicate synthetic update
+          status: ready
+          owner: system
+      - *duplicate_record
+    expected_results:
+      - disposition: ACCEPT
+        required_reason_codes: [MAPPED]
+      - disposition: REJECT
+        required_reason_codes: [DUPLICATE_SOURCE_VERSION]
+
+  - case_id: ENT-B-OUT-OF-ORDER
+    pattern: OUT_OF_ORDER_EVENT
+    records:
+      - schema_version: enterprise-source-record.v1
+        source_system: synthetic-work-tracker
+        source_tenant: lab-a
+        source_object_type: work-item
+        external_id: WI-ORDER
+        external_version: "2"
+        effective_at: 2026-07-21T12:00:00+09:00
+        observed_at: 2026-07-21T12:05:00+09:00
+        source_updated_at: 2026-07-21T12:04:00+09:00
+        ingested_at: 2026-07-21T12:06:00+09:00
+        content_hash: eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+        source_url: https://work.invalid/items/WI-ORDER
+        deletion_state: ACTIVE
+        source_acl_ref: acl-ref:project-v
+        classification: INTERNAL
+        payload:
+          item_id: WI-ORDER
+          title: Newer synthetic update
+          status: doing
+          owner: system
+      - schema_version: enterprise-source-record.v1
+        source_system: synthetic-work-tracker
+        source_tenant: lab-a
+        source_object_type: work-item
+        external_id: WI-ORDER
+        external_version: "1"
+        effective_at: 2026-07-20T12:00:00+09:00
+        observed_at: 2026-07-20T12:05:00+09:00
+        source_updated_at: 2026-07-20T12:04:00+09:00
+        ingested_at: 2026-07-21T12:07:00+09:00
+        content_hash: ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+        source_url: https://work.invalid/items/WI-ORDER
+        deletion_state: ACTIVE
+        source_acl_ref: acl-ref:project-v
+        classification: INTERNAL
+        payload:
+          item_id: WI-ORDER
+          title: Older synthetic update
+          status: todo
+          owner: system
+    expected_results:
+      - disposition: ACCEPT
+        required_reason_codes: [MAPPED]
+      - disposition: QUARANTINE
+        required_reason_codes: [OUT_OF_ORDER_SOURCE_UPDATE]
+
+  - case_id: ENT-B-MOVED-PAGE
+    pattern: MOVED_PAGE
+    records:
+      - schema_version: enterprise-source-record.v1
+        source_system: synthetic-knowledge-base
+        source_tenant: lab-a
+        source_object_type: page
+        external_id: PAGE-MOVED
+        external_version: "1"
+        effective_at: 2026-07-20T13:00:00+09:00
+        observed_at: 2026-07-20T13:05:00+09:00
+        source_updated_at: 2026-07-20T13:04:00+09:00
+        ingested_at: 2026-07-20T13:06:00+09:00
+        content_hash: "1111111111111111111111111111111111111111111111111111111111111111"
+        source_url: https://knowledge.invalid/spaces/a/pages/PAGE-MOVED
+        deletion_state: ACTIVE
+        source_acl_ref: acl-ref:project-v
+        classification: INTERNAL
+        payload:
+          page_id: PAGE-MOVED
+          title: Synthetic review note
+          claim_text: Interface review is scheduled.
+          risk_text: Late review may affect the gate.
+          assumption_text: Owner availability is assumed.
+      - schema_version: enterprise-source-record.v1
+        source_system: synthetic-knowledge-base
+        source_tenant: lab-a
+        source_object_type: page
+        external_id: PAGE-MOVED
+        external_version: "2"
+        effective_at: 2026-07-20T14:00:00+09:00
+        observed_at: 2026-07-20T14:05:00+09:00
+        source_updated_at: 2026-07-20T14:04:00+09:00
+        ingested_at: 2026-07-20T14:06:00+09:00
+        content_hash: "2222222222222222222222222222222222222222222222222222222222222222"
+        source_url: https://knowledge.invalid/spaces/b/pages/PAGE-MOVED
+        deletion_state: ACTIVE
+        source_acl_ref: acl-ref:project-v
+        classification: INTERNAL
+        payload:
+          page_id: PAGE-MOVED
+          title: Moved synthetic review note
+          claim_text: Interface review is scheduled.
+          risk_text: Late review may affect the gate.
+          assumption_text: Owner availability is assumed.
+    expected_results:
+      - disposition: ACCEPT
+        required_reason_codes: [MAPPED]
+      - disposition: ACCEPT
+        required_reason_codes: [MAPPED, SOURCE_URL_CHANGED]
+
+  - case_id: ENT-B-DELETED
+    pattern: DELETED_OBJECT
+    records:
+      - schema_version: enterprise-source-record.v1
+        source_system: synthetic-work-tracker
+        source_tenant: lab-a
+        source_object_type: work-item
+        external_id: WI-DELETED
+        external_version: "4"
+        effective_at: 2026-07-21T15:00:00+09:00
+        observed_at: 2026-07-21T15:05:00+09:00
+        source_updated_at: 2026-07-21T15:04:00+09:00
+        ingested_at: 2026-07-21T15:06:00+09:00
+        content_hash: "3333333333333333333333333333333333333333333333333333333333333333"
+        source_url: https://work.invalid/items/WI-DELETED
+        deletion_state: DELETED
+        source_acl_ref: acl-ref:project-v
+        classification: INTERNAL
+        payload: null
+    expected_results:
+      - disposition: ACCEPT
+        required_reason_codes: [SOURCE_DELETED]
+
+  - case_id: ENT-B-RESTRICTED
+    pattern: RESTRICTED_OBJECT
+    records:
+      - schema_version: enterprise-source-record.v1
+        source_system: synthetic-knowledge-base
+        source_tenant: lab-a
+        source_object_type: page
+        external_id: PAGE-RESTRICTED
+        external_version: "5"
+        effective_at: 2026-07-21T16:00:00+09:00
+        observed_at: 2026-07-21T16:05:00+09:00
+        source_updated_at: 2026-07-21T16:04:00+09:00
+        ingested_at: 2026-07-21T16:06:00+09:00
+        content_hash: "4444444444444444444444444444444444444444444444444444444444444444"
+        source_url: https://knowledge.invalid/pages/PAGE-RESTRICTED
+        deletion_state: RESTRICTED
+        source_acl_ref: acl-ref:restricted
+        classification: RESTRICTED
+        payload: null
+    expected_results:
+      - disposition: ACCEPT
+        required_reason_codes: [SOURCE_RESTRICTED]
+
+  - case_id: ENT-B-CONFLICT
+    pattern: CONFLICTING_SOURCE
+    records:
+      - schema_version: enterprise-source-record.v1
+        source_system: synthetic-work-tracker
+        source_tenant: lab-a
+        source_object_type: work-item
+        external_id: WI-CONFLICT
+        external_version: "6"
+        effective_at: 2026-07-21T17:00:00+09:00
+        observed_at: 2026-07-21T17:05:00+09:00
+        source_updated_at: 2026-07-21T17:04:00+09:00
+        ingested_at: 2026-07-21T17:06:00+09:00
+        content_hash: "5555555555555555555555555555555555555555555555555555555555555555"
+        source_url: https://work.invalid/items/WI-CONFLICT
+        deletion_state: ACTIVE
+        source_acl_ref: acl-ref:project-v
+        classification: INTERNAL
+        payload:
+          item_id: WI-CONFLICT
+          title: First synthetic content
+          status: doing
+          owner: architecture
+      - schema_version: enterprise-source-record.v1
+        source_system: synthetic-work-tracker
+        source_tenant: lab-a
+        source_object_type: work-item
+        external_id: WI-CONFLICT
+        external_version: "6"
+        effective_at: 2026-07-21T17:00:00+09:00
+        observed_at: 2026-07-21T17:05:00+09:00
+        source_updated_at: 2026-07-21T17:04:00+09:00
+        ingested_at: 2026-07-21T17:07:00+09:00
+        content_hash: "6666666666666666666666666666666666666666666666666666666666666666"
+        source_url: https://work.invalid/items/WI-CONFLICT
+        deletion_state: ACTIVE
+        source_acl_ref: acl-ref:project-v
+        classification: INTERNAL
+        payload:
+          item_id: WI-CONFLICT
+          title: Conflicting synthetic content
+          status: blocked
+          owner: architecture
+    expected_results:
+      - disposition: ACCEPT
+        required_reason_codes: [MAPPED]
+      - disposition: QUARANTINE
+        required_reason_codes: [SOURCE_VERSION_CONFLICT]
+
+  - case_id: ENT-B-LATE-EVIDENCE
+    pattern: LATE_EVIDENCE
+    records:
+      - schema_version: enterprise-source-record.v1
+        source_system: synthetic-knowledge-base
+        source_tenant: lab-a
+        source_object_type: page
+        external_id: PAGE-LATE
+        external_version: "1"
+        effective_at: 2026-07-01T09:00:00+09:00
+        observed_at: 2026-07-20T09:00:00+09:00
+        source_updated_at: 2026-07-20T08:59:00+09:00
+        ingested_at: 2026-07-20T09:01:00+09:00
+        content_hash: "7777777777777777777777777777777777777777777777777777777777777777"
+        source_url: https://knowledge.invalid/pages/PAGE-LATE
+        deletion_state: ACTIVE
+        source_acl_ref: acl-ref:project-v
+        classification: CONFIDENTIAL
+        payload:
+          page_id: PAGE-LATE
+          title: Late synthetic measurement note
+          claim_text: A synthetic measurement arrived after the review window.
+          risk_text: The earlier decision may have used incomplete evidence.
+          assumption_text: The measurement setup is assumed to be comparable.
+    expected_results:
+      - disposition: ACCEPT
+        required_reason_codes: [MAPPED, LATE_ARRIVAL]

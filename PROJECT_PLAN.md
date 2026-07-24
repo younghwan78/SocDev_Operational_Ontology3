@@ -1,9 +1,9 @@
 # SoC 개발 의사결정 디지털 트윈을 어떻게 구현하고 검증할 것인가
 
 > 문서 상태: Product Plan v0.3, 로컬 PoC 구현 승인
-> 갱신일: 2026-07-24
+> 갱신일: 2026-07-25
 > 문서 역할: 제품 목표, 범위, 가치 가설, 중단 기준을 정의  
-> 현재 판단: **GO: I0–I7 Replay, Step 5 B2 runtime, UX-A~UX-K와 ENT-A 구현 완료**, **DEFERRED: OPS-F human observation baseline 0/5·product 0/5**, **NEXT: ENT-B**, **NO-GO: human UX·business value 주장, live 사내 연동 및 실제 업무 적용**
+> 현재 판단: **GO: I0–I7 Replay, Step 5 B2 runtime, UX-A~UX-K와 ENT-A/B 구현 완료**, **DEFERRED: OPS-F human observation baseline 0/5·product 0/5**, **NEXT: ENT-C**, **NO-GO: human UX·business value 주장, live 사내 연동 및 실제 업무 적용**
 
 후속 실행 순서는 `OPS-F human observation 보류 → UX-I 완료 → UX-J → UX-K Local UX Release 1 → ENT-A~F
 사외 준비 → 사내 C0/C1`로 고정한다. UX와 connector를 동시에 변경하지 않는다.
@@ -411,7 +411,8 @@ Post-I7 후속은 다음 순서로만 진행한다.
 |UX-J|사용자 판단과 simulated Chair를 분리해 accept/modify/reject와 anchoring 측정|완료; Demo/Evaluation mode 분리, 불변 initial/reveal/final record, builder engineering-proxy 경계와 PostgreSQL 재시작 보존|
 |UX-K|전체 사용자 여정, 복구·접근성·역사 경계를 재검증하고 Local UX Release 1 동결|완료; `LOCAL-UX-RELEASE-1-5227D18`, fixture UX 완료만 주장|
 |ENT-A|source-neutral record, stable identity/time, ACL/classification와 application port|완료; ADR-0012 Accepted, `enterprise-source-record.v1`, 실제 adapter/persistence 없음|
-|ENT-B~F|dirty fixture, mapping, sync/dry-run/quarantine와 handoff kit 구현|ENT-B가 다음; 실제 company data/vendor API/auth 없음|
+|ENT-B|versioned mapping registry, candidate provenance와 dirty fixture disposition|완료; ADR-0013 Accepted, 10개 normal/dirty pattern과 `ACCEPT/QUARANTINE/REJECT` 검증|
+|ENT-C~F|sync/reconciliation, dry-run/quarantine, security emulator와 handoff kit|ENT-C가 다음; 실제 company data/vendor API/auth 없음|
 
 UX-H는 observable fixture hash와 source selector로 고정한 Jira/Confluence형 baseline pack,
 canonical 8개와 Development Twin 5개 task, `usability-session.v1` event/result 계약과
@@ -430,7 +431,8 @@ UX-I는 owner가 승인한 engineering-proxy 범위에서 raw 기준점/source I
 current/historical E2E와 함께 `LOCAL-UX-RELEASE-1-5227D18`로 재동결했다. 이는 local fixture
 engineering Gate이며 사람 사용성이나 비즈니스 가치를 입증하지 않는다. 다음 고정 단계는 ENT-A이고,
 ADR-0012는 `enterprise-source-record.v1`과 source-neutral port를 승인했고 ENT-A를 완료했다.
-다음 단계 ENT-B 전에는 mapping, dirty fixture, sync 또는 adapter를 구현하지 않는다.
+ADR-0013은 versioned mapping candidate와 synthetic dirty corpus를 승인해 ENT-B를 완료했다.
+다음 단계 ENT-C 전에는 cursor, retry, tombstone 적용이나 reconciliation persistence를 구현하지 않는다.
 
 ```text
 B2 validation 10/10 + sealed-unseen 6/6 PASS
@@ -458,8 +460,9 @@ B2 validation 10/10 + sealed-unseen 6/6 PASS
 
 ### ENT-A~F. 사외 Enterprise Preparation
 
-ENT-A는 ADR-0012, source-neutral envelope와 application port까지 완료했다. 현재 다음 단계는
-ENT-B synthetic dirty fixture와 mapping registry다.
+ENT-A는 source-neutral envelope와 application port, ENT-B는 versioned mapping registry,
+source-span candidate와 synthetic dirty corpus까지 완료했다. 현재 다음 단계는 ENT-C idempotent
+sync와 reconciliation engine이다.
 
 - source-neutral record, stable external identity와 enterprise time 계약
 - vendor SDK와 분리된 read-only source port
@@ -541,8 +544,8 @@ C1에서 가치와 보안 gate를 통과한 뒤에만 연다.
 - 데이터: synthetic fixture only
 - 로컬 승인: simulated Chair, 실제 권한 없음
 - 구현 단계: I0~I7
-- 현재 단계: ENT-A source-neutral ingestion 계약 완료; OPS-F human observation은 baseline 0/5·product 0/5에서 보류
-- 후속 순서: ENT-B~F 사외 준비, 그 뒤 사내 C0/C1
+- 현재 단계: ENT-B mapping registry와 dirty fixture corpus 완료; OPS-F human observation은 baseline 0/5·product 0/5에서 보류
+- 후속 순서: ENT-C~F 사외 준비, 그 뒤 사내 C0/C1
 - release topology: B2 independent routed Role Agents, deterministic core decision
 - CI provider: ReplayProvider
 - live provider: 구성 가능한 OpenAI Responses API adapter
@@ -594,6 +597,8 @@ Active planning documents:
 - `docs/decisions/ADR-0011-evaluation-response-and-advice-disclosure.md`
 - `docs/decisions/ADR-0012-source-neutral-enterprise-ingestion-boundary.md`
 - `internal_docs/26.07.24 ENT-A Source-neutral Ingestion 계약 구현 및 검증 보고서.md`
+- `docs/decisions/ADR-0013-versioned-enterprise-mapping-candidates.md`
+- `internal_docs/26.07.25 ENT-B Mapping Registry 및 Dirty Fixture 구현 보고서.md`
 
 Review and historical context:
 

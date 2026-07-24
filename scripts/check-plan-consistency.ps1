@@ -117,6 +117,36 @@ if ($projectFixtures.Count -ne 3) {
         throw "Missing OPS-B artifact: $_"
     }
 }
+@(
+    "enterprise-mapping-registry.v1",
+    "enterprise-mapping-result.v1",
+    "enterprise-dirty-fixture-corpus.v1",
+    "MappingDisposition",
+    "StructuredCandidateKind",
+    "UnstructuredCandidateKind",
+    "CandidateReviewStatus",
+    "DUPLICATE_SOURCE_VERSION",
+    "SOURCE_VERSION_CONFLICT"
+) | ForEach-Object {
+    if (-not $contract.Contains($_)) {
+        throw "Canonical contract is missing ENT-B term: $_"
+    }
+}
+@(
+    "backend/src/soc_ot/application/enterprise_mapping.py",
+    "backend/tests/test_ent_b_mapping_registry.py",
+    "contracts/generated/enterprise-mapping-registry.v1.schema.json",
+    "contracts/generated/enterprise-mapping-result.v1.schema.json",
+    "contracts/generated/enterprise-dirty-fixture-corpus.v1.schema.json",
+    "fixtures/enterprise/mapping-registry.v1.yaml",
+    "fixtures/enterprise/dirty-source-records.v1.yaml",
+    "fixtures/enterprise/manifest.yaml",
+    "docs/decisions/ADR-0013-versioned-enterprise-mapping-candidates.md"
+) | ForEach-Object {
+    if (-not (Test-Path -LiteralPath (Join-Path $root $_) -PathType Leaf)) {
+        throw "Missing ENT-B artifact: $_"
+    }
+}
 if ($projectPlan -notmatch "corpus v2: development regression 8, validation 2, sealed unseen 2") {
     throw "PROJECT_PLAN.md does not describe the canonical 8/2/2 evaluation partition."
 }

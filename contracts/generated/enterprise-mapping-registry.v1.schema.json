@@ -1,0 +1,218 @@
+{
+  "$defs": {
+    "EnterpriseMappingProfile": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "enterprise-mapping-profile.v1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "profile_id": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Profile Id",
+          "type": "string"
+        },
+        "mapping_version": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Mapping Version",
+          "type": "string"
+        },
+        "source_system": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Source System",
+          "type": "string"
+        },
+        "source_object_type": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Source Object Type",
+          "type": "string"
+        },
+        "target_kind": {
+          "$ref": "#/$defs/StructuredCandidateKind"
+        },
+        "required_source_fields": {
+          "items": {
+            "maxLength": 1024,
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Required Source Fields",
+          "type": "array"
+        },
+        "field_mappings": {
+          "items": {
+            "$ref": "#/$defs/FieldMapping"
+          },
+          "minItems": 1,
+          "title": "Field Mappings",
+          "type": "array"
+        },
+        "status_source_field": {
+          "anyOf": [
+            {
+              "maxLength": 1024,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Status Source Field"
+        },
+        "status_target_field": {
+          "anyOf": [
+            {
+              "maxLength": 1024,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Status Target Field"
+        },
+        "status_map": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Status Map",
+          "type": "object"
+        },
+        "unstructured_rules": {
+          "items": {
+            "$ref": "#/$defs/UnstructuredExtractionRule"
+          },
+          "title": "Unstructured Rules",
+          "type": "array"
+        },
+        "late_arrival_after_seconds": {
+          "default": 86400,
+          "minimum": 0,
+          "title": "Late Arrival After Seconds",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "schema_version",
+        "profile_id",
+        "mapping_version",
+        "source_system",
+        "source_object_type",
+        "target_kind",
+        "required_source_fields",
+        "field_mappings"
+      ],
+      "title": "EnterpriseMappingProfile",
+      "type": "object"
+    },
+    "FieldMapping": {
+      "additionalProperties": false,
+      "properties": {
+        "source_field": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Source Field",
+          "type": "string"
+        },
+        "target_field": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Target Field",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source_field",
+        "target_field"
+      ],
+      "title": "FieldMapping",
+      "type": "object"
+    },
+    "StructuredCandidateKind": {
+      "enum": [
+        "PROJECT",
+        "WORK_ITEM",
+        "ISSUE",
+        "EVIDENCE",
+        "EVENT"
+      ],
+      "title": "StructuredCandidateKind",
+      "type": "string"
+    },
+    "UnstructuredCandidateKind": {
+      "enum": [
+        "CLAIM",
+        "RISK",
+        "ASSUMPTION"
+      ],
+      "title": "UnstructuredCandidateKind",
+      "type": "string"
+    },
+    "UnstructuredExtractionRule": {
+      "additionalProperties": false,
+      "properties": {
+        "source_field": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Source Field",
+          "type": "string"
+        },
+        "candidate_kind": {
+          "$ref": "#/$defs/UnstructuredCandidateKind"
+        },
+        "extractor_version": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Extractor Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source_field",
+        "candidate_kind",
+        "extractor_version"
+      ],
+      "title": "UnstructuredExtractionRule",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "enterprise-mapping-registry.v1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "registry_version": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "title": "Registry Version",
+      "type": "string"
+    },
+    "profiles": {
+      "items": {
+        "$ref": "#/$defs/EnterpriseMappingProfile"
+      },
+      "minItems": 1,
+      "title": "Profiles",
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema_version",
+    "registry_version",
+    "profiles"
+  ],
+  "title": "EnterpriseMappingRegistry",
+  "type": "object"
+}

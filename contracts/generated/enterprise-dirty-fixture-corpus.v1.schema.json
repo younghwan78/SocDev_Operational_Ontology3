@@ -1,0 +1,273 @@
+{
+  "$defs": {
+    "DirtyFixturePattern": {
+      "enum": [
+        "NORMAL",
+        "MISSING_FIELD",
+        "UNKNOWN_STATUS",
+        "DUPLICATE_UPDATE",
+        "OUT_OF_ORDER_EVENT",
+        "MOVED_PAGE",
+        "DELETED_OBJECT",
+        "RESTRICTED_OBJECT",
+        "CONFLICTING_SOURCE",
+        "LATE_EVIDENCE"
+      ],
+      "title": "DirtyFixturePattern",
+      "type": "string"
+    },
+    "EnterpriseDirtyFixtureCase": {
+      "additionalProperties": false,
+      "properties": {
+        "case_id": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Case Id",
+          "type": "string"
+        },
+        "pattern": {
+          "$ref": "#/$defs/DirtyFixturePattern"
+        },
+        "records": {
+          "items": {
+            "$ref": "#/$defs/EnterpriseSourceRecord"
+          },
+          "minItems": 1,
+          "title": "Records",
+          "type": "array"
+        },
+        "expected_results": {
+          "items": {
+            "$ref": "#/$defs/ExpectedMappingResult"
+          },
+          "minItems": 1,
+          "title": "Expected Results",
+          "type": "array"
+        }
+      },
+      "required": [
+        "case_id",
+        "pattern",
+        "records",
+        "expected_results"
+      ],
+      "title": "EnterpriseDirtyFixtureCase",
+      "type": "object"
+    },
+    "EnterpriseSourceRecord": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "enterprise-source-record.v1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "source_system": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Source System",
+          "type": "string"
+        },
+        "source_tenant": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Source Tenant",
+          "type": "string"
+        },
+        "source_object_type": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Source Object Type",
+          "type": "string"
+        },
+        "external_id": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "External Id",
+          "type": "string"
+        },
+        "external_version": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "External Version",
+          "type": "string"
+        },
+        "effective_at": {
+          "format": "date-time",
+          "title": "Effective At",
+          "type": "string"
+        },
+        "observed_at": {
+          "format": "date-time",
+          "title": "Observed At",
+          "type": "string"
+        },
+        "source_updated_at": {
+          "format": "date-time",
+          "title": "Source Updated At",
+          "type": "string"
+        },
+        "ingested_at": {
+          "format": "date-time",
+          "title": "Ingested At",
+          "type": "string"
+        },
+        "content_hash": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Content Hash",
+          "type": "string"
+        },
+        "source_url": {
+          "format": "uri",
+          "maxLength": 2083,
+          "minLength": 1,
+          "title": "Source Url",
+          "type": "string"
+        },
+        "deletion_state": {
+          "$ref": "#/$defs/SourceDeletionState"
+        },
+        "source_acl_ref": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Source Acl Ref",
+          "type": "string"
+        },
+        "classification": {
+          "$ref": "#/$defs/SourceDataClassification"
+        },
+        "payload": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "$ref": "#/$defs/JsonValue"
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Payload"
+        }
+      },
+      "required": [
+        "schema_version",
+        "source_system",
+        "source_tenant",
+        "source_object_type",
+        "external_id",
+        "external_version",
+        "effective_at",
+        "observed_at",
+        "source_updated_at",
+        "ingested_at",
+        "content_hash",
+        "source_url",
+        "deletion_state",
+        "source_acl_ref",
+        "classification",
+        "payload"
+      ],
+      "title": "EnterpriseSourceRecord",
+      "type": "object"
+    },
+    "ExpectedMappingResult": {
+      "additionalProperties": false,
+      "properties": {
+        "disposition": {
+          "$ref": "#/$defs/MappingDisposition"
+        },
+        "required_reason_codes": {
+          "items": {
+            "$ref": "#/$defs/MappingReasonCode"
+          },
+          "minItems": 1,
+          "title": "Required Reason Codes",
+          "type": "array"
+        }
+      },
+      "required": [
+        "disposition",
+        "required_reason_codes"
+      ],
+      "title": "ExpectedMappingResult",
+      "type": "object"
+    },
+    "JsonValue": {},
+    "MappingDisposition": {
+      "enum": [
+        "ACCEPT",
+        "QUARANTINE",
+        "REJECT"
+      ],
+      "title": "MappingDisposition",
+      "type": "string"
+    },
+    "MappingReasonCode": {
+      "enum": [
+        "MAPPED",
+        "PROFILE_NOT_FOUND",
+        "REQUIRED_FIELD_MISSING",
+        "STATUS_UNMAPPED",
+        "DUPLICATE_SOURCE_VERSION",
+        "SOURCE_VERSION_CONFLICT",
+        "OUT_OF_ORDER_SOURCE_UPDATE",
+        "SOURCE_URL_CHANGED",
+        "SOURCE_DELETED",
+        "SOURCE_RESTRICTED",
+        "LATE_ARRIVAL"
+      ],
+      "title": "MappingReasonCode",
+      "type": "string"
+    },
+    "SourceDataClassification": {
+      "enum": [
+        "PUBLIC",
+        "INTERNAL",
+        "CONFIDENTIAL",
+        "RESTRICTED"
+      ],
+      "title": "SourceDataClassification",
+      "type": "string"
+    },
+    "SourceDeletionState": {
+      "enum": [
+        "ACTIVE",
+        "DELETED",
+        "RESTRICTED"
+      ],
+      "title": "SourceDeletionState",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "enterprise-dirty-fixture-corpus.v1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "corpus_version": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "title": "Corpus Version",
+      "type": "string"
+    },
+    "cases": {
+      "items": {
+        "$ref": "#/$defs/EnterpriseDirtyFixtureCase"
+      },
+      "minItems": 1,
+      "title": "Cases",
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema_version",
+    "corpus_version",
+    "cases"
+  ],
+  "title": "EnterpriseDirtyFixtureCorpus",
+  "type": "object"
+}

@@ -1,8 +1,8 @@
 # Implementation status
 
-> Updated: 2026-07-24
-> Current stage: ENT-A source-neutral ingestion contract complete; OPS-F human observation deferred at baseline 0/5 and product 0/5; ENT-B next
-> Planned sequence: ENT-B~F external fixture-only preparation → internal C0/C1; human/value claims remain blocked
+> Updated: 2026-07-25
+> Current stage: ENT-B mapping registry and dirty fixture corpus complete; OPS-F human observation deferred at baseline 0/5 and product 0/5; ENT-C next
+> Planned sequence: ENT-C~F external fixture-only preparation → internal C0/C1; human/value claims remain blocked
 
 ## Stage evidence
 
@@ -36,6 +36,7 @@
 |UX-J|Passed (engineering-proxy only)|Immutable builder initial/advice reveal/final response sequence, accept/modify/reject classification, URL-backed evaluation mode, PostgreSQL restart persistence and `UX-J-PRODUCT-218C095` pins. No human/anchoring/value claim.|
 |UX-K|Passed (Local fixture UX Release 1)|Full Portfolio→Project→Risk→Decision→builder response→advice→Outcome/Evaluation→Risk browser journey, explicit empty-learning destination, responsive/accessibility/recovery/history regression and `LOCAL-UX-RELEASE-1-5227D18` pins. Human observations remain 0/5 per condition; no human/time/value claim.|
 |ENT-A|Passed (contract-only)|ADR-0012, strict `enterprise-source-record.v1`, stable external identity, four timezone-aware source times, opaque ACL/classification, payload-safe deletion/restriction, source-neutral `SourceReader`/`IngestionSink`, generated schema and 15 focused tests. No adapter, persistence, company data or canonical mapping.|
+|ENT-B|Passed (fixture-only mapping)|ADR-0013, five versioned synthetic profiles covering Project/WorkItem/Issue/Event/Evidence candidates, source-span structured/unstructured candidates, fixed unreviewed prose boundary, hash-pinned 10-pattern corpus, explicit accept/quarantine/reject and 15 focused tests. No canonical import, sync, persistence, vendor SDK or company data.|
 
 OPS-F implementation record (2026-07-23):
 

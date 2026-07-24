@@ -1,6 +1,6 @@
 # Known limitations
 
-> Verified: 2026-07-23
+> Verified: 2026-07-25
 
 - The local product uses synthetic fixtures. It does not connect to company Confluence or Jira.
 - The Decision Chair is explicitly simulated and has no approval authority.
@@ -12,10 +12,11 @@
 - Local SSE follows persisted events with sequence resume, heartbeat, and a bounded 30-second connection; the UI uses polling as the reconnect fallback.
 - Provider token cost is an estimate based on operator-supplied rates and must be refreshed when pricing changes.
 - Company security, identity, retention, and write-back controls require a separate pilot design review.
-- ENT-A now provides a source-neutral enterprise identity/time envelope, opaque ACL/classification
-  metadata and deletion/restriction payload boundary. There is still no Jira/Confluence adapter,
-  mapping registry, real ACL inheritance, incremental sync, tombstone reconciliation, retention or
-  unstructured-extraction review path. Direct live company connection remains NO-GO.
+- ENT-A/B now provide a source-neutral enterprise identity/time envelope, versioned synthetic mapping
+  profiles, source-span candidates and explicit dirty-source disposition. There is still no
+  Jira/Confluence adapter, real ACL inheritance, incremental sync, tombstone reconciliation, durable
+  quarantine/resolution, retention or human-reviewed unstructured promotion path. Direct live company
+  connection remains NO-GO.
 - Codex CLI evaluation artifacts contain aggregate model usage and normalized results, while normal durable worker attempt telemetry remains Replay-verified unless the Responses API worker is separately authorized.
 - UX-H Decision-centered v1 material remains reproducible, and OPS-F now adds a Project-centered v2
   protocol with three hash-pinned Projects, six baseline surfaces and eleven frozen tasks. Both study

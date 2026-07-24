@@ -496,6 +496,54 @@ The application ports are `SourceReader.read(identity)` and `IngestionSink.write
 no executable source adapter, HTTP route, persistence, mapping, sync, authentication, real ACL or
 write-back. Raw enterprise records never enter an `ObservableCasePacket` or become Project/FACT truth.
 
-## 12. Compatibility gate
+## 12. Accepted ENT-B mapping candidate boundary
+
+ADR-0013 accepts the following contract names:
+
+```text
+enterprise-mapping-registry.v1
+enterprise-mapping-result.v1
+enterprise-dirty-fixture-corpus.v1
+```
+
+The mapping registry resolves one exact `(source_system, source_object_type)` key to a versioned
+profile. A profile declares required source fields, direct field mappings, optional status mapping,
+unstructured extraction rules and late-arrival threshold. It does not contain company field IDs.
+
+Mapping produces candidates, not canonical truth:
+
+```text
+StructuredCandidateKind   = PROJECT | WORK_ITEM | ISSUE | EVIDENCE | EVENT
+UnstructuredCandidateKind = CLAIM | RISK | ASSUMPTION
+CandidateReviewStatus     = UNREVIEWED
+MappingDisposition        = ACCEPT | QUARANTINE | REJECT
+```
+
+Every structured candidate requires source identity/version, mapping profile/version, mapped values
+and JSON-pointer source spans. Every unstructured candidate also requires extractor version and
+character offsets. Unstructured candidates cannot use `FACT` or a reviewed state.
+
+`ACCEPT` means candidate generation only and never authorizes canonical import. `QUARANTINE` requires
+later resolution. `REJECT` produces no candidate. Canonical reason codes are:
+
+```text
+MAPPED
+PROFILE_NOT_FOUND
+REQUIRED_FIELD_MISSING
+STATUS_UNMAPPED
+DUPLICATE_SOURCE_VERSION
+SOURCE_VERSION_CONFLICT
+OUT_OF_ORDER_SOURCE_UPDATE
+SOURCE_URL_CHANGED
+SOURCE_DELETED
+SOURCE_RESTRICTED
+LATE_ARRIVAL
+```
+
+Deleted and restricted source records create metadata-only `EVENT` candidates. ENT-B adds no HTTP
+route, persistence, canonical Project mutation, Agent input, authentication, real ACL, sync, durable
+quarantine or write-back.
+
+## 13. Compatibility gate
 
 Any change to a state code, DecisionType, endpoint, time field, or version name updates this contract first. CI then checks generated schemas, OpenAPI, Frontend client, fixture manifests, runbook examples, and documentation references.

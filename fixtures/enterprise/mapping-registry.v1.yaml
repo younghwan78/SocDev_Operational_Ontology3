@@ -1,0 +1,112 @@
+schema_version: enterprise-mapping-registry.v1
+registry_version: synthetic-enterprise-mapping.1
+profiles:
+  - schema_version: enterprise-mapping-profile.v1
+    profile_id: synthetic-project
+    mapping_version: synthetic-project.1
+    source_system: synthetic-work-tracker
+    source_object_type: project
+    target_kind: PROJECT
+    required_source_fields: [project_id, title, lifecycle]
+    field_mappings:
+      - source_field: project_id
+        target_field: project_id
+      - source_field: title
+        target_field: title_ko
+    status_source_field: lifecycle
+    status_target_field: lifecycle_stage
+    status_map:
+      specification: SPEC_DEFINITION
+      presilicon: PRE_SILICON_CLOSURE
+      production: MASS_PRODUCTION
+    late_arrival_after_seconds: 86400
+  - schema_version: enterprise-mapping-profile.v1
+    profile_id: synthetic-work-item
+    mapping_version: synthetic-work-item.1
+    source_system: synthetic-work-tracker
+    source_object_type: work-item
+    target_kind: WORK_ITEM
+    required_source_fields: [item_id, title, status, owner]
+    field_mappings:
+      - source_field: item_id
+        target_field: work_item_id
+      - source_field: title
+        target_field: title
+      - source_field: owner
+        target_field: owner
+    status_source_field: status
+    status_target_field: status
+    status_map:
+      todo: PLANNED
+      ready: READY
+      doing: IN_PROGRESS
+      blocked: BLOCKED
+      done: DONE
+    late_arrival_after_seconds: 86400
+  - schema_version: enterprise-mapping-profile.v1
+    profile_id: synthetic-issue
+    mapping_version: synthetic-issue.1
+    source_system: synthetic-work-tracker
+    source_object_type: issue
+    target_kind: ISSUE
+    required_source_fields: [issue_id, title, status]
+    field_mappings:
+      - source_field: issue_id
+        target_field: issue_id
+      - source_field: title
+        target_field: title
+    status_source_field: status
+    status_target_field: status
+    status_map:
+      open: OPEN
+      mitigating: MITIGATING
+      resolved: RESOLVED
+    late_arrival_after_seconds: 86400
+  - schema_version: enterprise-mapping-profile.v1
+    profile_id: synthetic-event
+    mapping_version: synthetic-event.1
+    source_system: synthetic-work-tracker
+    source_object_type: event
+    target_kind: EVENT
+    required_source_fields: [event_id, event_type, summary]
+    field_mappings:
+      - source_field: event_id
+        target_field: event_id
+      - source_field: summary
+        target_field: summary
+    status_source_field: event_type
+    status_target_field: event_type
+    status_map:
+      work-progress: WORK_PROGRESS
+      blocker-change: BLOCKER_CHANGE
+      evidence-change: EVIDENCE_CHANGE
+      interface-change: INTERFACE_CHANGE
+    late_arrival_after_seconds: 86400
+  - schema_version: enterprise-mapping-profile.v1
+    profile_id: synthetic-knowledge-page
+    mapping_version: synthetic-knowledge-page.1
+    source_system: synthetic-knowledge-base
+    source_object_type: page
+    target_kind: EVIDENCE
+    required_source_fields:
+      - page_id
+      - title
+      - claim_text
+      - risk_text
+      - assumption_text
+    field_mappings:
+      - source_field: page_id
+        target_field: evidence_id
+      - source_field: title
+        target_field: title
+    unstructured_rules:
+      - source_field: claim_text
+        candidate_kind: CLAIM
+        extractor_version: synthetic-text-span.1
+      - source_field: risk_text
+        candidate_kind: RISK
+        extractor_version: synthetic-text-span.1
+      - source_field: assumption_text
+        candidate_kind: ASSUMPTION
+        extractor_version: synthetic-text-span.1
+    late_arrival_after_seconds: 86400

@@ -1,8 +1,8 @@
 # 전체 계획 문서 안내
 
 > 상태: Active  
-> 갱신일: 2026-07-24
-> 현재 단계: UX-K Local fixture UX Release 1과 ENT-A source-neutral 계약 완료; OPS-F human observation은 baseline 0/5·product 0/5에서 보류; 다음 단계 ENT-B
+> 갱신일: 2026-07-25
+> 현재 단계: UX-K Local fixture UX Release 1과 ENT-A/B 완료; OPS-F human observation은 baseline 0/5·product 0/5에서 보류; 다음 단계 ENT-C
 
 > 고정 후속 순서: OPS-F human observation 보류 → UX-I 완료 → UX-J/K Local UX Release 1 → ENT-A~F 사외 준비 → 사내 C0/C1
 
@@ -86,8 +86,8 @@ I0~I7 Replay와 post-I7 UX-A/UX-B/UX-C/UX-D/UX-E/UX-F/UX-G 로컬 Gate,
 OPS-F Project protocol v2와 study release/rubric/E2E 도구까지 구현됐다. 독립 human 관측은 0/5씩인
 상태에서 보류했다. UX-I는 title-first projection, source ref 해석과 도메인 중심 copy를
 engineering-proxy로 구현하고 새 release를 동결했으며, 이는 human Gate를 통과시킨 것이 아니다.
-UX-J/K로 Local UX Release 1을 닫았고, ENT-A에서 source-neutral envelope와 port를 구현했다.
-다음 ENT-B~F fixture-only enterprise preparation을 순서대로 진행한 뒤 그 결과를 가지고 사내
+UX-J/K로 Local UX Release 1을 닫았고, ENT-A/B에서 source-neutral envelope, versioned mapping과
+dirty fixture disposition을 구현했다. 다음 ENT-C~F fixture-only enterprise preparation을 진행한 뒤 사내
 C0/C1에 들어간다. UX와 connector는 동시에 변경하지 않는다.
 
 ```text
@@ -135,7 +135,8 @@ UX-I/J/K Local UX Release 1
   → 전체 Project→Decision→Outcome 여정과 복구·접근성·역사 경계 재동결
 ENT-A~F 사외 준비
   → source-neutral ingestion 계약 PASS
-  → 다음: dirty fixture mapping + idempotent sync
+  → dirty fixture mapping과 candidate provenance PASS
+  → 다음: idempotent sync와 reconciliation
   → dry-run/quarantine + ACL/classification emulator + 사내 handoff kit
   → 실제 company data, vendor API, credential, auth와 write-back 없음
 ```
