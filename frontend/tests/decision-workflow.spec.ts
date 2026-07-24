@@ -277,6 +277,7 @@ test("workspace reflows at 768px and a 200-percent equivalent viewport", async (
 
 test("keyboard and screen-reader semantics expose a direct main-content path", async ({ page }) => {
   await page.setViewportSize({ width: 768, height: 1024 });
+  await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/decisions/CASE-VR-001");
 
   await page.keyboard.press("Tab");
@@ -287,6 +288,7 @@ test("keyboard and screen-reader semantics expose a direct main-content path", a
   await expect(page.locator("main#main-content")).toBeFocused();
   await expect(page.locator("main")).toHaveCount(1);
   await expect(page.getByRole("navigation", { name: "결정 검토 문맥" })).toBeVisible();
+  expect(await page.evaluate(() => getComputedStyle(document.documentElement).scrollBehavior)).toBe("auto");
 
   const primaryAction = page.getByRole("button", { name: "가상 역할 검토 실행", exact: true });
   await primaryAction.focus();

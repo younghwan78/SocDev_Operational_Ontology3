@@ -118,7 +118,13 @@ export function DecisionExecution({ item }: { item: DecisionWorkspace }) {
               <article><p className="section-kicker">결과 품질</p><h4>위험을 실제로 제한했는가</h4><p>{outcome.outcome_evaluation_ko ?? "아직 평가되지 않았습니다."}</p></article>
             </div>
           ) : null}
-          {lessons.length > 0 ? <section className="learning-summary" id="learning" tabIndex={-1}><h4>다음 판단에 남길 학습</h4><ul>{lessons.map((lesson) => <li key={lesson}>{lesson}</li>)}</ul></section> : null}
+          <section className="learning-summary" id="learning" tabIndex={-1}>
+            <h4>다음 판단에 남길 학습</h4>
+            <ResultList
+              items={lessons}
+              empty="이번 fixture 결과에 기록된 추가 학습은 없습니다."
+            />
+          </section>
         </section>
       ) : null}
     </section>

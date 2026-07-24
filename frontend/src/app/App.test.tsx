@@ -505,6 +505,28 @@ describe("App", () => {
     expect(screen.getByRole("heading", { name: "다음 판단에 남길 학습" })).toBeInTheDocument();
   });
 
+  it("keeps the learning-summary action usable when an evaluated fixture has no new lesson", async () => {
+    const evaluatedWithoutLesson = {
+      ...closedCaseItem,
+      outcome_and_evaluation: {
+        ...closedCaseItem.outcome_and_evaluation,
+        lessons_ko: [],
+      },
+    };
+    vi.spyOn(globalThis, "fetch").mockImplementation((input) => (
+      workspaceFixtureResponse(evaluatedWithoutLesson, input)
+    ));
+    renderApp("/decisions/CASE-VR-001");
+    const user = userEvent.setup();
+
+    expect(await screen.findByRole("heading", {
+      name: "다음 판단에 남길 학습",
+    })).toBeInTheDocument();
+    expect(screen.getByText("이번 fixture 결과에 기록된 추가 학습은 없습니다.")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "학습 요약 보기" }));
+    expect(document.querySelector("#learning")).toHaveFocus();
+  });
+
   it("moves between comparison cards on a narrow viewport", async () => {
     vi.spyOn(globalThis, "fetch").mockImplementation(workspaceResponse);
     const { container } = renderApp("/decisions/CASE-VR-001");

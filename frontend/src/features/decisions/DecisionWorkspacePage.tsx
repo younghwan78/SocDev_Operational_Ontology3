@@ -755,8 +755,8 @@ function actionTarget(action: DecisionWorkspace["workflow"]["primary_action"]) {
 function focusSection(targetId: string) {
   const target = document.getElementById(targetId);
   if (!target) return;
-  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  target.scrollIntoView({ behavior: reducedMotion ? "auto" : "smooth", block: "start" });
+  const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
+  target.scrollIntoView?.({ behavior: reducedMotion ? "auto" : "smooth", block: "start" });
   target.focus({ preventScroll: true });
 }
 
