@@ -9,15 +9,20 @@ import {
   createDossierRun,
   createSimulatedDecision,
   evaluateOutcome,
+  getDecisionEvaluationResponse,
   getDecisionTimeline,
   getDecisionWorkspace,
   getReviewRun,
   isCaseVersionConflict,
+  recordFinalDecisionResponse,
+  recordInitialDecisionResponse,
+  revealDecisionAdvice,
   retryReviewRun,
 } from "../../api/client";
 import type { DecisionWorkspace, DevelopmentTimeline } from "../../api/generated";
 import { AlternativeComparison } from "./AlternativeComparison";
 import { DecisionDeliberation } from "./DecisionDeliberation";
+import { DecisionEvaluationResponse } from "./DecisionEvaluationResponse";
 import { DecisionExecution } from "./DecisionExecution";
 
 export function DecisionWorkspacePage() {
@@ -25,6 +30,7 @@ export function DecisionWorkspacePage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const selectedStep = parseSearchStep(searchParams.get("at_step"));
   const selectedOptionPosition = parseSearchPosition(searchParams.get("option"));
+  const evaluationMode = searchParams.get("interaction") === "evaluation";
   const riskReturn = parseRiskReturn(searchParams);
   const [dossierRunId, setDossierRunId] = useState<string | null>(null);
   const query = useQuery({
@@ -37,6 +43,11 @@ export function DecisionWorkspacePage() {
     queryKey: ["development-timeline", caseId, selectedStep ?? "current"],
     queryFn: () => getDecisionTimeline(caseId, selectedStep),
     enabled: Boolean(caseId),
+  });
+  const evaluationResponseQuery = useQuery({
+    queryKey: ["decision-evaluation-response", caseId],
+    queryFn: () => getDecisionEvaluationResponse(caseId),
+    enabled: Boolean(caseId) && evaluationMode && selectedStep === undefined,
   });
   const dossierRunQuery = useQuery({
     queryKey: ["dossier-run", activeDossierRunId],
@@ -96,6 +107,22 @@ export function DecisionWorkspacePage() {
     mutationFn: () => evaluateOutcome(caseId, query.data?.aggregate_version ?? 0),
     onSuccess: () => void query.refetch(),
   });
+  const initialResponseMutation = useMutation({
+    mutationFn: (command: Parameters<typeof recordInitialDecisionResponse>[2]) => (
+      recordInitialDecisionResponse(caseId, query.data?.aggregate_version ?? 0, command)
+    ),
+    onSuccess: () => void evaluationResponseQuery.refetch(),
+  });
+  const adviceRevealMutation = useMutation({
+    mutationFn: () => revealDecisionAdvice(caseId, query.data?.aggregate_version ?? 0),
+    onSuccess: () => void evaluationResponseQuery.refetch(),
+  });
+  const finalResponseMutation = useMutation({
+    mutationFn: (command: Parameters<typeof recordFinalDecisionResponse>[2]) => (
+      recordFinalDecisionResponse(caseId, query.data?.aggregate_version ?? 0, command)
+    ),
+    onSuccess: () => void evaluationResponseQuery.refetch(),
+  });
   const commandMutations = [
     dossierStartMutation,
     retryDossier,
@@ -103,6 +130,9 @@ export function DecisionWorkspacePage() {
     decisionMutation,
     outcomeMutation,
     evaluationMutation,
+    initialResponseMutation,
+    adviceRevealMutation,
+    finalResponseMutation,
   ];
   const stale = commandMutations.some((mutation) => isCaseVersionConflict(mutation.error));
   const dossierStatus = dossierRunQuery.data?.status;
@@ -116,7 +146,10 @@ export function DecisionWorkspacePage() {
       void refetchWorkspace();
     }
   }, [dossierStatus, refetchWorkspace, selectedStep]);
-  const setWorkspaceParam = (name: "at_step" | "option", value: string | null) => {
+  const setWorkspaceParam = (
+    name: "at_step" | "option" | "interaction",
+    value: string | null,
+  ) => {
     setSearchParams((current) => {
       const next = new URLSearchParams(current);
       if (value === null) next.delete(name);
@@ -166,6 +199,10 @@ export function DecisionWorkspacePage() {
   if (!query.data) return null;
 
   const item = query.data;
+  const evaluationResponse = evaluationResponseQuery.data;
+  const initialResponseRecorded = Boolean(evaluationResponse?.initial_response);
+  const adviceRevealed = Boolean(evaluationResponse?.advice_snapshot);
+  const finalResponseRecorded = Boolean(evaluationResponse?.final_response);
   const commandsAllowed = item.time_context.commands_allowed_at_selected_step && !stale;
   const dossierResult = dossierRunQuery.data?.result;
   const dossierFailures = dossierResult && "failed_roles" in dossierResult
@@ -183,8 +220,27 @@ export function DecisionWorkspacePage() {
     primaryAction === "ADVANCE_SIMULATION" && outcomeMutation.isPending
   ) || (
     primaryAction === "VIEW_EVALUATION" && evaluationMutation.isPending
-  );
+  ) || initialResponseMutation.isPending
+    || adviceRevealMutation.isPending
+    || finalResponseMutation.isPending;
+  const evaluationPrimaryAction = evaluationMode
+    ? !initialResponseRecorded
+      ? "RECORD_INITIAL"
+      : item.controls.action_plan && !adviceRevealed
+        ? "REVEAL_ADVICE"
+        : adviceRevealed && !finalResponseRecorded
+          ? "RECORD_FINAL"
+          : null
+    : null;
   const runPrimaryAction = () => {
+    if (evaluationPrimaryAction === "RECORD_INITIAL" || evaluationPrimaryAction === "RECORD_FINAL") {
+      focusSection("evaluation-response");
+      return;
+    }
+    if (evaluationPrimaryAction === "REVEAL_ADVICE") {
+      adviceRevealMutation.mutate();
+      return;
+    }
     if (primaryAction === "RUN_VIRTUAL_REVIEW") {
       dossierStartMutation.mutate();
       return;
@@ -220,22 +276,42 @@ export function DecisionWorkspacePage() {
         selectedOptionPosition={selectedOptionPosition}
         onSelectOption={(position) => setWorkspaceParam("option", position === null ? null : String(position))}
       />
-      <DecisionDeliberation deliberation={item.deliberation} />
+      {!evaluationMode || adviceRevealed ? (
+        <DecisionDeliberation deliberation={item.deliberation} />
+      ) : null}
     </>
   );
 
   return (
     <main className="app-shell workspace-shell" id="main-content" tabIndex={-1}>
-      <ContextBar item={item} riskReturn={riskReturn} />
+      <ContextBar
+        item={item}
+        riskReturn={riskReturn}
+        evaluationMode={evaluationMode}
+        onModeChange={(mode) => setWorkspaceParam(
+          "interaction",
+          mode === "evaluation" ? "evaluation" : null,
+        )}
+      />
 
       <DecisionBrief
         item={item}
         commandsAllowed={commandsAllowed}
         primaryActionLabel={
-          workspaceActionLabel(primaryAction)
+          evaluationPrimaryAction === "RECORD_INITIAL"
+            ? "사전 판단 기록"
+            : evaluationPrimaryAction === "REVEAL_ADVICE"
+              ? "가상 조언 공개"
+              : evaluationPrimaryAction === "RECORD_FINAL"
+                ? "최종 판단 기록"
+                : workspaceActionLabel(primaryAction)
         }
         primaryActionPending={primaryActionPending}
-        primaryActionPendingLabel={workspaceActionPendingLabel(primaryAction)}
+        primaryActionPendingLabel={
+          adviceRevealMutation.isPending
+            ? "가상 조언 공개 중…"
+            : workspaceActionPendingLabel(primaryAction)
+        }
         onPrimaryAction={runPrimaryAction}
       />
 
@@ -254,7 +330,7 @@ export function DecisionWorkspacePage() {
         </section>
       ) : null}
 
-      {item.controls.action_plan ? (
+      {item.controls.action_plan && (!evaluationMode || adviceRevealed) ? (
         <>
           <DecisionExecution item={item} />
           <details className="predecision-review">
@@ -264,11 +340,42 @@ export function DecisionWorkspacePage() {
         </>
       ) : preDecisionReview}
 
-      {!item.controls.action_plan && item.time_context.mode === "current" ? (
+      {evaluationMode && item.time_context.mode === "current" ? (
+        evaluationResponseQuery.isPending ? (
+          <section className="panel" aria-live="polite">
+            <p>기록된 평가 응답을 확인하는 중…</p>
+          </section>
+        ) : (
+          <DecisionEvaluationResponse
+            item={item}
+            response={evaluationResponse}
+            pending={
+              initialResponseMutation.isPending
+              || adviceRevealMutation.isPending
+              || finalResponseMutation.isPending
+            }
+            error={evaluationResponseError(
+              initialResponseMutation.error
+              ?? adviceRevealMutation.error
+              ?? finalResponseMutation.error
+              ?? evaluationResponseQuery.error,
+            )}
+            onRecordInitial={(command) => initialResponseMutation.mutate(command)}
+            onRevealAdvice={() => adviceRevealMutation.mutate()}
+            onRecordFinal={(command) => finalResponseMutation.mutate(command)}
+          />
+        )
+      ) : null}
+
+      {!item.controls.action_plan
+        && item.time_context.mode === "current"
+        && (!evaluationMode || initialResponseRecorded) ? (
       <section className="panel virtual-review-panel" id="review" aria-labelledby="review-title" tabIndex={-1}>
-        <p className="section-kicker">가상 조언</p>
-        <h2 id="review-title">가상 역할 검토와 최종 판단</h2>
-        <p>현재 검증된 독립 역할 검토를 한 번 실행합니다. 단일 역할 실험과 구성 비교는 개발자 평가 화면의 범위입니다.</p>
+        <p className="section-kicker">{evaluationMode ? "조언 준비" : "가상 조언"}</p>
+        <h2 id="review-title">{evaluationMode ? "가상 조언을 생성합니다" : "가상 역할 검토와 최종 판단"}</h2>
+        <p>{evaluationMode
+          ? "사전 판단은 이미 잠겼습니다. 조언을 만들되 내용은 공개 버튼을 누르기 전까지 숨깁니다."
+          : "현재 검증된 독립 역할 검토를 한 번 실행합니다. 단일 역할 실험과 구성 비교는 개발자 평가 화면의 범위입니다."}</p>
         {!activeDossierRunId ? <p className="empty-copy">화면 상단의 ‘가상 역할 검토 실행’으로 시작합니다.</p> : null}
         {dossierStartMutation.isError ? <p role="alert">가상 역할 검토를 시작하지 못했습니다. 개발 상태를 새로고침한 뒤 다시 실행하세요.</p> : null}
         {dossierRunQuery.data ? (
@@ -301,7 +408,17 @@ export function DecisionWorkspacePage() {
   );
 }
 
-function ContextBar({ item, riskReturn }: { item: DecisionWorkspace; riskReturn: RiskReturn | null }) {
+function ContextBar({
+  item,
+  riskReturn,
+  evaluationMode,
+  onModeChange,
+}: {
+  item: DecisionWorkspace;
+  riskReturn: RiskReturn | null;
+  evaluationMode: boolean;
+  onModeChange: (mode: "demo" | "evaluation") => void;
+}) {
   const isHistorical = item.time_context.mode === "historical";
   return (
     <nav className="decision-context-bar" aria-label="결정 검토 문맥">
@@ -309,7 +426,22 @@ function ContextBar({ item, riskReturn }: { item: DecisionWorkspace; riskReturn:
         ← {riskReturn ? "Risk 상세" : "결정 목록"}
       </Link>
       <div className="context-facts">
-        <span>가상 판단</span>
+        <div className="interaction-mode" aria-label="상호작용 모드">
+          <button
+            type="button"
+            aria-pressed={!evaluationMode}
+            onClick={() => onModeChange("demo")}
+          >
+            데모
+          </button>
+          <button
+            type="button"
+            aria-pressed={evaluationMode}
+            onClick={() => onModeChange("evaluation")}
+          >
+            조언 영향 평가
+          </button>
+        </div>
         <span>{isHistorical ? `과거 Step ${item.time_context.selected_step}` : `현재 Step ${item.time_context.current_step}`}</span>
         <span>{isHistorical ? "당시 관측 상태" : "최신 상태"}</span>
         <span>{phaseLabel(item.header.workspace_phase)}</span>
@@ -594,6 +726,22 @@ function workspaceLoadErrorCopy(error: unknown, selectedStep: number | undefined
     recovery: "현재 화면에는 불완전한 정보를 표시하지 않았습니다. 잠시 후 다시 시도하세요.",
     action: "retry" as const,
   };
+}
+
+function evaluationResponseError(error: unknown): string | null {
+  if (!error) return null;
+  if (error instanceof ApiError) {
+    return ({
+      INITIAL_RESPONSE_IMMUTABLE: "사전 판단은 이미 기록되어 변경할 수 없습니다.",
+      ADVICE_REVEAL_IMMUTABLE: "가상 조언은 이미 공개되었습니다.",
+      FINAL_RESPONSE_IMMUTABLE: "최종 판단은 이미 기록되어 변경할 수 없습니다.",
+      SIMULATED_ADVICE_REQUIRED: "먼저 가상 최종 판단을 완료하세요.",
+      ACCEPT_MUST_MATCH_ADVICE: "조언 수용을 선택하면 권고 선택지를 유지해야 합니다.",
+      CASE_VERSION_CONFLICT: "개발 상태가 변경되었습니다. 최신 상태를 불러오세요.",
+    } as Record<string, string>)[error.code ?? ""]
+      ?? "평가 응답을 처리하지 못했습니다. 단계와 입력을 확인한 뒤 다시 시도하세요.";
+  }
+  return "평가 응답을 처리하지 못했습니다. 잠시 후 다시 시도하세요.";
 }
 
 function actionTarget(action: DecisionWorkspace["workflow"]["primary_action"]) {

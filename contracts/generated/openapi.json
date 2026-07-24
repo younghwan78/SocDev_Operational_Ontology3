@@ -556,6 +556,61 @@
         "title": "DecisionActionPlan",
         "type": "object"
       },
+      "DecisionAdviceRevealCommand": {
+        "additionalProperties": false,
+        "properties": {
+          "command_schema_version": {
+            "const": "decision-advice-reveal-command.v1",
+            "default": "decision-advice-reveal-command.v1",
+            "title": "Command Schema Version",
+            "type": "string"
+          }
+        },
+        "title": "DecisionAdviceRevealCommand",
+        "type": "object"
+      },
+      "DecisionAdviceSnapshot": {
+        "additionalProperties": false,
+        "properties": {
+          "advice_snapshot_id": {
+            "title": "Advice Snapshot Id",
+            "type": "string"
+          },
+          "decision_source": {
+            "title": "Decision Source",
+            "type": "string"
+          },
+          "decision_type": {
+            "title": "Decision Type",
+            "type": "string"
+          },
+          "revealed_at": {
+            "format": "date-time",
+            "title": "Revealed At",
+            "type": "string"
+          },
+          "selected_option_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Selected Option Id"
+          }
+        },
+        "required": [
+          "advice_snapshot_id",
+          "decision_type",
+          "selected_option_id",
+          "decision_source",
+          "revealed_at"
+        ],
+        "title": "DecisionAdviceSnapshot",
+        "type": "object"
+      },
       "DecisionCaseStatus": {
         "enum": [
           "DRAFT",
@@ -643,6 +698,293 @@
           "unresolved_uncertainties"
         ],
         "title": "DecisionDossier",
+        "type": "object"
+      },
+      "DecisionEvaluationResponseState": {
+        "additionalProperties": false,
+        "properties": {
+          "actor_id": {
+            "title": "Actor Id",
+            "type": "string"
+          },
+          "advice_snapshot": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DecisionAdviceSnapshot"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "case_id": {
+            "title": "Case Id",
+            "type": "string"
+          },
+          "final_response": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DecisionFinalResponseRecord"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "initial_response": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DecisionInitialResponseRecord"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "interpretation": {
+            "const": "engineering_proxy_only",
+            "default": "engineering_proxy_only",
+            "title": "Interpretation",
+            "type": "string"
+          },
+          "participant_kind": {
+            "const": "builder",
+            "default": "builder",
+            "title": "Participant Kind",
+            "type": "string"
+          },
+          "response_id": {
+            "title": "Response Id",
+            "type": "string"
+          },
+          "response_schema_version": {
+            "const": "decision-evaluation-response.v1",
+            "default": "decision-evaluation-response.v1",
+            "title": "Response Schema Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "response_id",
+          "case_id",
+          "actor_id"
+        ],
+        "title": "DecisionEvaluationResponseState",
+        "type": "object"
+      },
+      "DecisionFinalResponseCommand": {
+        "additionalProperties": false,
+        "properties": {
+          "accepted_risks_ko": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "title": "Accepted Risks Ko",
+            "type": "array"
+          },
+          "adoption": {
+            "enum": [
+              "accept",
+              "modify",
+              "reject"
+            ],
+            "title": "Adoption",
+            "type": "string"
+          },
+          "command_schema_version": {
+            "const": "decision-final-response-command.v1",
+            "default": "decision-final-response-command.v1",
+            "title": "Command Schema Version",
+            "type": "string"
+          },
+          "difference_reason_ko": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Difference Reason Ko"
+          },
+          "option_id": {
+            "minLength": 1,
+            "title": "Option Id",
+            "type": "string"
+          },
+          "rationale_ko": {
+            "minLength": 1,
+            "title": "Rationale Ko",
+            "type": "string"
+          },
+          "safeguards_ko": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "title": "Safeguards Ko",
+            "type": "array"
+          }
+        },
+        "required": [
+          "adoption",
+          "option_id",
+          "accepted_risks_ko",
+          "safeguards_ko",
+          "rationale_ko"
+        ],
+        "title": "DecisionFinalResponseCommand",
+        "type": "object"
+      },
+      "DecisionFinalResponseRecord": {
+        "additionalProperties": false,
+        "properties": {
+          "accepted_risks_ko": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Accepted Risks Ko",
+            "type": "array"
+          },
+          "adoption": {
+            "enum": [
+              "accept",
+              "modify",
+              "reject"
+            ],
+            "title": "Adoption",
+            "type": "string"
+          },
+          "difference_reason_ko": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Difference Reason Ko"
+          },
+          "option_id": {
+            "title": "Option Id",
+            "type": "string"
+          },
+          "rationale_ko": {
+            "title": "Rationale Ko",
+            "type": "string"
+          },
+          "recorded_at": {
+            "format": "date-time",
+            "title": "Recorded At",
+            "type": "string"
+          },
+          "safeguards_ko": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Safeguards Ko",
+            "type": "array"
+          }
+        },
+        "required": [
+          "adoption",
+          "option_id",
+          "accepted_risks_ko",
+          "safeguards_ko",
+          "rationale_ko",
+          "difference_reason_ko",
+          "recorded_at"
+        ],
+        "title": "DecisionFinalResponseRecord",
+        "type": "object"
+      },
+      "DecisionInitialResponseCommand": {
+        "additionalProperties": false,
+        "properties": {
+          "accepted_risks_ko": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "title": "Accepted Risks Ko",
+            "type": "array"
+          },
+          "command_schema_version": {
+            "const": "decision-initial-response-command.v1",
+            "default": "decision-initial-response-command.v1",
+            "title": "Command Schema Version",
+            "type": "string"
+          },
+          "option_id": {
+            "minLength": 1,
+            "title": "Option Id",
+            "type": "string"
+          },
+          "rationale_ko": {
+            "minLength": 1,
+            "title": "Rationale Ko",
+            "type": "string"
+          },
+          "safeguards_ko": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "title": "Safeguards Ko",
+            "type": "array"
+          }
+        },
+        "required": [
+          "option_id",
+          "accepted_risks_ko",
+          "safeguards_ko",
+          "rationale_ko"
+        ],
+        "title": "DecisionInitialResponseCommand",
+        "type": "object"
+      },
+      "DecisionInitialResponseRecord": {
+        "additionalProperties": false,
+        "properties": {
+          "accepted_risks_ko": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Accepted Risks Ko",
+            "type": "array"
+          },
+          "option_id": {
+            "title": "Option Id",
+            "type": "string"
+          },
+          "rationale_ko": {
+            "title": "Rationale Ko",
+            "type": "string"
+          },
+          "recorded_at": {
+            "format": "date-time",
+            "title": "Recorded At",
+            "type": "string"
+          },
+          "safeguards_ko": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Safeguards Ko",
+            "type": "array"
+          }
+        },
+        "required": [
+          "option_id",
+          "accepted_risks_ko",
+          "safeguards_ko",
+          "rationale_ko",
+          "recorded_at"
+        ],
+        "title": "DecisionInitialResponseRecord",
         "type": "object"
       },
       "DecisionListBlocker": {
@@ -5492,6 +5834,266 @@
         "summary": "Get Evaluation",
         "tags": [
           "evaluations"
+        ]
+      }
+    },
+    "/api/v1/decision-cases/{case_id}/evaluation-response": {
+      "get": {
+        "operationId": "get_decision_evaluation_response_api_v1_decision_cases__case_id__evaluation_response_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "case_id",
+            "required": true,
+            "schema": {
+              "title": "Case Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/DecisionEvaluationResponseState"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Response Get Decision Evaluation Response Api V1 Decision Cases  Case Id  Evaluation Response Get"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Decision Evaluation Response",
+        "tags": [
+          "decision-evaluation-response"
+        ]
+      }
+    },
+    "/api/v1/decision-cases/{case_id}/evaluation-response/advice-reveal": {
+      "post": {
+        "operationId": "reveal_simulated_advice_api_v1_decision_cases__case_id__evaluation_response_advice_reveal_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "case_id",
+            "required": true,
+            "schema": {
+              "title": "Case Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": true,
+            "schema": {
+              "title": "Idempotency-Key",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "If-Match",
+            "required": true,
+            "schema": {
+              "title": "If-Match",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DecisionAdviceRevealCommand"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DecisionEvaluationResponseState"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Reveal Simulated Advice",
+        "tags": [
+          "decision-evaluation-response"
+        ]
+      }
+    },
+    "/api/v1/decision-cases/{case_id}/evaluation-response/final": {
+      "post": {
+        "operationId": "record_final_decision_response_api_v1_decision_cases__case_id__evaluation_response_final_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "case_id",
+            "required": true,
+            "schema": {
+              "title": "Case Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": true,
+            "schema": {
+              "title": "Idempotency-Key",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "If-Match",
+            "required": true,
+            "schema": {
+              "title": "If-Match",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DecisionFinalResponseCommand"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DecisionEvaluationResponseState"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Record Final Decision Response",
+        "tags": [
+          "decision-evaluation-response"
+        ]
+      }
+    },
+    "/api/v1/decision-cases/{case_id}/evaluation-response/initial": {
+      "post": {
+        "operationId": "record_initial_decision_response_api_v1_decision_cases__case_id__evaluation_response_initial_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "case_id",
+            "required": true,
+            "schema": {
+              "title": "Case Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": true,
+            "schema": {
+              "title": "Idempotency-Key",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "If-Match",
+            "required": true,
+            "schema": {
+              "title": "If-Match",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DecisionInitialResponseCommand"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DecisionEvaluationResponseState"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Record Initial Decision Response",
+        "tags": [
+          "decision-evaluation-response"
         ]
       }
     },

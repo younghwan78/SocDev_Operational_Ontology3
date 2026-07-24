@@ -54,6 +54,7 @@ function resetCaseExecutionState(root: string, caseId: string) {
     `DELETE FROM observable.agent_run_steps WHERE run_id IN (SELECT run_id FROM observable.agent_runs WHERE case_id = ${quotedCaseId})`,
     `DELETE FROM hidden.outcome_evaluations WHERE case_id = ${quotedCaseId}`,
     `DELETE FROM hidden.outcome_advances WHERE case_id = ${quotedCaseId}`,
+    `DELETE FROM observable.decision_evaluation_responses WHERE case_id = ${quotedCaseId}`,
     `DELETE FROM observable.simulated_decisions WHERE case_id = ${quotedCaseId}`,
     `DELETE FROM observable.simulation_states WHERE case_id = ${quotedCaseId}`,
     `DELETE FROM observable.agent_runs WHERE case_id = ${quotedCaseId}`,

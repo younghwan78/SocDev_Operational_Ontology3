@@ -15,3 +15,6 @@ export type ProjectSituation = components["schemas"]["ProjectSituationProjection
 export type ProjectRiskSummary = components["schemas"]["ProjectRiskSummary"];
 export type ProjectRiskDetail = components["schemas"]["ProjectRiskDetailProjection"];
 export type ProjectTimeline = components["schemas"]["ProjectTimelineProjection"];
+export type DecisionEvaluationResponse = components["schemas"]["DecisionEvaluationResponseState"];
+export type DecisionInitialResponseCommand = components["schemas"]["DecisionInitialResponseCommand"];
+export type DecisionFinalResponseCommand = components["schemas"]["DecisionFinalResponseCommand"];

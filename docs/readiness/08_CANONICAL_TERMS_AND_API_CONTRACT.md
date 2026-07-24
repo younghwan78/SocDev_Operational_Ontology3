@@ -183,6 +183,11 @@ Current executable decision contract versions are `simulated-decision.v2` and
 `decision-action-plan.v1`. `simulated-decision.v1` remains a historical read/migration
 format and is not emitted by current commands.
 
+UX-J adds the evaluation-only `decision-evaluation-response.v1` read contract and
+`decision-initial-response-command.v1`, `decision-advice-reveal-command.v1`, and
+`decision-final-response-command.v1` commands. `AdviceAdoption` is exactly
+`accept | modify | reject`.
+
 Do not use the generic name `case_version` for more than one meaning.
 
 ## 5. Canonical Frontend routes
@@ -207,6 +212,7 @@ GET /api/v1/decision-cases/{case_id}/workspace
 GET /api/v1/decision-cases/{case_id}/timeline
 GET /api/v1/decision-cases/{case_id}/evidence
 GET /api/v1/decision-cases/{case_id}/evaluation
+GET /api/v1/decision-cases/{case_id}/evaluation-response
 ```
 
 The decision-case collection returns `decision-list-item.v1`, already ordered by Backend
@@ -237,6 +243,11 @@ The timeline resource returns `development-timeline.v1`. Optional query paramete
 `observed_at_step <= at_step`. An out-of-range step returns
 `DEVELOPMENT_STEP_OUT_OF_RANGE`.
 
+The evaluation-response resource returns the current local actor's
+`decision-evaluation-response.v1`, or JSON `null` before an initial response exists. It is
+evaluation-only and fixes `participant_kind=builder` and
+`interpretation=engineering_proxy_only`; these records are not human-observation evidence.
+
 ### 6.2 Command API
 
 ```text
@@ -244,6 +255,9 @@ POST /api/v1/decision-cases/{case_id}/review-runs
 POST /api/v1/decision-cases/{case_id}/simulated-decisions
 POST /api/v1/decision-cases/{case_id}/outcome-advances
 POST /api/v1/decision-cases/{case_id}/evaluations
+POST /api/v1/decision-cases/{case_id}/evaluation-response/initial
+POST /api/v1/decision-cases/{case_id}/evaluation-response/advice-reveal
+POST /api/v1/decision-cases/{case_id}/evaluation-response/final
 ```
 
 Review runs perform routing, independent Role review, optional challenge/revision, and Dossier
@@ -256,6 +270,13 @@ the command returns `DECISION_NOT_READY`; if a supplied decision differs from th
 decision, it returns `DECISION_MISMATCH`. This keeps the Frontend command reload-safe without making
 the browser an authority for decision content. Logical time still advances only through this
 explicit command.
+
+Evaluation-response commands implement the immutable order
+`initial response → advice reveal → final response`. The Backend resolves the latest persisted
+simulated advice; the client never posts advice content or participant authority. `accept` retains
+the advice-selected option, while `modify` and `reject` require a difference reason. These commands
+do not mutate the case, simulated decision, Action Plan, Outcome, or Project truth. The
+evaluation-response record is an engineering proxy only, not approval or company-system write-back.
 
 ### 6.3 Run API
 
@@ -417,6 +438,9 @@ references inside `development-project.v1`; adding required Project fields to ex
 payloads would require a new major version and is not part of OPS-C. PostgreSQL migration
 `0020_development_projects` persists the new aggregate independently. ADR-0010 owns the full semantic
 boundary and transition sequence.
+
+UX-J migration `0021_decision_responses` separately persists evaluation-only pre-advice and
+post-advice responses. ADR-0011 owns its disclosure, immutability, and non-authority boundary.
 
 ## 11. Compatibility gate
 

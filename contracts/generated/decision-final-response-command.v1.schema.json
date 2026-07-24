@@ -1,0 +1,67 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "command_schema_version": {
+      "const": "decision-final-response-command.v1",
+      "default": "decision-final-response-command.v1",
+      "title": "Command Schema Version",
+      "type": "string"
+    },
+    "adoption": {
+      "enum": [
+        "accept",
+        "modify",
+        "reject"
+      ],
+      "title": "Adoption",
+      "type": "string"
+    },
+    "option_id": {
+      "minLength": 1,
+      "title": "Option Id",
+      "type": "string"
+    },
+    "accepted_risks_ko": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Accepted Risks Ko",
+      "type": "array"
+    },
+    "safeguards_ko": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Safeguards Ko",
+      "type": "array"
+    },
+    "rationale_ko": {
+      "minLength": 1,
+      "title": "Rationale Ko",
+      "type": "string"
+    },
+    "difference_reason_ko": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Difference Reason Ko"
+    }
+  },
+  "required": [
+    "adoption",
+    "option_id",
+    "accepted_risks_ko",
+    "safeguards_ko",
+    "rationale_ko"
+  ],
+  "title": "DecisionFinalResponseCommand",
+  "type": "object"
+}

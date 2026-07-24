@@ -16,6 +16,16 @@ from soc_ot.api.contracts import (
     ReviewRunView,
     RunTelemetryView,
 )
+from soc_ot.application.decision_evaluation_responses import (
+    DecisionAdviceRevealCommand,
+    DecisionEvaluationResponseConflict,
+    DecisionEvaluationResponseRepository,
+    DecisionEvaluationResponseState,
+    DecisionFinalResponseCommand,
+    DecisionInitialResponseCommand,
+    InMemoryDecisionEvaluationResponseRepository,
+    PostgresDecisionEvaluationResponseRepository,
+)
 from soc_ot.application.development_twin import (
     DevelopmentTimelineProjection,
     build_development_timeline,
@@ -86,7 +96,7 @@ from soc_ot.infrastructure.hidden_repository import (
 )
 from soc_ot.infrastructure.project_repository import PostgresProjectRepository
 
-EXPECTED_DB_REVISION = "0020_development_projects"
+EXPECTED_DB_REVISION = "0021_decision_responses"
 
 
 def _default_repository() -> CaseRepository:
@@ -101,6 +111,7 @@ def create_app(
     evaluation_repository: EvaluationRepository | None = None,
     decision_repository: SimulatedDecisionRepository | None = None,
     project_repository: ProjectRepository | None = None,
+    decision_response_repository: DecisionEvaluationResponseRepository | None = None,
 ) -> FastAPI:
     settings = get_settings()
     app = FastAPI(title="SoC Operational Decision Twin", version=__version__)
@@ -144,6 +155,11 @@ def create_app(
         if repository is not None
         else PostgresSimulatedDecisionRepository(get_runtime_engine())
     )
+    local_decision_responses = decision_response_repository or (
+        InMemoryDecisionEvaluationResponseRepository()
+        if repository is not None
+        else PostgresDecisionEvaluationResponseRepository(get_runtime_engine())
+    )
 
     def outcome_repository_provider() -> OutcomeAdvanceRepository:
         if outcome_repository is not None:
@@ -179,6 +195,10 @@ def create_app(
     ]
     DecisionCommands = Annotated[
         SimulatedDecisionRepository, Depends(lambda: local_decisions)
+    ]
+    DecisionResponses = Annotated[
+        DecisionEvaluationResponseRepository,
+        Depends(lambda: local_decision_responses),
     ]
 
     @app.get("/health/live", tags=["health"])
@@ -588,6 +608,115 @@ def create_app(
             )
         except SimulatedDecisionConflict as error:
             raise HTTPException(status_code=409, detail={"code": str(error)}) from error
+
+    @app.get(
+        "/api/v1/decision-cases/{case_id}/evaluation-response",
+        response_model=DecisionEvaluationResponseState | None,
+        tags=["decision-evaluation-response"],
+    )
+    def get_decision_evaluation_response(
+        case_id: str,
+        repo: Repository,
+        responses: DecisionResponses,
+    ) -> DecisionEvaluationResponseState | None:
+        _require_case(repo, case_id)
+        return responses.get(case_id=case_id, actor_id=settings.local_actor_id)
+
+    @app.post(
+        "/api/v1/decision-cases/{case_id}/evaluation-response/initial",
+        response_model=DecisionEvaluationResponseState,
+        tags=["decision-evaluation-response"],
+    )
+    def record_initial_decision_response(
+        case_id: str,
+        command: DecisionInitialResponseCommand,
+        repo: Repository,
+        responses: DecisionResponses,
+        idempotency_key: Annotated[str, Header(alias="Idempotency-Key")],
+        if_match: Annotated[str, Header(alias="If-Match")],
+    ) -> DecisionEvaluationResponseState:
+        stored = _require_case(repo, case_id)
+        try:
+            return responses.record_initial(
+                case_id=case_id,
+                actor_id=settings.local_actor_id,
+                idempotency_key=idempotency_key,
+                expected_aggregate_version=_expected_version(if_match),
+                actual_aggregate_version=stored.aggregate_version,
+                allowed_option_ids={
+                    alternative.option_id for alternative in stored.case.alternatives
+                },
+                command=command,
+            )
+        except DecisionEvaluationResponseConflict as error:
+            raise HTTPException(
+                status_code=409, detail={"code": str(error)}
+            ) from error
+
+    @app.post(
+        "/api/v1/decision-cases/{case_id}/evaluation-response/advice-reveal",
+        response_model=DecisionEvaluationResponseState,
+        tags=["decision-evaluation-response"],
+    )
+    def reveal_simulated_advice(
+        case_id: str,
+        _command: DecisionAdviceRevealCommand,
+        repo: Repository,
+        decisions: DecisionCommands,
+        responses: DecisionResponses,
+        idempotency_key: Annotated[str, Header(alias="Idempotency-Key")],
+        if_match: Annotated[str, Header(alias="If-Match")],
+    ) -> DecisionEvaluationResponseState:
+        stored = _require_case(repo, case_id)
+        advice = decisions.latest(case_id)
+        if advice is None:
+            raise HTTPException(
+                status_code=409, detail={"code": "SIMULATED_ADVICE_REQUIRED"}
+            )
+        try:
+            return responses.reveal_advice(
+                case_id=case_id,
+                actor_id=settings.local_actor_id,
+                idempotency_key=idempotency_key,
+                expected_aggregate_version=_expected_version(if_match),
+                actual_aggregate_version=stored.aggregate_version,
+                advice=advice,
+            )
+        except DecisionEvaluationResponseConflict as error:
+            raise HTTPException(
+                status_code=409, detail={"code": str(error)}
+            ) from error
+
+    @app.post(
+        "/api/v1/decision-cases/{case_id}/evaluation-response/final",
+        response_model=DecisionEvaluationResponseState,
+        tags=["decision-evaluation-response"],
+    )
+    def record_final_decision_response(
+        case_id: str,
+        command: DecisionFinalResponseCommand,
+        repo: Repository,
+        responses: DecisionResponses,
+        idempotency_key: Annotated[str, Header(alias="Idempotency-Key")],
+        if_match: Annotated[str, Header(alias="If-Match")],
+    ) -> DecisionEvaluationResponseState:
+        stored = _require_case(repo, case_id)
+        try:
+            return responses.record_final(
+                case_id=case_id,
+                actor_id=settings.local_actor_id,
+                idempotency_key=idempotency_key,
+                expected_aggregate_version=_expected_version(if_match),
+                actual_aggregate_version=stored.aggregate_version,
+                allowed_option_ids={
+                    alternative.option_id for alternative in stored.case.alternatives
+                },
+                command=command,
+            )
+        except DecisionEvaluationResponseConflict as error:
+            raise HTTPException(
+                status_code=409, detail={"code": str(error)}
+            ) from error
 
     @app.post("/api/v1/decision-cases/{case_id}/outcome-advances", tags=["outcomes"])
     def create_outcome_advance(

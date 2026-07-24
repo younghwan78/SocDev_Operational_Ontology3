@@ -1,4 +1,4 @@
-import type { AblationResult, CaseEvaluation, DecisionListItem, DecisionWorkspace, DevelopmentTimeline, OutcomeSnapshot, ProjectListItem, ProjectRiskDetail, ProjectSituation, ProjectTimeline, ReviewRun } from "./generated";
+import type { AblationResult, CaseEvaluation, DecisionEvaluationResponse, DecisionFinalResponseCommand, DecisionInitialResponseCommand, DecisionListItem, DecisionWorkspace, DevelopmentTimeline, OutcomeSnapshot, ProjectListItem, ProjectRiskDetail, ProjectSituation, ProjectTimeline, ReviewRun } from "./generated";
 
 const API_BASE = import.meta.env.VITE_SOC_OT_API_BASE_URL ?? "http://127.0.0.1:18080";
 
@@ -118,6 +118,68 @@ export function createSimulatedDecision(
   return postJson(
     `/api/v1/decision-cases/${encodeURIComponent(caseId)}/simulated-decisions?${query}`,
     commandHeaders(aggregateVersion),
+  );
+}
+
+export async function getDecisionEvaluationResponse(
+  caseId: string,
+): Promise<DecisionEvaluationResponse | null> {
+  try {
+    return await getJson(
+      `/api/v1/decision-cases/${encodeURIComponent(caseId)}/evaluation-response`,
+    );
+  } catch (error) {
+    if (
+      error instanceof ApiError
+      && error.status === 404
+      && error.code === "DECISION_EVALUATION_RESPONSE_NOT_FOUND"
+    ) {
+      return null;
+    }
+    throw error;
+  }
+}
+
+export function recordInitialDecisionResponse(
+  caseId: string,
+  aggregateVersion: number,
+  command: Omit<DecisionInitialResponseCommand, "command_schema_version">,
+): Promise<DecisionEvaluationResponse> {
+  return postJson(
+    `/api/v1/decision-cases/${encodeURIComponent(caseId)}/evaluation-response/initial`,
+    { ...commandHeaders(aggregateVersion), "Content-Type": "application/json" },
+    JSON.stringify({
+      command_schema_version: "decision-initial-response-command.v1",
+      ...command,
+    }),
+  );
+}
+
+export function revealDecisionAdvice(
+  caseId: string,
+  aggregateVersion: number,
+): Promise<DecisionEvaluationResponse> {
+  return postJson(
+    `/api/v1/decision-cases/${encodeURIComponent(caseId)}/evaluation-response/advice-reveal`,
+    { ...commandHeaders(aggregateVersion), "Content-Type": "application/json" },
+    JSON.stringify({
+      command_schema_version: "decision-advice-reveal-command.v1",
+    }),
+  );
+}
+
+export function recordFinalDecisionResponse(
+  caseId: string,
+  aggregateVersion: number,
+  command: Omit<DecisionFinalResponseCommand, "command_schema_version">,
+): Promise<DecisionEvaluationResponse> {
+  return postJson(
+    `/api/v1/decision-cases/${encodeURIComponent(caseId)}/evaluation-response/final`,
+    { ...commandHeaders(aggregateVersion), "Content-Type": "application/json" },
+    JSON.stringify({
+      command_schema_version: "decision-final-response-command.v1",
+      ...command,
+    }),
   );
 }
 

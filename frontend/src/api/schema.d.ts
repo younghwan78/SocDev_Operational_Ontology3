@@ -38,6 +38,74 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/decision-cases/{case_id}/evaluation-response": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Decision Evaluation Response */
+        get: operations["get_decision_evaluation_response_api_v1_decision_cases__case_id__evaluation_response_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/decision-cases/{case_id}/evaluation-response/advice-reveal": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Reveal Simulated Advice */
+        post: operations["reveal_simulated_advice_api_v1_decision_cases__case_id__evaluation_response_advice_reveal_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/decision-cases/{case_id}/evaluation-response/final": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Record Final Decision Response */
+        post: operations["record_final_decision_response_api_v1_decision_cases__case_id__evaluation_response_final_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/decision-cases/{case_id}/evaluation-response/initial": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Record Initial Decision Response */
+        post: operations["record_initial_decision_response_api_v1_decision_cases__case_id__evaluation_response_initial_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/decision-cases/{case_id}/evaluations": {
         parameters: {
             query?: never;
@@ -600,6 +668,31 @@ export interface components {
             /** Verification */
             verification: string;
         };
+        /** DecisionAdviceRevealCommand */
+        DecisionAdviceRevealCommand: {
+            /**
+             * Command Schema Version
+             * @default decision-advice-reveal-command.v1
+             * @constant
+             */
+            command_schema_version: "decision-advice-reveal-command.v1";
+        };
+        /** DecisionAdviceSnapshot */
+        DecisionAdviceSnapshot: {
+            /** Advice Snapshot Id */
+            advice_snapshot_id: string;
+            /** Decision Source */
+            decision_source: string;
+            /** Decision Type */
+            decision_type: string;
+            /**
+             * Revealed At
+             * Format: date-time
+             */
+            revealed_at: string;
+            /** Selected Option Id */
+            selected_option_id: string | null;
+        };
         /**
          * DecisionCaseStatus
          * @enum {string}
@@ -628,6 +721,116 @@ export interface components {
             schema_version: "decision-dossier.v1";
             /** Unresolved Uncertainties */
             unresolved_uncertainties: string[];
+        };
+        /** DecisionEvaluationResponseState */
+        DecisionEvaluationResponseState: {
+            /** Actor Id */
+            actor_id: string;
+            advice_snapshot?: components["schemas"]["DecisionAdviceSnapshot"] | null;
+            /** Case Id */
+            case_id: string;
+            final_response?: components["schemas"]["DecisionFinalResponseRecord"] | null;
+            initial_response?: components["schemas"]["DecisionInitialResponseRecord"] | null;
+            /**
+             * Interpretation
+             * @default engineering_proxy_only
+             * @constant
+             */
+            interpretation: "engineering_proxy_only";
+            /**
+             * Participant Kind
+             * @default builder
+             * @constant
+             */
+            participant_kind: "builder";
+            /** Response Id */
+            response_id: string;
+            /**
+             * Response Schema Version
+             * @default decision-evaluation-response.v1
+             * @constant
+             */
+            response_schema_version: "decision-evaluation-response.v1";
+        };
+        /** DecisionFinalResponseCommand */
+        DecisionFinalResponseCommand: {
+            /** Accepted Risks Ko */
+            accepted_risks_ko: string[];
+            /**
+             * Adoption
+             * @enum {string}
+             */
+            adoption: "accept" | "modify" | "reject";
+            /**
+             * Command Schema Version
+             * @default decision-final-response-command.v1
+             * @constant
+             */
+            command_schema_version: "decision-final-response-command.v1";
+            /** Difference Reason Ko */
+            difference_reason_ko?: string | null;
+            /** Option Id */
+            option_id: string;
+            /** Rationale Ko */
+            rationale_ko: string;
+            /** Safeguards Ko */
+            safeguards_ko: string[];
+        };
+        /** DecisionFinalResponseRecord */
+        DecisionFinalResponseRecord: {
+            /** Accepted Risks Ko */
+            accepted_risks_ko: string[];
+            /**
+             * Adoption
+             * @enum {string}
+             */
+            adoption: "accept" | "modify" | "reject";
+            /** Difference Reason Ko */
+            difference_reason_ko: string | null;
+            /** Option Id */
+            option_id: string;
+            /** Rationale Ko */
+            rationale_ko: string;
+            /**
+             * Recorded At
+             * Format: date-time
+             */
+            recorded_at: string;
+            /** Safeguards Ko */
+            safeguards_ko: string[];
+        };
+        /** DecisionInitialResponseCommand */
+        DecisionInitialResponseCommand: {
+            /** Accepted Risks Ko */
+            accepted_risks_ko: string[];
+            /**
+             * Command Schema Version
+             * @default decision-initial-response-command.v1
+             * @constant
+             */
+            command_schema_version: "decision-initial-response-command.v1";
+            /** Option Id */
+            option_id: string;
+            /** Rationale Ko */
+            rationale_ko: string;
+            /** Safeguards Ko */
+            safeguards_ko: string[];
+        };
+        /** DecisionInitialResponseRecord */
+        DecisionInitialResponseRecord: {
+            /** Accepted Risks Ko */
+            accepted_risks_ko: string[];
+            /** Option Id */
+            option_id: string;
+            /** Rationale Ko */
+            rationale_ko: string;
+            /**
+             * Recorded At
+             * Format: date-time
+             */
+            recorded_at: string;
+            /** Safeguards Ko */
+            safeguards_ko: string[];
         };
         /** DecisionListBlocker */
         DecisionListBlocker: {
@@ -2333,6 +2536,151 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CaseEvaluation"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_decision_evaluation_response_api_v1_decision_cases__case_id__evaluation_response_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                case_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DecisionEvaluationResponseState"] | null;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    reveal_simulated_advice_api_v1_decision_cases__case_id__evaluation_response_advice_reveal_post: {
+        parameters: {
+            query?: never;
+            header: {
+                "Idempotency-Key": string;
+                "If-Match": string;
+            };
+            path: {
+                case_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DecisionAdviceRevealCommand"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DecisionEvaluationResponseState"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    record_final_decision_response_api_v1_decision_cases__case_id__evaluation_response_final_post: {
+        parameters: {
+            query?: never;
+            header: {
+                "Idempotency-Key": string;
+                "If-Match": string;
+            };
+            path: {
+                case_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DecisionFinalResponseCommand"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DecisionEvaluationResponseState"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    record_initial_decision_response_api_v1_decision_cases__case_id__evaluation_response_initial_post: {
+        parameters: {
+            query?: never;
+            header: {
+                "Idempotency-Key": string;
+                "If-Match": string;
+            };
+            path: {
+                case_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DecisionInitialResponseCommand"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DecisionEvaluationResponseState"];
                 };
             };
             /** @description Validation Error */

@@ -122,6 +122,76 @@ test("CASE-VR-001 complete Replay decision workflow is accessible", async ({ pag
   });
 });
 
+test("evaluation mode preserves pre-advice judgment and measures advice adoption", async ({ page }) => {
+  const consoleProblems: string[] = [];
+  page.on("console", (message) => {
+    if (["error", "warning"].includes(message.type())) {
+      consoleProblems.push(`${message.type()}: ${message.text()}`);
+    }
+  });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/decisions/CASE-VR-001?interaction=evaluation");
+
+  await expect(page.getByRole("heading", {
+    name: "내 판단과 가상 조언을 분리해 기록합니다",
+  })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "의견 일치" })).toHaveCount(0);
+  const initial = page.getByRole("group", { name: "1. 조언을 보기 전 내 판단" });
+  await initial.getByLabel("선택지").selectOption("OPT-SW-GUARDED");
+  await initial.getByLabel("감수할 위험").fill("장시간 thermal 거동");
+  await initial.getByLabel("필요한 보호 조치").fill("feature flag로 즉시 철회");
+  await initial.getByLabel("판단 이유").fill("Freeze 전에 가역 경로를 확보합니다.");
+  await initial.getByRole("button", { name: "사전 판단을 변경 불가로 기록" }).click();
+  await expect(page.getByRole("heading", { name: "1. 조언 전 판단 · 기록 완료" })).toBeVisible();
+
+  await page.getByRole("button", { name: "가상 역할 검토 실행", exact: true }).click();
+  for (let attempt = 0; attempt < 20; attempt += 1) {
+    execFileSync("uv", ["run", "python", "-m", "soc_ot.worker", "--once"], {
+      cwd: root,
+      stdio: "ignore",
+    });
+    await page.waitForTimeout(200);
+    const progress = await page.getByText(/관점별 검토:/).locator("..").textContent();
+    if (progress?.includes("완료")) break;
+  }
+  await expect(page.getByText(/관점별 검토:/).locator("..")).toContainText("완료");
+  await expect(page.getByRole("heading", { name: "의견 일치" })).toHaveCount(0);
+  await page.getByRole("button", { name: "가상 최종 판단 실행" }).click();
+
+  await expect(page.getByRole("button", { name: "조언 공개 시점 기록" })).toBeVisible();
+  await expect(page.getByRole("heading", {
+    name: "판단에서 실행과 확인까지 한 흐름으로 봅니다",
+  })).toHaveCount(0);
+  await page.getByRole("button", { name: "조언 공개 시점 기록" }).click();
+  await expect(page.getByRole("heading", {
+    name: "판단에서 실행과 확인까지 한 흐름으로 봅니다",
+  })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "가상 조언 공개 완료" })).toBeVisible();
+
+  const final = page.getByRole("group", { name: "3. 조언을 본 뒤 최종 판단" });
+  await final.getByLabel("선택지").selectOption("OPT-SW-GUARDED");
+  await final.getByLabel("감수할 위험").fill("장시간 thermal 거동");
+  await final.getByLabel("필요한 보호 조치").fill("Step 15 실측과 rollback");
+  await final.getByLabel("판단 이유").fill("조언의 가역 경로와 중단 기준을 수용합니다.");
+  await final.getByRole("button", { name: "최종 판단을 변경 불가로 기록" }).click();
+  await expect(page.getByRole("heading", { name: "3. 최종 판단 · 수용" })).toBeVisible();
+  await expect(page.getByText(/simulated Chair의 판단이나 실행 계획을 변경하지 않습니다/)).toBeVisible();
+
+  await page.reload();
+  await expect(page.getByRole("heading", { name: "3. 최종 판단 · 수용" })).toBeVisible();
+  const hasPageOverflow = await page.evaluate(
+    () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
+  );
+  expect(hasPageOverflow).toBe(false);
+  const accessibility = await new AxeBuilder({ page }).analyze();
+  expect(accessibility.violations).toEqual([]);
+  expect(consoleProblems).toEqual([]);
+  await page.screenshot({
+    path: path.join(root, "output/playwright/ux-j-evaluation-390px.png"),
+    fullPage: true,
+  });
+});
+
 test("workspace remains usable at 390px", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/decisions/CASE-VR-001");

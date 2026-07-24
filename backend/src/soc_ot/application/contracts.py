@@ -5,6 +5,12 @@ from pydantic import BaseModel
 
 from soc_ot.agents.contracts import RoleReview
 from soc_ot.agents.multi_role import DecisionActionPlan, DecisionDossier, SimulatedDecision
+from soc_ot.application.decision_evaluation_responses import (
+    DecisionAdviceRevealCommand,
+    DecisionEvaluationResponseState,
+    DecisionFinalResponseCommand,
+    DecisionInitialResponseCommand,
+)
 from soc_ot.application.development_twin import DevelopmentTimelineProjection
 from soc_ot.application.evaluation import CaseEvaluation, EvaluationSummary
 from soc_ot.application.evaluation_manifest import EvaluationManifest
@@ -45,6 +51,10 @@ CONTRACT_MODELS: dict[str, type[BaseModel]] = {
     "project-risk-detail.v1": ProjectRiskDetailProjection,
     "project-timeline.v1": ProjectTimelineProjection,
     "development-timeline.v1": DevelopmentTimelineProjection,
+    "decision-evaluation-response.v1": DecisionEvaluationResponseState,
+    "decision-initial-response-command.v1": DecisionInitialResponseCommand,
+    "decision-final-response-command.v1": DecisionFinalResponseCommand,
+    "decision-advice-reveal-command.v1": DecisionAdviceRevealCommand,
     "evaluation-manifest.v2": EvaluationManifest,
     "case-evaluation.v2": CaseEvaluation,
     "evaluation-summary.v2": EvaluationSummary,

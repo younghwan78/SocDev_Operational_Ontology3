@@ -368,6 +368,100 @@ describe("App", () => {
     expect(screen.queryByRole("button", { name: "역할 검토 시작" })).not.toBeInTheDocument();
   });
 
+  it("records a pre-advice judgment without rendering role advice in evaluation mode", async () => {
+    vi.spyOn(globalThis, "fetch").mockImplementation((input) => {
+      const url = String(input);
+      if (url.includes("/evaluation-response")) {
+        return Promise.resolve(new Response(
+          JSON.stringify({ detail: { code: "DECISION_EVALUATION_RESPONSE_NOT_FOUND" } }),
+          { status: 404, headers: { "Content-Type": "application/json" } },
+        ));
+      }
+      return workspaceResponse(input);
+    });
+    renderApp("/decisions/CASE-VR-001?interaction=evaluation");
+
+    expect(await screen.findByRole("heading", {
+      name: "내 판단과 가상 조언을 분리해 기록합니다",
+    })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "사전 판단을 변경 불가로 기록" })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "의견 일치" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "가상 역할 검토와 최종 판단" })).not.toBeInTheDocument();
+    expect(screen.getByText(/engineering proxy/)).toBeInTheDocument();
+  });
+
+  it("keeps simulated advice hidden until an immutable reveal record exists", async () => {
+    const initialResponse = {
+      response_schema_version: "decision-evaluation-response.v1",
+      response_id: "RESPONSE-1",
+      case_id: "CASE-VR-001",
+      actor_id: "local-builder",
+      participant_kind: "builder",
+      interpretation: "engineering_proxy_only",
+      initial_response: {
+        option_id: "OPT-SW-GUARDED",
+        accepted_risks_ko: ["장시간 thermal"],
+        safeguards_ko: ["feature flag"],
+        rationale_ko: "가역 경로를 확보합니다.",
+        recorded_at: "2026-07-24T01:00:00Z",
+      },
+      advice_snapshot: null,
+      final_response: null,
+    };
+    vi.spyOn(globalThis, "fetch").mockImplementation((input) => (
+      String(input).includes("/evaluation-response")
+        ? Promise.resolve(new Response(JSON.stringify(initialResponse), { status: 200 }))
+        : workspaceFixtureResponse(actioningCaseItem, input)
+    ));
+    renderApp("/decisions/CASE-VR-001?interaction=evaluation");
+
+    expect(await screen.findByRole("button", { name: "조언 공개 시점 기록" })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", {
+      name: "판단에서 실행과 확인까지 한 흐름으로 봅니다",
+    })).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "의견 일치" })).not.toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "1. 조언 전 판단 · 기록 완료" })).toBeInTheDocument();
+  });
+
+  it("shows advice and final response fields only after reveal", async () => {
+    const revealedResponse = {
+      response_schema_version: "decision-evaluation-response.v1",
+      response_id: "RESPONSE-1",
+      case_id: "CASE-VR-001",
+      actor_id: "local-builder",
+      participant_kind: "builder",
+      interpretation: "engineering_proxy_only",
+      initial_response: {
+        option_id: "OPT-SW-GUARDED",
+        accepted_risks_ko: ["장시간 thermal"],
+        safeguards_ko: ["feature flag"],
+        rationale_ko: "가역 경로를 확보합니다.",
+        recorded_at: "2026-07-24T01:00:00Z",
+      },
+      advice_snapshot: {
+        advice_snapshot_id: "a".repeat(64),
+        decision_type: "PROCEED_WITH_SAFEGUARDS",
+        selected_option_id: "OPT-SW-GUARDED",
+        decision_source: "deterministic_core",
+        revealed_at: "2026-07-24T01:10:00Z",
+      },
+      final_response: null,
+    };
+    vi.spyOn(globalThis, "fetch").mockImplementation((input) => (
+      String(input).includes("/evaluation-response")
+        ? Promise.resolve(new Response(JSON.stringify(revealedResponse), { status: 200 }))
+        : workspaceFixtureResponse(actioningCaseItem, input)
+    ));
+    renderApp("/decisions/CASE-VR-001?interaction=evaluation");
+
+    expect(await screen.findByRole("heading", {
+      name: "판단에서 실행과 확인까지 한 흐름으로 봅니다",
+    })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "의견 일치" })).toBeInTheDocument();
+    expect(screen.getByRole("group", { name: "3. 조언을 본 뒤 최종 판단" })).toBeInTheDocument();
+    expect(screen.getByRole("radio", { name: "수용" })).toBeChecked();
+  });
+
   it("returns from a linked Decision to the originating historical Risk", async () => {
     vi.spyOn(globalThis, "fetch").mockImplementation(workspaceResponse);
     renderApp("/decisions/CASE-VR-001?from_project=PROJECT-V&from_risk=RISK-V-WRONG-COMMIT&from_project_step=20");

@@ -302,7 +302,7 @@ Step 5 activation record (2026-07-15):
 - B2 validation passed 10/10 acceptable and 10/10 policy compliant
 - B2 sealed-unseen passed 6/6 acceptable and 6/6 policy compliant
 - new durable dossier runs persist and execute B2; pre-Step-5 dossier rows migrate to B3
-- PostgreSQL migration head is `0020_development_projects`
+- PostgreSQL migration head is `0021_decision_responses`
 
 Post-I7 UX-A record (2026-07-17):
 

@@ -1,0 +1,45 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "command_schema_version": {
+      "const": "decision-initial-response-command.v1",
+      "default": "decision-initial-response-command.v1",
+      "title": "Command Schema Version",
+      "type": "string"
+    },
+    "option_id": {
+      "minLength": 1,
+      "title": "Option Id",
+      "type": "string"
+    },
+    "accepted_risks_ko": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Accepted Risks Ko",
+      "type": "array"
+    },
+    "safeguards_ko": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Safeguards Ko",
+      "type": "array"
+    },
+    "rationale_ko": {
+      "minLength": 1,
+      "title": "Rationale Ko",
+      "type": "string"
+    }
+  },
+  "required": [
+    "option_id",
+    "accepted_risks_ko",
+    "safeguards_ko",
+    "rationale_ko"
+  ],
+  "title": "DecisionInitialResponseCommand",
+  "type": "object"
+}

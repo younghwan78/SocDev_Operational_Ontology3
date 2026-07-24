@@ -131,8 +131,8 @@ if ($projectPlan -notmatch "release topology: B2 independent routed Role Agents"
 if ($multiRole -notmatch 'RELEASE_DOSSIER_TOPOLOGY: DossierTopology = "B2"') {
     throw "Runtime release topology is not the approved B2 value."
 }
-if ($master -notmatch 'PostgreSQL migration head is `0020_development_projects`') {
-    throw "Master plan does not record the OPS-C migration head."
+if ($master -notmatch 'PostgreSQL migration head is `0021_decision_responses`') {
+    throw "Master plan does not record the UX-J migration head."
 }
 @("project-attention.v1", "project-risk-order.v1") | ForEach-Object {
     if (-not $contract.Contains($_)) {

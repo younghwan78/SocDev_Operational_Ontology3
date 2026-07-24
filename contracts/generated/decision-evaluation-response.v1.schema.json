@@ -1,0 +1,223 @@
+{
+  "$defs": {
+    "DecisionAdviceSnapshot": {
+      "additionalProperties": false,
+      "properties": {
+        "advice_snapshot_id": {
+          "title": "Advice Snapshot Id",
+          "type": "string"
+        },
+        "decision_type": {
+          "title": "Decision Type",
+          "type": "string"
+        },
+        "selected_option_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Selected Option Id"
+        },
+        "decision_source": {
+          "title": "Decision Source",
+          "type": "string"
+        },
+        "revealed_at": {
+          "format": "date-time",
+          "title": "Revealed At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "advice_snapshot_id",
+        "decision_type",
+        "selected_option_id",
+        "decision_source",
+        "revealed_at"
+      ],
+      "title": "DecisionAdviceSnapshot",
+      "type": "object"
+    },
+    "DecisionFinalResponseRecord": {
+      "additionalProperties": false,
+      "properties": {
+        "adoption": {
+          "enum": [
+            "accept",
+            "modify",
+            "reject"
+          ],
+          "title": "Adoption",
+          "type": "string"
+        },
+        "option_id": {
+          "title": "Option Id",
+          "type": "string"
+        },
+        "accepted_risks_ko": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Accepted Risks Ko",
+          "type": "array"
+        },
+        "safeguards_ko": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Safeguards Ko",
+          "type": "array"
+        },
+        "rationale_ko": {
+          "title": "Rationale Ko",
+          "type": "string"
+        },
+        "difference_reason_ko": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Difference Reason Ko"
+        },
+        "recorded_at": {
+          "format": "date-time",
+          "title": "Recorded At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "adoption",
+        "option_id",
+        "accepted_risks_ko",
+        "safeguards_ko",
+        "rationale_ko",
+        "difference_reason_ko",
+        "recorded_at"
+      ],
+      "title": "DecisionFinalResponseRecord",
+      "type": "object"
+    },
+    "DecisionInitialResponseRecord": {
+      "additionalProperties": false,
+      "properties": {
+        "option_id": {
+          "title": "Option Id",
+          "type": "string"
+        },
+        "accepted_risks_ko": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Accepted Risks Ko",
+          "type": "array"
+        },
+        "safeguards_ko": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Safeguards Ko",
+          "type": "array"
+        },
+        "rationale_ko": {
+          "title": "Rationale Ko",
+          "type": "string"
+        },
+        "recorded_at": {
+          "format": "date-time",
+          "title": "Recorded At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "option_id",
+        "accepted_risks_ko",
+        "safeguards_ko",
+        "rationale_ko",
+        "recorded_at"
+      ],
+      "title": "DecisionInitialResponseRecord",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "response_schema_version": {
+      "const": "decision-evaluation-response.v1",
+      "default": "decision-evaluation-response.v1",
+      "title": "Response Schema Version",
+      "type": "string"
+    },
+    "response_id": {
+      "title": "Response Id",
+      "type": "string"
+    },
+    "case_id": {
+      "title": "Case Id",
+      "type": "string"
+    },
+    "actor_id": {
+      "title": "Actor Id",
+      "type": "string"
+    },
+    "participant_kind": {
+      "const": "builder",
+      "default": "builder",
+      "title": "Participant Kind",
+      "type": "string"
+    },
+    "interpretation": {
+      "const": "engineering_proxy_only",
+      "default": "engineering_proxy_only",
+      "title": "Interpretation",
+      "type": "string"
+    },
+    "initial_response": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/DecisionInitialResponseRecord"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "advice_snapshot": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/DecisionAdviceSnapshot"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "final_response": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/DecisionFinalResponseRecord"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    }
+  },
+  "required": [
+    "response_id",
+    "case_id",
+    "actor_id"
+  ],
+  "title": "DecisionEvaluationResponseState",
+  "type": "object"
+}

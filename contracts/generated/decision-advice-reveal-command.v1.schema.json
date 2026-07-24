@@ -1,0 +1,13 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "command_schema_version": {
+      "const": "decision-advice-reveal-command.v1",
+      "default": "decision-advice-reveal-command.v1",
+      "title": "Command Schema Version",
+      "type": "string"
+    }
+  },
+  "title": "DecisionAdviceRevealCommand",
+  "type": "object"
+}

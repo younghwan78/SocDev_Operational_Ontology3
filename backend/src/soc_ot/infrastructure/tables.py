@@ -276,6 +276,43 @@ class SimulatedDecisionRow(Base):
     )
 
 
+class DecisionEvaluationResponseRow(Base):
+    __tablename__ = "decision_evaluation_responses"
+    __table_args__ = (
+        UniqueConstraint(
+            "case_id", "actor_id", name="uq_decision_evaluation_response_actor"
+        ),
+        UniqueConstraint("initial_key", name="uq_decision_response_initial_key"),
+        UniqueConstraint("reveal_key", name="uq_decision_response_reveal_key"),
+        UniqueConstraint("final_key", name="uq_decision_response_final_key"),
+        {"schema": "observable"},
+    )
+
+    response_id: Mapped[str] = mapped_column(String(120), primary_key=True)
+    case_id: Mapped[str] = mapped_column(String(80), nullable=False, index=True)
+    actor_id: Mapped[str] = mapped_column(String(120), nullable=False)
+    participant_kind: Mapped[str] = mapped_column(String(40), nullable=False)
+    interpretation: Mapped[str] = mapped_column(String(80), nullable=False)
+    initial_response: Mapped[dict[str, Any]] = mapped_column(JSONB, nullable=False)
+    advice_snapshot: Mapped[dict[str, Any] | None] = mapped_column(JSONB)
+    final_response: Mapped[dict[str, Any] | None] = mapped_column(JSONB)
+    initial_key: Mapped[str] = mapped_column(String(120), nullable=False)
+    initial_fingerprint: Mapped[str] = mapped_column(String(64), nullable=False)
+    reveal_key: Mapped[str | None] = mapped_column(String(120))
+    reveal_fingerprint: Mapped[str | None] = mapped_column(String(64))
+    final_key: Mapped[str | None] = mapped_column(String(120))
+    final_fingerprint: Mapped[str | None] = mapped_column(String(64))
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False,
+    )
+
+
 class OutcomeAdvanceRow(Base):
     __tablename__ = "outcome_advances"
     __table_args__ = (
