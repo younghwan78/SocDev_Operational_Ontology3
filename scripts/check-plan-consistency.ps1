@@ -176,6 +176,7 @@ if ($master -notmatch 'OPS-E implementation record') {
     "fixtures/usability/PROJECT-OPERATIONS.baseline-pack.v2.yaml",
     "fixtures/usability/OPS-F-20260722.release.v1.yaml",
     "fixtures/usability/UX-I-20260724.release.v1.yaml",
+    "fixtures/usability/UX-J-20260724.release.v1.yaml",
     "fixtures/usability/OPS-F-20260722.reviewer-rubric.v1.yaml",
     "contracts/generated/usability-study-protocol.v2.schema.json",
     "contracts/generated/usability-project-baseline-pack.v2.schema.json",

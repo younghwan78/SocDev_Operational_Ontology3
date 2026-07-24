@@ -552,6 +552,24 @@ UX-I implementation record (2026-07-24):
 - desktop and 390px browser checks passed with Axe, keyboard skip-link, overflow, console and full
   Project-to-Decision regression; these are local engineering results, not human usability evidence
 
+UX-J implementation record (2026-07-24):
+
+- ADR-0011 separates unchanged Demo mode from URL-backed `interaction=evaluation` mode
+- the evaluation sequence stores immutable initial builder judgment, server-resolved advice reveal
+  snapshot and final `accept | modify | reject` judgment without mutating simulated decision or truth
+- the server fixes `participant_kind=builder` and `interpretation=engineering_proxy_only`; client
+  input cannot claim human authority, approval or company-system write-back
+- `decision-evaluation-response.v1` and three command contracts use version checks, idempotency,
+  phase ordering and allowed-option validation
+- PostgreSQL migration `0021_decision_responses` preserves the sequence across restart with
+  in-memory parity
+- `UX-J-PRODUCT-218C095` pins product revision `218c095`, Decision UI/API contracts and unchanged
+  OPS-F study materials
+- backend 166 non-PostgreSQL plus 12 PostgreSQL tests, 22 Frontend unit tests and 11 browser E2E
+  tests passed; UX-J 390px flow passed Axe, overflow, reload and console checks
+- human observations remain baseline 0/5 and product 0/5; no human UX, decision-speed, anchoring or
+  business-value claim is opened
+
 ## 7. Crosswalk to supporting plans
 
 |Canonical|Role/Domain supporting topic|Technical supporting section|

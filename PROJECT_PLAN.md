@@ -424,7 +424,8 @@ canonical 8개와 Development Twin 5개 task, `usability-session.v1` event/resul
 UX-I는 owner가 승인한 engineering-proxy 범위에서 raw 기준점/source ID와 구현 중심 copy라는
 사전 지정 문제만 개선했고 `UX-I-PRODUCT-87D49D7` release로 동결했다. UX-J는 advice 공개 전 builder의
 초기 판단과 공개 후 `accept/modify/reject`를 별도 불변 record로 보존한다. 현재 record는
-`engineering_proxy_only`이며 사람 평가로 집계하지 않는다. UX-K는 이 전체 흐름을
+`engineering_proxy_only`이며 사람 평가로 집계하지 않는다. 구현은 `UX-J-PRODUCT-218C095`로
+동결했다. UX-K는 이 전체 흐름을
 responsive, accessibility, partial/stale/conflict, current/historical E2E와 함께 재동결한다. 이
 세 Gate를 통과하기 전에는 enterprise ingestion 구현을 시작하지 않는다.
 

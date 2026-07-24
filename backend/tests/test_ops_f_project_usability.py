@@ -37,7 +37,7 @@ from soc_ot.domain.models import ObservableCase
 ROOT = Path(__file__).resolve().parents[2]
 PROTOCOL_V2 = ROOT / "fixtures/usability/OPS-F-20260722.protocol.v2.yaml"
 BASELINE_V2 = ROOT / "fixtures/usability/PROJECT-OPERATIONS.baseline-pack.v2.yaml"
-RELEASE_V2 = ROOT / "fixtures/usability/UX-I-20260724.release.v1.yaml"
+RELEASE_V2 = ROOT / "fixtures/usability/UX-J-20260724.release.v1.yaml"
 RUBRIC_V2 = ROOT / "fixtures/usability/OPS-F-20260722.reviewer-rubric.v1.yaml"
 PROTOCOL_V1 = ROOT / "fixtures/usability/UX-H-20260719.protocol.yaml"
 BASELINE_V1 = ROOT / "fixtures/usability/CASE-VR-001.baseline-pack.v1.yaml"
@@ -143,8 +143,8 @@ def test_v2_release_pins_product_and_reviewer_material() -> None:
         RUBRIC_V2,
     )
 
-    assert release.release_id == "UX-I-PRODUCT-87D49D7"
-    assert release.product_revision == "87d49d76290324ea71b44dfccd4bdbd4ff766e4c"
+    assert release.release_id == "UX-J-PRODUCT-218C095"
+    assert release.product_revision == "218c0959c90d2f47c87adae6919630b948f70aaa"
     assert release.environment.browser_family == "chromium"
     assert {item.purpose for item in release.artifact_pins} == {
         "product_ui",
