@@ -176,6 +176,40 @@ if ($projectFixtures.Count -ne 3) {
         throw "Missing ENT-C artifact: $_"
     }
 }
+@(
+    "enterprise-dry-run-input.v1",
+    "enterprise-resolution-file.v1",
+    "enterprise-dry-run-report.v1",
+    "CanonicalChangeAction",
+    "EnterpriseDryRunStatus",
+    "EnterpriseQuarantineStatus",
+    "DANGLING_REFERENCE",
+    "TIME_AMBIGUITY",
+    "UNMAPPED_FIELD",
+    "ACL_REFERENCE_UNKNOWN",
+    "STALE_SOURCE",
+    "MAPPING_QUARANTINED",
+    "MAPPING_REJECTED",
+    "canonical_import_authorized=false"
+) | ForEach-Object {
+    if (-not $contract.Contains($_)) {
+        throw "Canonical contract is missing ENT-D term: $_"
+    }
+}
+@(
+    "backend/src/soc_ot/application/enterprise_dry_run.py",
+    "backend/tests/test_ent_d_enterprise_dry_run.py",
+    "contracts/generated/enterprise-dry-run-input.v1.schema.json",
+    "contracts/generated/enterprise-resolution-file.v1.schema.json",
+    "contracts/generated/enterprise-dry-run-report.v1.schema.json",
+    "fixtures/enterprise/dry-run-input.v1.yaml",
+    "fixtures/enterprise/resolution-template.v1.yaml",
+    "docs/decisions/ADR-0015-no-write-enterprise-dry-run-review-boundary.md"
+) | ForEach-Object {
+    if (-not (Test-Path -LiteralPath (Join-Path $root $_) -PathType Leaf)) {
+        throw "Missing ENT-D artifact: $_"
+    }
+}
 if ($projectPlan -notmatch "corpus v2: development regression 8, validation 2, sealed unseen 2") {
     throw "PROJECT_PLAN.md does not describe the canonical 8/2/2 evaluation partition."
 }

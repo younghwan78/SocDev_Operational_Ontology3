@@ -1,0 +1,93 @@
+{
+  "$defs": {
+    "EnterpriseResolutionAction": {
+      "enum": [
+        "EXCLUDE_SOURCE",
+        "SOURCE_FIXED",
+        "MAPPING_UPDATED",
+        "ACKNOWLEDGE_RISK"
+      ],
+      "title": "EnterpriseResolutionAction",
+      "type": "string"
+    },
+    "EnterpriseResolutionEntry": {
+      "additionalProperties": false,
+      "properties": {
+        "quarantine_id": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Quarantine Id",
+          "type": "string"
+        },
+        "expected_content_hash": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Content Hash"
+        },
+        "action": {
+          "$ref": "#/$defs/EnterpriseResolutionAction"
+        },
+        "reviewer": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Reviewer",
+          "type": "string"
+        },
+        "justification": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Justification",
+          "type": "string"
+        },
+        "proposed_at": {
+          "format": "date-time",
+          "title": "Proposed At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "quarantine_id",
+        "action",
+        "reviewer",
+        "justification",
+        "proposed_at"
+      ],
+      "title": "EnterpriseResolutionEntry",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "enterprise-resolution-file.v1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "resolution_version": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "title": "Resolution Version",
+      "type": "string"
+    },
+    "entries": {
+      "items": {
+        "$ref": "#/$defs/EnterpriseResolutionEntry"
+      },
+      "title": "Entries",
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema_version",
+    "resolution_version"
+  ],
+  "title": "EnterpriseResolutionFile",
+  "type": "object"
+}

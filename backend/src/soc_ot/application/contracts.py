@@ -12,6 +12,11 @@ from soc_ot.application.decision_evaluation_responses import (
     DecisionInitialResponseCommand,
 )
 from soc_ot.application.development_twin import DevelopmentTimelineProjection
+from soc_ot.application.enterprise_dry_run import (
+    EnterpriseDryRunInput,
+    EnterpriseDryRunReport,
+    EnterpriseResolutionFile,
+)
 from soc_ot.application.enterprise_ingestion import EnterpriseSourceRecord
 from soc_ot.application.enterprise_mapping import (
     EnterpriseDirtyFixtureCorpus,
@@ -63,6 +68,9 @@ CONTRACT_MODELS: dict[str, type[BaseModel]] = {
     "enterprise-sync-checkpoint.v1": EnterpriseSyncCheckpoint,
     "enterprise-sync-result.v1": EnterpriseSyncResult,
     "enterprise-sync-fixture-corpus.v1": EnterpriseSyncFixtureCorpus,
+    "enterprise-dry-run-input.v1": EnterpriseDryRunInput,
+    "enterprise-resolution-file.v1": EnterpriseResolutionFile,
+    "enterprise-dry-run-report.v1": EnterpriseDryRunReport,
     "project-list-item.v1": ProjectListItemProjection,
     "project-situation.v1": ProjectSituationProjection,
     "project-risk-summary.v1": ProjectRiskSummary,

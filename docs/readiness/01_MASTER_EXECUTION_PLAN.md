@@ -1,6 +1,6 @@
 # Master execution plan
 
-> Status: IMPLEMENTED THROUGH I7 REPLAY + STEP 5 B2 RUNTIME + UX-K LOCAL FIXTURE UX RELEASE 1 + ENT-A~C; OPS-F HUMAN OBSERVATION DEFERRED AT 0/5 PER CONDITION, ENT-D NEXT
+> Status: IMPLEMENTED THROUGH I7 REPLAY + STEP 5 B2 RUNTIME + UX-K LOCAL FIXTURE UX RELEASE 1 + ENT-A~D; OPS-F HUMAN OBSERVATION DEFERRED AT 0/5 PER CONDITION, ENT-E NEXT
 > Date: 2026-07-25
 > Scope: local fixture-only PoC
 
@@ -438,7 +438,8 @@ After OPS-F, the only allowed order is:
 |ENT-A|Source-neutral record, stable identity/time, access metadata and application ports|Complete: ADR-0012 accepted, strict contract/schema/boundary tests pass; no adapter or persistence|
 |ENT-B|Versioned mapping registry, candidate provenance and dirty-source disposition|Complete: ADR-0013 accepted, 10 normal/dirty patterns and explicit accept/quarantine/reject pass|
 |ENT-C|Deterministic sync, idempotency, retry, tombstone and reconciliation|Complete: ADR-0014 accepted, cursor/page-token resume, bounded retry, stale protection and full/incremental parity pass|
-|ENT-D~F|Dry-run/quarantine, security emulator and internal handoff kit|ENT-D next; fixture-only tests, no vendor API, company data, credential or real ACL|
+|ENT-D|No-write dry-run, canonical change proposal, quality and quarantine/resolution|Complete: ADR-0015 accepted, report-only CLI, seven quality classes and review artifacts pass|
+|ENT-E~F|Security emulator and internal handoff kit|ENT-E next; fixture-only tests, no vendor API, company data, credential or real ACL|
 |C0/C1|Internal configuration, sanitized schema-fit, one-project read-only smoke and pilot|Company security, data owner and human authority approvals|
 
 The detailed work packages and transition criteria are owned by
@@ -640,6 +641,22 @@ ENT-C implementation record (2026-07-25):
   full non-PostgreSQL regression is 206 passed with all required repository checks
 - there is no route, persistence, canonical import, dry-run CLI, vendor adapter, real ACL, credential,
   company data or write-back; ENT-D is next
+
+ENT-D implementation record (2026-07-25):
+
+- ADR-0015 accepts versioned dry-run input, proposed resolution and report contracts; the report
+  permanently fixes `write_performed=false` and `canonical_import_authorized=false`
+- `soc-ot enterprise validate-source` validates every synthetic enterprise artifact, while
+  `enterprise dry-run` executes ENT-C in memory and writes only the requested JSON report
+- current candidate state compared with a source-linked snapshot yields deterministic
+  `CREATE 2 / UPDATE 1 / DELETE 2`; restricted/deleted sources propose removal without payload
+- dangling reference, time ambiguity, unmapped field, unknown ACL reference, stale source and
+  mapping quarantine/reject remain separate findings with explicit blocking policy
+- 25 source outcomes yield mapping coverage 19/25, 15 visible findings and 8 quarantine entries;
+  one hash-pinned human resolution proposal does not approve import or hide seven open entries
+- 10 focused tests cover no-database CLI execution, deterministic report, partial-error preservation,
+  stale/unknown resolution rejection and immutable no-write authority; full non-PostgreSQL regression
+  is 216 passed with all required repository checks; ENT-E is next
 
 ## 7. Crosswalk to supporting plans
 

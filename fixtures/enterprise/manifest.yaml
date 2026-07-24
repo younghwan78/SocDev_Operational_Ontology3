@@ -6,3 +6,7 @@ artifacts:
     sha256: 14598f3fb8e33381d3085633e40a40a34d1b3cc383c6ec1b2186d33882eb8fcf
   - path: sync-pages.v1.yaml
     sha256: 13d89f89553bd9e3ac4336fee2b0d12d9822d517399ac589aae6879cd44255ef
+  - path: dry-run-input.v1.yaml
+    sha256: b5f2f5912807c9aaa1d206c6c39209840b3bb40f1095b58de0cfd8247aa9faa6
+  - path: resolution-template.v1.yaml
+    sha256: c0f6f9f641e45b4df1654bac92ab8c8a3aafcc43799f752cc73610f60221d05c

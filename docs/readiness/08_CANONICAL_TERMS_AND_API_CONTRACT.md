@@ -581,6 +581,48 @@ Project/Event persistence.
 ENT-C adds no route, database, canonical import, durable quarantine, vendor adapter, real ACL,
 credential, company data, Agent input or write-back.
 
-## 14. Compatibility gate
+## 14. Accepted ENT-D dry-run and review boundary
+
+ADR-0015 accepts:
+
+```text
+enterprise-dry-run-input.v1
+enterprise-resolution-file.v1
+enterprise-dry-run-report.v1
+
+CanonicalChangeAction     = CREATE | UPDATE | DELETE | NO_CHANGE
+EnterpriseDryRunStatus    = READY_FOR_REVIEW | BLOCKED
+EnterpriseQuarantineStatus = OPEN | RESOLUTION_PROPOSED
+```
+
+Canonical quality codes are:
+
+```text
+DANGLING_REFERENCE
+TIME_AMBIGUITY
+UNMAPPED_FIELD
+ACL_REFERENCE_UNKNOWN
+STALE_SOURCE
+MAPPING_QUARANTINED
+MAPPING_REJECTED
+```
+
+The report compares current ENT-C candidate state with an explicitly supplied synthetic snapshot and
+records deterministic before/after proposals. Every finding declares whether it blocks import.
+Blocking findings become quarantine entries without removing unrelated valid proposals.
+
+Resolution actions are `EXCLUDE_SOURCE | SOURCE_FIXED | MAPPING_UPDATED | ACKNOWLEDGE_RISK`.
+A resolution is only `RESOLUTION_PROPOSED`; unknown quarantine IDs or mismatched content hashes fail.
+It never authorizes import.
+
+Every `enterprise-dry-run-report.v1` fixes `write_performed=false` and
+`canonical_import_authorized=false`. `soc-ot enterprise validate-source` validates input contracts.
+`soc-ot enterprise dry-run --output <report.json>` writes only the requested report and does not open
+the runtime database.
+
+ENT-D adds no canonical Project/Event mutation, durable queue, API route, vendor adapter, real ACL,
+credential, company data, Agent input or write-back.
+
+## 15. Compatibility gate
 
 Any change to a state code, DecisionType, endpoint, time field, or version name updates this contract first. CI then checks generated schemas, OpenAPI, Frontend client, fixture manifests, runbook examples, and documentation references.

@@ -2,7 +2,7 @@
 
 > 상태: Active  
 > 갱신일: 2026-07-25
-> 현재 단계: UX-K Local fixture UX Release 1과 ENT-A~C 완료; OPS-F human observation은 baseline 0/5·product 0/5에서 보류; 다음 단계 ENT-D
+> 현재 단계: UX-K Local fixture UX Release 1과 ENT-A~D 완료; OPS-F human observation은 baseline 0/5·product 0/5에서 보류; 다음 단계 ENT-E
 
 > 고정 후속 순서: OPS-F human observation 보류 → UX-I 완료 → UX-J/K Local UX Release 1 → ENT-A~F 사외 준비 → 사내 C0/C1
 
@@ -58,8 +58,10 @@
 - `internal_docs/26.07.23 UX 마무리 및 사내 데이터 전환 실행 계획.md`
 - `internal_docs/26.07.23 OPS-F Human Observation 보류 결정.md`
 - `internal_docs/26.07.25 ENT-C Idempotent Sync 및 Reconciliation 구현 보고서.md`
+- `internal_docs/26.07.25 ENT-D Dry-run Quality 및 Quarantine 구현 보고서.md`
 - `docs/decisions/ADR-0010-project-operations-and-risk-provenance.md`
 - `docs/decisions/ADR-0014-deterministic-enterprise-sync-reconciliation.md`
+- `docs/decisions/ADR-0015-no-write-enterprise-dry-run-review-boundary.md`
 
 다음 문서는 과거 판단의 근거다. 새 구현 기준으로 직접 사용하지 않는다.
 
@@ -89,7 +91,8 @@ OPS-F Project protocol v2와 study release/rubric/E2E 도구까지 구현됐다.
 상태에서 보류했다. UX-I는 title-first projection, source ref 해석과 도메인 중심 copy를
 engineering-proxy로 구현하고 새 release를 동결했으며, 이는 human Gate를 통과시킨 것이 아니다.
 UX-J/K로 Local UX Release 1을 닫았고, ENT-A~C에서 source-neutral envelope, versioned mapping,
-dirty fixture disposition과 deterministic reconciliation을 구현했다. 다음 ENT-D~F fixture-only enterprise preparation을 진행한 뒤 사내
+dirty fixture disposition, deterministic reconciliation과 no-write dry-run review artifact를
+구현했다. 다음 ENT-E~F fixture-only enterprise preparation을 진행한 뒤 사내
 C0/C1에 들어간다. UX와 connector는 동시에 변경하지 않는다.
 
 ```text

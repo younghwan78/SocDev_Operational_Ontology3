@@ -12,6 +12,20 @@ from soc_ot import __version__
 from soc_ot.agents.codex_cli_provider import CodexCliProvider
 from soc_ot.agents.providers import OpenAIResponsesProvider, ReviewProvider
 from soc_ot.application.contracts import export_contracts
+from soc_ot.application.enterprise_dry_run import (
+    load_dry_run_input,
+    load_resolution_file,
+    run_enterprise_dry_run,
+)
+from soc_ot.application.enterprise_mapping import (
+    load_dirty_fixture_corpus,
+    load_mapping_registry,
+)
+from soc_ot.application.enterprise_sync import (
+    EnterpriseSyncMode,
+    load_sync_fixture_corpus,
+    reconcile_enterprise_pages,
+)
 from soc_ot.application.evaluation import run_evaluation
 from soc_ot.application.evaluation_artifacts import write_evaluation_artifacts
 from soc_ot.application.evaluation_manifest import (
@@ -70,6 +84,17 @@ DEFAULT_USABILITY_RELEASE = (
 )
 DEFAULT_REVIEWER_RUBRIC = (
     ROOT_DIR / "fixtures/usability/OPS-F-20260722.reviewer-rubric.v1.yaml"
+)
+DEFAULT_ENTERPRISE_REGISTRY = ROOT_DIR / "fixtures/enterprise/mapping-registry.v1.yaml"
+DEFAULT_ENTERPRISE_DIRTY_CORPUS = (
+    ROOT_DIR / "fixtures/enterprise/dirty-source-records.v1.yaml"
+)
+DEFAULT_ENTERPRISE_SYNC_CORPUS = ROOT_DIR / "fixtures/enterprise/sync-pages.v1.yaml"
+DEFAULT_ENTERPRISE_DRY_RUN_INPUT = (
+    ROOT_DIR / "fixtures/enterprise/dry-run-input.v1.yaml"
+)
+DEFAULT_ENTERPRISE_RESOLUTION = (
+    ROOT_DIR / "fixtures/enterprise/resolution-template.v1.yaml"
 )
 
 
@@ -185,6 +210,14 @@ def build_parser() -> argparse.ArgumentParser:
         "--provider", choices=["openai", "codex-cli"], default="openai"
     )
 
+    enterprise = subparsers.add_parser("enterprise")
+    enterprise_sub = enterprise.add_subparsers(dest="enterprise_command")
+    enterprise_validate = enterprise_sub.add_parser("validate-source")
+    _add_enterprise_arguments(enterprise_validate)
+    enterprise_dry_run = enterprise_sub.add_parser("dry-run")
+    _add_enterprise_arguments(enterprise_dry_run)
+    enterprise_dry_run.add_argument("--output", type=Path, required=True)
+
     usability = subparsers.add_parser("usability")
     usability_sub = usability.add_subparsers(dest="usability_command")
     usability_validate = usability_sub.add_parser("validate")
@@ -225,9 +258,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     if args.command == "status":
         print(
             "I7 Replay + Step 5 B2 stability gates complete; "
-            "B2 durable dossier runtime active; UX-H session tooling ready, "
-            "OPS-F project protocol v2 ready; independent human observations pending, "
-            "UX-I blocked"
+            "Local fixture UX Release 1 and ENT-A through ENT-D complete; "
+            "independent human observations pending; ENT-E next; "
+            "live company connection remains blocked"
         )
         return 0
     if args.command == "contracts" and args.contracts_command == "export":
@@ -370,6 +403,56 @@ def main(argv: Sequence[str] | None = None) -> int:
         print("=== AUTHORING/HIDDEN: hidden fixture inspection is being audited ===")
         _audit_hidden_access("inspect-hidden", args.case_id)
         print(json.dumps(hidden.model_dump(mode="json"), ensure_ascii=False, indent=2))
+        return 0
+    if args.command == "enterprise" and args.enterprise_command == "validate-source":
+        registry = load_mapping_registry(args.registry)
+        dirty = load_dirty_fixture_corpus(args.dirty_corpus)
+        sync = load_sync_fixture_corpus(args.sync_corpus)
+        dry_run_input = load_dry_run_input(args.dry_run_input)
+        resolution = load_resolution_file(args.resolution)
+        print(
+            f"Validated registry_profiles={len(registry.profiles)}, "
+            f"dirty_cases={len(dirty.cases)}, sync_pages={len(sync.pages)}, "
+            f"quality_probes={len(dry_run_input.quality_probes)}, "
+            f"resolutions={len(resolution.entries)}; no canonical write performed."
+        )
+        return 0
+    if args.command == "enterprise" and args.enterprise_command == "dry-run":
+        registry = load_mapping_registry(args.registry)
+        dirty = load_dirty_fixture_corpus(args.dirty_corpus)
+        sync = load_sync_fixture_corpus(args.sync_corpus)
+        dry_run_input = load_dry_run_input(args.dry_run_input)
+        resolution = load_resolution_file(args.resolution)
+        sync_result = reconcile_enterprise_pages(
+            pages=sync.pages,
+            registry=registry,
+            policy=sync.policy,
+            mode=EnterpriseSyncMode.FULL,
+            transient_failures_before_success=sync.transient_failures_before_success,
+        )
+        report = run_enterprise_dry_run(
+            sync_result=sync_result,
+            source_records=[
+                record for page in sync.pages for record in page.records
+            ],
+            dirty_corpus=dirty,
+            registry=registry,
+            dry_run_input=dry_run_input,
+            resolution_file=resolution,
+        )
+        args.output.parent.mkdir(parents=True, exist_ok=True)
+        args.output.write_text(
+            json.dumps(report.model_dump(mode="json"), ensure_ascii=False, indent=2)
+            + "\n",
+            encoding="utf-8",
+        )
+        print(
+            f"Dry-run status={report.status}, changes="
+            f"{len(report.canonical_changes)}, findings="
+            f"{len(report.quality_findings)}, quarantine="
+            f"{len(report.quarantine_entries)}; report={args.output}; "
+            "canonical write=false."
+        )
         return 0
     if args.command == "usability" and args.usability_command == "validate":
         protocol, pack, _, release_id = _validate_usability_materials(args)
@@ -706,6 +789,34 @@ def _redacted_runtime_settings() -> dict[str, object]:
         "max_evaluation_cost_usd": settings.max_evaluation_cost_usd,
         "raw_provider_retention_days": settings.raw_provider_retention_days,
     }
+
+
+def _add_enterprise_arguments(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument(
+        "--registry",
+        type=Path,
+        default=DEFAULT_ENTERPRISE_REGISTRY,
+    )
+    parser.add_argument(
+        "--dirty-corpus",
+        type=Path,
+        default=DEFAULT_ENTERPRISE_DIRTY_CORPUS,
+    )
+    parser.add_argument(
+        "--sync-corpus",
+        type=Path,
+        default=DEFAULT_ENTERPRISE_SYNC_CORPUS,
+    )
+    parser.add_argument(
+        "--dry-run-input",
+        type=Path,
+        default=DEFAULT_ENTERPRISE_DRY_RUN_INPUT,
+    )
+    parser.add_argument(
+        "--resolution",
+        type=Path,
+        default=DEFAULT_ENTERPRISE_RESOLUTION,
+    )
 
 
 def _add_usability_material_arguments(parser: argparse.ArgumentParser) -> None:

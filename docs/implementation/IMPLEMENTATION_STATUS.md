@@ -1,8 +1,8 @@
 # Implementation status
 
 > Updated: 2026-07-25
-> Current stage: ENT-C deterministic sync and reconciliation complete; OPS-F human observation deferred at baseline 0/5 and product 0/5; ENT-D next
-> Planned sequence: ENT-D~F external fixture-only preparation → internal C0/C1; human/value claims remain blocked
+> Current stage: ENT-D no-write dry-run and review artifacts complete; OPS-F human observation deferred at baseline 0/5 and product 0/5; ENT-E next
+> Planned sequence: ENT-E~F external fixture-only preparation → internal C0/C1; human/value claims remain blocked
 
 ## Stage evidence
 
@@ -38,6 +38,7 @@
 |ENT-A|Passed (contract-only)|ADR-0012, strict `enterprise-source-record.v1`, stable external identity, four timezone-aware source times, opaque ACL/classification, payload-safe deletion/restriction, source-neutral `SourceReader`/`IngestionSink`, generated schema and 15 focused tests. No adapter, persistence, company data or canonical mapping.|
 |ENT-B|Passed (fixture-only mapping)|ADR-0013, five versioned synthetic profiles covering Project/WorkItem/Issue/Event/Evidence candidates, source-span structured/unstructured candidates, fixed unreviewed prose boundary, hash-pinned 10-pattern corpus, explicit accept/quarantine/reject and 15 focused tests. No canonical import, sync, persistence, vendor SDK or company data.|
 |ENT-C|Passed (fixture-only sync)|ADR-0014, cursor/page-token checkpoint, content-hash idempotency, deterministic bounded retry, tombstone/restricted precedence, stale-active quarantine, late-arrival audit and one-shot/resume parity with 10 focused tests. No persistence, canonical import, dry-run CLI, vendor SDK, real ACL or company data.|
+|ENT-D|Passed (no-write fixture dry-run)|ADR-0015, source-validation/dry-run CLI, deterministic create/update/delete proposals, seven quality classes, mapping/freshness summary, quarantine and hash-pinned proposed resolution with 10 focused tests. Report fixes write/import authority false; no DB, vendor SDK, real ACL or company data.|
 
 OPS-F implementation record (2026-07-23):
 

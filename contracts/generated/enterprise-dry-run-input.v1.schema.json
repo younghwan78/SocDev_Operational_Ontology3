@@ -1,0 +1,345 @@
+{
+  "$defs": {
+    "CanonicalKeyRule": {
+      "additionalProperties": false,
+      "properties": {
+        "candidate_kind": {
+          "$ref": "#/$defs/StructuredCandidateKind"
+        },
+        "target_field": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Target Field",
+          "type": "string"
+        }
+      },
+      "required": [
+        "candidate_kind",
+        "target_field"
+      ],
+      "title": "CanonicalKeyRule",
+      "type": "object"
+    },
+    "CanonicalObjectSnapshot": {
+      "additionalProperties": false,
+      "properties": {
+        "candidate_kind": {
+          "$ref": "#/$defs/StructuredCandidateKind"
+        },
+        "canonical_key": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Canonical Key",
+          "type": "string"
+        },
+        "source_identity": {
+          "$ref": "#/$defs/EnterpriseSourceIdentity"
+        },
+        "values": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonValue"
+          },
+          "minProperties": 1,
+          "title": "Values",
+          "type": "object"
+        }
+      },
+      "required": [
+        "candidate_kind",
+        "canonical_key",
+        "source_identity",
+        "values"
+      ],
+      "title": "CanonicalObjectSnapshot",
+      "type": "object"
+    },
+    "EnterpriseQualityProbe": {
+      "additionalProperties": false,
+      "properties": {
+        "probe_id": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Probe Id",
+          "type": "string"
+        },
+        "record": {
+          "$ref": "#/$defs/EnterpriseSourceRecord"
+        },
+        "reference_keys": {
+          "items": {
+            "maxLength": 1024,
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Reference Keys",
+          "type": "array"
+        }
+      },
+      "required": [
+        "probe_id",
+        "record"
+      ],
+      "title": "EnterpriseQualityProbe",
+      "type": "object"
+    },
+    "EnterpriseSourceIdentity": {
+      "additionalProperties": false,
+      "properties": {
+        "source_system": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Source System",
+          "type": "string"
+        },
+        "source_tenant": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Source Tenant",
+          "type": "string"
+        },
+        "source_object_type": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Source Object Type",
+          "type": "string"
+        },
+        "external_id": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "External Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source_system",
+        "source_tenant",
+        "source_object_type",
+        "external_id"
+      ],
+      "title": "EnterpriseSourceIdentity",
+      "type": "object"
+    },
+    "EnterpriseSourceRecord": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "enterprise-source-record.v1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "source_system": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Source System",
+          "type": "string"
+        },
+        "source_tenant": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Source Tenant",
+          "type": "string"
+        },
+        "source_object_type": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Source Object Type",
+          "type": "string"
+        },
+        "external_id": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "External Id",
+          "type": "string"
+        },
+        "external_version": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "External Version",
+          "type": "string"
+        },
+        "effective_at": {
+          "format": "date-time",
+          "title": "Effective At",
+          "type": "string"
+        },
+        "observed_at": {
+          "format": "date-time",
+          "title": "Observed At",
+          "type": "string"
+        },
+        "source_updated_at": {
+          "format": "date-time",
+          "title": "Source Updated At",
+          "type": "string"
+        },
+        "ingested_at": {
+          "format": "date-time",
+          "title": "Ingested At",
+          "type": "string"
+        },
+        "content_hash": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Content Hash",
+          "type": "string"
+        },
+        "source_url": {
+          "format": "uri",
+          "maxLength": 2083,
+          "minLength": 1,
+          "title": "Source Url",
+          "type": "string"
+        },
+        "deletion_state": {
+          "$ref": "#/$defs/SourceDeletionState"
+        },
+        "source_acl_ref": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Source Acl Ref",
+          "type": "string"
+        },
+        "classification": {
+          "$ref": "#/$defs/SourceDataClassification"
+        },
+        "payload": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "$ref": "#/$defs/JsonValue"
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Payload"
+        }
+      },
+      "required": [
+        "schema_version",
+        "source_system",
+        "source_tenant",
+        "source_object_type",
+        "external_id",
+        "external_version",
+        "effective_at",
+        "observed_at",
+        "source_updated_at",
+        "ingested_at",
+        "content_hash",
+        "source_url",
+        "deletion_state",
+        "source_acl_ref",
+        "classification",
+        "payload"
+      ],
+      "title": "EnterpriseSourceRecord",
+      "type": "object"
+    },
+    "JsonValue": {},
+    "SourceDataClassification": {
+      "enum": [
+        "PUBLIC",
+        "INTERNAL",
+        "CONFIDENTIAL",
+        "RESTRICTED"
+      ],
+      "title": "SourceDataClassification",
+      "type": "string"
+    },
+    "SourceDeletionState": {
+      "enum": [
+        "ACTIVE",
+        "DELETED",
+        "RESTRICTED"
+      ],
+      "title": "SourceDeletionState",
+      "type": "string"
+    },
+    "StructuredCandidateKind": {
+      "enum": [
+        "PROJECT",
+        "WORK_ITEM",
+        "ISSUE",
+        "EVIDENCE",
+        "EVENT"
+      ],
+      "title": "StructuredCandidateKind",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "enterprise-dry-run-input.v1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "input_version": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "title": "Input Version",
+      "type": "string"
+    },
+    "as_of": {
+      "format": "date-time",
+      "title": "As Of",
+      "type": "string"
+    },
+    "stale_after_seconds": {
+      "minimum": 0,
+      "title": "Stale After Seconds",
+      "type": "integer"
+    },
+    "known_acl_refs": {
+      "items": {
+        "maxLength": 1024,
+        "minLength": 1,
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Known Acl Refs",
+      "type": "array"
+    },
+    "canonical_snapshot_version": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "title": "Canonical Snapshot Version",
+      "type": "string"
+    },
+    "canonical_key_rules": {
+      "items": {
+        "$ref": "#/$defs/CanonicalKeyRule"
+      },
+      "minItems": 1,
+      "title": "Canonical Key Rules",
+      "type": "array"
+    },
+    "canonical_objects": {
+      "items": {
+        "$ref": "#/$defs/CanonicalObjectSnapshot"
+      },
+      "title": "Canonical Objects",
+      "type": "array"
+    },
+    "quality_probes": {
+      "items": {
+        "$ref": "#/$defs/EnterpriseQualityProbe"
+      },
+      "title": "Quality Probes",
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema_version",
+    "input_version",
+    "as_of",
+    "stale_after_seconds",
+    "known_acl_refs",
+    "canonical_snapshot_version",
+    "canonical_key_rules"
+  ],
+  "title": "EnterpriseDryRunInput",
+  "type": "object"
+}

@@ -1,0 +1,584 @@
+{
+  "$defs": {
+    "CanonicalChangeAction": {
+      "enum": [
+        "CREATE",
+        "UPDATE",
+        "DELETE",
+        "NO_CHANGE"
+      ],
+      "title": "CanonicalChangeAction",
+      "type": "string"
+    },
+    "EnterpriseCanonicalChange": {
+      "additionalProperties": false,
+      "properties": {
+        "change_id": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Change Id",
+          "type": "string"
+        },
+        "action": {
+          "$ref": "#/$defs/CanonicalChangeAction"
+        },
+        "candidate_kind": {
+          "$ref": "#/$defs/StructuredCandidateKind"
+        },
+        "canonical_key": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Canonical Key",
+          "type": "string"
+        },
+        "source_identity": {
+          "$ref": "#/$defs/EnterpriseSourceIdentity"
+        },
+        "before_values": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "$ref": "#/$defs/JsonValue"
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Before Values"
+        },
+        "after_values": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "$ref": "#/$defs/JsonValue"
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "After Values"
+        },
+        "reason_codes": {
+          "items": {
+            "$ref": "#/$defs/MappingReasonCode"
+          },
+          "title": "Reason Codes",
+          "type": "array"
+        }
+      },
+      "required": [
+        "change_id",
+        "action",
+        "candidate_kind",
+        "canonical_key",
+        "source_identity"
+      ],
+      "title": "EnterpriseCanonicalChange",
+      "type": "object"
+    },
+    "EnterpriseDryRunStatus": {
+      "enum": [
+        "READY_FOR_REVIEW",
+        "BLOCKED"
+      ],
+      "title": "EnterpriseDryRunStatus",
+      "type": "string"
+    },
+    "EnterpriseDryRunSummary": {
+      "additionalProperties": false,
+      "properties": {
+        "source_record_count": {
+          "minimum": 0,
+          "title": "Source Record Count",
+          "type": "integer"
+        },
+        "mapped_record_count": {
+          "minimum": 0,
+          "title": "Mapped Record Count",
+          "type": "integer"
+        },
+        "mapping_coverage": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Mapping Coverage",
+          "type": "number"
+        },
+        "create_count": {
+          "minimum": 0,
+          "title": "Create Count",
+          "type": "integer"
+        },
+        "update_count": {
+          "minimum": 0,
+          "title": "Update Count",
+          "type": "integer"
+        },
+        "delete_count": {
+          "minimum": 0,
+          "title": "Delete Count",
+          "type": "integer"
+        },
+        "no_change_count": {
+          "minimum": 0,
+          "title": "No Change Count",
+          "type": "integer"
+        },
+        "quality_finding_count": {
+          "minimum": 0,
+          "title": "Quality Finding Count",
+          "type": "integer"
+        },
+        "rejected_count": {
+          "minimum": 0,
+          "title": "Rejected Count",
+          "type": "integer"
+        },
+        "quarantined_count": {
+          "minimum": 0,
+          "title": "Quarantined Count",
+          "type": "integer"
+        },
+        "open_quarantine_count": {
+          "minimum": 0,
+          "title": "Open Quarantine Count",
+          "type": "integer"
+        },
+        "proposed_resolution_count": {
+          "minimum": 0,
+          "title": "Proposed Resolution Count",
+          "type": "integer"
+        },
+        "freshness_seconds": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Freshness Seconds"
+        }
+      },
+      "required": [
+        "source_record_count",
+        "mapped_record_count",
+        "mapping_coverage",
+        "create_count",
+        "update_count",
+        "delete_count",
+        "no_change_count",
+        "quality_finding_count",
+        "rejected_count",
+        "quarantined_count",
+        "open_quarantine_count",
+        "proposed_resolution_count"
+      ],
+      "title": "EnterpriseDryRunSummary",
+      "type": "object"
+    },
+    "EnterpriseQualityCode": {
+      "enum": [
+        "DANGLING_REFERENCE",
+        "TIME_AMBIGUITY",
+        "UNMAPPED_FIELD",
+        "ACL_REFERENCE_UNKNOWN",
+        "STALE_SOURCE",
+        "MAPPING_QUARANTINED",
+        "MAPPING_REJECTED"
+      ],
+      "title": "EnterpriseQualityCode",
+      "type": "string"
+    },
+    "EnterpriseQualityFinding": {
+      "additionalProperties": false,
+      "properties": {
+        "finding_id": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Finding Id",
+          "type": "string"
+        },
+        "code": {
+          "$ref": "#/$defs/EnterpriseQualityCode"
+        },
+        "severity": {
+          "$ref": "#/$defs/EnterpriseQualitySeverity"
+        },
+        "blocks_import": {
+          "title": "Blocks Import",
+          "type": "boolean"
+        },
+        "detail": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Detail",
+          "type": "string"
+        },
+        "source_identity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EnterpriseSourceIdentity"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "content_hash": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Content Hash"
+        },
+        "field_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Field Name"
+        },
+        "reference_key": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reference Key"
+        },
+        "mapping_reason_codes": {
+          "items": {
+            "$ref": "#/$defs/MappingReasonCode"
+          },
+          "title": "Mapping Reason Codes",
+          "type": "array"
+        }
+      },
+      "required": [
+        "finding_id",
+        "code",
+        "severity",
+        "blocks_import",
+        "detail"
+      ],
+      "title": "EnterpriseQualityFinding",
+      "type": "object"
+    },
+    "EnterpriseQualitySeverity": {
+      "enum": [
+        "INFO",
+        "WARNING",
+        "ERROR"
+      ],
+      "title": "EnterpriseQualitySeverity",
+      "type": "string"
+    },
+    "EnterpriseQuarantineEntry": {
+      "additionalProperties": false,
+      "properties": {
+        "quarantine_id": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Quarantine Id",
+          "type": "string"
+        },
+        "finding_ids": {
+          "items": {
+            "pattern": "^[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Finding Ids",
+          "type": "array"
+        },
+        "source_identity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EnterpriseSourceIdentity"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "content_hash": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Content Hash"
+        },
+        "status": {
+          "$ref": "#/$defs/EnterpriseQuarantineStatus"
+        },
+        "proposed_resolution": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EnterpriseResolutionEntry"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "quarantine_id",
+        "finding_ids",
+        "status"
+      ],
+      "title": "EnterpriseQuarantineEntry",
+      "type": "object"
+    },
+    "EnterpriseQuarantineStatus": {
+      "enum": [
+        "OPEN",
+        "RESOLUTION_PROPOSED"
+      ],
+      "title": "EnterpriseQuarantineStatus",
+      "type": "string"
+    },
+    "EnterpriseResolutionAction": {
+      "enum": [
+        "EXCLUDE_SOURCE",
+        "SOURCE_FIXED",
+        "MAPPING_UPDATED",
+        "ACKNOWLEDGE_RISK"
+      ],
+      "title": "EnterpriseResolutionAction",
+      "type": "string"
+    },
+    "EnterpriseResolutionEntry": {
+      "additionalProperties": false,
+      "properties": {
+        "quarantine_id": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Quarantine Id",
+          "type": "string"
+        },
+        "expected_content_hash": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Content Hash"
+        },
+        "action": {
+          "$ref": "#/$defs/EnterpriseResolutionAction"
+        },
+        "reviewer": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Reviewer",
+          "type": "string"
+        },
+        "justification": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Justification",
+          "type": "string"
+        },
+        "proposed_at": {
+          "format": "date-time",
+          "title": "Proposed At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "quarantine_id",
+        "action",
+        "reviewer",
+        "justification",
+        "proposed_at"
+      ],
+      "title": "EnterpriseResolutionEntry",
+      "type": "object"
+    },
+    "EnterpriseSourceIdentity": {
+      "additionalProperties": false,
+      "properties": {
+        "source_system": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Source System",
+          "type": "string"
+        },
+        "source_tenant": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Source Tenant",
+          "type": "string"
+        },
+        "source_object_type": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Source Object Type",
+          "type": "string"
+        },
+        "external_id": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "External Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source_system",
+        "source_tenant",
+        "source_object_type",
+        "external_id"
+      ],
+      "title": "EnterpriseSourceIdentity",
+      "type": "object"
+    },
+    "JsonValue": {},
+    "MappingReasonCode": {
+      "enum": [
+        "MAPPED",
+        "PROFILE_NOT_FOUND",
+        "REQUIRED_FIELD_MISSING",
+        "STATUS_UNMAPPED",
+        "DUPLICATE_SOURCE_VERSION",
+        "SOURCE_VERSION_CONFLICT",
+        "OUT_OF_ORDER_SOURCE_UPDATE",
+        "SOURCE_URL_CHANGED",
+        "SOURCE_DELETED",
+        "SOURCE_RESTRICTED",
+        "LATE_ARRIVAL"
+      ],
+      "title": "MappingReasonCode",
+      "type": "string"
+    },
+    "StructuredCandidateKind": {
+      "enum": [
+        "PROJECT",
+        "WORK_ITEM",
+        "ISSUE",
+        "EVIDENCE",
+        "EVENT"
+      ],
+      "title": "StructuredCandidateKind",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "enterprise-dry-run-report.v1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "report_id": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Report Id",
+      "type": "string"
+    },
+    "input_version": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "title": "Input Version",
+      "type": "string"
+    },
+    "registry_version": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "title": "Registry Version",
+      "type": "string"
+    },
+    "checkpoint_version": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "title": "Checkpoint Version",
+      "type": "string"
+    },
+    "status": {
+      "$ref": "#/$defs/EnterpriseDryRunStatus"
+    },
+    "write_performed": {
+      "const": false,
+      "title": "Write Performed",
+      "type": "boolean"
+    },
+    "canonical_import_authorized": {
+      "const": false,
+      "title": "Canonical Import Authorized",
+      "type": "boolean"
+    },
+    "canonical_changes": {
+      "items": {
+        "$ref": "#/$defs/EnterpriseCanonicalChange"
+      },
+      "title": "Canonical Changes",
+      "type": "array"
+    },
+    "quality_findings": {
+      "items": {
+        "$ref": "#/$defs/EnterpriseQualityFinding"
+      },
+      "title": "Quality Findings",
+      "type": "array"
+    },
+    "quarantine_entries": {
+      "items": {
+        "$ref": "#/$defs/EnterpriseQuarantineEntry"
+      },
+      "title": "Quarantine Entries",
+      "type": "array"
+    },
+    "summary": {
+      "$ref": "#/$defs/EnterpriseDryRunSummary"
+    }
+  },
+  "required": [
+    "schema_version",
+    "report_id",
+    "input_version",
+    "registry_version",
+    "checkpoint_version",
+    "status",
+    "write_performed",
+    "canonical_import_authorized",
+    "canonical_changes",
+    "quality_findings",
+    "quarantine_entries",
+    "summary"
+  ],
+  "title": "EnterpriseDryRunReport",
+  "type": "object"
+}

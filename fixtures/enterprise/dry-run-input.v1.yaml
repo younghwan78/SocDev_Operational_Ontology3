@@ -1,0 +1,78 @@
+schema_version: enterprise-dry-run-input.v1
+input_version: synthetic-enterprise-dry-run.1
+as_of: 2026-07-24T12:00:00+09:00
+stale_after_seconds: 172800
+known_acl_refs:
+  - acl-ref:project-sync
+  - acl-ref:project-v
+  - acl-ref:restricted
+canonical_snapshot_version: synthetic-canonical-snapshot.1
+canonical_key_rules:
+  - candidate_kind: PROJECT
+    target_field: project_id
+  - candidate_kind: WORK_ITEM
+    target_field: work_item_id
+  - candidate_kind: ISSUE
+    target_field: issue_id
+  - candidate_kind: EVIDENCE
+    target_field: evidence_id
+  - candidate_kind: EVENT
+    target_field: event_id
+canonical_objects:
+  - candidate_kind: PROJECT
+    canonical_key: PROJECT-SYNC
+    source_identity:
+      source_system: synthetic-work-tracker
+      source_tenant: lab-a
+      source_object_type: project
+      external_id: PROJECT-SYNC
+    values:
+      project_id: PROJECT-SYNC
+      title_ko: Previous synthetic project title
+      lifecycle_stage: PRE_SILICON_CLOSURE
+  - candidate_kind: WORK_ITEM
+    canonical_key: WI-SYNC
+    source_identity:
+      source_system: synthetic-work-tracker
+      source_tenant: lab-a
+      source_object_type: work-item
+      external_id: WI-SYNC
+    values:
+      work_item_id: WI-SYNC
+      title: Synthetic interface sign-off
+      owner: integration
+      status: DONE
+  - candidate_kind: EVIDENCE
+    canonical_key: PAGE-LATE
+    source_identity:
+      source_system: synthetic-knowledge-base
+      source_tenant: lab-a
+      source_object_type: page
+      external_id: PAGE-LATE
+    values:
+      evidence_id: PAGE-LATE
+      title: Synthetic late evidence
+quality_probes:
+  - probe_id: ENT-D-QUALITY-PROBE
+    reference_keys: [PROJECT-MISSING]
+    record:
+      schema_version: enterprise-source-record.v1
+      source_system: synthetic-work-tracker
+      source_tenant: lab-a
+      source_object_type: issue
+      external_id: ISSUE-QUALITY-PROBE
+      external_version: "1"
+      effective_at: 2026-07-26T09:00:00+09:00
+      observed_at: 2026-07-23T09:00:00+09:00
+      source_updated_at: 2026-07-23T08:59:00+09:00
+      ingested_at: 2026-07-23T09:01:00+09:00
+      content_hash: a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0
+      source_url: https://work.invalid/issues/ISSUE-QUALITY-PROBE
+      deletion_state: ACTIVE
+      source_acl_ref: acl-ref:unknown
+      classification: INTERNAL
+      payload:
+        issue_id: ISSUE-QUALITY-PROBE
+        title: Synthetic quality probe
+        status: open
+        project_ref: PROJECT-MISSING

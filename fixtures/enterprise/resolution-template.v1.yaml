@@ -1,0 +1,9 @@
+schema_version: enterprise-resolution-file.v1
+resolution_version: synthetic-resolution-template.1
+entries:
+  - quarantine_id: 223186a9449c83cb2d1a7a3d0783c68776e12ecbc66f4b649fa622c765fd7e32
+    expected_content_hash: a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0
+    action: SOURCE_FIXED
+    reviewer: synthetic-reviewer
+    justification: Add the missing synthetic Project reference and rerun dry-run.
+    proposed_at: 2026-07-24T13:00:00+09:00
