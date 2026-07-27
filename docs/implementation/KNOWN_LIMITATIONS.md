@@ -1,6 +1,6 @@
 # Known limitations
 
-> Verified: 2026-07-25
+> Verified: 2026-07-27
 
 - The local product uses synthetic fixtures. It does not connect to company Confluence or Jira.
 - The Decision Chair is explicitly simulated and has no approval authority.
@@ -12,14 +12,15 @@
 - Local SSE follows persisted events with sequence resume, heartbeat, and a bounded 30-second connection; the UI uses polling as the reconnect fallback.
 - Provider token cost is an estimate based on operator-supplied rates and must be refreshed when pricing changes.
 - Company security, identity, retention, and write-back controls require a separate pilot design review.
-- ENT-A~D now provide a source-neutral enterprise identity/time envelope, versioned synthetic mapping
+- ENT-A~E now provide a source-neutral enterprise identity/time envelope, versioned synthetic mapping
   profiles, source-span candidates, dirty-source disposition and a deterministic in-memory
-  sync/reconciliation checkpoint plus a report-only dry-run and proposed-resolution artifact. This
-  proves fixture cursor resume, idempotency, bounded retry, tombstone/stale precedence and visible
-  create/update/delete/quality review, not transport, durability or import safety. There is still no
-  Jira/Confluence adapter, real ACL inheritance, database checkpoint, canonical import, durable
-  quarantine, retention or human-reviewed unstructured promotion path. Direct live company connection
-  remains NO-GO.
+  sync/reconciliation checkpoint plus a report-only dry-run, proposed-resolution artifact and
+  synthetic security/operation emulator. This proves fail-closed fixture ACL/classification,
+  credential redaction and recovery-state contracts in addition to cursor/idempotency/quality behavior;
+  it does not prove real authorization, transport, durability or import safety. There is still no
+  Jira/Confluence adapter, company identity/ACL inheritance, database checkpoint, canonical import,
+  durable quarantine, retention or human-reviewed unstructured promotion path. Direct live company
+  connection remains NO-GO.
 - Codex CLI evaluation artifacts contain aggregate model usage and normalized results, while normal durable worker attempt telemetry remains Replay-verified unless the Responses API worker is separately authorized.
 - UX-H Decision-centered v1 material remains reproducible, and OPS-F now adds a Project-centered v2
   protocol with three hash-pinned Projects, six baseline surfaces and eleven frozen tasks. Both study

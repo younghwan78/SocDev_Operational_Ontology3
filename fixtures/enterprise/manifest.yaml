@@ -10,3 +10,7 @@ artifacts:
     sha256: b5f2f5912807c9aaa1d206c6c39209840b3bb40f1095b58de0cfd8247aa9faa6
   - path: resolution-template.v1.yaml
     sha256: c0f6f9f641e45b4df1654bac92ab8c8a3aafcc43799f752cc73610f60221d05c
+  - path: security-operation-policy.v1.yaml
+    sha256: acb5b31a26630adee642d419ccbfc91a5a0b62206afe60d7ba9476aead2fe140
+  - path: security-operation-scenarios.v1.yaml
+    sha256: b79d89ec038544133e01b956cc0b66d804807118f488ebdb42a784cf1ecf8a27

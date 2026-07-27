@@ -623,6 +623,46 @@ the runtime database.
 ENT-D adds no canonical Project/Event mutation, durable queue, API route, vendor adapter, real ACL,
 credential, company data, Agent input or write-back.
 
-## 15. Compatibility gate
+## 15. Accepted ENT-E security and operation emulator boundary
+
+ADR-0016 accepts:
+
+```text
+enterprise-security-operation-policy.v1
+enterprise-security-operation-scenario-corpus.v1
+enterprise-security-operation-report.v1
+
+EnterpriseExposureSurface = FRONTEND | API | MODEL | ROLE_PACKET | LOG
+EnterpriseExposureMode    = FULL | METADATA_ONLY | DENY
+EnterpriseAccessDecision  = ALLOW | DENY
+```
+
+Missing ACL, unknown principal, allow/deny conflict, no allow match, inactive source and classification
+denial all fail closed. `RESTRICTED` denies every surface. Exposure records contain a hash reference,
+not raw identity, URL, or payload. The classification matrix is total across all four classifications
+and five surfaces.
+
+```text
+EnterpriseIncidentType =
+  HEALTHY | LAG | STALE | RATE_LIMITED | PARTIAL_SOURCE | UNKNOWN_FRESHNESS
+EnterpriseHealthStatus    = HEALTHY | DEGRADED | NOT_READY
+EnterpriseReadinessStatus = READY | NOT_READY
+EnterpriseRecoveryAction  =
+  NONE | WAIT_BACKOFF | FULL_RECONCILIATION |
+  RETRY_MISSING_PARTITION | ESCALATE_SOURCE_OWNER
+```
+
+Only complete, known-freshness HEALTHY input within the lag threshold is READY/current. Unknown
+freshness is never current. Diagnostic redaction covers configured field names, Bearer/token/secret
+assignments and URL user-info recursively. Audit contains only hashes and compact outcomes.
+
+Every report fixes `real_authorization_performed=false` and `credential_persisted=false`.
+`soc-ot enterprise emulate-security --output <report.json>` writes only a synthetic report and opens
+no runtime database.
+
+ENT-E adds no real authentication/authorization, company principal/group, inherited ACL, vendor
+credential, canonical import, API route, monitoring service, Agent input or write-back.
+
+## 16. Compatibility gate
 
 Any change to a state code, DecisionType, endpoint, time field, or version name updates this contract first. CI then checks generated schemas, OpenAPI, Frontend client, fixture manifests, runbook examples, and documentation references.

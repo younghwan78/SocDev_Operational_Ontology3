@@ -23,6 +23,11 @@ from soc_ot.application.enterprise_mapping import (
     EnterpriseMappingRegistry,
     EnterpriseMappingResult,
 )
+from soc_ot.application.enterprise_security_operations import (
+    EnterpriseSecurityOperationPolicy,
+    EnterpriseSecurityOperationReport,
+    EnterpriseSecurityOperationScenarioCorpus,
+)
 from soc_ot.application.enterprise_sync import (
     EnterpriseSyncCheckpoint,
     EnterpriseSyncFixtureCorpus,
@@ -71,6 +76,11 @@ CONTRACT_MODELS: dict[str, type[BaseModel]] = {
     "enterprise-dry-run-input.v1": EnterpriseDryRunInput,
     "enterprise-resolution-file.v1": EnterpriseResolutionFile,
     "enterprise-dry-run-report.v1": EnterpriseDryRunReport,
+    "enterprise-security-operation-policy.v1": EnterpriseSecurityOperationPolicy,
+    "enterprise-security-operation-scenario-corpus.v1": (
+        EnterpriseSecurityOperationScenarioCorpus
+    ),
+    "enterprise-security-operation-report.v1": EnterpriseSecurityOperationReport,
     "project-list-item.v1": ProjectListItemProjection,
     "project-situation.v1": ProjectSituationProjection,
     "project-risk-summary.v1": ProjectRiskSummary,

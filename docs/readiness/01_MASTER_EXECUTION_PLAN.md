@@ -1,6 +1,6 @@
 # Master execution plan
 
-> Status: IMPLEMENTED THROUGH I7 REPLAY + STEP 5 B2 RUNTIME + UX-K LOCAL FIXTURE UX RELEASE 1 + ENT-A~D; OPS-F HUMAN OBSERVATION DEFERRED AT 0/5 PER CONDITION, ENT-E NEXT
+> Status: IMPLEMENTED THROUGH I7 REPLAY + STEP 5 B2 RUNTIME + UX-K LOCAL FIXTURE UX RELEASE 1 + ENT-A~E; OPS-F HUMAN OBSERVATION DEFERRED AT 0/5 PER CONDITION, ENT-F NEXT
 > Date: 2026-07-25
 > Scope: local fixture-only PoC
 
@@ -439,7 +439,8 @@ After OPS-F, the only allowed order is:
 |ENT-B|Versioned mapping registry, candidate provenance and dirty-source disposition|Complete: ADR-0013 accepted, 10 normal/dirty patterns and explicit accept/quarantine/reject pass|
 |ENT-C|Deterministic sync, idempotency, retry, tombstone and reconciliation|Complete: ADR-0014 accepted, cursor/page-token resume, bounded retry, stale protection and full/incremental parity pass|
 |ENT-D|No-write dry-run, canonical change proposal, quality and quarantine/resolution|Complete: ADR-0015 accepted, report-only CLI, seven quality classes and review artifacts pass|
-|ENT-E~F|Security emulator and internal handoff kit|ENT-E next; fixture-only tests, no vendor API, company data, credential or real ACL|
+|ENT-E|Synthetic ACL/classification, redaction, recovery and operation observability|Complete: ADR-0016 accepted, total surface policy, six incident states and metadata-only audit pass|
+|ENT-F|Internal handoff templates, worksheet, rollback and runbook|Next; fixture-only package, no vendor API, company data, credential or real ACL|
 |C0/C1|Internal configuration, sanitized schema-fit, one-project read-only smoke and pilot|Company security, data owner and human authority approvals|
 
 The detailed work packages and transition criteria are owned by
@@ -657,6 +658,23 @@ ENT-D implementation record (2026-07-25):
 - 10 focused tests cover no-database CLI execution, deterministic report, partial-error preservation,
   stale/unknown resolution rejection and immutable no-write authority; full non-PostgreSQL regression
   is 216 passed with all required repository checks; ENT-E is next
+
+ENT-E implementation record (2026-07-27):
+
+- ADR-0016 accepts synthetic security policy, scenario corpus and report contracts; every report fixes
+  `real_authorization_performed=false` and `credential_persisted=false`
+- four classifications cover Frontend/API/Model/Role packet/Log surfaces; synthetic principal/group
+  ACL allows, denies, missing references, unknown principals and allow/deny conflict all have explicit
+  fail-closed results
+- 7 probes produce 35 frozen exposure decisions with 25 denies; restricted source identity, URL and
+  payload are absent from report/audit, while allowed logs remain metadata-only
+- recursive field/message/URL redaction removes six synthetic credential paths; metadata audit uses
+  only hashed subject references and compact outcomes
+- HEALTHY/LAG/STALE/RATE_LIMITED/PARTIAL_SOURCE/UNKNOWN_FRESHNESS scenarios expose deterministic
+  readiness, recovery, 27 metrics and 47 audit events; only HEALTHY is current/ready
+- 12 focused tests cover frozen matrix parity, fail-closed policy, leakage/redaction, readiness,
+  metrics/audit determinism, immutable authority flags and no-database CLI execution; full
+  non-PostgreSQL regression is 228 passed with all required repository checks; ENT-F is next
 
 ## 7. Crosswalk to supporting plans
 

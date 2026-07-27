@@ -1,0 +1,243 @@
+schema_version: enterprise-security-operation-scenario-corpus.v1
+corpus_version: synthetic-security-operation-scenarios.1
+exposure_probes:
+  - probe_id: EXPOSURE-PUBLIC
+    principal_id: principal-engineer
+    record:
+      schema_version: enterprise-source-record.v1
+      source_system: synthetic-work-tracker
+      source_tenant: lab-a
+      source_object_type: project
+      external_id: PROJECT-PUBLIC
+      external_version: "1"
+      effective_at: 2026-07-25T08:00:00+09:00
+      observed_at: 2026-07-25T08:01:00+09:00
+      source_updated_at: 2026-07-25T08:00:00+09:00
+      ingested_at: 2026-07-25T08:02:00+09:00
+      content_hash: "1010101010101010101010101010101010101010101010101010101010101010"
+      source_url: https://work.invalid/projects/PROJECT-PUBLIC
+      deletion_state: ACTIVE
+      source_acl_ref: acl-ref:public
+      classification: PUBLIC
+      payload: {project_id: PROJECT-PUBLIC, title: Synthetic public project}
+    expected_decisions:
+      - {surface: FRONTEND, decision: ALLOW, exposure_mode: FULL, reason: ACL_ALLOW}
+      - {surface: API, decision: ALLOW, exposure_mode: FULL, reason: ACL_ALLOW}
+      - {surface: MODEL, decision: ALLOW, exposure_mode: FULL, reason: ACL_ALLOW}
+      - {surface: ROLE_PACKET, decision: ALLOW, exposure_mode: FULL, reason: ACL_ALLOW}
+      - {surface: LOG, decision: ALLOW, exposure_mode: METADATA_ONLY, reason: ACL_ALLOW}
+
+  - probe_id: EXPOSURE-INTERNAL-ALLOW
+    principal_id: principal-engineer
+    record:
+      schema_version: enterprise-source-record.v1
+      source_system: synthetic-work-tracker
+      source_tenant: lab-a
+      source_object_type: issue
+      external_id: ISSUE-INTERNAL
+      external_version: "1"
+      effective_at: 2026-07-25T08:10:00+09:00
+      observed_at: 2026-07-25T08:11:00+09:00
+      source_updated_at: 2026-07-25T08:10:00+09:00
+      ingested_at: 2026-07-25T08:12:00+09:00
+      content_hash: "2020202020202020202020202020202020202020202020202020202020202020"
+      source_url: https://work.invalid/issues/ISSUE-INTERNAL
+      deletion_state: ACTIVE
+      source_acl_ref: acl-ref:project
+      classification: INTERNAL
+      payload: {issue_id: ISSUE-INTERNAL, title: Synthetic internal issue}
+    expected_decisions:
+      - {surface: FRONTEND, decision: ALLOW, exposure_mode: FULL, reason: ACL_ALLOW}
+      - {surface: API, decision: ALLOW, exposure_mode: FULL, reason: ACL_ALLOW}
+      - {surface: MODEL, decision: ALLOW, exposure_mode: FULL, reason: ACL_ALLOW}
+      - {surface: ROLE_PACKET, decision: ALLOW, exposure_mode: FULL, reason: ACL_ALLOW}
+      - {surface: LOG, decision: ALLOW, exposure_mode: METADATA_ONLY, reason: ACL_ALLOW}
+
+  - probe_id: EXPOSURE-ACL-DENY
+    principal_id: principal-viewer
+    record:
+      schema_version: enterprise-source-record.v1
+      source_system: synthetic-work-tracker
+      source_tenant: lab-a
+      source_object_type: issue
+      external_id: ISSUE-DENIED
+      external_version: "1"
+      effective_at: 2026-07-25T08:20:00+09:00
+      observed_at: 2026-07-25T08:21:00+09:00
+      source_updated_at: 2026-07-25T08:20:00+09:00
+      ingested_at: 2026-07-25T08:22:00+09:00
+      content_hash: "3030303030303030303030303030303030303030303030303030303030303030"
+      source_url: https://work.invalid/issues/ISSUE-DENIED
+      deletion_state: ACTIVE
+      source_acl_ref: acl-ref:project
+      classification: INTERNAL
+      payload: {issue_id: ISSUE-DENIED, title: Synthetic denied issue}
+    expected_decisions:
+      - {surface: FRONTEND, decision: DENY, exposure_mode: DENY, reason: ACL_DENY}
+      - {surface: API, decision: DENY, exposure_mode: DENY, reason: ACL_DENY}
+      - {surface: MODEL, decision: DENY, exposure_mode: DENY, reason: ACL_DENY}
+      - {surface: ROLE_PACKET, decision: DENY, exposure_mode: DENY, reason: ACL_DENY}
+      - {surface: LOG, decision: DENY, exposure_mode: DENY, reason: ACL_DENY}
+
+  - probe_id: EXPOSURE-PRINCIPAL-UNKNOWN
+    principal_id: principal-unknown
+    record:
+      schema_version: enterprise-source-record.v1
+      source_system: synthetic-work-tracker
+      source_tenant: lab-a
+      source_object_type: issue
+      external_id: ISSUE-UNKNOWN-PRINCIPAL
+      external_version: "1"
+      effective_at: 2026-07-25T08:30:00+09:00
+      observed_at: 2026-07-25T08:31:00+09:00
+      source_updated_at: 2026-07-25T08:30:00+09:00
+      ingested_at: 2026-07-25T08:32:00+09:00
+      content_hash: "4040404040404040404040404040404040404040404040404040404040404040"
+      source_url: https://work.invalid/issues/ISSUE-UNKNOWN-PRINCIPAL
+      deletion_state: ACTIVE
+      source_acl_ref: acl-ref:project
+      classification: INTERNAL
+      payload: {issue_id: ISSUE-UNKNOWN-PRINCIPAL, title: Synthetic unknown principal}
+    expected_decisions:
+      - {surface: FRONTEND, decision: DENY, exposure_mode: DENY, reason: PRINCIPAL_UNKNOWN}
+      - {surface: API, decision: DENY, exposure_mode: DENY, reason: PRINCIPAL_UNKNOWN}
+      - {surface: MODEL, decision: DENY, exposure_mode: DENY, reason: PRINCIPAL_UNKNOWN}
+      - {surface: ROLE_PACKET, decision: DENY, exposure_mode: DENY, reason: PRINCIPAL_UNKNOWN}
+      - {surface: LOG, decision: DENY, exposure_mode: DENY, reason: PRINCIPAL_UNKNOWN}
+
+  - probe_id: EXPOSURE-ACL-MISSING
+    principal_id: principal-engineer
+    record:
+      schema_version: enterprise-source-record.v1
+      source_system: synthetic-work-tracker
+      source_tenant: lab-a
+      source_object_type: issue
+      external_id: ISSUE-MISSING-ACL
+      external_version: "1"
+      effective_at: 2026-07-25T08:40:00+09:00
+      observed_at: 2026-07-25T08:41:00+09:00
+      source_updated_at: 2026-07-25T08:40:00+09:00
+      ingested_at: 2026-07-25T08:42:00+09:00
+      content_hash: "5050505050505050505050505050505050505050505050505050505050505050"
+      source_url: https://work.invalid/issues/ISSUE-MISSING-ACL
+      deletion_state: ACTIVE
+      source_acl_ref: acl-ref:missing
+      classification: INTERNAL
+      payload: {issue_id: ISSUE-MISSING-ACL, title: Synthetic missing ACL}
+    expected_decisions:
+      - {surface: FRONTEND, decision: DENY, exposure_mode: DENY, reason: ACL_MISSING}
+      - {surface: API, decision: DENY, exposure_mode: DENY, reason: ACL_MISSING}
+      - {surface: MODEL, decision: DENY, exposure_mode: DENY, reason: ACL_MISSING}
+      - {surface: ROLE_PACKET, decision: DENY, exposure_mode: DENY, reason: ACL_MISSING}
+      - {surface: LOG, decision: DENY, exposure_mode: DENY, reason: ACL_MISSING}
+
+  - probe_id: EXPOSURE-ACL-CONFLICT
+    principal_id: principal-conflict
+    record:
+      schema_version: enterprise-source-record.v1
+      source_system: synthetic-knowledge-base
+      source_tenant: lab-a
+      source_object_type: page
+      external_id: PAGE-CONFLICT
+      external_version: "1"
+      effective_at: 2026-07-25T08:50:00+09:00
+      observed_at: 2026-07-25T08:51:00+09:00
+      source_updated_at: 2026-07-25T08:50:00+09:00
+      ingested_at: 2026-07-25T08:52:00+09:00
+      content_hash: "6060606060606060606060606060606060606060606060606060606060606060"
+      source_url: https://knowledge.invalid/pages/PAGE-CONFLICT
+      deletion_state: ACTIVE
+      source_acl_ref: acl-ref:conflict
+      classification: CONFIDENTIAL
+      payload: {page_id: PAGE-CONFLICT, title: Synthetic confidential page}
+    expected_decisions:
+      - {surface: FRONTEND, decision: DENY, exposure_mode: DENY, reason: ACL_CONFLICT}
+      - {surface: API, decision: DENY, exposure_mode: DENY, reason: ACL_CONFLICT}
+      - {surface: MODEL, decision: DENY, exposure_mode: DENY, reason: CLASSIFICATION_DENY}
+      - {surface: ROLE_PACKET, decision: DENY, exposure_mode: DENY, reason: CLASSIFICATION_DENY}
+      - {surface: LOG, decision: DENY, exposure_mode: DENY, reason: ACL_CONFLICT}
+
+  - probe_id: EXPOSURE-RESTRICTED
+    principal_id: principal-engineer
+    record:
+      schema_version: enterprise-source-record.v1
+      source_system: synthetic-knowledge-base
+      source_tenant: lab-a
+      source_object_type: page
+      external_id: PAGE-RESTRICTED-SECRET
+      external_version: "2"
+      effective_at: 2026-07-25T09:00:00+09:00
+      observed_at: 2026-07-25T09:01:00+09:00
+      source_updated_at: 2026-07-25T09:00:00+09:00
+      ingested_at: 2026-07-25T09:02:00+09:00
+      content_hash: "7070707070707070707070707070707070707070707070707070707070707070"
+      source_url: https://knowledge.invalid/pages/PAGE-RESTRICTED-SECRET
+      deletion_state: RESTRICTED
+      source_acl_ref: acl-ref:restricted
+      classification: RESTRICTED
+      payload: null
+    expected_decisions:
+      - {surface: FRONTEND, decision: DENY, exposure_mode: DENY, reason: SOURCE_RESTRICTED}
+      - {surface: API, decision: DENY, exposure_mode: DENY, reason: SOURCE_RESTRICTED}
+      - {surface: MODEL, decision: DENY, exposure_mode: DENY, reason: SOURCE_RESTRICTED}
+      - {surface: ROLE_PACKET, decision: DENY, exposure_mode: DENY, reason: SOURCE_RESTRICTED}
+      - {surface: LOG, decision: DENY, exposure_mode: DENY, reason: SOURCE_RESTRICTED}
+
+diagnostics:
+  - diagnostic_id: DIAGNOSTIC-CREDENTIALS
+    message: "upstream failed with Bearer synthetic-access-value and token=synthetic-token-value"
+    headers:
+      Authorization: "Bearer synthetic-header-value"
+      Cookie: "session=synthetic-cookie-value"
+      X-Safe-Request: synthetic-request-42
+    payload:
+      api_key: synthetic-api-key-value
+      nested:
+        password: synthetic-password-value
+        safe_count: 3
+      endpoint: "https://synthetic-user:synthetic-pass@source.invalid/api"
+
+operation_scenarios:
+  - scenario_id: OP-HEALTHY
+    incident_type: HEALTHY
+    evaluated_at: 2026-07-25T12:00:00+09:00
+    last_success_at: 2026-07-25T11:55:00+09:00
+    freshness_known: true
+    expected_source_count: 10
+    received_source_count: 10
+  - scenario_id: OP-LAG
+    incident_type: LAG
+    evaluated_at: 2026-07-25T12:00:00+09:00
+    last_success_at: 2026-07-25T11:30:00+09:00
+    freshness_known: true
+    expected_source_count: 10
+    received_source_count: 10
+  - scenario_id: OP-STALE
+    incident_type: STALE
+    evaluated_at: 2026-07-25T12:00:00+09:00
+    last_success_at: 2026-07-25T09:00:00+09:00
+    freshness_known: true
+    expected_source_count: 10
+    received_source_count: 10
+  - scenario_id: OP-RATE-LIMITED
+    incident_type: RATE_LIMITED
+    evaluated_at: 2026-07-25T12:00:00+09:00
+    last_success_at: 2026-07-25T11:50:00+09:00
+    freshness_known: true
+    expected_source_count: 10
+    received_source_count: 10
+    retry_after_seconds: 120
+  - scenario_id: OP-PARTIAL
+    incident_type: PARTIAL_SOURCE
+    evaluated_at: 2026-07-25T12:00:00+09:00
+    last_success_at: 2026-07-25T11:55:00+09:00
+    freshness_known: true
+    expected_source_count: 10
+    received_source_count: 7
+  - scenario_id: OP-UNKNOWN-FRESHNESS
+    incident_type: UNKNOWN_FRESHNESS
+    evaluated_at: 2026-07-25T12:00:00+09:00
+    last_success_at: null
+    freshness_known: false
+    expected_source_count: 10
+    received_source_count: 10

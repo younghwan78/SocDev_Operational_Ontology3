@@ -1,0 +1,411 @@
+{
+  "$defs": {
+    "EnterpriseAccessDecision": {
+      "enum": [
+        "ALLOW",
+        "DENY"
+      ],
+      "title": "EnterpriseAccessDecision",
+      "type": "string"
+    },
+    "EnterpriseAccessReason": {
+      "enum": [
+        "ACL_ALLOW",
+        "ACL_DENY",
+        "ACL_NO_MATCH",
+        "ACL_MISSING",
+        "ACL_CONFLICT",
+        "PRINCIPAL_UNKNOWN",
+        "CLASSIFICATION_DENY",
+        "SOURCE_INACTIVE",
+        "SOURCE_RESTRICTED"
+      ],
+      "title": "EnterpriseAccessReason",
+      "type": "string"
+    },
+    "EnterpriseExposureMode": {
+      "enum": [
+        "FULL",
+        "METADATA_ONLY",
+        "DENY"
+      ],
+      "title": "EnterpriseExposureMode",
+      "type": "string"
+    },
+    "EnterpriseExposureProbe": {
+      "additionalProperties": false,
+      "properties": {
+        "probe_id": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Probe Id",
+          "type": "string"
+        },
+        "principal_id": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Principal Id",
+          "type": "string"
+        },
+        "record": {
+          "$ref": "#/$defs/EnterpriseSourceRecord"
+        },
+        "expected_decisions": {
+          "items": {
+            "$ref": "#/$defs/ExpectedExposureDecision"
+          },
+          "minItems": 1,
+          "title": "Expected Decisions",
+          "type": "array"
+        }
+      },
+      "required": [
+        "probe_id",
+        "principal_id",
+        "record",
+        "expected_decisions"
+      ],
+      "title": "EnterpriseExposureProbe",
+      "type": "object"
+    },
+    "EnterpriseExposureSurface": {
+      "enum": [
+        "FRONTEND",
+        "API",
+        "MODEL",
+        "ROLE_PACKET",
+        "LOG"
+      ],
+      "title": "EnterpriseExposureSurface",
+      "type": "string"
+    },
+    "EnterpriseIncidentType": {
+      "enum": [
+        "HEALTHY",
+        "LAG",
+        "STALE",
+        "RATE_LIMITED",
+        "PARTIAL_SOURCE",
+        "UNKNOWN_FRESHNESS"
+      ],
+      "title": "EnterpriseIncidentType",
+      "type": "string"
+    },
+    "EnterpriseOperationScenario": {
+      "additionalProperties": false,
+      "properties": {
+        "scenario_id": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Scenario Id",
+          "type": "string"
+        },
+        "incident_type": {
+          "$ref": "#/$defs/EnterpriseIncidentType"
+        },
+        "evaluated_at": {
+          "format": "date-time",
+          "title": "Evaluated At",
+          "type": "string"
+        },
+        "last_success_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Last Success At"
+        },
+        "freshness_known": {
+          "title": "Freshness Known",
+          "type": "boolean"
+        },
+        "expected_source_count": {
+          "minimum": 1,
+          "title": "Expected Source Count",
+          "type": "integer"
+        },
+        "received_source_count": {
+          "minimum": 0,
+          "title": "Received Source Count",
+          "type": "integer"
+        },
+        "retry_after_seconds": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Retry After Seconds"
+        }
+      },
+      "required": [
+        "scenario_id",
+        "incident_type",
+        "evaluated_at",
+        "last_success_at",
+        "freshness_known",
+        "expected_source_count",
+        "received_source_count"
+      ],
+      "title": "EnterpriseOperationScenario",
+      "type": "object"
+    },
+    "EnterpriseSourceRecord": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "enterprise-source-record.v1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "source_system": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Source System",
+          "type": "string"
+        },
+        "source_tenant": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Source Tenant",
+          "type": "string"
+        },
+        "source_object_type": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Source Object Type",
+          "type": "string"
+        },
+        "external_id": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "External Id",
+          "type": "string"
+        },
+        "external_version": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "External Version",
+          "type": "string"
+        },
+        "effective_at": {
+          "format": "date-time",
+          "title": "Effective At",
+          "type": "string"
+        },
+        "observed_at": {
+          "format": "date-time",
+          "title": "Observed At",
+          "type": "string"
+        },
+        "source_updated_at": {
+          "format": "date-time",
+          "title": "Source Updated At",
+          "type": "string"
+        },
+        "ingested_at": {
+          "format": "date-time",
+          "title": "Ingested At",
+          "type": "string"
+        },
+        "content_hash": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Content Hash",
+          "type": "string"
+        },
+        "source_url": {
+          "format": "uri",
+          "maxLength": 2083,
+          "minLength": 1,
+          "title": "Source Url",
+          "type": "string"
+        },
+        "deletion_state": {
+          "$ref": "#/$defs/SourceDeletionState"
+        },
+        "source_acl_ref": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Source Acl Ref",
+          "type": "string"
+        },
+        "classification": {
+          "$ref": "#/$defs/SourceDataClassification"
+        },
+        "payload": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "$ref": "#/$defs/JsonValue"
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Payload"
+        }
+      },
+      "required": [
+        "schema_version",
+        "source_system",
+        "source_tenant",
+        "source_object_type",
+        "external_id",
+        "external_version",
+        "effective_at",
+        "observed_at",
+        "source_updated_at",
+        "ingested_at",
+        "content_hash",
+        "source_url",
+        "deletion_state",
+        "source_acl_ref",
+        "classification",
+        "payload"
+      ],
+      "title": "EnterpriseSourceRecord",
+      "type": "object"
+    },
+    "ExpectedExposureDecision": {
+      "additionalProperties": false,
+      "properties": {
+        "surface": {
+          "$ref": "#/$defs/EnterpriseExposureSurface"
+        },
+        "decision": {
+          "$ref": "#/$defs/EnterpriseAccessDecision"
+        },
+        "exposure_mode": {
+          "$ref": "#/$defs/EnterpriseExposureMode"
+        },
+        "reason": {
+          "$ref": "#/$defs/EnterpriseAccessReason"
+        }
+      },
+      "required": [
+        "surface",
+        "decision",
+        "exposure_mode",
+        "reason"
+      ],
+      "title": "ExpectedExposureDecision",
+      "type": "object"
+    },
+    "JsonValue": {},
+    "SourceDataClassification": {
+      "enum": [
+        "PUBLIC",
+        "INTERNAL",
+        "CONFIDENTIAL",
+        "RESTRICTED"
+      ],
+      "title": "SourceDataClassification",
+      "type": "string"
+    },
+    "SourceDeletionState": {
+      "enum": [
+        "ACTIVE",
+        "DELETED",
+        "RESTRICTED"
+      ],
+      "title": "SourceDeletionState",
+      "type": "string"
+    },
+    "UntrustedDiagnostic": {
+      "additionalProperties": false,
+      "properties": {
+        "diagnostic_id": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Diagnostic Id",
+          "type": "string"
+        },
+        "message": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Message",
+          "type": "string"
+        },
+        "headers": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonValue"
+          },
+          "title": "Headers",
+          "type": "object"
+        },
+        "payload": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonValue"
+          },
+          "title": "Payload",
+          "type": "object"
+        }
+      },
+      "required": [
+        "diagnostic_id",
+        "message"
+      ],
+      "title": "UntrustedDiagnostic",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "enterprise-security-operation-scenario-corpus.v1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "corpus_version": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "title": "Corpus Version",
+      "type": "string"
+    },
+    "exposure_probes": {
+      "items": {
+        "$ref": "#/$defs/EnterpriseExposureProbe"
+      },
+      "minItems": 1,
+      "title": "Exposure Probes",
+      "type": "array"
+    },
+    "diagnostics": {
+      "items": {
+        "$ref": "#/$defs/UntrustedDiagnostic"
+      },
+      "minItems": 1,
+      "title": "Diagnostics",
+      "type": "array"
+    },
+    "operation_scenarios": {
+      "items": {
+        "$ref": "#/$defs/EnterpriseOperationScenario"
+      },
+      "minItems": 1,
+      "title": "Operation Scenarios",
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema_version",
+    "corpus_version",
+    "exposure_probes",
+    "diagnostics",
+    "operation_scenarios"
+  ],
+  "title": "EnterpriseSecurityOperationScenarioCorpus",
+  "type": "object"
+}

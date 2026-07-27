@@ -21,6 +21,11 @@ from soc_ot.application.enterprise_mapping import (
     load_dirty_fixture_corpus,
     load_mapping_registry,
 )
+from soc_ot.application.enterprise_security_operations import (
+    load_security_operation_policy,
+    load_security_operation_scenarios,
+    run_security_operation_emulator,
+)
 from soc_ot.application.enterprise_sync import (
     EnterpriseSyncMode,
     load_sync_fixture_corpus,
@@ -95,6 +100,12 @@ DEFAULT_ENTERPRISE_DRY_RUN_INPUT = (
 )
 DEFAULT_ENTERPRISE_RESOLUTION = (
     ROOT_DIR / "fixtures/enterprise/resolution-template.v1.yaml"
+)
+DEFAULT_ENTERPRISE_SECURITY_POLICY = (
+    ROOT_DIR / "fixtures/enterprise/security-operation-policy.v1.yaml"
+)
+DEFAULT_ENTERPRISE_SECURITY_SCENARIOS = (
+    ROOT_DIR / "fixtures/enterprise/security-operation-scenarios.v1.yaml"
 )
 
 
@@ -217,6 +228,18 @@ def build_parser() -> argparse.ArgumentParser:
     enterprise_dry_run = enterprise_sub.add_parser("dry-run")
     _add_enterprise_arguments(enterprise_dry_run)
     enterprise_dry_run.add_argument("--output", type=Path, required=True)
+    enterprise_security = enterprise_sub.add_parser("emulate-security")
+    enterprise_security.add_argument(
+        "--policy",
+        type=Path,
+        default=DEFAULT_ENTERPRISE_SECURITY_POLICY,
+    )
+    enterprise_security.add_argument(
+        "--scenarios",
+        type=Path,
+        default=DEFAULT_ENTERPRISE_SECURITY_SCENARIOS,
+    )
+    enterprise_security.add_argument("--output", type=Path, required=True)
 
     usability = subparsers.add_parser("usability")
     usability_sub = usability.add_subparsers(dest="usability_command")
@@ -258,8 +281,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     if args.command == "status":
         print(
             "I7 Replay + Step 5 B2 stability gates complete; "
-            "Local fixture UX Release 1 and ENT-A through ENT-D complete; "
-            "independent human observations pending; ENT-E next; "
+            "Local fixture UX Release 1 and ENT-A through ENT-E complete; "
+            "independent human observations pending; ENT-F next; "
             "live company connection remains blocked"
         )
         return 0
@@ -452,6 +475,36 @@ def main(argv: Sequence[str] | None = None) -> int:
             f"{len(report.quality_findings)}, quarantine="
             f"{len(report.quarantine_entries)}; report={args.output}; "
             "canonical write=false."
+        )
+        return 0
+    if args.command == "enterprise" and args.enterprise_command == "emulate-security":
+        policy = load_security_operation_policy(args.policy)
+        scenarios = load_security_operation_scenarios(args.scenarios)
+        security_report = run_security_operation_emulator(policy, scenarios)
+        args.output.parent.mkdir(parents=True, exist_ok=True)
+        args.output.write_text(
+            json.dumps(
+                security_report.model_dump(mode="json"),
+                ensure_ascii=False,
+                indent=2,
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+        denied = sum(
+            item.decision.value == "DENY"
+            for item in security_report.exposure_decisions
+        )
+        not_ready = sum(
+            item.readiness_status.value == "NOT_READY"
+            for item in security_report.operation_evaluations
+        )
+        print(
+            f"Security emulator decisions={len(security_report.exposure_decisions)}, "
+            f"denied={denied}, redacted="
+            f"{sum(len(item.redacted_paths) for item in security_report.redacted_diagnostics)}, "
+            f"not_ready={not_ready}; report={args.output}; "
+            "real authorization=false; credential persisted=false."
         )
         return 0
     if args.command == "usability" and args.usability_command == "validate":

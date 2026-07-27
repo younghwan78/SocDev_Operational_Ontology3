@@ -210,6 +210,38 @@ if ($projectFixtures.Count -ne 3) {
         throw "Missing ENT-D artifact: $_"
     }
 }
+@(
+    "enterprise-security-operation-policy.v1",
+    "enterprise-security-operation-scenario-corpus.v1",
+    "enterprise-security-operation-report.v1",
+    "EnterpriseExposureSurface",
+    "EnterpriseExposureMode",
+    "EnterpriseAccessDecision",
+    "EnterpriseIncidentType",
+    "EnterpriseHealthStatus",
+    "EnterpriseReadinessStatus",
+    "EnterpriseRecoveryAction",
+    "real_authorization_performed=false",
+    "credential_persisted=false"
+) | ForEach-Object {
+    if (-not $contract.Contains($_)) {
+        throw "Canonical contract is missing ENT-E term: $_"
+    }
+}
+@(
+    "backend/src/soc_ot/application/enterprise_security_operations.py",
+    "backend/tests/test_ent_e_security_operations.py",
+    "contracts/generated/enterprise-security-operation-policy.v1.schema.json",
+    "contracts/generated/enterprise-security-operation-scenario-corpus.v1.schema.json",
+    "contracts/generated/enterprise-security-operation-report.v1.schema.json",
+    "fixtures/enterprise/security-operation-policy.v1.yaml",
+    "fixtures/enterprise/security-operation-scenarios.v1.yaml",
+    "docs/decisions/ADR-0016-synthetic-enterprise-security-operation-emulator.md"
+) | ForEach-Object {
+    if (-not (Test-Path -LiteralPath (Join-Path $root $_) -PathType Leaf)) {
+        throw "Missing ENT-E artifact: $_"
+    }
+}
 if ($projectPlan -notmatch "corpus v2: development regression 8, validation 2, sealed unseen 2") {
     throw "PROJECT_PLAN.md does not describe the canonical 8/2/2 evaluation partition."
 }

@@ -28,6 +28,7 @@ $enterpriseFiles = @(
     (Join-Path $root "backend/src/soc_ot/application/enterprise_mapping.py"),
     (Join-Path $root "backend/src/soc_ot/application/enterprise_sync.py"),
     (Join-Path $root "backend/src/soc_ot/application/enterprise_dry_run.py"),
+    (Join-Path $root "backend/src/soc_ot/application/enterprise_security_operations.py"),
     (Join-Path $root "backend/src/soc_ot/application/ports.py")
 )
 $enterpriseForbidden = Select-String -Path $enterpriseFiles `

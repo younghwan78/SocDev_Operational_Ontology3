@@ -1,0 +1,62 @@
+schema_version: enterprise-security-operation-policy.v1
+policy_version: synthetic-security-operation.1
+max_source_lag_seconds: 600
+stale_source_after_seconds: 3600
+sensitive_field_names:
+  - authorization
+  - cookie
+  - token
+  - password
+  - secret
+  - api_key
+  - api-key
+principals:
+  - principal_id: principal-engineer
+    group_ids: [group-project-team]
+  - principal_id: principal-viewer
+    group_ids: []
+  - principal_id: principal-conflict
+    group_ids: [group-conflict]
+acl_rules:
+  - acl_ref: acl-ref:public
+    allow_principal_ids:
+      - principal-engineer
+      - principal-viewer
+      - principal-conflict
+  - acl_ref: acl-ref:project
+    allow_group_ids: [group-project-team]
+    deny_principal_ids: [principal-viewer]
+  - acl_ref: acl-ref:conflict
+    allow_principal_ids: [principal-conflict]
+    deny_principal_ids: [principal-conflict]
+  - acl_ref: acl-ref:restricted
+    allow_principal_ids: [principal-engineer]
+classification_rules:
+  - classification: PUBLIC
+    surface_rules:
+      - {surface: FRONTEND, exposure_mode: FULL}
+      - {surface: API, exposure_mode: FULL}
+      - {surface: MODEL, exposure_mode: FULL}
+      - {surface: ROLE_PACKET, exposure_mode: FULL}
+      - {surface: LOG, exposure_mode: METADATA_ONLY}
+  - classification: INTERNAL
+    surface_rules:
+      - {surface: FRONTEND, exposure_mode: FULL}
+      - {surface: API, exposure_mode: FULL}
+      - {surface: MODEL, exposure_mode: FULL}
+      - {surface: ROLE_PACKET, exposure_mode: FULL}
+      - {surface: LOG, exposure_mode: METADATA_ONLY}
+  - classification: CONFIDENTIAL
+    surface_rules:
+      - {surface: FRONTEND, exposure_mode: FULL}
+      - {surface: API, exposure_mode: FULL}
+      - {surface: MODEL, exposure_mode: DENY}
+      - {surface: ROLE_PACKET, exposure_mode: DENY}
+      - {surface: LOG, exposure_mode: METADATA_ONLY}
+  - classification: RESTRICTED
+    surface_rules:
+      - {surface: FRONTEND, exposure_mode: DENY}
+      - {surface: API, exposure_mode: DENY}
+      - {surface: MODEL, exposure_mode: DENY}
+      - {surface: ROLE_PACKET, exposure_mode: DENY}
+      - {surface: LOG, exposure_mode: DENY}

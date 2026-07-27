@@ -1,0 +1,433 @@
+{
+  "$defs": {
+    "EnterpriseAccessDecision": {
+      "enum": [
+        "ALLOW",
+        "DENY"
+      ],
+      "title": "EnterpriseAccessDecision",
+      "type": "string"
+    },
+    "EnterpriseAccessReason": {
+      "enum": [
+        "ACL_ALLOW",
+        "ACL_DENY",
+        "ACL_NO_MATCH",
+        "ACL_MISSING",
+        "ACL_CONFLICT",
+        "PRINCIPAL_UNKNOWN",
+        "CLASSIFICATION_DENY",
+        "SOURCE_INACTIVE",
+        "SOURCE_RESTRICTED"
+      ],
+      "title": "EnterpriseAccessReason",
+      "type": "string"
+    },
+    "EnterpriseAuditEventType": {
+      "enum": [
+        "ACCESS_EVALUATED",
+        "REDACTION_APPLIED",
+        "RECOVERY_PLANNED",
+        "HEALTH_EVALUATED"
+      ],
+      "title": "EnterpriseAuditEventType",
+      "type": "string"
+    },
+    "EnterpriseExposureDecisionRecord": {
+      "additionalProperties": false,
+      "properties": {
+        "decision_id": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Decision Id",
+          "type": "string"
+        },
+        "probe_id": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Probe Id",
+          "type": "string"
+        },
+        "source_ref_hash": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Source Ref Hash",
+          "type": "string"
+        },
+        "principal_id": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Principal Id",
+          "type": "string"
+        },
+        "classification": {
+          "$ref": "#/$defs/SourceDataClassification"
+        },
+        "surface": {
+          "$ref": "#/$defs/EnterpriseExposureSurface"
+        },
+        "decision": {
+          "$ref": "#/$defs/EnterpriseAccessDecision"
+        },
+        "exposure_mode": {
+          "$ref": "#/$defs/EnterpriseExposureMode"
+        },
+        "reason": {
+          "$ref": "#/$defs/EnterpriseAccessReason"
+        }
+      },
+      "required": [
+        "decision_id",
+        "probe_id",
+        "source_ref_hash",
+        "principal_id",
+        "classification",
+        "surface",
+        "decision",
+        "exposure_mode",
+        "reason"
+      ],
+      "title": "EnterpriseExposureDecisionRecord",
+      "type": "object"
+    },
+    "EnterpriseExposureMode": {
+      "enum": [
+        "FULL",
+        "METADATA_ONLY",
+        "DENY"
+      ],
+      "title": "EnterpriseExposureMode",
+      "type": "string"
+    },
+    "EnterpriseExposureSurface": {
+      "enum": [
+        "FRONTEND",
+        "API",
+        "MODEL",
+        "ROLE_PACKET",
+        "LOG"
+      ],
+      "title": "EnterpriseExposureSurface",
+      "type": "string"
+    },
+    "EnterpriseHealthStatus": {
+      "enum": [
+        "HEALTHY",
+        "DEGRADED",
+        "NOT_READY"
+      ],
+      "title": "EnterpriseHealthStatus",
+      "type": "string"
+    },
+    "EnterpriseIncidentType": {
+      "enum": [
+        "HEALTHY",
+        "LAG",
+        "STALE",
+        "RATE_LIMITED",
+        "PARTIAL_SOURCE",
+        "UNKNOWN_FRESHNESS"
+      ],
+      "title": "EnterpriseIncidentType",
+      "type": "string"
+    },
+    "EnterpriseOperationAuditEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "event_id": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Event Id",
+          "type": "string"
+        },
+        "event_type": {
+          "$ref": "#/$defs/EnterpriseAuditEventType"
+        },
+        "occurred_at": {
+          "format": "date-time",
+          "title": "Occurred At",
+          "type": "string"
+        },
+        "subject_ref_hash": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Subject Ref Hash",
+          "type": "string"
+        },
+        "outcome": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Outcome",
+          "type": "string"
+        }
+      },
+      "required": [
+        "event_id",
+        "event_type",
+        "occurred_at",
+        "subject_ref_hash",
+        "outcome"
+      ],
+      "title": "EnterpriseOperationAuditEvent",
+      "type": "object"
+    },
+    "EnterpriseOperationEvaluation": {
+      "additionalProperties": false,
+      "properties": {
+        "scenario_id": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Scenario Id",
+          "type": "string"
+        },
+        "incident_type": {
+          "$ref": "#/$defs/EnterpriseIncidentType"
+        },
+        "health_status": {
+          "$ref": "#/$defs/EnterpriseHealthStatus"
+        },
+        "readiness_status": {
+          "$ref": "#/$defs/EnterpriseReadinessStatus"
+        },
+        "source_current": {
+          "title": "Source Current",
+          "type": "boolean"
+        },
+        "source_lag_seconds": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source Lag Seconds"
+        },
+        "completion_ratio": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Completion Ratio",
+          "type": "number"
+        },
+        "recovery_action": {
+          "$ref": "#/$defs/EnterpriseRecoveryAction"
+        }
+      },
+      "required": [
+        "scenario_id",
+        "incident_type",
+        "health_status",
+        "readiness_status",
+        "source_current",
+        "completion_ratio",
+        "recovery_action"
+      ],
+      "title": "EnterpriseOperationEvaluation",
+      "type": "object"
+    },
+    "EnterpriseOperationMetric": {
+      "additionalProperties": false,
+      "properties": {
+        "metric_id": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Metric Id",
+          "type": "string"
+        },
+        "scenario_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Scenario Id"
+        },
+        "value": {
+          "minimum": 0,
+          "title": "Value",
+          "type": "number"
+        },
+        "unit": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Unit",
+          "type": "string"
+        }
+      },
+      "required": [
+        "metric_id",
+        "value",
+        "unit"
+      ],
+      "title": "EnterpriseOperationMetric",
+      "type": "object"
+    },
+    "EnterpriseReadinessStatus": {
+      "enum": [
+        "READY",
+        "NOT_READY"
+      ],
+      "title": "EnterpriseReadinessStatus",
+      "type": "string"
+    },
+    "EnterpriseRecoveryAction": {
+      "enum": [
+        "NONE",
+        "WAIT_BACKOFF",
+        "FULL_RECONCILIATION",
+        "RETRY_MISSING_PARTITION",
+        "ESCALATE_SOURCE_OWNER"
+      ],
+      "title": "EnterpriseRecoveryAction",
+      "type": "string"
+    },
+    "JsonValue": {},
+    "RedactedDiagnostic": {
+      "additionalProperties": false,
+      "properties": {
+        "diagnostic_id": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Diagnostic Id",
+          "type": "string"
+        },
+        "message": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Message",
+          "type": "string"
+        },
+        "headers": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonValue"
+          },
+          "title": "Headers",
+          "type": "object"
+        },
+        "payload": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonValue"
+          },
+          "title": "Payload",
+          "type": "object"
+        },
+        "redacted_paths": {
+          "items": {
+            "maxLength": 1024,
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Redacted Paths",
+          "type": "array"
+        }
+      },
+      "required": [
+        "diagnostic_id",
+        "message",
+        "headers",
+        "payload",
+        "redacted_paths"
+      ],
+      "title": "RedactedDiagnostic",
+      "type": "object"
+    },
+    "SourceDataClassification": {
+      "enum": [
+        "PUBLIC",
+        "INTERNAL",
+        "CONFIDENTIAL",
+        "RESTRICTED"
+      ],
+      "title": "SourceDataClassification",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "enterprise-security-operation-report.v1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "report_id": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Report Id",
+      "type": "string"
+    },
+    "policy_version": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "title": "Policy Version",
+      "type": "string"
+    },
+    "corpus_version": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "title": "Corpus Version",
+      "type": "string"
+    },
+    "real_authorization_performed": {
+      "const": false,
+      "title": "Real Authorization Performed",
+      "type": "boolean"
+    },
+    "credential_persisted": {
+      "const": false,
+      "title": "Credential Persisted",
+      "type": "boolean"
+    },
+    "exposure_decisions": {
+      "items": {
+        "$ref": "#/$defs/EnterpriseExposureDecisionRecord"
+      },
+      "title": "Exposure Decisions",
+      "type": "array"
+    },
+    "redacted_diagnostics": {
+      "items": {
+        "$ref": "#/$defs/RedactedDiagnostic"
+      },
+      "title": "Redacted Diagnostics",
+      "type": "array"
+    },
+    "operation_evaluations": {
+      "items": {
+        "$ref": "#/$defs/EnterpriseOperationEvaluation"
+      },
+      "title": "Operation Evaluations",
+      "type": "array"
+    },
+    "metrics": {
+      "items": {
+        "$ref": "#/$defs/EnterpriseOperationMetric"
+      },
+      "title": "Metrics",
+      "type": "array"
+    },
+    "audit_events": {
+      "items": {
+        "$ref": "#/$defs/EnterpriseOperationAuditEvent"
+      },
+      "title": "Audit Events",
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema_version",
+    "report_id",
+    "policy_version",
+    "corpus_version",
+    "real_authorization_performed",
+    "credential_persisted",
+    "exposure_decisions",
+    "redacted_diagnostics",
+    "operation_evaluations",
+    "metrics",
+    "audit_events"
+  ],
+  "title": "EnterpriseSecurityOperationReport",
+  "type": "object"
+}

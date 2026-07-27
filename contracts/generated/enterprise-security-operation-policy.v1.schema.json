@@ -1,0 +1,220 @@
+{
+  "$defs": {
+    "ClassificationExposureRule": {
+      "additionalProperties": false,
+      "properties": {
+        "classification": {
+          "$ref": "#/$defs/SourceDataClassification"
+        },
+        "surface_rules": {
+          "items": {
+            "$ref": "#/$defs/ClassificationSurfaceRule"
+          },
+          "minItems": 1,
+          "title": "Surface Rules",
+          "type": "array"
+        }
+      },
+      "required": [
+        "classification",
+        "surface_rules"
+      ],
+      "title": "ClassificationExposureRule",
+      "type": "object"
+    },
+    "ClassificationSurfaceRule": {
+      "additionalProperties": false,
+      "properties": {
+        "surface": {
+          "$ref": "#/$defs/EnterpriseExposureSurface"
+        },
+        "exposure_mode": {
+          "$ref": "#/$defs/EnterpriseExposureMode"
+        }
+      },
+      "required": [
+        "surface",
+        "exposure_mode"
+      ],
+      "title": "ClassificationSurfaceRule",
+      "type": "object"
+    },
+    "EnterpriseExposureMode": {
+      "enum": [
+        "FULL",
+        "METADATA_ONLY",
+        "DENY"
+      ],
+      "title": "EnterpriseExposureMode",
+      "type": "string"
+    },
+    "EnterpriseExposureSurface": {
+      "enum": [
+        "FRONTEND",
+        "API",
+        "MODEL",
+        "ROLE_PACKET",
+        "LOG"
+      ],
+      "title": "EnterpriseExposureSurface",
+      "type": "string"
+    },
+    "SourceDataClassification": {
+      "enum": [
+        "PUBLIC",
+        "INTERNAL",
+        "CONFIDENTIAL",
+        "RESTRICTED"
+      ],
+      "title": "SourceDataClassification",
+      "type": "string"
+    },
+    "SyntheticAclRule": {
+      "additionalProperties": false,
+      "properties": {
+        "acl_ref": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Acl Ref",
+          "type": "string"
+        },
+        "allow_principal_ids": {
+          "items": {
+            "maxLength": 1024,
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Allow Principal Ids",
+          "type": "array"
+        },
+        "deny_principal_ids": {
+          "items": {
+            "maxLength": 1024,
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Deny Principal Ids",
+          "type": "array"
+        },
+        "allow_group_ids": {
+          "items": {
+            "maxLength": 1024,
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Allow Group Ids",
+          "type": "array"
+        },
+        "deny_group_ids": {
+          "items": {
+            "maxLength": 1024,
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Deny Group Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "acl_ref"
+      ],
+      "title": "SyntheticAclRule",
+      "type": "object"
+    },
+    "SyntheticPrincipal": {
+      "additionalProperties": false,
+      "properties": {
+        "principal_id": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Principal Id",
+          "type": "string"
+        },
+        "group_ids": {
+          "items": {
+            "maxLength": 1024,
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Group Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "principal_id"
+      ],
+      "title": "SyntheticPrincipal",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "enterprise-security-operation-policy.v1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "policy_version": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "title": "Policy Version",
+      "type": "string"
+    },
+    "principals": {
+      "items": {
+        "$ref": "#/$defs/SyntheticPrincipal"
+      },
+      "minItems": 1,
+      "title": "Principals",
+      "type": "array"
+    },
+    "acl_rules": {
+      "items": {
+        "$ref": "#/$defs/SyntheticAclRule"
+      },
+      "minItems": 1,
+      "title": "Acl Rules",
+      "type": "array"
+    },
+    "classification_rules": {
+      "items": {
+        "$ref": "#/$defs/ClassificationExposureRule"
+      },
+      "minItems": 1,
+      "title": "Classification Rules",
+      "type": "array"
+    },
+    "sensitive_field_names": {
+      "items": {
+        "maxLength": 1024,
+        "minLength": 1,
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Sensitive Field Names",
+      "type": "array"
+    },
+    "max_source_lag_seconds": {
+      "minimum": 0,
+      "title": "Max Source Lag Seconds",
+      "type": "integer"
+    },
+    "stale_source_after_seconds": {
+      "minimum": 0,
+      "title": "Stale Source After Seconds",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "schema_version",
+    "policy_version",
+    "principals",
+    "acl_rules",
+    "classification_rules",
+    "sensitive_field_names",
+    "max_source_lag_seconds",
+    "stale_source_after_seconds"
+  ],
+  "title": "EnterpriseSecurityOperationPolicy",
+  "type": "object"
+}
