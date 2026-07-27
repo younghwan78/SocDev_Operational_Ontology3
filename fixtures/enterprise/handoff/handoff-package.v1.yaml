@@ -1,0 +1,62 @@
+schema_version: enterprise-handoff-package.v1
+package_version: enterprise-internal-handoff.1
+package_status: READY_FOR_INTERNAL_DISCOVERY
+live_use_authorized: false
+company_data_included: false
+credential_value_included: false
+write_back_implemented: false
+artifacts:
+  - path: work-tracker-mapping-template.v1.yaml
+    sha256: 06082e2ef690084c454341b889f97a98640d3fedcd0548e0057c16a82077bc5b
+  - path: knowledge-base-mapping-template.v1.yaml
+    sha256: 42722ccc1c79e5da374e8df448cf5636ccfc62eca31526561d9468edaca38649
+  - path: environment-worksheet.v1.yaml
+    sha256: e10cbc716d3492cf32d0fdc8f8331d1f88c0550e2bab2d43089ea30fb7c604b8
+  - path: pilot-runbook.v1.yaml
+    sha256: 93fd6ab6ef8753181a118e4188d48a8fcb362718566aa74f14ea6d6d08f432c3
+checklist:
+  - check_id: source-boundary
+    description: Source-neutral record identity time classification and deletion contract
+    ownership: EXTERNALLY_VERIFIED
+    status: VERIFIED_EXTERNALLY
+    evidence_ref: docs/decisions/ADR-0012-source-neutral-enterprise-ingestion-boundary.md
+  - check_id: mapping-boundary
+    description: Versioned mapping creates review candidates without canonical mutation
+    ownership: EXTERNALLY_VERIFIED
+    status: VERIFIED_EXTERNALLY
+    evidence_ref: docs/decisions/ADR-0013-versioned-enterprise-mapping-candidates.md
+  - check_id: sync-boundary
+    description: Deterministic checkpoint retry and reconciliation fixture behavior
+    ownership: EXTERNALLY_VERIFIED
+    status: VERIFIED_EXTERNALLY
+    evidence_ref: docs/decisions/ADR-0014-deterministic-enterprise-sync-reconciliation.md
+  - check_id: dry-run-boundary
+    description: No-write dry-run review and quarantine contract
+    ownership: EXTERNALLY_VERIFIED
+    status: VERIFIED_EXTERNALLY
+    evidence_ref: docs/decisions/ADR-0015-no-write-enterprise-dry-run-review-boundary.md
+  - check_id: security-operation-boundary
+    description: Synthetic access redaction freshness recovery and audit emulator
+    ownership: EXTERNALLY_VERIFIED
+    status: VERIFIED_EXTERNALLY
+    evidence_ref: docs/decisions/ADR-0016-synthetic-enterprise-security-operation-emulator.md
+  - check_id: environment-values
+    description: Company environment network identity secret reference ACL and retention values
+    ownership: INTERNAL_REQUIRED
+    status: UNCONFIRMED_INTERNAL
+    evidence_ref: null
+  - check_id: source-mapping-values
+    description: Actual source fields statuses labels and version identifiers
+    ownership: INTERNAL_REQUIRED
+    status: UNCONFIRMED_INTERNAL
+    evidence_ref: null
+  - check_id: project-allowlist
+    description: Exactly one approved Project reference and pilot owner
+    ownership: INTERNAL_REQUIRED
+    status: UNCONFIRMED_INTERNAL
+    evidence_ref: null
+  - check_id: human-approval
+    description: C1 human approval before import and reconciliation
+    ownership: INTERNAL_REQUIRED
+    status: UNCONFIRMED_INTERNAL
+    evidence_ref: null

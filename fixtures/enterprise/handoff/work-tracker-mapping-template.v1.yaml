@@ -1,0 +1,95 @@
+schema_version: enterprise-handoff-mapping-template.v1
+template_version: work-tracker-handoff.1
+source_kind: WORK_TRACKER
+source_system_placeholder: INTERNAL_REQUIRED
+mapping_version_placeholder: INTERNAL_REQUIRED
+company_data_included: false
+object_mappings:
+  - object_type: project
+    target_kind: PROJECT
+    field_mappings:
+      - target_field: project_id
+        source_field_placeholder: INTERNAL_REQUIRED
+        ownership: INTERNAL_REQUIRED
+      - target_field: title_ko
+        source_field_placeholder: INTERNAL_REQUIRED
+        ownership: INTERNAL_REQUIRED
+    status_mappings:
+      - canonical_status: SPEC_DEFINITION
+        source_status_placeholder: INTERNAL_REQUIRED
+        ownership: INTERNAL_REQUIRED
+      - canonical_status: PRE_SILICON_CLOSURE
+        source_status_placeholder: INTERNAL_REQUIRED
+        ownership: INTERNAL_REQUIRED
+      - canonical_status: MASS_PRODUCTION
+        source_status_placeholder: INTERNAL_REQUIRED
+        ownership: INTERNAL_REQUIRED
+  - object_type: work-item
+    target_kind: WORK_ITEM
+    field_mappings:
+      - target_field: work_item_id
+        source_field_placeholder: INTERNAL_REQUIRED
+        ownership: INTERNAL_REQUIRED
+      - target_field: title
+        source_field_placeholder: INTERNAL_REQUIRED
+        ownership: INTERNAL_REQUIRED
+      - target_field: owner
+        source_field_placeholder: INTERNAL_REQUIRED
+        ownership: INTERNAL_REQUIRED
+    status_mappings:
+      - canonical_status: PLANNED
+        source_status_placeholder: INTERNAL_REQUIRED
+        ownership: INTERNAL_REQUIRED
+      - canonical_status: READY
+        source_status_placeholder: INTERNAL_REQUIRED
+        ownership: INTERNAL_REQUIRED
+      - canonical_status: IN_PROGRESS
+        source_status_placeholder: INTERNAL_REQUIRED
+        ownership: INTERNAL_REQUIRED
+      - canonical_status: BLOCKED
+        source_status_placeholder: INTERNAL_REQUIRED
+        ownership: INTERNAL_REQUIRED
+      - canonical_status: DONE
+        source_status_placeholder: INTERNAL_REQUIRED
+        ownership: INTERNAL_REQUIRED
+  - object_type: issue
+    target_kind: ISSUE
+    field_mappings:
+      - target_field: issue_id
+        source_field_placeholder: INTERNAL_REQUIRED
+        ownership: INTERNAL_REQUIRED
+      - target_field: title
+        source_field_placeholder: INTERNAL_REQUIRED
+        ownership: INTERNAL_REQUIRED
+    status_mappings:
+      - canonical_status: OPEN
+        source_status_placeholder: INTERNAL_REQUIRED
+        ownership: INTERNAL_REQUIRED
+      - canonical_status: MITIGATING
+        source_status_placeholder: INTERNAL_REQUIRED
+        ownership: INTERNAL_REQUIRED
+      - canonical_status: RESOLVED
+        source_status_placeholder: INTERNAL_REQUIRED
+        ownership: INTERNAL_REQUIRED
+  - object_type: event
+    target_kind: EVENT
+    field_mappings:
+      - target_field: event_id
+        source_field_placeholder: INTERNAL_REQUIRED
+        ownership: INTERNAL_REQUIRED
+      - target_field: summary
+        source_field_placeholder: INTERNAL_REQUIRED
+        ownership: INTERNAL_REQUIRED
+    status_mappings:
+      - canonical_status: WORK_PROGRESS
+        source_status_placeholder: INTERNAL_REQUIRED
+        ownership: INTERNAL_REQUIRED
+      - canonical_status: BLOCKER_CHANGE
+        source_status_placeholder: INTERNAL_REQUIRED
+        ownership: INTERNAL_REQUIRED
+      - canonical_status: EVIDENCE_CHANGE
+        source_status_placeholder: INTERNAL_REQUIRED
+        ownership: INTERNAL_REQUIRED
+      - canonical_status: INTERFACE_CHANGE
+        source_status_placeholder: INTERNAL_REQUIRED
+        ownership: INTERNAL_REQUIRED

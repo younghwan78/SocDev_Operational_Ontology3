@@ -1,0 +1,26 @@
+schema_version: enterprise-handoff-mapping-template.v1
+template_version: knowledge-base-handoff.1
+source_kind: KNOWLEDGE_BASE
+source_system_placeholder: INTERNAL_REQUIRED
+mapping_version_placeholder: INTERNAL_REQUIRED
+company_data_included: false
+object_mappings:
+  - object_type: page
+    target_kind: EVIDENCE
+    field_mappings:
+      - target_field: evidence_id
+        source_field_placeholder: INTERNAL_REQUIRED
+        ownership: INTERNAL_REQUIRED
+      - target_field: title
+        source_field_placeholder: INTERNAL_REQUIRED
+        ownership: INTERNAL_REQUIRED
+      - target_field: claim_text
+        source_field_placeholder: INTERNAL_REQUIRED
+        ownership: INTERNAL_REQUIRED
+      - target_field: risk_text
+        source_field_placeholder: INTERNAL_REQUIRED
+        ownership: INTERNAL_REQUIRED
+      - target_field: assumption_text
+        source_field_placeholder: INTERNAL_REQUIRED
+        ownership: INTERNAL_REQUIRED
+    status_mappings: []

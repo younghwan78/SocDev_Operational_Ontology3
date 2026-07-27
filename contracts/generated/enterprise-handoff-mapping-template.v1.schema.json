@@ -1,0 +1,166 @@
+{
+  "$defs": {
+    "HandoffMappingRow": {
+      "additionalProperties": false,
+      "properties": {
+        "target_field": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Target Field",
+          "type": "string"
+        },
+        "source_field_placeholder": {
+          "const": "INTERNAL_REQUIRED",
+          "title": "Source Field Placeholder",
+          "type": "string"
+        },
+        "ownership": {
+          "const": "INTERNAL_REQUIRED",
+          "title": "Ownership",
+          "type": "string"
+        }
+      },
+      "required": [
+        "target_field",
+        "source_field_placeholder",
+        "ownership"
+      ],
+      "title": "HandoffMappingRow",
+      "type": "object"
+    },
+    "HandoffObjectMappingTemplate": {
+      "additionalProperties": false,
+      "properties": {
+        "object_type": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Object Type",
+          "type": "string"
+        },
+        "target_kind": {
+          "$ref": "#/$defs/StructuredCandidateKind"
+        },
+        "field_mappings": {
+          "items": {
+            "$ref": "#/$defs/HandoffMappingRow"
+          },
+          "minItems": 1,
+          "title": "Field Mappings",
+          "type": "array"
+        },
+        "status_mappings": {
+          "items": {
+            "$ref": "#/$defs/HandoffStatusMappingRow"
+          },
+          "title": "Status Mappings",
+          "type": "array"
+        }
+      },
+      "required": [
+        "object_type",
+        "target_kind",
+        "field_mappings"
+      ],
+      "title": "HandoffObjectMappingTemplate",
+      "type": "object"
+    },
+    "HandoffSourceKind": {
+      "enum": [
+        "WORK_TRACKER",
+        "KNOWLEDGE_BASE"
+      ],
+      "title": "HandoffSourceKind",
+      "type": "string"
+    },
+    "HandoffStatusMappingRow": {
+      "additionalProperties": false,
+      "properties": {
+        "canonical_status": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Canonical Status",
+          "type": "string"
+        },
+        "source_status_placeholder": {
+          "const": "INTERNAL_REQUIRED",
+          "title": "Source Status Placeholder",
+          "type": "string"
+        },
+        "ownership": {
+          "const": "INTERNAL_REQUIRED",
+          "title": "Ownership",
+          "type": "string"
+        }
+      },
+      "required": [
+        "canonical_status",
+        "source_status_placeholder",
+        "ownership"
+      ],
+      "title": "HandoffStatusMappingRow",
+      "type": "object"
+    },
+    "StructuredCandidateKind": {
+      "enum": [
+        "PROJECT",
+        "WORK_ITEM",
+        "ISSUE",
+        "EVIDENCE",
+        "EVENT"
+      ],
+      "title": "StructuredCandidateKind",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "enterprise-handoff-mapping-template.v1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "template_version": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "title": "Template Version",
+      "type": "string"
+    },
+    "source_kind": {
+      "$ref": "#/$defs/HandoffSourceKind"
+    },
+    "source_system_placeholder": {
+      "const": "INTERNAL_REQUIRED",
+      "title": "Source System Placeholder",
+      "type": "string"
+    },
+    "mapping_version_placeholder": {
+      "const": "INTERNAL_REQUIRED",
+      "title": "Mapping Version Placeholder",
+      "type": "string"
+    },
+    "object_mappings": {
+      "items": {
+        "$ref": "#/$defs/HandoffObjectMappingTemplate"
+      },
+      "minItems": 1,
+      "title": "Object Mappings",
+      "type": "array"
+    },
+    "company_data_included": {
+      "const": false,
+      "title": "Company Data Included",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "schema_version",
+    "template_version",
+    "source_kind",
+    "source_system_placeholder",
+    "mapping_version_placeholder",
+    "object_mappings",
+    "company_data_included"
+  ],
+  "title": "EnterpriseHandoffMappingTemplate",
+  "type": "object"
+}

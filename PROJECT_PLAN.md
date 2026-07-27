@@ -3,7 +3,7 @@
 > 문서 상태: Product Plan v0.3, 로컬 PoC 구현 승인
 > 갱신일: 2026-07-27
 > 문서 역할: 제품 목표, 범위, 가치 가설, 중단 기준을 정의  
-> 현재 판단: **GO: I0–I7 Replay, Step 5 B2 runtime, UX-A~UX-K와 ENT-A~E 구현 완료**, **DEFERRED: OPS-F human observation baseline 0/5·product 0/5**, **NEXT: ENT-F**, **NO-GO: human UX·business value 주장, live 사내 연동 및 실제 업무 적용**
+> 현재 판단: **GO: I0–I7 Replay, Step 5 B2 runtime, UX-A~UX-K와 ENT-A~F 구현 완료**, **DEFERRED: OPS-F human observation baseline 0/5·product 0/5**, **NEXT: 사내 C0 discovery(사외에서는 실행 불가)**, **NO-GO: human UX·business value 주장, live 사내 연동 및 실제 업무 적용**
 
 후속 실행 순서는 `OPS-F human observation 보류 → UX-I 완료 → UX-J → UX-K Local UX Release 1 → ENT-A~F
 사외 준비 → 사내 C0/C1`로 고정한다. UX와 connector를 동시에 변경하지 않는다.
@@ -415,7 +415,7 @@ Post-I7 후속은 다음 순서로만 진행한다.
 |ENT-C|idempotent sync, cursor/checkpoint, bounded retry, tombstone와 reconciliation|완료; ADR-0014 Accepted, one-shot/resume 결정성 및 stale-content 보호 검증|
 |ENT-D|no-write dry-run, canonical diff 후보, quality와 quarantine/resolution|완료; ADR-0015 Accepted, report-only CLI와 blocking review artifact 검증|
 |ENT-E|synthetic ACL/classification, redaction, recovery와 operation observability|완료; ADR-0016 Accepted, fail-closed matrix와 six-incident recovery 검증|
-|ENT-F|사내 적용 template, worksheet, runbook과 handoff kit|다음 단계; 실제 company data/vendor API/auth 없음|
+|ENT-F|사내 적용 template, worksheet, runbook과 handoff kit|완료; ADR-0017, hash-pinned package와 no-command import/reconcile Gate, 실제 company data/vendor API/auth 없음|
 
 UX-H는 observable fixture hash와 source selector로 고정한 Jira/Confluence형 baseline pack,
 canonical 8개와 Development Twin 5개 task, `usability-session.v1` event/result 계약과
@@ -432,13 +432,15 @@ UX-I는 owner가 승인한 engineering-proxy 범위에서 raw 기준점/source I
 `engineering_proxy_only`이며 사람 평가로 집계하지 않는다. 구현은 `UX-J-PRODUCT-218C095`로
 동결했다. UX-K는 이 전체 흐름을 responsive, accessibility, partial/stale/conflict,
 current/historical E2E와 함께 `LOCAL-UX-RELEASE-1-5227D18`로 재동결했다. 이는 local fixture
-engineering Gate이며 사람 사용성이나 비즈니스 가치를 입증하지 않는다. 다음 고정 단계는 ENT-A이고,
+engineering Gate이며 사람 사용성이나 비즈니스 가치를 입증하지 않는다. 다음 고정 단계는 ENT-A였고,
 ADR-0012는 `enterprise-source-record.v1`과 source-neutral port를 승인했고 ENT-A를 완료했다.
 ADR-0013은 versioned mapping candidate와 synthetic dirty corpus를 승인해 ENT-B를 완료했다.
 ADR-0014는 cursor/page token, content-hash idempotency, bounded retry, tombstone/restricted 우선
 reconciliation을 persistence-independent checkpoint로 승인해 ENT-C를 완료했다. ADR-0015는
-no-write diff, quality report와 proposed resolution 경계를 승인해 ENT-D를 완료했다. 다음 단계
-ENT-E 전에는 real ACL evaluation, credential 처리나 operation exposure policy를 구현하지 않는다.
+no-write diff, quality report와 proposed resolution 경계를 승인해 ENT-D를 완료했다. ADR-0016은
+synthetic security/operation emulator를, ADR-0017은 사외 검증과 사내 미확인 값을 분리한
+machine-validatable handoff package를 승인해 ENT-E/F를 완료했다. 사외에서 실행 가능한 다음 단계는
+없으며 C0는 사내 승인 환경에서만 시작한다.
 
 ```text
 B2 validation 10/10 + sealed-unseen 6/6 PASS
@@ -467,10 +469,10 @@ B2 validation 10/10 + sealed-unseen 6/6 PASS
 ### ENT-A~F. 사외 Enterprise Preparation
 
 ENT-A는 source-neutral envelope와 application port, ENT-B는 versioned mapping registry와
-source-span candidate, ENT-C는 deterministic checkpoint/reconciliation까지 완료했다. 현재 다음
-단계 ENT-D는 no-write dry-run, quality report와 quarantine/resolution contract까지 완료했다.
-ENT-E는 synthetic ACL/classification matrix, credential redaction, recovery와 health/metrics/audit
-contract까지 완료했다. 현재 다음 단계는 ENT-F 사내 적용 handoff package다.
+source-span candidate, ENT-C는 deterministic checkpoint/reconciliation, ENT-D는 no-write
+dry-run과 quarantine/resolution, ENT-E는 synthetic security/operation emulator까지 완료했다.
+ENT-F는 vendor-neutral mapping template, 환경 worksheet, 한 Project read-only/rollback,
+고정 runbook과 hash-pinned handoff checklist를 완료했다.
 
 - source-neutral record, stable external identity와 enterprise time 계약
 - vendor SDK와 분리된 read-only source port
@@ -478,9 +480,9 @@ contract까지 완료했다. 현재 다음 단계는 ENT-F 사내 적용 handoff
 - cursor, content hash, idempotency, retry, tombstone와 reconciliation
 - no-write dry-run, canonical diff, quality report와 quarantine
 - opaque ACL/classification policy emulator와 restricted-source leakage test
-- Jira/Confluence mapping template, 환경 worksheet와 사내 cutover runbook
+- work-tracker/knowledge-base mapping template, 환경 worksheet와 사내 handoff runbook
 
-사외 단계에는 실제 Jira/Confluence API 호출, credential, 회사 field ID, 실제 user/group ACL과
+사외 단계에는 실제 vendor API 호출, credential, 회사 field ID, 실제 user/group ACL과
 write-back을 넣지 않는다. 상세 순서와 Gate는
 `internal_docs/26.07.23 UX 마무리 및 사내 데이터 전환 실행 계획.md`가 소유한다.
 

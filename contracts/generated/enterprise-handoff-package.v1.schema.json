@@ -1,0 +1,155 @@
+{
+  "$defs": {
+    "HandoffArtifact": {
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Path",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "sha256"
+      ],
+      "title": "HandoffArtifact",
+      "type": "object"
+    },
+    "HandoffCheckStatus": {
+      "enum": [
+        "VERIFIED_EXTERNALLY",
+        "UNCONFIRMED_INTERNAL",
+        "NOT_APPLICABLE",
+        "NOT_EVALUATED"
+      ],
+      "title": "HandoffCheckStatus",
+      "type": "string"
+    },
+    "HandoffChecklistItem": {
+      "additionalProperties": false,
+      "properties": {
+        "check_id": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Check Id",
+          "type": "string"
+        },
+        "description": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Description",
+          "type": "string"
+        },
+        "ownership": {
+          "$ref": "#/$defs/HandoffValueOwnership"
+        },
+        "status": {
+          "$ref": "#/$defs/HandoffCheckStatus"
+        },
+        "evidence_ref": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Evidence Ref"
+        }
+      },
+      "required": [
+        "check_id",
+        "description",
+        "ownership",
+        "status"
+      ],
+      "title": "HandoffChecklistItem",
+      "type": "object"
+    },
+    "HandoffValueOwnership": {
+      "enum": [
+        "EXTERNALLY_VERIFIED",
+        "INTERNAL_REQUIRED"
+      ],
+      "title": "HandoffValueOwnership",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "enterprise-handoff-package.v1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "package_version": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "title": "Package Version",
+      "type": "string"
+    },
+    "package_status": {
+      "const": "READY_FOR_INTERNAL_DISCOVERY",
+      "title": "Package Status",
+      "type": "string"
+    },
+    "live_use_authorized": {
+      "const": false,
+      "title": "Live Use Authorized",
+      "type": "boolean"
+    },
+    "company_data_included": {
+      "const": false,
+      "title": "Company Data Included",
+      "type": "boolean"
+    },
+    "credential_value_included": {
+      "const": false,
+      "title": "Credential Value Included",
+      "type": "boolean"
+    },
+    "write_back_implemented": {
+      "const": false,
+      "title": "Write Back Implemented",
+      "type": "boolean"
+    },
+    "artifacts": {
+      "items": {
+        "$ref": "#/$defs/HandoffArtifact"
+      },
+      "minItems": 4,
+      "title": "Artifacts",
+      "type": "array"
+    },
+    "checklist": {
+      "items": {
+        "$ref": "#/$defs/HandoffChecklistItem"
+      },
+      "minItems": 1,
+      "title": "Checklist",
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema_version",
+    "package_version",
+    "package_status",
+    "live_use_authorized",
+    "company_data_included",
+    "credential_value_included",
+    "write_back_implemented",
+    "artifacts",
+    "checklist"
+  ],
+  "title": "EnterpriseHandoffPackage",
+  "type": "object"
+}

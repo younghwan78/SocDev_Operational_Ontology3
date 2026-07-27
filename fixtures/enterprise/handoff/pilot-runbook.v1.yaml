@@ -1,0 +1,92 @@
+schema_version: enterprise-pilot-runbook.v1
+runbook_version: enterprise-read-only-pilot.1
+live_use_authorized: false
+pilot_scope:
+  max_project_count: 1
+  allowed_project_refs: []
+  read_only: true
+  write_back_enabled: false
+  canonical_import_authorized: false
+rollback:
+  triggers:
+    - ACL exposure count is greater than zero
+    - write attempt count is greater than zero
+    - silent drop or duplicate Event count is greater than zero
+    - source freshness is unknown or reconciliation differs
+  actions:
+    - stop the pilot before canonical import
+    - revoke the pilot source access outside this repository
+    - preserve metadata-only audit evidence
+    - return to mapping or environment discovery
+  recovery_owner_placeholder: INTERNAL_REQUIRED
+steps:
+  - sequence: 1
+    stage: VALIDATE
+    authority: EXTERNAL_EXECUTABLE
+    command: uv run soc-ot enterprise validate-handoff
+    entry_criteria:
+      - handoff package files are unchanged and hash-pinned
+    pass_criteria:
+      - package contract and artifact hashes are valid
+    stop_criteria:
+      - an artifact is missing, changed, or contains a filled internal value
+  - sequence: 2
+    stage: DRY_RUN
+    authority: EXTERNAL_EXECUTABLE
+    command: uv run soc-ot enterprise dry-run --output output/enterprise-dry-run.json
+    entry_criteria:
+      - source mapping has been validated with synthetic fixtures
+    pass_criteria:
+      - report fixes write_performed=false and canonical_import_authorized=false
+    stop_criteria:
+      - any write, unknown freshness, duplicate identity, or unresolved quarantine exists
+  - sequence: 3
+    stage: REVIEW
+    authority: EXTERNAL_EXECUTABLE
+    command: uv run soc-ot enterprise emulate-security --output output/enterprise-security.json
+    entry_criteria:
+      - dry-run report and quarantine list are available
+    pass_criteria:
+      - ACL, redaction, freshness, recovery, and audit checks pass
+    stop_criteria:
+      - any restricted record exposure, credential leakage, or NOT_READY source is treated as current
+  - sequence: 4
+    stage: IMPORT
+    authority: COMPANY_APPROVAL_REQUIRED
+    command: null
+    entry_criteria:
+      - one Project is allowlisted and C1 human approval is recorded internally
+    pass_criteria:
+      - approved read-only pilot import is independently reconciled
+    stop_criteria:
+      - approval, ACL, rollback owner, or source freshness is missing
+  - sequence: 5
+    stage: RECONCILE
+    authority: COMPANY_APPROVAL_REQUIRED
+    command: null
+    entry_criteria:
+      - an approved internal import record exists
+    pass_criteria:
+      - source and candidate counts, identities, versions, and quarantine entries reconcile
+    stop_criteria:
+      - silent drop, duplicate Event, stale source, or count mismatch is detected
+expected_metrics:
+  - metric_id: acl_exposure_total
+    expected_value: 0
+    status: NOT_EVALUATED
+  - metric_id: credential_leak_total
+    expected_value: 0
+    status: NOT_EVALUATED
+  - metric_id: write_attempt_total
+    expected_value: 0
+    status: NOT_EVALUATED
+  - metric_id: silent_drop_total
+    expected_value: 0
+    status: NOT_EVALUATED
+  - metric_id: duplicate_event_total
+    expected_value: 0
+    status: NOT_EVALUATED
+  - metric_id: reconciliation_mismatch_total
+    expected_value: 0
+    status: NOT_EVALUATED
+current_gate_decision: NOT_EVALUATED

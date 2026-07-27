@@ -242,6 +242,47 @@ if ($projectFixtures.Count -ne 3) {
         throw "Missing ENT-E artifact: $_"
     }
 }
+@(
+    "enterprise-handoff-mapping-template.v1",
+    "enterprise-environment-worksheet.v1",
+    "enterprise-pilot-runbook.v1",
+    "enterprise-handoff-package.v1",
+    "HandoffSourceKind",
+    "HandoffValueOwnership",
+    "HandoffCheckStatus",
+    "HandoffRunbookStage",
+    "HandoffStageAuthority",
+    "HandoffGateDecision",
+    "READY_FOR_INTERNAL_DISCOVERY",
+    "write_back_implemented=false"
+) | ForEach-Object {
+    if (-not $contract.Contains($_)) {
+        throw "Canonical contract is missing ENT-F term: $_"
+    }
+}
+@(
+    "backend/src/soc_ot/application/enterprise_handoff.py",
+    "backend/tests/test_ent_f_enterprise_handoff.py",
+    "contracts/generated/enterprise-handoff-mapping-template.v1.schema.json",
+    "contracts/generated/enterprise-environment-worksheet.v1.schema.json",
+    "contracts/generated/enterprise-pilot-runbook.v1.schema.json",
+    "contracts/generated/enterprise-handoff-package.v1.schema.json",
+    "fixtures/enterprise/handoff/work-tracker-mapping-template.v1.yaml",
+    "fixtures/enterprise/handoff/knowledge-base-mapping-template.v1.yaml",
+    "fixtures/enterprise/handoff/environment-worksheet.v1.yaml",
+    "fixtures/enterprise/handoff/pilot-runbook.v1.yaml",
+    "fixtures/enterprise/handoff/handoff-package.v1.yaml",
+    "docs/decisions/ADR-0017-machine-validatable-enterprise-handoff-package.md",
+    "docs/operations/ENTERPRISE_READ_ONLY_HANDOFF_RUNBOOK.md"
+) | ForEach-Object {
+    if (-not (Test-Path -LiteralPath (Join-Path $root $_) -PathType Leaf)) {
+        throw "Missing ENT-F artifact: $_"
+    }
+}
+if (-not (Get-ChildItem -LiteralPath (Join-Path $root "internal_docs") -File `
+    -Filter "*ENT-F*Handoff Package*.md")) {
+    throw "Missing ENT-F handoff implementation report."
+}
 if ($projectPlan -notmatch "corpus v2: development regression 8, validation 2, sealed unseen 2") {
     throw "PROJECT_PLAN.md does not describe the canonical 8/2/2 evaluation partition."
 }

@@ -1,0 +1,259 @@
+{
+  "$defs": {
+    "HandoffExpectedMetric": {
+      "additionalProperties": false,
+      "properties": {
+        "metric_id": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Metric Id",
+          "type": "string"
+        },
+        "expected_value": {
+          "minimum": 0,
+          "title": "Expected Value",
+          "type": "integer"
+        },
+        "status": {
+          "const": "NOT_EVALUATED",
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "metric_id",
+        "expected_value",
+        "status"
+      ],
+      "title": "HandoffExpectedMetric",
+      "type": "object"
+    },
+    "HandoffPilotScope": {
+      "additionalProperties": false,
+      "properties": {
+        "max_project_count": {
+          "const": 1,
+          "title": "Max Project Count",
+          "type": "integer"
+        },
+        "allowed_project_refs": {
+          "items": {
+            "maxLength": 1024,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 1,
+          "title": "Allowed Project Refs",
+          "type": "array"
+        },
+        "read_only": {
+          "const": true,
+          "title": "Read Only",
+          "type": "boolean"
+        },
+        "write_back_enabled": {
+          "const": false,
+          "title": "Write Back Enabled",
+          "type": "boolean"
+        },
+        "canonical_import_authorized": {
+          "const": false,
+          "title": "Canonical Import Authorized",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "max_project_count",
+        "allowed_project_refs",
+        "read_only",
+        "write_back_enabled",
+        "canonical_import_authorized"
+      ],
+      "title": "HandoffPilotScope",
+      "type": "object"
+    },
+    "HandoffRollbackPlan": {
+      "additionalProperties": false,
+      "properties": {
+        "triggers": {
+          "items": {
+            "maxLength": 1024,
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Triggers",
+          "type": "array"
+        },
+        "actions": {
+          "items": {
+            "maxLength": 1024,
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Actions",
+          "type": "array"
+        },
+        "recovery_owner_placeholder": {
+          "const": "INTERNAL_REQUIRED",
+          "title": "Recovery Owner Placeholder",
+          "type": "string"
+        }
+      },
+      "required": [
+        "triggers",
+        "actions",
+        "recovery_owner_placeholder"
+      ],
+      "title": "HandoffRollbackPlan",
+      "type": "object"
+    },
+    "HandoffRunbookStage": {
+      "enum": [
+        "VALIDATE",
+        "DRY_RUN",
+        "REVIEW",
+        "IMPORT",
+        "RECONCILE"
+      ],
+      "title": "HandoffRunbookStage",
+      "type": "string"
+    },
+    "HandoffRunbookStep": {
+      "additionalProperties": false,
+      "properties": {
+        "sequence": {
+          "minimum": 1,
+          "title": "Sequence",
+          "type": "integer"
+        },
+        "stage": {
+          "$ref": "#/$defs/HandoffRunbookStage"
+        },
+        "authority": {
+          "$ref": "#/$defs/HandoffStageAuthority"
+        },
+        "command": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Command"
+        },
+        "entry_criteria": {
+          "items": {
+            "maxLength": 1024,
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Entry Criteria",
+          "type": "array"
+        },
+        "pass_criteria": {
+          "items": {
+            "maxLength": 1024,
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Pass Criteria",
+          "type": "array"
+        },
+        "stop_criteria": {
+          "items": {
+            "maxLength": 1024,
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Stop Criteria",
+          "type": "array"
+        }
+      },
+      "required": [
+        "sequence",
+        "stage",
+        "authority",
+        "entry_criteria",
+        "pass_criteria",
+        "stop_criteria"
+      ],
+      "title": "HandoffRunbookStep",
+      "type": "object"
+    },
+    "HandoffStageAuthority": {
+      "enum": [
+        "EXTERNAL_EXECUTABLE",
+        "COMPANY_APPROVAL_REQUIRED"
+      ],
+      "title": "HandoffStageAuthority",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "enterprise-pilot-runbook.v1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "runbook_version": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "title": "Runbook Version",
+      "type": "string"
+    },
+    "live_use_authorized": {
+      "const": false,
+      "title": "Live Use Authorized",
+      "type": "boolean"
+    },
+    "pilot_scope": {
+      "$ref": "#/$defs/HandoffPilotScope"
+    },
+    "rollback": {
+      "$ref": "#/$defs/HandoffRollbackPlan"
+    },
+    "steps": {
+      "items": {
+        "$ref": "#/$defs/HandoffRunbookStep"
+      },
+      "maxItems": 5,
+      "minItems": 5,
+      "title": "Steps",
+      "type": "array"
+    },
+    "expected_metrics": {
+      "items": {
+        "$ref": "#/$defs/HandoffExpectedMetric"
+      },
+      "minItems": 1,
+      "title": "Expected Metrics",
+      "type": "array"
+    },
+    "current_gate_decision": {
+      "const": "NOT_EVALUATED",
+      "title": "Current Gate Decision",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "runbook_version",
+    "live_use_authorized",
+    "pilot_scope",
+    "rollback",
+    "steps",
+    "expected_metrics",
+    "current_gate_decision"
+  ],
+  "title": "EnterprisePilotRunbook",
+  "type": "object"
+}

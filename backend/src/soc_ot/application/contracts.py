@@ -17,6 +17,12 @@ from soc_ot.application.enterprise_dry_run import (
     EnterpriseDryRunReport,
     EnterpriseResolutionFile,
 )
+from soc_ot.application.enterprise_handoff import (
+    EnterpriseEnvironmentWorksheet,
+    EnterpriseHandoffMappingTemplate,
+    EnterpriseHandoffPackage,
+    EnterprisePilotRunbook,
+)
 from soc_ot.application.enterprise_ingestion import EnterpriseSourceRecord
 from soc_ot.application.enterprise_mapping import (
     EnterpriseDirtyFixtureCorpus,
@@ -81,6 +87,10 @@ CONTRACT_MODELS: dict[str, type[BaseModel]] = {
         EnterpriseSecurityOperationScenarioCorpus
     ),
     "enterprise-security-operation-report.v1": EnterpriseSecurityOperationReport,
+    "enterprise-handoff-mapping-template.v1": EnterpriseHandoffMappingTemplate,
+    "enterprise-environment-worksheet.v1": EnterpriseEnvironmentWorksheet,
+    "enterprise-pilot-runbook.v1": EnterprisePilotRunbook,
+    "enterprise-handoff-package.v1": EnterpriseHandoffPackage,
     "project-list-item.v1": ProjectListItemProjection,
     "project-situation.v1": ProjectSituationProjection,
     "project-risk-summary.v1": ProjectRiskSummary,

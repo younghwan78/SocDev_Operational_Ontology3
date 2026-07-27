@@ -14,3 +14,13 @@ artifacts:
     sha256: acb5b31a26630adee642d419ccbfc91a5a0b62206afe60d7ba9476aead2fe140
   - path: security-operation-scenarios.v1.yaml
     sha256: b79d89ec038544133e01b956cc0b66d804807118f488ebdb42a784cf1ecf8a27
+  - path: handoff/work-tracker-mapping-template.v1.yaml
+    sha256: 06082e2ef690084c454341b889f97a98640d3fedcd0548e0057c16a82077bc5b
+  - path: handoff/knowledge-base-mapping-template.v1.yaml
+    sha256: 42722ccc1c79e5da374e8df448cf5636ccfc62eca31526561d9468edaca38649
+  - path: handoff/environment-worksheet.v1.yaml
+    sha256: e10cbc716d3492cf32d0fdc8f8331d1f88c0550e2bab2d43089ea30fb7c604b8
+  - path: handoff/pilot-runbook.v1.yaml
+    sha256: 93fd6ab6ef8753181a118e4188d48a8fcb362718566aa74f14ea6d6d08f432c3
+  - path: handoff/handoff-package.v1.yaml
+    sha256: 4bb2c0e0b7d8dabb42f6ca56d0cc66da51b78c3c7bafbfcd2d58fedb994d7501

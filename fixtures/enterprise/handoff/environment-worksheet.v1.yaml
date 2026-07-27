@@ -1,0 +1,79 @@
+schema_version: enterprise-environment-worksheet.v1
+worksheet_version: enterprise-environment-handoff.1
+company_data_included: false
+credential_value_included: false
+sections:
+  - section_id: runtime
+    items:
+      - item_id: runtime-version
+        topic: DEPLOYMENT_VERSION
+        ownership: INTERNAL_REQUIRED
+        status: UNCONFIRMED_INTERNAL
+        value: null
+        evidence_ref: null
+      - item_id: network-path
+        topic: NETWORK_PROXY_CERTIFICATE
+        ownership: INTERNAL_REQUIRED
+        status: UNCONFIRMED_INTERNAL
+        value: null
+        evidence_ref: null
+  - section_id: access
+    items:
+      - item_id: identity-method
+        topic: IDENTITY_ACCESS_METHOD
+        ownership: INTERNAL_REQUIRED
+        status: UNCONFIRMED_INTERNAL
+        value: null
+        evidence_ref: null
+        must_not_commit_value: true
+      - item_id: secret-reference
+        topic: SECRET_MANAGER_REFERENCE
+        ownership: INTERNAL_REQUIRED
+        status: UNCONFIRMED_INTERNAL
+        value: null
+        evidence_ref: null
+        must_not_commit_value: true
+      - item_id: acl-classification
+        topic: ACL_CLASSIFICATION
+        ownership: INTERNAL_REQUIRED
+        status: UNCONFIRMED_INTERNAL
+        value: null
+        evidence_ref: null
+  - section_id: governance
+    items:
+      - item_id: retention-deletion
+        topic: RETENTION_DELETION
+        ownership: INTERNAL_REQUIRED
+        status: UNCONFIRMED_INTERNAL
+        value: null
+        evidence_ref: null
+      - item_id: rate-limit
+        topic: RATE_LIMIT
+        ownership: INTERNAL_REQUIRED
+        status: UNCONFIRMED_INTERNAL
+        value: null
+        evidence_ref: null
+      - item_id: data-owner
+        topic: DATA_OWNER
+        ownership: INTERNAL_REQUIRED
+        status: UNCONFIRMED_INTERNAL
+        value: null
+        evidence_ref: null
+      - item_id: security-owner
+        topic: SECURITY_OWNER
+        ownership: INTERNAL_REQUIRED
+        status: UNCONFIRMED_INTERNAL
+        value: null
+        evidence_ref: null
+      - item_id: human-authority
+        topic: HUMAN_DECISION_AUTHORITY
+        ownership: INTERNAL_REQUIRED
+        status: UNCONFIRMED_INTERNAL
+        value: null
+        evidence_ref: null
+      - item_id: model-provider-policy
+        topic: MODEL_PROVIDER_POLICY
+        ownership: INTERNAL_REQUIRED
+        status: UNCONFIRMED_INTERNAL
+        value: null
+        evidence_ref: null

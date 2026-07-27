@@ -663,6 +663,45 @@ no runtime database.
 ENT-E adds no real authentication/authorization, company principal/group, inherited ACL, vendor
 credential, canonical import, API route, monitoring service, Agent input or write-back.
 
-## 16. Compatibility gate
+## 16. Accepted ENT-F enterprise handoff boundary
+
+ADR-0017 accepts:
+
+```text
+enterprise-handoff-mapping-template.v1
+enterprise-environment-worksheet.v1
+enterprise-pilot-runbook.v1
+enterprise-handoff-package.v1
+
+HandoffSourceKind       = WORK_TRACKER | KNOWLEDGE_BASE
+HandoffValueOwnership   = EXTERNALLY_VERIFIED | INTERNAL_REQUIRED
+HandoffCheckStatus      =
+  VERIFIED_EXTERNALLY | UNCONFIRMED_INTERNAL | NOT_APPLICABLE | NOT_EVALUATED
+HandoffRunbookStage     = VALIDATE | DRY_RUN | REVIEW | IMPORT | RECONCILE
+HandoffStageAuthority   = EXTERNAL_EXECUTABLE | COMPANY_APPROVAL_REQUIRED
+HandoffGateDecision     = CONTINUE | STOP | NOT_EVALUATED
+```
+
+Mapping templates fix canonical targets while source system, mapping version, fields and statuses
+remain `INTERNAL_REQUIRED`. The environment worksheet holds no company value or credential value.
+Internal items are null and `UNCONFIRMED_INTERNAL`; external items require a repository evidence
+reference and `VERIFIED_EXTERNALLY`.
+
+The pilot scope fixes `max_project_count=1`, `read_only=true`, `write_back_enabled=false` and
+`canonical_import_authorized=false`. The stage order is immutable. Only VALIDATE, DRY_RUN and REVIEW
+ship executable local commands. IMPORT and RECONCILE are `COMPANY_APPROVAL_REQUIRED` and have no
+command before internal C0/C1.
+
+`enterprise-handoff-package.v1` fixes `package_status=READY_FOR_INTERNAL_DISCOVERY`,
+`live_use_authorized=false`, `company_data_included=false`, `credential_value_included=false` and
+`write_back_implemented=false`, and pins every child artifact by SHA-256.
+`soc-ot enterprise validate-handoff` validates this package without opening a database or network
+connection and without writing an output.
+
+ENT-F adds no vendor adapter, company field, user/group, real ACL, authentication, secret store,
+credential, canonical import, API route, Agent input, durable queue, reconciliation service or
+write-back. `READY_FOR_INTERNAL_DISCOVERY` is not live readiness.
+
+## 17. Compatibility gate
 
 Any change to a state code, DecisionType, endpoint, time field, or version name updates this contract first. CI then checks generated schemas, OpenAPI, Frontend client, fixture manifests, runbook examples, and documentation references.

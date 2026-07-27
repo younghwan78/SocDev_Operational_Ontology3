@@ -17,6 +17,7 @@ from soc_ot.application.enterprise_dry_run import (
     load_resolution_file,
     run_enterprise_dry_run,
 )
+from soc_ot.application.enterprise_handoff import load_and_validate_handoff_package
 from soc_ot.application.enterprise_mapping import (
     load_dirty_fixture_corpus,
     load_mapping_registry,
@@ -107,6 +108,7 @@ DEFAULT_ENTERPRISE_SECURITY_POLICY = (
 DEFAULT_ENTERPRISE_SECURITY_SCENARIOS = (
     ROOT_DIR / "fixtures/enterprise/security-operation-scenarios.v1.yaml"
 )
+DEFAULT_ENTERPRISE_HANDOFF_ROOT = ROOT_DIR / "fixtures/enterprise/handoff"
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -240,6 +242,12 @@ def build_parser() -> argparse.ArgumentParser:
         default=DEFAULT_ENTERPRISE_SECURITY_SCENARIOS,
     )
     enterprise_security.add_argument("--output", type=Path, required=True)
+    enterprise_handoff = enterprise_sub.add_parser("validate-handoff")
+    enterprise_handoff.add_argument(
+        "--package-root",
+        type=Path,
+        default=DEFAULT_ENTERPRISE_HANDOFF_ROOT,
+    )
 
     usability = subparsers.add_parser("usability")
     usability_sub = usability.add_subparsers(dest="usability_command")
@@ -281,8 +289,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     if args.command == "status":
         print(
             "I7 Replay + Step 5 B2 stability gates complete; "
-            "Local fixture UX Release 1 and ENT-A through ENT-E complete; "
-            "independent human observations pending; ENT-F next; "
+            "Local fixture UX Release 1 and ENT-A through ENT-F complete; "
+            "independent human observations and internal C0 discovery pending; "
             "live company connection remains blocked"
         )
         return 0
@@ -505,6 +513,21 @@ def main(argv: Sequence[str] | None = None) -> int:
             f"{sum(len(item.redacted_paths) for item in security_report.redacted_diagnostics)}, "
             f"not_ready={not_ready}; report={args.output}; "
             "real authorization=false; credential persisted=false."
+        )
+        return 0
+    if args.command == "enterprise" and args.enterprise_command == "validate-handoff":
+        handoff = load_and_validate_handoff_package(args.package_root)
+        internal_items = sum(
+            item.ownership.value == "INTERNAL_REQUIRED"
+            for section in handoff.worksheet.sections
+            for item in section.items
+        )
+        print(
+            f"Validated handoff package={handoff.package.package_version}, "
+            f"artifacts={len(handoff.package.artifacts)}, "
+            f"mapping_templates={len(handoff.mapping_templates)}, "
+            f"internal_items={internal_items}, "
+            "live use authorized=false; write-back implemented=false."
         )
         return 0
     if args.command == "usability" and args.usability_command == "validate":

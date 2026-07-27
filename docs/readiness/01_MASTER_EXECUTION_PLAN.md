@@ -1,7 +1,7 @@
 # Master execution plan
 
-> Status: IMPLEMENTED THROUGH I7 REPLAY + STEP 5 B2 RUNTIME + UX-K LOCAL FIXTURE UX RELEASE 1 + ENT-A~E; OPS-F HUMAN OBSERVATION DEFERRED AT 0/5 PER CONDITION, ENT-F NEXT
-> Date: 2026-07-25
+> Status: IMPLEMENTED THROUGH I7 REPLAY + STEP 5 B2 RUNTIME + UX-K LOCAL FIXTURE UX RELEASE 1 + ENT-A~F; OPS-F HUMAN OBSERVATION DEFERRED AT 0/5 PER CONDITION, INTERNAL C0 DISCOVERY NEXT
+> Date: 2026-07-27
 > Scope: local fixture-only PoC
 
 Frozen follow-up order: `OPS-F human observations deferred → UX-I complete → UX-J → UX-K Local UX Release 1 →
@@ -440,7 +440,7 @@ After OPS-F, the only allowed order is:
 |ENT-C|Deterministic sync, idempotency, retry, tombstone and reconciliation|Complete: ADR-0014 accepted, cursor/page-token resume, bounded retry, stale protection and full/incremental parity pass|
 |ENT-D|No-write dry-run, canonical change proposal, quality and quarantine/resolution|Complete: ADR-0015 accepted, report-only CLI, seven quality classes and review artifacts pass|
 |ENT-E|Synthetic ACL/classification, redaction, recovery and operation observability|Complete: ADR-0016 accepted, total surface policy, six incident states and metadata-only audit pass|
-|ENT-F|Internal handoff templates, worksheet, rollback and runbook|Next; fixture-only package, no vendor API, company data, credential or real ACL|
+|ENT-F|Internal handoff templates, worksheet, rollback and runbook|Complete: ADR-0017, hash-pinned package, one-Project read-only scope and approval-blocked import/reconcile|
 |C0/C1|Internal configuration, sanitized schema-fit, one-project read-only smoke and pilot|Company security, data owner and human authority approvals|
 
 The detailed work packages and transition criteria are owned by
@@ -674,7 +674,24 @@ ENT-E implementation record (2026-07-27):
   readiness, recovery, 27 metrics and 47 audit events; only HEALTHY is current/ready
 - 12 focused tests cover frozen matrix parity, fail-closed policy, leakage/redaction, readiness,
   metrics/audit determinism, immutable authority flags and no-database CLI execution; full
-  non-PostgreSQL regression is 228 passed with all required repository checks; ENT-F is next
+  non-PostgreSQL regression was 228 passed with all required repository checks
+
+ENT-F implementation record (2026-07-27):
+
+- ADR-0017 accepts mapping template, environment worksheet, pilot runbook and handoff package
+  contracts; the package is `READY_FOR_INTERNAL_DISCOVERY`, not authorized for live use
+- vendor-neutral work-tracker and knowledge-base templates fix canonical targets while every actual
+  source field, status and mapping version remains `INTERNAL_REQUIRED`
+- the worksheet covers environment/access/governance topics with null, unconfirmed internal values;
+  no company data or credential value is included
+- the pilot is limited to one Project, read-only and no write-back/canonical import; rollback
+  triggers/actions and six explicit zero-threshold metrics remain `NOT_EVALUATED`
+- VALIDATE, DRY_RUN and REVIEW have local commands; IMPORT and RECONCILE require company approval
+  and deliberately ship no command
+- `soc-ot enterprise validate-handoff` verifies four child artifact hashes without database/network
+  access or output mutation
+- 12 focused tests and the 240-test non-PostgreSQL regression pass with contract, plan, architecture,
+  hidden-data and secret gates; internal C0 discovery is next and cannot run outside company
 
 ## 7. Crosswalk to supporting plans
 
